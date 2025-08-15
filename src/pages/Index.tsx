@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import Container from "@/components/ui/Container";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import { ResourcesHighlight } from "@/components/landing/ResourcesHighlight";
-import { ProductStrip } from "@/components/landing/ProductStrip";
+import { PlatformShowcase } from "@/components/landing/PlatformShowcase";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { SearchDemo } from "@/components/landing/SearchDemo";
 import { PricingSection } from "@/components/landing/PricingSection";
@@ -94,6 +94,9 @@ const Index = () => {
       {/* Hero Section */}
       <HeroSection />
 
+
+      {/* Platform Showcase */}
+      <PlatformShowcase />
 
       {/* Feature Grid */}
       <FeatureGrid />
