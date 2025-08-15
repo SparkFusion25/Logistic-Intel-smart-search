@@ -51,7 +51,7 @@
     --primary-foreground: var(--surface);
     --secondary: var(--bg-elevated);
     --secondary-foreground: var(--text-on-dark);
-    --muted: hsl(215 20% 85%);
+    --muted: hsl(var(--surface));
     --muted-foreground: var(--muted-text);
     --destructive: var(--danger);
     --destructive-foreground: var(--surface);
@@ -83,7 +83,7 @@
     --primary-foreground: var(--surface);
     --secondary: var(--bg-elevated);
     --secondary-foreground: var(--text-on-dark);
-    --muted: hsl(215 20% 15%);
+    --muted: hsl(var(--surface));
     --muted-foreground: var(--muted-text);
     --destructive: var(--danger);
     --destructive-foreground: var(--surface);

@@ -130,8 +130,8 @@ const FeatureGrid = () => {
         </div>
 
         {/* Active Feature Display */}
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-7xl mx-auto">
+          <div className="space-y-6 lg:space-y-8 order-2 lg:order-1 px-4 lg:px-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               {(() => {
                 const Icon = features[activeFeature as keyof typeof features].icon;
@@ -157,9 +157,9 @@ const FeatureGrid = () => {
             
             <div className="space-y-4">
               <h4 className="font-semibold text-text-dark text-lg">Key Benefits:</h4>
-              <div className="grid sm:grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {features[activeFeature as keyof typeof features].benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 bg-white rounded-lg border border-border/50 shadow-sm">
+                  <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-border/30 shadow-sm hover:shadow-md transition-shadow">
                     <div className="w-6 h-6 bg-success/20 rounded-full flex items-center justify-center flex-shrink-0">
                       <div className="w-3 h-3 bg-success rounded-full"></div>
                     </div>
@@ -181,7 +181,7 @@ const FeatureGrid = () => {
             </div>
           </div>
 
-          <Card className="bg-white border border-border/20 shadow-xl hover:shadow-2xl transition-all duration-300 order-1 lg:order-2">
+          <Card className="bg-white border border-border/20 shadow-xl hover:shadow-2xl transition-all duration-300 order-1 lg:order-2 mx-4 lg:mx-0 relative z-10">
             <CardContent className="p-6 lg:p-8">
               <div className="mb-6">
                 <Badge className="bg-brand/10 text-brand border-brand/30 mb-3">
