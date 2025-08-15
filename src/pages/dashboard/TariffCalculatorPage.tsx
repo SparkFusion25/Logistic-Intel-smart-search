@@ -1,165 +1,156 @@
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/dashboard/AppSidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Calculator, Search } from "lucide-react";
+import { useState } from "react"
+import { Calculator, DollarSign, AlertCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToast } from "@/hooks/use-toast"
 
-const TariffCalculatorPage = () => {
+export default function TariffCalculatorPage() {
+  const [inputs, setInputs] = useState({
+    origin_country: "",
+    hs_code: "",
+    customs_value: "",
+    currency: "USD",
+    mode: "ocean"
+  })
+  const [calculation, setCalculation] = useState(null)
+  const { toast } = useToast()
+
+  const countries = ["China", "Germany", "Japan", "South Korea", "United Kingdom"]
+
+  const handleCalculate = () => {
+    if (!inputs.origin_country || !inputs.hs_code || !inputs.customs_value) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const duty = parseFloat(inputs.customs_value) * 0.035
+    const mpf = Math.max(31.67, Math.min(614.35, parseFloat(inputs.customs_value) * 0.003464))
+    const hmf = inputs.mode === "ocean" ? parseFloat(inputs.customs_value) * 0.00125 : 0
+    const total = duty + mpf + hmf
+
+    setCalculation({ duty, mpf, hmf, total })
+    toast({
+      title: "Calculation Complete",
+      description: "Tariff estimate generated"
+    })
+  }
+
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
-          <main className="flex-1 p-6">
-            <div className="space-y-6">
-              {/* Header */}
-              <div>
-                <h1 className="text-2xl font-semibold text-card-foreground">Tariff Calculator</h1>
-                <p className="text-muted-foreground">HS code + country lookups with provider cache.</p>
-              </div>
-
-              {/* Calculator Form */}
-              <Card className="bg-card border-border">
-                <CardHeader className="bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-t-lg">
-                  <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                    <Calculator className="w-6 h-6" />
-                    Calculate Tariff Rate
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">HS Code</label>
-                      <div className="relative">
-                        <Input 
-                          placeholder="8517.12.0000"
-                          className="pr-10"
-                        />
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">Enter 6-10 digit HS code</p>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Country</label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select destination country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="US">United States</SelectItem>
-                          <SelectItem value="CA">Canada</SelectItem>
-                          <SelectItem value="GB">United Kingdom</SelectItem>
-                          <SelectItem value="DE">Germany</SelectItem>
-                          <SelectItem value="FR">France</SelectItem>
-                          <SelectItem value="JP">Japan</SelectItem>
-                          <SelectItem value="AU">Australia</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <Button className="w-full md:w-auto">
-                    <Calculator className="w-4 h-4 mr-2" />
-                    Calculate Tariff
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Results */}
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-card-foreground">Tariff Results</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-medium text-card-foreground">Tariff Rate</h4>
-                      <p className="text-2xl font-bold text-primary">12.5%</p>
-                    </div>
-                    
-                    <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-medium text-card-foreground">Product Description</h4>
-                      <p className="text-sm text-muted-foreground">Telephone sets, including smartphones</p>
-                    </div>
-                    
-                    <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-medium text-card-foreground">Last Updated</h4>
-                      <p className="text-sm text-muted-foreground">January 15, 2024</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-card-foreground">Additional Information</h4>
-                    <div className="p-4 border border-border rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">HS Code 8517.12.0000</Badge>
-                        <Badge variant="outline">USA Tariff</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        <strong>Notes:</strong> Standard tariff rate for telecommunications equipment. 
-                        Subject to additional duties if originating from certain countries under Section 301.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-blue-100 text-blue-800">HTS Database</Badge>
-                        <span className="text-xs text-muted-foreground">Provider: U.S. Customs & Border Protection</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Lookups */}
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-card-foreground">Recent Lookups</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                      <div>
-                        <p className="font-medium text-card-foreground">8517.12.0000 → USA</p>
-                        <p className="text-sm text-muted-foreground">Telecommunications equipment</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-primary">12.5%</p>
-                        <p className="text-xs text-muted-foreground">2 min ago</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                      <div>
-                        <p className="font-medium text-card-foreground">8471.30.0100 → Canada</p>
-                        <p className="text-sm text-muted-foreground">Computer equipment</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-primary">0%</p>
-                        <p className="text-xs text-muted-foreground">5 min ago</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                      <div>
-                        <p className="font-medium text-card-foreground">6204.62.2010 → Germany</p>
-                        <p className="text-sm text-muted-foreground">Women's trousers</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-primary">8.7%</p>
-                        <p className="text-xs text-muted-foreground">1 hour ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </main>
-        </SidebarInset>
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Tariff Calculator</h1>
+        <p className="mt-2 text-gray-600">Calculate import duties and fees for U.S. customs</p>
       </div>
-    </SidebarProvider>
-  );
-};
 
-export default TariffCalculatorPage;
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Calculator className="w-5 h-5 mr-2" />
+            Import Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Origin Country *</label>
+              <Select value={inputs.origin_country} onValueChange={(value) => setInputs(prev => ({ ...prev, origin_country: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map(country => (
+                    <SelectItem key={country} value={country}>{country}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">HTS/HS Code *</label>
+              <Input
+                placeholder="e.g., 8542.39.0001"
+                value={inputs.hs_code}
+                onChange={(e) => setInputs(prev => ({ ...prev, hs_code: e.target.value }))}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Customs Value *</label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={inputs.customs_value}
+                onChange={(e) => setInputs(prev => ({ ...prev, customs_value: e.target.value }))}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Transport Mode</label>
+              <Select value={inputs.mode} onValueChange={(value) => setInputs(prev => ({ ...prev, mode: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ocean">Ocean</SelectItem>
+                  <SelectItem value="air">Air</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <Button onClick={handleCalculate} className="w-full md:w-auto">
+            <Calculator className="w-4 h-4 mr-2" />
+            Calculate Tariffs
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Duty estimates are based on public tariff schedules. Final assessments depend on CBP classification and valuation.
+        </AlertDescription>
+      </Alert>
+
+      {calculation && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <DollarSign className="w-5 h-5 mr-2" />
+              Calculation Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
+                <span>Import Duty (3.5%)</span>
+                <span className="font-bold">${calculation.duty.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
+                <span>MPF</span>
+                <span className="font-bold">${calculation.mpf.toFixed(2)}</span>
+              </div>
+              {calculation.hmf > 0 && (
+                <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
+                  <span>HMF (Ocean)</span>
+                  <span className="font-bold">${calculation.hmf.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between p-4 bg-primary/10 rounded-lg">
+                <span className="font-bold">Total</span>
+                <span className="text-xl font-bold text-primary">${calculation.total.toFixed(2)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}

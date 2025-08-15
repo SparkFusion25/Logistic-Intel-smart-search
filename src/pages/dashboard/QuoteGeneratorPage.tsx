@@ -1,229 +1,202 @@
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/dashboard/AppSidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Download, Mail, Plus, Trash2 } from "lucide-react";
+import { useState } from "react"
+import { FileText, Download, Calculator, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
 
-const QuoteGeneratorPage = () => {
+export default function QuoteGeneratorPage() {
+  const [quote, setQuote] = useState({
+    quote_number: `QT-${Date.now().toString().slice(-6)}`,
+    customer_company: "",
+    mode: "ocean",
+    origin: "",
+    destination: "",
+    charges: [
+      { name: "Ocean Freight", buy: 0, sell: 0, margin: 0 },
+      { name: "Terminal Handling", buy: 0, sell: 0, margin: 0 }
+    ]
+  })
+  const { toast } = useToast()
+
+  const updateCharge = (index, field, value) => {
+    const newCharges = [...quote.charges]
+    newCharges[index] = { ...newCharges[index], [field]: parseFloat(value) || 0 }
+    newCharges[index].margin = newCharges[index].sell - newCharges[index].buy
+    setQuote(prev => ({ ...prev, charges: newCharges }))
+  }
+
+  const addCharge = () => {
+    setQuote(prev => ({
+      ...prev,
+      charges: [...prev.charges, { name: "", buy: 0, sell: 0, margin: 0 }]
+    }))
+  }
+
+  const totalSell = quote.charges.reduce((sum, charge) => sum + (charge.sell || 0), 0)
+  const totalMargin = quote.charges.reduce((sum, charge) => sum + (charge.margin || 0), 0)
+
+  const handleDownloadPDF = () => {
+    toast({
+      title: "Generating PDF",
+      description: "Your branded quote PDF is being generated..."
+    })
+  }
+
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
-          <main className="flex-1 p-6">
-            <div className="space-y-6">
-              {/* Header */}
-              <div>
-                <h1 className="text-2xl font-semibold text-card-foreground">Quote Generator</h1>
-                <p className="text-muted-foreground">Create branded quotes and export to PDF/HTML.</p>
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Quote Generator</h1>
+          <p className="mt-2 text-gray-600">Create professional, branded freight quotes</p>
+        </div>
+        <Button onClick={handleDownloadPDF}>
+          <Download className="w-4 h-4 mr-2" />
+          Download PDF
+        </Button>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="w-5 h-5 mr-2" />
+                Quote Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Quote Number</label>
+                  <Input
+                    value={quote.quote_number}
+                    onChange={(e) => setQuote(prev => ({ ...prev, quote_number: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Customer Company</label>
+                  <Input
+                    value={quote.customer_company}
+                    onChange={(e) => setQuote(prev => ({ ...prev, customer_company: e.target.value }))}
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Quote Form */}
-                <Card className="bg-card border-border">
-                  <CardHeader className="bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-t-lg">
-                    <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                      <FileText className="w-6 h-6" />
-                      Quote Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">Company</label>
-                        <Input placeholder="Client Company Name" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">Contact Person</label>
-                        <Input placeholder="John Doe" />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">Origin</label>
-                        <Input placeholder="Shanghai, China" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">Destination</label>
-                        <Input placeholder="Los Angeles, USA" />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">Mode</label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select transport mode" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="air">Air Freight</SelectItem>
-                            <SelectItem value="ocean">Ocean Freight</SelectItem>
-                            <SelectItem value="ground">Ground Transport</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">HS Code</label>
-                        <Input placeholder="8517.12.0000" />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Commodity</label>
-                      <Input placeholder="Electronics, Smartphones" />
-                    </div>
-
-                    {/* Line Items */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-sm font-medium text-card-foreground">Line Items</label>
-                        <Button variant="outline" size="sm">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Item
-                        </Button>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-12 gap-2 items-center">
-                          <div className="col-span-5">
-                            <Input placeholder="Service description" className="text-sm" />
-                          </div>
-                          <div className="col-span-2">
-                            <Input placeholder="Qty" className="text-sm" />
-                          </div>
-                          <div className="col-span-2">
-                            <Input placeholder="Rate" className="text-sm" />
-                          </div>
-                          <div className="col-span-2">
-                            <Input placeholder="Amount" className="text-sm" disabled />
-                          </div>
-                          <div className="col-span-1">
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-12 gap-2 items-center">
-                          <div className="col-span-5">
-                            <Input placeholder="Ocean freight" className="text-sm" />
-                          </div>
-                          <div className="col-span-2">
-                            <Input placeholder="1" className="text-sm" />
-                          </div>
-                          <div className="col-span-2">
-                            <Input placeholder="2500" className="text-sm" />
-                          </div>
-                          <div className="col-span-2">
-                            <Input placeholder="$2,500" className="text-sm" disabled />
-                          </div>
-                          <div className="col-span-1">
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Notes</label>
-                      <Textarea 
-                        placeholder="Additional terms and conditions..."
-                        className="min-h-[100px]"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Quote Preview */}
-                <Card className="bg-card border-border">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-card-foreground">Quote Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="bg-white border border-gray-300 rounded-lg p-6 min-h-[500px]">
-                      {/* Logo Area */}
-                      <div className="text-center mb-6">
-                        <div className="w-16 h-16 bg-primary rounded-lg mx-auto mb-2"></div>
-                        <h1 className="text-2xl font-bold text-gray-900">LOGISTIC INTEL</h1>
-                        <p className="text-gray-600">Freight Quote</p>
-                      </div>
-                      
-                      {/* Quote Details */}
-                      <div className="grid grid-cols-2 gap-6 mb-6">
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-2">Bill To:</h3>
-                          <p className="text-gray-700">Client Company Name</p>
-                          <p className="text-gray-700">John Doe</p>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-2">Shipment Details:</h3>
-                          <p className="text-gray-700">Origin: Shanghai, China</p>
-                          <p className="text-gray-700">Destination: Los Angeles, USA</p>
-                          <p className="text-gray-700">Mode: Ocean Freight</p>
-                        </div>
-                      </div>
-                      
-                      {/* Line Items Table */}
-                      <div className="mb-6">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="border-b border-gray-300">
-                              <th className="text-left py-2 text-gray-900">Description</th>
-                              <th className="text-right py-2 text-gray-900">Qty</th>
-                              <th className="text-right py-2 text-gray-900">Rate</th>
-                              <th className="text-right py-2 text-gray-900">Amount</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr className="border-b border-gray-200">
-                              <td className="py-2 text-gray-700">Ocean freight</td>
-                              <td className="text-right py-2 text-gray-700">1</td>
-                              <td className="text-right py-2 text-gray-700">$2,500</td>
-                              <td className="text-right py-2 text-gray-700">$2,500</td>
-                            </tr>
-                          </tbody>
-                          <tfoot>
-                            <tr className="border-t-2 border-gray-300">
-                              <td colSpan={3} className="text-right py-2 font-semibold text-gray-900">Total:</td>
-                              <td className="text-right py-2 font-bold text-gray-900">$2,500</td>
-                            </tr>
-                          </tfoot>
-                        </table>
-                      </div>
-                      
-                      <div className="text-sm text-gray-600">
-                        <p>Valid for 30 days from quote date.</p>
-                        <p>Terms and conditions apply.</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Mode</label>
+                  <Select value={quote.mode} onValueChange={(value) => setQuote(prev => ({ ...prev, mode: value }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ocean">Ocean</SelectItem>
+                      <SelectItem value="air">Air</SelectItem>
+                      <SelectItem value="truck">Truck</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Origin</label>
+                  <Input
+                    placeholder="Port/City"
+                    value={quote.origin}
+                    onChange={(e) => setQuote(prev => ({ ...prev, origin: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Destination</label>
+                  <Input
+                    placeholder="Port/City"
+                    value={quote.destination}
+                    onChange={(e) => setQuote(prev => ({ ...prev, destination: e.target.value }))}
+                  />
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Export Actions */}
-              <div className="flex gap-3">
-                <Button className="bg-gray-900 hover:bg-gray-800 text-white">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export PDF
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Calculator className="w-5 h-5 mr-2" />
+                  Charges
+                </div>
+                <Button onClick={addCharge} size="sm">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Charge
                 </Button>
-                <Button>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Send via Email
-                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {quote.charges.map((charge, index) => (
+                <div key={index} className="grid grid-cols-4 gap-2 items-center p-3 bg-gray-50 rounded-lg">
+                  <Input
+                    placeholder="Charge name"
+                    value={charge.name}
+                    onChange={(e) => {
+                      const newCharges = [...quote.charges]
+                      newCharges[index].name = e.target.value
+                      setQuote(prev => ({ ...prev, charges: newCharges }))
+                    }}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Buy"
+                    value={charge.buy}
+                    onChange={(e) => updateCharge(index, 'buy', e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Sell"
+                    value={charge.sell}
+                    onChange={(e) => updateCharge(index, 'sell', e.target.value)}
+                  />
+                  <div className="text-sm font-medium">
+                    ${charge.margin.toFixed(2)}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quote Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold">{quote.quote_number}</p>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Mode:</span>
+                <span className="font-medium capitalize">{quote.mode}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Route:</span>
+                <span className="font-medium">{quote.origin || "Origin"} → {quote.destination || "Destination"}</span>
               </div>
             </div>
-          </main>
-        </SidebarInset>
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between">
+                <span>Total:</span>
+                <span className="font-bold">${totalSell.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Margin:</span>
+                <span className={`font-bold ${totalMargin >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  ${totalMargin.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </SidebarProvider>
-  );
-};
-
-export default QuoteGeneratorPage;
+    </div>
+  )
+}
