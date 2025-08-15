@@ -1,26 +1,38 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  Users, 
-  Mail, 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown,
-  ArrowRight,
-  Plane,
-  Ship,
+import {
+  Search,
+  Users,
+  Mail,
+  BarChart3,
+  TrendingUp,
   Calculator,
-  FileText
+  ChevronDown,
+  Bell,
+  Settings,
+  LogOut,
+  Building,
+  Phone,
+  MapPin,
+  Ship,
+  Plane,
+  Globe,
+  ArrowUpRight,
+  Plus,
+  Filter,
+  Download,
+  Menu,
+  FileText,
+  TrendingDown
 } from "lucide-react";
-import { SearchPanel } from "@/components/search/SearchPanel";
 
 type ActiveView = 'overview' | 'search' | 'crm' | 'campaigns' | 'widgets';
 
 const Dashboard = () => {
   const [activeView, setActiveView] = useState<ActiveView>('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const stats = [
     {
@@ -28,383 +40,445 @@ const Dashboard = () => {
       value: "12,847",
       change: "+12%",
       trend: "up" as const,
-      icon: <Search className="w-4 h-4" />
+      icon: <Search className="w-5 h-5" />
     },
     {
       title: "CRM Contacts",
       value: "3,291",
       change: "+8%",
       trend: "up" as const,
-      icon: <Users className="w-4 h-4" />
+      icon: <Users className="w-5 h-5" />
     },
     {
       title: "Email Campaigns",
       value: "47",
       change: "+23%",
       trend: "up" as const,
-      icon: <Mail className="w-4 h-4" />
+      icon: <Mail className="w-5 h-5" />
     },
     {
       title: "Response Rate",
       value: "18.3%",
       change: "-2%",
       trend: "down" as const,
-      icon: <BarChart3 className="w-4 h-4" />
+      icon: <TrendingUp className="w-5 h-5" />
     }
   ];
 
-  const recentActivity = [
+  const recentSearches = [
     {
-      type: "search",
-      description: "Searched for Apple Inc shipments",
-      time: "2 minutes ago",
-      icon: <Search className="w-4 h-4 text-primary" />
+      query: "Electronics importers from China",
+      results: 245,
+      timestamp: "2 hours ago"
     },
     {
-      type: "crm",
-      description: "Added 12 contacts from Apollo enrichment",
-      time: "15 minutes ago",
-      icon: <Users className="w-4 h-4 text-accent" />
+      query: "Textile manufacturers in Vietnam",
+      results: 189,
+      timestamp: "5 hours ago"
     },
     {
-      type: "email",
-      description: "Campaign 'Q1 Outreach' sent to 248 contacts",
-      time: "1 hour ago",
-      icon: <Mail className="w-4 h-4 text-primary" />
-    },
-    {
-      type: "widget",
-      description: "Generated quote for LAX-SHA lane",
-      time: "2 hours ago",
-      icon: <FileText className="w-4 h-4 text-accent" />
+      query: "Auto parts suppliers from Mexico",
+      results: 156,
+      timestamp: "1 day ago"
     }
   ];
 
-  const quickActions = [
+  const topContacts = [
     {
-      title: "New Search",
-      description: "Search freight data",
-      icon: <Search className="w-5 h-5" />,
-      action: () => setActiveView('search' as ActiveView)
+      name: "Sarah Chen",
+      company: "Global Electronics Corp",
+      title: "Supply Chain Director",
+      email: "s.chen@globalelectronics.com",
+      phone: "+1 (555) 123-4567",
+      status: "verified",
+      icon: <Building className="w-5 h-5 text-blue-600" />
     },
     {
-      title: "Add Contacts",
-      description: "Import or enrich CRM",
-      icon: <Users className="w-5 h-5" />,
-      action: () => setActiveView('crm' as ActiveView)
+      name: "Marcus Rodriguez",
+      company: "Pacific Imports Ltd",
+      title: "Logistics Manager", 
+      email: "m.rodriguez@pacificimports.com",
+      location: "Los Angeles, CA",
+      status: "active",
+      icon: <Ship className="w-5 h-5 text-purple-600" />
     },
     {
-      title: "Create Campaign",
-      description: "Start email sequence",
-      icon: <Mail className="w-5 h-5" />,
-      action: () => setActiveView('campaigns' as ActiveView)
-    },
-    {
-      title: "Calculate Tariff",
-      description: "Get current rates",
-      icon: <Calculator className="w-5 h-5" />,
-      action: () => setActiveView('widgets' as ActiveView)
+      name: "Lisa Wang",
+      company: "TechFlow Solutions",
+      title: "Procurement Head",
+      email: "l.wang@techflow.com",
+      phone: "+1 (555) 987-6543",
+      status: "high-value",
+      icon: <Plane className="w-5 h-5 text-green-600" />
     }
   ];
 
   if (activeView === ('search' as ActiveView)) {
     return (
-      <div className="min-h-screen bg-gradient-primary p-6">
-        <div className="container mx-auto">
-          <div className="mb-6">
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="mb-8">
             <Button 
               variant="outline" 
               onClick={() => setActiveView('overview' as ActiveView)}
-              className="border-white/20 text-foreground hover:bg-white/10"
+              className="mb-4"
             >
               ← Back to Dashboard
             </Button>
+            <h1 className="text-3xl font-bold text-gray-900">Search Trade Data</h1>
+            <p className="text-gray-600 mt-2">Find importers, exporters, and trade opportunities</p>
           </div>
-          <SearchPanel />
+
+          {/* Search Interface */}
+          <Card className="shadow-sm border-0">
+            <CardContent className="p-8">
+              <div className="space-y-6">
+                <div className="grid lg:grid-cols-4 gap-4">
+                  <div className="lg:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Search Query</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g., electronics importers from China"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Mode</label>
+                    <select className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                      <option>All</option>
+                      <option>Air</option>
+                      <option>Ocean</option>
+                    </select>
+                  </div>
+                  <div className="flex items-end">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                  <Button variant="outline" size="sm">
+                    <Filter className="w-4 h-4 mr-2" />
+                    More Filters
+                  </Button>
+                  <span>•</span>
+                  <span>2,847 results found</span>
+                  <span>•</span>
+                  <Button variant="ghost" size="sm">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sample Results */}
+          <div className="mt-8 space-y-4">
+            {topContacts.map((contact, index) => (
+              <Card key={index} className="shadow-sm border-0 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                        {contact.icon}
+                      </div>
+                      <div className="space-y-2">
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{contact.name}</h3>
+                          <p className="text-sm text-gray-600">{contact.title} at {contact.company}</p>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span className="flex items-center space-x-1">
+                            <Mail className="w-4 h-4" />
+                            <span>{contact.email}</span>
+                          </span>
+                          {contact.phone && (
+                            <span className="flex items-center space-x-1">
+                              <Phone className="w-4 h-4" />
+                              <span>{contact.phone}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Badge 
+                        className={
+                          contact.status === 'verified' ? 'bg-green-100 text-green-800' :
+                          contact.status === 'active' ? 'bg-blue-100 text-blue-800' :
+                          'bg-orange-100 text-orange-800'
+                        }
+                      >
+                        {contact.status === 'verified' ? 'Verified' :
+                         contact.status === 'active' ? 'Active' : 'High Value'}
+                      </Badge>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        Add to CRM
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-primary">
-      {/* Navigation */}
-      <nav className="border-b border-white/10 backdrop-blur-sm bg-background/50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                  <ArrowRight className="w-2.5 h-2.5 text-white rotate-45" />
-                </div>
-              </div>
-              <div>
-                <div className="text-lg font-semibold text-foreground">LOGISTIC INTEL</div>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navigation */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden"
+              >
+                <Menu className="w-5 h-5" />
+              </Button>
+              <div className="text-xl font-bold text-gray-900">LOGISTIC INTEL</div>
             </div>
 
-            <div className="flex items-center space-x-6">
-              <Button
-                variant={activeView === 'overview' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('overview' as ActiveView)}
-                size="sm"
-              >
-                Overview
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="sm">
+                <Bell className="w-5 h-5" />
               </Button>
-              <Button
-                variant={activeView === ('search' as ActiveView) ? 'default' : 'ghost'}
-                onClick={() => setActiveView('search' as ActiveView)}
-                size="sm"
-              >
-                Search
+              <Button variant="ghost" size="sm">
+                <Settings className="w-5 h-5" />
               </Button>
-              <Button
-                variant={activeView === 'crm' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('crm' as ActiveView)}
-                size="sm"
-              >
-                CRM
-              </Button>
-              <Button
-                variant={activeView === 'campaigns' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('campaigns' as ActiveView)}
-                size="sm"
-              >
-                Campaigns
-              </Button>
-              <Button
-                variant={activeView === 'widgets' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('widgets' as ActiveView)}
-                size="sm"
-              >
-                Widgets
-              </Button>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">JD</span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              </div>
             </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex items-center space-x-8 -mb-px">
+            <Button
+              variant={activeView === 'overview' ? 'default' : 'ghost'}
+              onClick={() => setActiveView('overview' as ActiveView)}
+              className={`border-b-2 rounded-none px-0 py-4 ${
+                activeView === 'overview' 
+                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+              }`}
+            >
+              Overview
+            </Button>
+            <Button
+              variant={activeView === ('search' as ActiveView) ? 'default' : 'ghost'}
+              onClick={() => setActiveView('search' as ActiveView)}
+              className={`border-b-2 rounded-none px-0 py-4 ${
+                activeView === ('search' as ActiveView)
+                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+              }`}
+            >
+              Search
+            </Button>
+            <Button
+              variant={activeView === 'crm' ? 'default' : 'ghost'}
+              onClick={() => setActiveView('crm' as ActiveView)}
+              className={`border-b-2 rounded-none px-0 py-4 ${
+                activeView === 'crm'
+                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+              }`}
+            >
+              CRM
+            </Button>
+            <Button
+              variant={activeView === 'campaigns' ? 'default' : 'ghost'}
+              onClick={() => setActiveView('campaigns' as ActiveView)}
+              className={`border-b-2 rounded-none px-0 py-4 ${
+                activeView === 'campaigns'
+                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+              }`}
+            >
+              Campaigns
+            </Button>
+            <Button
+              variant={activeView === 'widgets' ? 'default' : 'ghost'}
+              onClick={() => setActiveView('widgets' as ActiveView)}
+              className={`border-b-2 rounded-none px-0 py-4 ${
+                activeView === 'widgets'
+                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+              }`}
+            >
+              Widgets
+            </Button>
           </div>
         </div>
       </nav>
 
-      <div className="container mx-auto px-6 py-8">
-        {activeView === 'overview' && (
-          <div className="space-y-8">
-            {/* Header */}
-            <div>
-              <h1 className="text-3xl font-semibold text-foreground mb-2">
-                Welcome back to Logistic Intel
-              </h1>
-              <p className="text-foreground/80">
-                Here's what's happening with your freight intelligence platform
-              </p>
-            </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your freight intelligence.</p>
+        </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {stats.map((stat, index) => (
-                <Card key={index} className="bg-card shadow-card">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                        <p className="text-2xl font-bold text-card-foreground">{stat.value}</p>
-                      </div>
-                      <div className="flex flex-col items-end space-y-1">
-                        <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                          {stat.icon}
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          {stat.trend === 'up' ? (
-                            <TrendingUp className="w-3 h-3 text-accent" />
-                          ) : (
-                            <TrendingDown className="w-3 h-3 text-destructive" />
-                          )}
-                          <span className={`text-xs font-medium ${
-                            stat.trend === 'up' ? 'text-accent' : 'text-destructive'
-                          }`}>
-                            {stat.change}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Quick Actions */}
-            <Card className="bg-card shadow-card">
-              <CardHeader>
-                <CardTitle className="text-card-foreground">Quick Actions</CardTitle>
-                <CardDescription>Common tasks to get you started</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {quickActions.map((action, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="h-auto p-4 flex flex-col items-center space-y-2 border-border hover:border-primary/30"
-                      onClick={action.action}
-                    >
-                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                        {action.icon}
-                      </div>
-                      <div className="text-center">
-                        <div className="font-medium text-card-foreground">{action.title}</div>
-                        <div className="text-xs text-muted-foreground">{action.description}</div>
-                      </div>
-                    </Button>
-                  ))}
+        {/* Stats Grid */}
+        <div className="grid lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <Card key={index} className="shadow-sm border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
+                    <p className={`text-sm mt-1 ${
+                      stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {stat.change} from last month
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                    {stat.icon}
+                  </div>
                 </div>
               </CardContent>
             </Card>
+          ))}
+        </div>
 
-            {/* Recent Activity */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <Card className="bg-card shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground">Recent Activity</CardTitle>
-                  <CardDescription>Your latest actions on the platform</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className="p-2 bg-secondary rounded-lg">
-                          {activity.icon}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-card-foreground">{activity.description}</p>
-                          <p className="text-xs text-muted-foreground">{activity.time}</p>
-                        </div>
-                      </div>
-                    ))}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Recent Searches */}
+          <Card className="lg:col-span-2 shadow-sm border-0">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Recent Searches</CardTitle>
+                  <CardDescription>Your latest trade data queries</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => setActiveView('search' as ActiveView)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Search
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentSearches.map((search, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">{search.query}</p>
+                      <p className="text-sm text-gray-600">{search.results} results • {search.timestamp}</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <ArrowUpRight className="w-4 h-4" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card className="bg-card shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground">Popular Trade Lanes</CardTitle>
-                  <CardDescription>Most searched routes this week</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Plane className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-medium text-card-foreground">LAX → SHA</span>
-                      </div>
-                      <Badge variant="secondary">2,847 searches</Badge>
+          {/* Top Contacts */}
+          <Card className="shadow-sm border-0">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Top Contacts</CardTitle>
+                  <CardDescription>High-value prospects</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setActiveView('crm' as ActiveView)}
+                >
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {topContacts.slice(0, 3).map((contact, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                      {contact.icon}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Ship className="w-4 h-4 text-accent" />
-                        <span className="text-sm font-medium text-card-foreground">LGB → YTN</span>
-                      </div>
-                      <Badge variant="secondary">1,932 searches</Badge>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{contact.name}</p>
+                      <p className="text-sm text-gray-600 truncate">{contact.company}</p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Plane className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-medium text-card-foreground">JFK → LHR</span>
-                      </div>
-                      <Badge variant="secondary">1,634 searches</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Ship className="w-4 h-4 text-accent" />
-                        <span className="text-sm font-medium text-card-foreground">LAX → HKG</span>
-                      </div>
-                      <Badge variant="secondary">1,401 searches</Badge>
-                    </div>
+                    <Badge 
+                      className={
+                        contact.status === 'verified' ? 'bg-green-100 text-green-800' :
+                        contact.status === 'active' ? 'bg-blue-100 text-blue-800' :
+                        'bg-orange-100 text-orange-800'
+                      }
+                    >
+                      {contact.status === 'verified' ? 'Verified' :
+                       contact.status === 'active' ? 'Active' : 'High Value'}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <Card className="mt-8 shadow-sm border-0">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Get started with your freight intelligence workflow</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-4 gap-4">
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col space-y-2"
+                onClick={() => setActiveView('search' as ActiveView)}
+              >
+                <Search className="w-6 h-6" />
+                <span>New Search</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col space-y-2"
+                onClick={() => setActiveView('crm' as ActiveView)}
+              >
+                <Users className="w-6 h-6" />
+                <span>Add Contacts</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col space-y-2"
+                onClick={() => setActiveView('campaigns' as ActiveView)}
+              >
+                <Mail className="w-6 h-6" />
+                <span>Create Campaign</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col space-y-2"
+                onClick={() => setActiveView('widgets' as ActiveView)}
+              >
+                <Calculator className="w-6 h-6" />
+                <span>Calculate Tariff</span>
+              </Button>
             </div>
-          </div>
-        )}
-
-        {activeView === 'crm' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-foreground">CRM Management</h2>
-            <Card className="bg-card shadow-card">
-              <CardContent className="p-8 text-center">
-                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-card-foreground mb-2">CRM Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Contact management and enrichment features will be available in the next update.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeView === 'campaigns' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-foreground">Email Campaigns</h2>
-            <Card className="bg-card shadow-card">
-              <CardContent className="p-8 text-center">
-                <Mail className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-card-foreground mb-2">Campaigns Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Email automation and campaign management features will be available in the next update.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeView === 'widgets' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-foreground">Widgets & Tools</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-card shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground flex items-center">
-                    <Calculator className="w-5 h-5 mr-2" />
-                    Tariff Calculator
-                  </CardTitle>
-                  <CardDescription>Get real-time tariff rates for any HS code and country</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">
-                    Open Calculator
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground flex items-center">
-                    <FileText className="w-5 h-5 mr-2" />
-                    Quote Generator
-                  </CardTitle>
-                  <CardDescription>Create professional freight quotes and proposals</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">
-                    Create Quote
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2" />
-                    Market Benchmark
-                  </CardTitle>
-                  <CardDescription>Analyze market rates and trends for trade lanes</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">
-                    View Benchmarks
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
