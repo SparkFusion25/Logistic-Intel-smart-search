@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import BlogPage from "./pages/BlogPage";
 
 // Dashboard Pages
 import SearchIntelligencePage from "./pages/dashboard/SearchIntelligencePage";
@@ -19,6 +20,7 @@ import WidgetsPage from "./pages/dashboard/WidgetsPage";
 import QuoteGeneratorPage from "./pages/dashboard/QuoteGeneratorPage";
 import TariffCalculatorPage from "./pages/dashboard/TariffCalculatorPage";
 import BenchmarkPage from "./pages/dashboard/BenchmarkPage";
+import SettingsPage from "./pages/dashboard/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/blog" element={<BlogPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/search" element={<SearchIntelligencePage />} />
             <Route path="/dashboard/crm" element={<CRMPage />} />
@@ -43,6 +46,7 @@ const App = () => (
             <Route path="/dashboard/widgets/quote" element={<QuoteGeneratorPage />} />
             <Route path="/dashboard/widgets/tariff" element={<TariffCalculatorPage />} />
             <Route path="/dashboard/widgets/benchmark" element={<BenchmarkPage />} />
+            <Route path="/dashboard/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

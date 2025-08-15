@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Search, Contact, Mail, BarChart3, Flag, LineChart, 
-  Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle 
+  Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle, BookOpen 
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import {
@@ -34,7 +34,8 @@ const navigationItems = [
 ]
 
 const bottomItems = [
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Blog", url: "/blog", icon: BookOpen },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
   { title: "Help", url: "/help", icon: HelpCircle },
 ]
 

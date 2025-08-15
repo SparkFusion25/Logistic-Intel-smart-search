@@ -69,13 +69,14 @@ const Index = () => {
               <a href="#solutions" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Solutions</a>
               <a href="#who-we-serve" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Who We Serve</a>
               <a href="#resources" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Resources</a>
+              <Link to="/blog" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Blog</Link>
               <a href="#company" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Company</a>
               <Button variant="ghost" className="text-text-on-dark/80 hover:text-text-on-dark hover:bg-surface/10">
                 Login
               </Button>
-              <Button className="cta-gradient text-white px-6 hover:scale-105 transition-transform">
+              <Link to="/dashboard" className="cta-gradient text-white px-6 hover:scale-105 transition-transform">
                 Get Demo
-              </Button>
+              </Link>
             </div>
             <button 
               className="lg:hidden text-text-on-dark"
