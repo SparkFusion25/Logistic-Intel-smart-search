@@ -68,7 +68,6 @@ export const PlatformShowcase = () => {
             {/* Search Interface */}
             <div className="bg-slate-800 rounded-xl p-6 text-white">
               <div className="mb-4">
-                <div className="text-sm text-slate-400 mb-2">SEARCV IPEARCH</div>
                 <div className="text-sm text-slate-400 mb-4">Search Query</div>
               </div>
               
