@@ -152,6 +152,80 @@
   .hero-bg {
     background: var(--hero-gradient);
   }
+
+  /* Xeneta-style sophisticated hero background */
+  .xeneta-hero-bg {
+    background: 
+      linear-gradient(135deg, 
+        hsl(220 60% 8%) 0%, 
+        hsl(220 45% 12%) 25%,
+        hsl(225 50% 18%) 50%,
+        hsl(230 55% 22%) 75%,
+        hsl(235 60% 28%) 100%
+      );
+    position: relative;
+    overflow: hidden;
+  }
+
+  .xeneta-hero-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(47, 107, 255, 0.1) 20%,
+        rgba(33, 212, 253, 0.15) 40%,
+        rgba(47, 107, 255, 0.1) 60%,
+        transparent 80%
+      ),
+      linear-gradient(45deg,
+        transparent 0%,
+        rgba(47, 107, 255, 0.05) 25%,
+        rgba(33, 212, 253, 0.08) 50%,
+        rgba(47, 107, 255, 0.05) 75%,
+        transparent 100%
+      );
+    animation: gradientShift 8s ease-in-out infinite;
+  }
+
+  .xeneta-hero-bg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: 
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 100px,
+        rgba(255, 255, 255, 0.02) 102px,
+        rgba(255, 255, 255, 0.02) 104px,
+        transparent 106px
+      );
+    animation: streakMove 12s linear infinite;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { 
+      opacity: 1; 
+      transform: translateX(0) scale(1);
+    }
+    50% { 
+      opacity: 0.8; 
+      transform: translateX(20px) scale(1.02);
+    }
+  }
+
+  @keyframes streakMove {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(0%); }
+  }
   
   /* CTA gradient background */
   .cta-gradient {

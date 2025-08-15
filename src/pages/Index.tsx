@@ -87,8 +87,8 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="container mx-auto px-6 py-20 lg:py-32">
+      <section className="relative overflow-hidden xeneta-hero-bg">
+        <div className="container mx-auto px-6 py-20 lg:py-32 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <div className="space-y-6">
