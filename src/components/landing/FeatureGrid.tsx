@@ -92,98 +92,107 @@ const FeatureGrid = () => {
   ];
 
   return (
-    <section className="py-20 bg-elevated">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <Badge className="bg-accent/20 text-accent border-accent/30 mb-4">
+    <section className="py-16 lg:py-24 bg-surface">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12 lg:mb-20">
+          <Badge className="bg-accent/20 text-accent border-accent/30 mb-6">
             Platform Features
           </Badge>
-          <h2 className="text-h2 text-text-on-dark mb-4">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-text-dark mb-6">
             Everything you need to dominate global trade
           </h2>
-          <p className="text-xl text-text-on-dark/70 max-w-3xl mx-auto">
+          <p className="text-lg lg:text-xl text-text-dark/70 max-w-4xl mx-auto leading-relaxed">
             From intelligent search to contact discovery and market analysis—all in one powerful platform.
           </p>
         </div>
 
         {/* Feature Tabs */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-3 lg:gap-4 mb-12 lg:mb-16">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <Button
                 key={tab.id}
                 variant={activeFeature === tab.id ? "default" : "outline"}
-                className={`px-6 py-3 ${
+                className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base ${
                   activeFeature === tab.id 
-                    ? "cta-gradient text-white" 
-                    : "border-border-glass text-text-on-dark hover:bg-surface/10"
+                    ? "cta-gradient text-white shadow-lg" 
+                    : "border-border text-text-dark hover:bg-surface/50 bg-white"
                 }`}
                 onClick={() => setActiveFeature(tab.id)}
               >
                 <Icon className="w-4 h-4 mr-2" />
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
               </Button>
             );
           })}
         </div>
 
         {/* Active Feature Display */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+          <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               {(() => {
                 const Icon = features[activeFeature as keyof typeof features].icon;
-                return <Icon className="w-12 h-12 text-brand" />;
+                return (
+                  <div className="w-16 h-16 bg-brand/10 rounded-2xl flex items-center justify-center">
+                    <Icon className="w-8 h-8 text-brand" />
+                  </div>
+                );
               })()}
               <div>
-                <h3 className="text-2xl font-semibold text-text-on-dark">
+                <h3 className="text-2xl lg:text-3xl font-semibold text-text-dark mb-2">
                   {features[activeFeature as keyof typeof features].title}
                 </h3>
-                <p className="text-text-on-dark/60">
+                <p className="text-text-dark/60 text-lg">
                   {features[activeFeature as keyof typeof features].subtitle}
                 </p>
               </div>
             </div>
             
-            <p className="text-lg text-text-on-dark/80">
+            <p className="text-lg lg:text-xl text-text-dark/80 leading-relaxed">
               {features[activeFeature as keyof typeof features].description}
             </p>
             
-            <div className="space-y-2">
-              {features[activeFeature as keyof typeof features].benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-success/20 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-success rounded-full"></div>
+            <div className="space-y-4">
+              <h4 className="font-semibold text-text-dark text-lg">Key Benefits:</h4>
+              <div className="grid sm:grid-cols-1 gap-3">
+                {features[activeFeature as keyof typeof features].benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center gap-4 p-3 bg-white rounded-lg border border-border/50 shadow-sm">
+                    <div className="w-6 h-6 bg-success/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-3 h-3 bg-success rounded-full"></div>
+                    </div>
+                    <span className="text-text-dark font-medium">{benefit}</span>
                   </div>
-                  <span className="text-text-on-dark/80">{benefit}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
             
-            <div className="flex gap-4">
-              <Button className="cta-gradient text-white px-8 hover:scale-105 transition-transform">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button className="cta-gradient text-white px-8 py-3 text-lg hover:scale-105 transition-transform shadow-lg">
                 {features[activeFeature as keyof typeof features].cta}
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-              <Button variant="outline" className="border-border-glass text-text-on-dark hover:bg-surface/10">
-                <Play className="w-4 h-4 mr-2" />
+              <Button variant="outline" className="border-border text-text-dark hover:bg-surface/30 bg-white px-8 py-3 text-lg">
+                <Play className="w-5 h-5 mr-2" />
                 Watch demo
               </Button>
             </div>
           </div>
 
-          <Card className="card-enterprise bg-surface/5 border-border-glass backdrop-blur-sm">
-            <CardContent className="p-8">
-              <div className="mb-4">
-                <Badge className="bg-brand/20 text-brand border-brand/30 mb-2">
+          <Card className="bg-white border border-border/20 shadow-xl hover:shadow-2xl transition-all duration-300 order-1 lg:order-2">
+            <CardContent className="p-6 lg:p-8">
+              <div className="mb-6">
+                <Badge className="bg-brand/10 text-brand border-brand/30 mb-3">
                   Live Preview
                 </Badge>
-                <h4 className="text-lg font-semibold text-text-on-dark mb-2">
+                <h4 className="text-xl font-semibold text-text-dark mb-2">
                   {features[activeFeature as keyof typeof features].title} Interface
                 </h4>
+                <p className="text-text-dark/60">See how it works in real-time</p>
               </div>
-              <div className="bg-canvas/50 rounded-lg p-6 min-h-[200px] flex items-center justify-center">
+              <div className="bg-canvas/30 rounded-xl p-6 min-h-[250px] lg:min-h-[300px] flex items-center justify-center border border-border/10">
                 {features[activeFeature as keyof typeof features].preview}
               </div>
             </CardContent>
