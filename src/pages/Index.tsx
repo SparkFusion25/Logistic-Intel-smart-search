@@ -98,8 +98,6 @@ const Index = () => {
       {/* Feature Grid */}
       <FeatureGrid />
 
-      {/* Product Strip */}
-      <ProductStrip />
 
       {/* Pricing Section */}
       <PricingSection />
