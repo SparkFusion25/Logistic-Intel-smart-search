@@ -3,9 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Container from "@/components/ui/Container";
-import { ContactCard } from "@/components/landing/ContactCard";
 import FeatureGrid from "@/components/landing/FeatureGrid";
-import { ProofSection } from "@/components/landing/ProofSection";
 import { ResourcesHighlight } from "@/components/landing/ResourcesHighlight";
 import { ProductStrip } from "@/components/landing/ProductStrip";
 import { HeroContactChip } from "@/components/marketing/HeroContactChip";
@@ -131,7 +129,7 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            <div className="relative order-first lg:order-last">
+            <div className="relative">
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start max-w-lg mx-auto lg:mx-0">
                 {contactCards.slice(0, 6).map((contact, index) => (
                   <HeroContactChip
