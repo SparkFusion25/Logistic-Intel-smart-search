@@ -2,19 +2,23 @@ import { useState } from "react"
 import { 
   Search, Filter, Download, ArrowRight, Star, Eye, ExternalLink, 
   MoreHorizontal, Building2, MapPin, Calendar, Globe, Ship, TrendingUp,
-  TrendingDown, Plane, Package, Plus, Users
+  TrendingDown, Plane, Package, Plus, Users, X, Phone, Mail
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
+import { useCRMAPI } from "@/hooks/useAPI"
 
 export function SearchIntelligence() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("companies")
   const [hasSearched, setHasSearched] = useState(false)
+  const [selectedCompany, setSelectedCompany] = useState(null)
+  const [watchlist, setWatchlist] = useState(new Set())
   const [filters, setFilters] = useState({
     mode: "all",
     range: "90d",
@@ -26,6 +30,7 @@ export function SearchIntelligence() {
     min_confidence: ""
   })
   const { toast } = useToast()
+  const { addContact, loading: crmLoading } = useCRMAPI()
   
   const countries = [
     "United States", "China", "Germany", "Japan", "United Kingdom", 
@@ -155,25 +160,54 @@ export function SearchIntelligence() {
     })
   }
 
-  const handleAddToCRM = (company: any) => {
-    toast({
-      title: "Add to CRM",
-      description: `Adding ${company.name} to CRM...`
-    })
+  const handleAddToCRM = async (company: any) => {
+    try {
+      await addContact({
+        company_name: company.name,
+        full_name: null,
+        title: null,
+        email: null,
+        phone: null,
+        linkedin: null,
+        country: company.location.split(", ").pop(),
+        city: company.location.split(", ")[0],
+        tags: [company.industry.toLowerCase()],
+        notes: `Added from search results. Trade volume: ${formatCurrency(company.trade_volume_usd)}`
+      })
+      
+      toast({
+        title: "Success",
+        description: `${company.name} has been added to your CRM`
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add company to CRM",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleViewCompany = (company: any) => {
-    toast({
-      title: "Company Profile",
-      description: `Opening profile for ${company.name}`
-    })
+    setSelectedCompany(company)
   }
 
   const handleWatchCompany = (company: any) => {
-    toast({
-      title: "Company Watched",
-      description: `${company.name} added to watchlist`
-    })
+    const newWatchlist = new Set(watchlist)
+    if (newWatchlist.has(company.company_id)) {
+      newWatchlist.delete(company.company_id)
+      toast({
+        title: "Removed from Watchlist",
+        description: `${company.name} removed from watchlist`
+      })
+    } else {
+      newWatchlist.add(company.company_id)
+      toast({
+        title: "Added to Watchlist",
+        description: `${company.name} added to watchlist`
+      })
+    }
+    setWatchlist(newWatchlist)
   }
 
   const formatCurrency = (amount: number) => {
@@ -422,8 +456,9 @@ export function SearchIntelligence() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleWatchCompany(company)}
+                    className={watchlist.has(company.company_id) ? "text-yellow-500" : ""}
                   >
-                    <Star className="w-4 h-4" />
+                    <Star className={`w-4 h-4 ${watchlist.has(company.company_id) ? "fill-current" : ""}`} />
                   </Button>
                   <Button
                     variant="ghost"
@@ -436,9 +471,10 @@ export function SearchIntelligence() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleAddToCRM(company)}
+                    disabled={crmLoading}
                   >
                     <Plus className="w-4 h-4 mr-1" />
-                    Add to CRM
+                    {crmLoading ? "Adding..." : "Add to CRM"}
                   </Button>
                 </div>
               </div>
@@ -560,6 +596,119 @@ export function SearchIntelligence() {
           ))}
         </div>
       </div>
+
+      {/* Company Details Modal */}
+      <Dialog open={!!selectedCompany} onOpenChange={() => setSelectedCompany(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          {selectedCompany && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-sky-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">{selectedCompany.name}</h2>
+                    <p className="text-gray-600">{selectedCompany.industry}</p>
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                {/* Company Overview */}
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">Company Overview</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Location</p>
+                        <p className="font-medium">{selectedCompany.location}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Industry</p>
+                        <p className="font-medium">{selectedCompany.industry}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Trade Volume</p>
+                        <p className="font-medium">{formatCurrency(selectedCompany.trade_volume_usd)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Confidence Score</p>
+                        <p className="font-medium">{selectedCompany.confidence}%</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">Trade Activity</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Total Shipments</p>
+                        <p className="font-medium">{selectedCompany.shipment_count.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Last Shipment</p>
+                        <p className="font-medium">{formatDate(selectedCompany.last_shipment_at)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Trend</p>
+                        <div className="flex items-center">
+                          {selectedCompany.trend === 'up' ? (
+                            <TrendingUp className="w-4 h-4 text-emerald-500 mr-1" />
+                          ) : (
+                            <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
+                          )}
+                          <span className="font-medium capitalize">{selectedCompany.trend}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions Panel */}
+                <div className="space-y-4">
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
+                    <div className="space-y-2">
+                      <Button
+                        className="w-full justify-start"
+                        onClick={() => handleAddToCRM(selectedCompany)}
+                        disabled={crmLoading}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        {crmLoading ? "Adding to CRM..." : "Add to CRM"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => handleWatchCompany(selectedCompany)}
+                      >
+                        <Star className={`w-4 h-4 mr-2 ${watchlist.has(selectedCompany.company_id) ? "fill-current text-yellow-500" : ""}`} />
+                        {watchlist.has(selectedCompany.company_id) ? "Remove from Watchlist" : "Add to Watchlist"}
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Full Profile
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">Contact Information</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Upgrade to Pro to access verified contact details.
+                    </p>
+                    <Button variant="outline" className="w-full" disabled>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Email Contacts
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
