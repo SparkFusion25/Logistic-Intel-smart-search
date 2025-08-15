@@ -92,16 +92,16 @@ const FeatureGrid = () => {
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-surface">
+    <section className="py-16 lg:py-24 bg-canvas">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-12 lg:mb-20">
           <Badge className="bg-accent/20 text-accent border-accent/30 mb-6">
             Platform Features
           </Badge>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-text-dark mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-text-on-dark mb-6">
             Everything you need to dominate global trade
           </h2>
-          <p className="text-lg lg:text-xl text-text-dark/70 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-lg lg:text-xl text-text-on-dark/70 max-w-4xl mx-auto leading-relaxed">
             From intelligent search to contact discovery and market analysis—all in one powerful platform.
           </p>
         </div>
@@ -117,7 +117,7 @@ const FeatureGrid = () => {
                 className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base ${
                   activeFeature === tab.id 
                     ? "cta-gradient text-white shadow-lg" 
-                    : "border-border text-text-dark hover:bg-surface/50 bg-white"
+                    : "border-border text-text-on-dark hover:bg-elevated/30 bg-elevated/10"
                 }`}
                 onClick={() => setActiveFeature(tab.id)}
               >
@@ -142,21 +142,21 @@ const FeatureGrid = () => {
                 );
               })()}
               <div>
-                <h3 className="text-2xl lg:text-3xl font-semibold text-text-dark mb-2">
+                <h3 className="text-2xl lg:text-3xl font-semibold text-text-on-dark mb-2">
                   {features[activeFeature as keyof typeof features].title}
                 </h3>
-                <p className="text-text-dark/60 text-lg">
+                <p className="text-text-on-dark/60 text-lg">
                   {features[activeFeature as keyof typeof features].subtitle}
                 </p>
               </div>
             </div>
             
-            <p className="text-lg lg:text-xl text-text-dark/80 leading-relaxed">
+            <p className="text-lg lg:text-xl text-text-on-dark/80 leading-relaxed">
               {features[activeFeature as keyof typeof features].description}
             </p>
             
             <div className="space-y-4">
-              <h4 className="font-semibold text-text-dark text-lg">Key Benefits:</h4>
+              <h4 className="font-semibold text-text-on-dark text-lg">Key Benefits:</h4>
               <div className="grid grid-cols-1 gap-3">
                 {features[activeFeature as keyof typeof features].benefits.map((benefit, index) => (
                   <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-border/30 shadow-sm hover:shadow-md transition-shadow">
@@ -174,7 +174,7 @@ const FeatureGrid = () => {
                 {features[activeFeature as keyof typeof features].cta}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-              <Button variant="outline" className="border-border text-text-dark hover:bg-surface/30 bg-white px-8 py-3 text-lg">
+              <Button variant="outline" className="border-border text-text-on-dark hover:bg-elevated/30 bg-elevated/10 px-8 py-3 text-lg">
                 <Play className="w-5 h-5 mr-2" />
                 Watch demo
               </Button>
