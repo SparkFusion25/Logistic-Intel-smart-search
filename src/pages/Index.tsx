@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ContactCard } from "@/components/landing/ContactCard";
-import { ArrowRight, Search, Users, TrendingUp, Globe, Menu, X } from "lucide-react";
+import { ProductStrip } from "@/components/landing/ProductStrip";
+import { ProofSection } from "@/components/landing/ProofSection";
+import { ResourcesHighlight } from "@/components/landing/ResourcesHighlight";
+import { ArrowRight, Search, Users, TrendingUp, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -55,10 +58,11 @@ const Index = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-cta-gradient rounded-lg flex items-center justify-center">
-                <Globe className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-xl font-semibold text-text-on-dark">LOGISTIC INTEL</div>
+              <img 
+                src="/lovable-uploads/5bf6f857-7953-4cd2-9470-106d46cc76fa.png" 
+                alt="LOGISTIC INTEL"
+                className="h-8 w-auto"
+              />
             </div>
             <div className="hidden lg:flex items-center space-x-8">
               <a href="#solutions" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Solutions</a>
@@ -184,6 +188,15 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Product Strip */}
+      <ProductStrip />
+
+      {/* Proof Section */}
+      <ProofSection />
+
+      {/* Resources Highlight */}
+      <ResourcesHighlight />
 
       {/* Final CTA */}
       <section className="py-20 bg-canvas">

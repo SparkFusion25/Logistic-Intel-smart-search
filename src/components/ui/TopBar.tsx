@@ -13,6 +13,13 @@ export const TopBar = () => {
         <div className="flex items-center gap-4">
           <SidebarTrigger className="text-text-on-dark" />
           
+          {/* Logo */}
+          <img 
+            src="/lovable-uploads/5bf6f857-7953-4cd2-9470-106d46cc76fa.png" 
+            alt="LOGISTIC INTEL"
+            className="h-6 w-auto"
+          />
+          
           {/* Live Data Pill */}
           <Badge className="bg-success/20 text-success border-success/30 hover:bg-success/30">
             <div className="w-2 h-2 bg-success rounded-full mr-2 animate-pulse" />
