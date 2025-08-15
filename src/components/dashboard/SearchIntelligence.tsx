@@ -2,18 +2,34 @@ import { useState } from "react"
 import { 
   Search, Filter, Download, ArrowRight, Star, Eye, ExternalLink, 
   MoreHorizontal, Building2, MapPin, Calendar, Globe, Ship, TrendingUp,
-  TrendingDown 
+  TrendingDown, Plane, Package, Plus, Users
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 
 export function SearchIntelligence() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedFilter, setSelectedFilter] = useState("all")
+  const [activeTab, setActiveTab] = useState("companies")
+  const [hasSearched, setHasSearched] = useState(false)
+  const [filters, setFilters] = useState({
+    mode: "all",
+    range: "90d",
+    origin_country: "",
+    dest_country: "",
+    hs_codes: "",
+    entity: "all",
+    min_shipments: "",
+    min_confidence: ""
+  })
+  const { toast } = useToast()
   
-  const filters = [
-    { id: "all", label: "All Companies", count: 2847 },
-    { id: "importers", label: "Importers", count: 1567 },
-    { id: "exporters", label: "Exporters", count: 892 },
-    { id: "manufacturers", label: "Manufacturers", count: 388 }
+  const countries = [
+    "United States", "China", "Germany", "Japan", "United Kingdom", 
+    "South Korea", "Netherlands", "France", "Italy", "Canada"
   ]
 
   const savedSearches = [
@@ -22,272 +38,526 @@ export function SearchIntelligence() {
     { name: "High Volume Shippers", count: 453, updated: "3 days ago" }
   ]
 
-  const searchResults = [
+  const companyResults = [
     {
-      id: 1,
-      company: "Apple Inc.",
-      type: "Importer",
+      company_id: "1",
+      name: "Apple Inc.",
       location: "Cupertino, CA, USA",
       industry: "Technology",
-      tradeVolume: "$2.4B",
-      lastShipment: "2 days ago",
-      routes: ["Shanghai → Los Angeles", "Shenzhen → San Francisco"],
-      shipmentCount: 15420,
+      shipment_count: 15420,
+      last_shipment_at: "2025-08-13T08:00:00Z",
+      trade_volume_usd: 2400000000,
       confidence: 98,
-      trending: "up"
+      trend: "up",
+      logo_url: null
+    },
+    {
+      company_id: "2", 
+      name: "Samsung Electronics",
+      location: "Seoul, South Korea",
+      industry: "Electronics",
+      shipment_count: 12350,
+      last_shipment_at: "2025-08-10T08:00:00Z",
+      trade_volume_usd: 1800000000,
+      confidence: 95,
+      trend: "up",
+      logo_url: null
+    },
+    {
+      company_id: "3",
+      name: "Global Logistics Corp",
+      location: "Hamburg, Germany", 
+      industry: "Automotive",
+      shipment_count: 8750,
+      last_shipment_at: "2025-08-08T08:00:00Z",
+      trade_volume_usd: 890000000,
+      confidence: 92,
+      trend: "down",
+      logo_url: null
+    }
+  ]
+
+  const shipmentResults = [
+    {
+      id: 1,
+      company: "Apple Inc",
+      mode: "air",
+      destination: "Shanghai, CN",
+      origin: "Los Angeles, US",
+      value: "$2,400,000",
+      weight: "24,500 kg",
+      confidence: 95,
+      date: "2025-08-15",
+      hs_code: "8471.60",
+      carrier: "FedEx Express",
+      description: "Computer parts and accessories"
     },
     {
       id: 2,
       company: "Samsung Electronics",
-      type: "Manufacturer",
-      location: "Seoul, South Korea",
-      industry: "Electronics",
-      tradeVolume: "$1.8B",
-      lastShipment: "5 days ago",
-      routes: ["Busan → Long Beach", "Seoul → Newark"],
-      shipmentCount: 12350,
-      confidence: 95,
-      trending: "up"
-    },
-    {
-      id: 3,
-      company: "Global Logistics Corp",
-      type: "Exporter",
-      location: "Hamburg, Germany",
-      industry: "Automotive",
-      tradeVolume: "$890M",
-      lastShipment: "1 week ago",
-      routes: ["Hamburg → New York", "Bremen → Baltimore"],
-      shipmentCount: 8750,
-      confidence: 92,
-      trending: "down"
+      mode: "ocean",
+      destination: "Los Angeles, US",
+      origin: "Busan, KR",
+      value: "$8,100,000",
+      weight: "450,000 kg",
+      confidence: 87,
+      date: "2025-08-12",
+      hs_code: "8517.12",
+      carrier: "COSCO Shipping",
+      description: "Telecommunication equipment"
     }
   ]
+
+  const contactResults = [
+    {
+      id: 1,
+      company_name: "Apple Inc",
+      full_name: "Sarah Chen",
+      title: "VP of Procurement",
+      email: "sarah.chen@apple.com", // Only for enterprise plan
+      phone: "+1 (555) 123-4567", // Only for enterprise plan
+      linkedin: "https://linkedin.com/in/sarah-chen",
+      country: "US",
+      city: "Cupertino",
+      last_verified_at: "2025-08-10T08:00:00Z",
+      confidence: 95
+    }
+  ]
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      toast({
+        title: "Search Required",
+        description: "Please enter a search query",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    setHasSearched(true)
+    toast({
+      title: "Search Started",
+      description: `Searching for "${searchQuery}"...`
+    })
+  }
+
+  const handleSaveSearch = () => {
+    toast({
+      title: "Search Saved",
+      description: "Your search has been saved successfully"
+    })
+  }
+
+  const handleExport = () => {
+    toast({
+      title: "Export Started", 
+      description: "Your search results are being exported..."
+    })
+  }
+
+  const handleAddToCRM = (company: any) => {
+    toast({
+      title: "Add to CRM",
+      description: `Adding ${company.name} to CRM...`
+    })
+  }
+
+  const handleViewCompany = (company: any) => {
+    toast({
+      title: "Company Profile",
+      description: `Opening profile for ${company.name}`
+    })
+  }
+
+  const handleWatchCompany = (company: any) => {
+    toast({
+      title: "Company Watched",
+      description: `${company.name} added to watchlist`
+    })
+  }
+
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000000) return `$${(amount / 1000000000).toFixed(1)}B`
+    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(0)}M`
+    return `$${amount.toLocaleString()}`
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) return "1 day ago"
+    if (diffDays < 7) return `${diffDays} days ago`
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`
+    return `${Math.ceil(diffDays / 30)} months ago`
+  }
+
+  if (!hasSearched) {
+    return (
+      <div className="min-h-[600px] flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 bg-gradient-to-br from-sky-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Search className="w-12 h-12 text-sky-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Start Your Search</h2>
+          <p className="text-gray-600 mb-8">
+            Search companies, HS codes, or trade lanes to discover global trade intelligence.
+          </p>
+          
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="e.g., 'Tesla suppliers CN→US last 90d'"
+              className="w-full pl-12 pr-4 py-4 text-lg"
+            />
+          </div>
+          
+          <Button onClick={handleSearch} size="lg" className="w-full">
+            <Search className="w-5 h-5 mr-2" />
+            Search Trade Data
+          </Button>
+          
+          <div className="mt-8 text-left">
+            <h4 className="text-sm font-bold text-gray-900 mb-3">Quick Examples:</h4>
+            <div className="space-y-2">
+              {[
+                "Electronics importers from China",
+                "Tesla suppliers last 6 months",
+                "HS code 8517 US exports"
+              ].map((example, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSearchQuery(example)}
+                  className="block w-full text-left px-3 py-2 text-sm text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                >
+                  "{example}"
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search companies, products, or trade routes..."
-            className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent shadow-sm"
-          />
-          <button className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-700 transition-colors">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="relative flex-1">
+            <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="Search companies, HS codes, lanes (e.g., 'Tesla suppliers CN→US last 90d')"
+              className="w-full pl-12 pr-4 py-3 text-base"
+            />
+          </div>
+          <Button onClick={handleSearch} className="px-8">
+            <Search className="w-4 h-4 mr-2" />
             Search
-          </button>
+          </Button>
+        </div>
+        
+        {/* Advanced Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Select value={filters.mode} onValueChange={(value) => setFilters(prev => ({ ...prev, mode: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Modes</SelectItem>
+              <SelectItem value="air">Air</SelectItem>
+              <SelectItem value="ocean">Ocean</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={filters.range} onValueChange={(value) => setFilters(prev => ({ ...prev, range: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Date Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="12m">Last 12 months</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={filters.origin_country} onValueChange={(value) => setFilters(prev => ({ ...prev, origin_country: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Origin Country" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map(country => (
+                <SelectItem key={country} value={country}>{country}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={filters.dest_country} onValueChange={(value) => setFilters(prev => ({ ...prev, dest_country: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Destination" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map(country => (
+                <SelectItem key={country} value={country}>{country}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Input
+            placeholder="HS Codes"
+            value={filters.hs_codes}
+            onChange={(e) => setFilters(prev => ({ ...prev, hs_codes: e.target.value }))}
+          />
+          
+          <div className="flex space-x-2">
+            <Button onClick={handleSaveSearch} variant="outline" size="sm">
+              Save Search
+            </Button>
+            <Button onClick={handleExport} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1" />
+              Export
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-6">
-        {/* Sidebar Filters */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Filters</h3>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <TabsList className="grid w-full max-w-md grid-cols-4">
+              <TabsTrigger value="companies">Companies</TabsTrigger>
+              <TabsTrigger value="shipments">Shipments</TabsTrigger>
+              <TabsTrigger value="routes">Routes</TabsTrigger>
+              <TabsTrigger value="contacts">Contacts</TabsTrigger>
+            </TabsList>
             
-            {/* Filter Categories */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Company Type</label>
-                <div className="space-y-2">
-                  {filters.map((filter) => (
-                    <label key={filter.id} className="flex items-center">
-                      <input
-                        type="radio"
-                        name="companyType"
-                        value={filter.id}
-                        checked={selectedFilter === filter.id}
-                        onChange={(e) => setSelectedFilter(e.target.value)}
-                        className="w-4 h-4 text-sky-600 border-gray-300 focus:ring-sky-500"
-                      />
-                      <span className="ml-3 text-sm text-gray-700">{filter.label}</span>
-                      <span className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {filter.count}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Industry</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-                  <option>All Industries</option>
-                  <option>Electronics</option>
-                  <option>Automotive</option>
-                  <option>Textiles</option>
-                  <option>Machinery</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Trade Volume</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-                  <option>Any Volume</option>
-                  <option>$1M - $10M</option>
-                  <option>$10M - $100M</option>
-                  <option>$100M - $1B</option>
-                  <option>$1B+</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                <input
-                  type="text"
-                  placeholder="Country or region"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-              </div>
-            </div>
-
-            {/* Saved Searches */}
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <h4 className="text-sm font-bold text-gray-900 mb-3">Saved Searches</h4>
-              <div className="space-y-2">
-                {savedSearches.map((search, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{search.name}</p>
-                      <p className="text-xs text-gray-500">{search.count} results • {search.updated}</p>
-                    </div>
-                    <button className="text-gray-400 hover:text-sky-600">
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center space-x-3">
+              <Select>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Sort by Relevance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relevance">Sort by Relevance</SelectItem>
+                  <SelectItem value="volume_desc">Trade Volume (High to Low)</SelectItem>
+                  <SelectItem value="volume_asc">Trade Volume (Low to High)</SelectItem>
+                  <SelectItem value="activity">Last Activity</SelectItem>
+                  <SelectItem value="name">Company Name</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
+          
+          <p className="text-sm text-gray-600">
+            Found {companyResults.length} results for "{searchQuery}"
+          </p>
         </div>
 
-        {/* Main Results */}
-        <div className="lg:col-span-3">
-          {/* Results Header */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Search Results</h2>
-                <p className="text-sm text-gray-600 mt-1">Found 2,847 companies matching your criteria</p>
-              </div>
-              <div className="flex items-center space-x-3">
-                <select className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-                  <option>Sort by Relevance</option>
-                  <option>Trade Volume (High to Low)</option>
-                  <option>Trade Volume (Low to High)</option>
-                  <option>Last Activity</option>
-                  <option>Company Name</option>
-                </select>
-                <button className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
-                  <Filter className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
+        <TabsContent value="companies" className="space-y-4">
+          {companyResults.map((company) => (
+            <div key={company.company_id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start space-x-4 flex-1">
+                  <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-8 h-8 text-sky-600" />
+                  </div>
 
-          {/* Results List */}
-          <div className="space-y-4">
-            {searchResults.map((result) => (
-              <div key={result.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    {/* Company Logo */}
-                    <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Building2 className="w-8 h-8 text-sky-600" />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="text-xl font-bold text-gray-900">{company.name}</h3>
+                      <Badge variant="secondary">{company.industry}</Badge>
+                      <div className="flex items-center">
+                        {company.trend === 'up' ? (
+                          <TrendingUp className="w-4 h-4 text-emerald-500" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-500" />
+                        )}
+                        <span className="text-xs text-gray-500 ml-1">Trending</span>
+                      </div>
                     </div>
 
-                    {/* Company Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-900">{result.company}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          result.type === 'Importer' ? 'bg-blue-100 text-blue-800' :
-                          result.type === 'Exporter' ? 'bg-emerald-100 text-emerald-800' :
-                          'bg-purple-100 text-purple-800'
-                        }`}>
-                          {result.type}
-                        </span>
-                        <div className="flex items-center">
-                          {result.trending === 'up' && <TrendingUp className="w-4 h-4 text-emerald-500" />}
-                          <span className="text-xs text-gray-500 ml-1">Trending</span>
-                        </div>
+                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                        {company.location}
                       </div>
-
-                      <div className="grid md:grid-cols-2 gap-4 mb-4">
-                        <div className="flex items-center text-sm text-gray-600">
-                          <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                          {result.location}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Building2 className="w-4 h-4 mr-2 text-gray-400" />
-                          {result.industry}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Globe className="w-4 h-4 mr-2 text-gray-400" />
-                          Trade Volume: <span className="font-semibold ml-1">{result.tradeVolume}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                          Last shipment: {result.lastShipment}
-                        </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Globe className="w-4 h-4 mr-2 text-gray-400" />
+                        Trade Volume: <span className="font-semibold ml-1">{formatCurrency(company.trade_volume_usd)}</span>
                       </div>
-
-                      {/* Routes */}
-                      <div className="flex items-center space-x-2 mb-4">
-                        <span className="text-sm text-gray-500">Trade Routes:</span>
-                        {result.routes.map((route, index) => (
-                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs">
-                            {route}
-                          </span>
-                        ))}
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                        Last shipment: {formatDate(company.last_shipment_at)}
                       </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Ship className="w-4 h-4 mr-2 text-gray-400" />
+                        {company.shipment_count.toLocaleString()} shipments
+                      </div>
+                    </div>
 
-                      {/* Stats */}
-                      <div className="flex items-center space-x-6 text-sm">
-                        <div className="flex items-center">
-                          <Ship className="w-4 h-4 mr-1 text-gray-400" />
-                          <span className="font-medium">{result.shipmentCount.toLocaleString()}</span>
-                          <span className="text-gray-500 ml-1">shipments</span>
-                        </div>
-                        <div className="flex items-center">
-                          <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                          <span className="font-medium">{result.confidence}%</span>
-                          <span className="text-gray-500 ml-1">confidence</span>
-                        </div>
+                    <div className="flex items-center space-x-6 text-sm">
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+                        <span className="font-medium">{company.confidence}%</span>
+                        <span className="text-gray-500 ml-1">confidence</span>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors">
-                      <Star className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
+                <div className="flex items-center space-x-2 ml-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleWatchCompany(company)}
+                  >
+                    <Star className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewCompany(company)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddToCRM(company)}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add to CRM
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="shipments" className="space-y-4">
+          {shipmentResults.map((shipment) => (
+            <div key={shipment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex items-center space-x-2">
+                  {shipment.mode === 'air' ? (
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Plane className="w-4 h-4 text-primary" />
+                    </div>
+                  ) : (
+                    <div className="p-2 bg-accent/10 rounded-lg">
+                      <Ship className="w-4 h-4 text-accent" />
+                    </div>
+                  )}
+                  <Badge variant={shipment.mode === 'air' ? 'default' : 'secondary'} className="text-xs">
+                    {shipment.mode.toUpperCase()}
+                  </Badge>
+                </div>
+                
+                <div className="flex-1">
+                  <h4 className="font-semibold text-lg mb-2">{shipment.company}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
+                    <div className="flex items-center">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {shipment.origin} → {shipment.destination}
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {shipment.date}
+                    </div>
+                    <div className="flex items-center">
+                      <Package className="w-3 h-3 mr-1" />
+                      HS {shipment.hs_code}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">{shipment.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="font-semibold text-lg">{shipment.value}</div>
+                      <div className="text-sm text-gray-500">{shipment.weight}</div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-emerald-500 rounded-full h-2"
+                          style={{ width: `${shipment.confidence}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-medium">{shipment.confidence}%</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </TabsContent>
 
-          {/* Load More */}
-          <div className="mt-8 text-center">
-            <button className="bg-sky-600 text-white px-8 py-3 rounded-lg hover:bg-sky-700 transition-colors font-semibold">
-              Load More Results
-            </button>
+        <TabsContent value="routes" className="space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-bold mb-4">Top Trade Routes</h3>
+            <div className="space-y-4">
+              {[
+                { route: "China → United States", volume: "$125.8B", count: 45720, share: "38%" },
+                { route: "Germany → United States", volume: "$89.2B", count: 28150, share: "27%" },
+                { route: "South Korea → United States", volume: "$56.4B", count: 19340, share: "17%" }
+              ].map((route, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div>
+                    <h4 className="font-semibold">{route.route}</h4>
+                    <p className="text-sm text-gray-600">{route.count.toLocaleString()} shipments</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-lg">{route.volume}</div>
+                    <div className="text-sm text-gray-600">{route.share} share</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="contacts" className="space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-yellow-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Upgrade to View Contacts</h3>
+              <p className="text-gray-600 mb-4">
+                Get access to verified contact information including emails, phone numbers, and LinkedIn profiles.
+              </p>
+              <Button>Upgrade to Pro</Button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Saved Searches Sidebar */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h4 className="text-sm font-bold text-gray-900 mb-3">Saved Searches</h4>
+        <div className="space-y-2">
+          {savedSearches.map((search, index) => (
+            <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-200">
+              <div>
+                <p className="text-sm font-medium text-gray-900">{search.name}</p>
+                <p className="text-xs text-gray-500">{search.count} results • {search.updated}</p>
+              </div>
+              <Button variant="ghost" size="sm">
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

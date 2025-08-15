@@ -170,6 +170,10 @@ export function CRMDashboard() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId)
+    toast({
+      title: `${tabId} View`,
+      description: `Switched to ${tabId} view`
+    })
   }
 
   return (
@@ -230,7 +234,7 @@ export function CRMDashboard() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => handleTabClick(tab.label)}
+                onClick={() => handleTabClick(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? 'border-sky-500 text-sky-600'
