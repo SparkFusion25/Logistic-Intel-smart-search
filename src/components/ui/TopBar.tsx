@@ -15,9 +15,9 @@ export const TopBar = () => {
           
           {/* Logo */}
           <img 
-            src="/lovable-uploads/5bf6f857-7953-4cd2-9470-106d46cc76fa.png" 
+            src="/src/assets/logistic-intel-logo.png" 
             alt="LOGISTIC INTEL"
-            className="h-6 w-auto"
+            className="h-10 w-auto"
           />
           
           {/* Live Data Pill */}

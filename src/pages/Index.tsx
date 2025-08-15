@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ContactCard } from "@/components/landing/ContactCard";
-import { ProductStrip } from "@/components/landing/ProductStrip";
+import FeatureGrid from "@/components/landing/FeatureGrid";
 import { ProofSection } from "@/components/landing/ProofSection";
 import { ResourcesHighlight } from "@/components/landing/ResourcesHighlight";
 import { ArrowRight, Search, Users, TrendingUp, Menu, X } from "lucide-react";
@@ -59,9 +59,9 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img 
-                src="/lovable-uploads/5bf6f857-7953-4cd2-9470-106d46cc76fa.png" 
+                src="/src/assets/logistic-intel-logo.png" 
                 alt="LOGISTIC INTEL"
-                className="h-8 w-auto"
+                className="h-12 w-auto"
               />
             </div>
             <div className="hidden lg:flex items-center space-x-8">
@@ -146,51 +146,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Value Pillars */}
-      <section className="py-20 bg-elevated">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-h2 text-text-on-dark mb-4">
-              The complete freight intelligence platform
-            </h2>
-            <p className="text-xl text-text-on-dark/70 max-w-3xl mx-auto">
-              From trade data analysis to contact enrichment and outreach automation.
-            </p>
-          </div>
-          <div className="grid lg:grid-cols-3 gap-8">
-            <Card className="card-enterprise hover:scale-105 transition-transform duration-300">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-brand/20 rounded-xl flex items-center justify-center mb-6">
-                  <Search className="w-6 h-6 text-brand" />
-                </div>
-                <h3 className="text-xl font-semibold text-text-dark mb-3">Find the right companies fast</h3>
-                <p className="text-text-dark/70">Search by company, HS code, origin, destination, and mode.</p>
-              </CardContent>
-            </Card>
-            <Card className="card-enterprise hover:scale-105 transition-transform duration-300">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-success/20 rounded-xl flex items-center justify-center mb-6">
-                  <Users className="w-6 h-6 text-success" />
-                </div>
-                <h3 className="text-xl font-semibold text-text-dark mb-3">Reach real decision‑makers</h3>
-                <p className="text-text-dark/70">Verified contacts, enrichment, and outreach—built in.</p>
-              </CardContent>
-            </Card>
-            <Card className="card-enterprise hover:scale-105 transition-transform duration-300">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center mb-6">
-                  <TrendingUp className="w-6 h-6 text-accent" />
-                </div>
-                <h3 className="text-xl font-semibold text-text-dark mb-3">Win with intelligence</h3>
-                <p className="text-text-dark/70">Tariffs, quotes, and market benchmarks for every lane.</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Product Strip */}
-      <ProductStrip />
+      {/* Feature Grid */}
+      <FeatureGrid />
 
       {/* Proof Section */}
       <ProofSection />
