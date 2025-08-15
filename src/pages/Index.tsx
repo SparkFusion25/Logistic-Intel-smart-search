@@ -106,41 +106,6 @@ const Index = () => {
                   Discover every air, ocean, and cross‑border importer, find decision‑makers, and supercharge your sales.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button size="lg" className="cta-gradient text-white px-8 py-4 text-lg hover:scale-105 transition-transform shadow-lg">
-                  Get a demo
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-                <Button variant="outline" size="lg" className="border-border-glass text-text-on-dark hover:bg-surface/10 px-8 py-4 text-lg bg-white/10 backdrop-blur-sm">
-                  Explore solutions
-                </Button>
-              </div>
-              <div className="grid grid-cols-3 gap-4 lg:gap-8 pt-6 lg:pt-8">
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-text-on-dark">2.5M+</div>
-                  <div className="text-sm lg:text-base text-text-on-dark/60">Global Shipments</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-text-on-dark">150K+</div>
-                  <div className="text-sm lg:text-base text-text-on-dark/60">Active Companies</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-text-on-dark">94%</div>
-                  <div className="text-sm lg:text-base text-text-on-dark/60">Contact Accuracy</div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start max-w-lg mx-auto lg:mx-0">
-                {contactCards.slice(0, 6).map((contact, index) => (
-                  <HeroContactChip
-                    key={index}
-                    name={contact.name}
-                    title={contact.title}
-                    company={contact.company}
-                  />
-                ))}
-              </div>
             </div>
           </div>
         </Container>
