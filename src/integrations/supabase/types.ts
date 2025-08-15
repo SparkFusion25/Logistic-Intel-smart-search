@@ -2188,6 +2188,30 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          keys: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          keys: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          keys?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           commodity: string | null
@@ -2751,6 +2775,33 @@ export type Database = {
           unified_value?: number | null
           unified_weight?: number | null
           vessel_name?: string | null
+        }
+        Relationships: []
+      }
+      user_notification_prefs: {
+        Row: {
+          browser: boolean | null
+          email: boolean | null
+          mobile: boolean | null
+          updated_at: string | null
+          user_id: string
+          weekly: boolean | null
+        }
+        Insert: {
+          browser?: boolean | null
+          email?: boolean | null
+          mobile?: boolean | null
+          updated_at?: string | null
+          user_id: string
+          weekly?: boolean | null
+        }
+        Update: {
+          browser?: boolean | null
+          email?: boolean | null
+          mobile?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+          weekly?: boolean | null
         }
         Relationships: []
       }
