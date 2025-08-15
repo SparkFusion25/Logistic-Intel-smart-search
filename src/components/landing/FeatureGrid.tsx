@@ -13,83 +13,75 @@ const FeatureGrid = () => {
       icon: Search,
       title: "Advanced Search",
       subtitle: "Find any company's shipping activity",
-      description: "Search by company, HS code, origin, destination, and mode with precision filters.",
-      benefits: ["2.5M+ global shipments", "Real-time data updates", "Advanced filtering"],
-      cta: "Start searching",
-      preview: (
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Badge variant="outline" className="bg-brand/10 text-brand border-brand/30">Ocean</Badge>
-            <Badge variant="outline" className="bg-accent/10 text-accent border-accent/30">Air</Badge>
-            <Badge variant="outline" className="bg-success/10 text-success border-success/30">Cross-border</Badge>
-          </div>
-          <div className="space-y-2">
-            <div className="h-3 bg-surface/20 rounded-full">
-              <div className="h-3 bg-brand w-3/4 rounded-full"></div>
-            </div>
-            <div className="h-3 bg-surface/20 rounded-full">
-              <div className="h-3 bg-accent w-1/2 rounded-full"></div>
-            </div>
-            <div className="h-3 bg-surface/20 rounded-full">
-              <div className="h-3 bg-success w-2/3 rounded-full"></div>
-            </div>
-          </div>
-        </div>
-      )
+      description: "Search through millions of trade records with precision filters for HS codes, routes, and trade patterns. Get real-time insights into market movements.",
+      benefits: [
+        "Real-time shipment tracking across all modes",
+        "Advanced filtering by HS codes, routes, and time periods", 
+        "Export capabilities for further analysis",
+        "API access for seamless integration"
+      ],
+      cta: "Start searching now"
     },
     contacts: {
       icon: Users,
-      title: "Contact Discovery",
-      subtitle: "Reach real decision-makers",
-      description: "Verified contacts, enrichment, and outreach automation—all built in.",
-      benefits: ["94% contact accuracy", "Decision-maker targeting", "Automated enrichment"],
-      cta: "Find contacts",
-      preview: (
-        <div className="space-y-3">
-          {["Sarah Chen - Supply Chain Director", "Marcus Rodriguez - Logistics Manager", "Lisa Wang - Procurement Head"].map((contact, i) => (
-            <div key={i} className="flex items-center gap-3 p-2 bg-surface/10 rounded-lg">
-              <div className="w-8 h-8 bg-brand/20 rounded-full flex items-center justify-center">
-                <Users className="w-4 h-4 text-brand" />
-              </div>
-              <div className="flex-1 text-sm text-text-on-dark/80">{contact}</div>
-              <Badge className="bg-success/20 text-success border-success/30 text-xs">Verified</Badge>
-            </div>
-          ))}
-        </div>
-      )
+      title: "Verified Contacts",
+      subtitle: "Direct access to decision makers",
+      description: "Access verified contact information for procurement managers, supply chain directors, and trade decision-makers with 94% accuracy.",
+      benefits: [
+        "94% email verification accuracy",
+        "Direct phone numbers and LinkedIn profiles",
+        "Real-time contact enrichment",
+        "CRM integration capabilities"
+      ],
+      cta: "Find contacts"
     },
-    intelligence: {
+    analytics: {
       icon: TrendingUp,
-      title: "Market Intelligence",
-      subtitle: "Win with data-driven insights",
-      description: "Tariffs, quotes, and market benchmarks for every trade lane.",
-      benefits: ["Real-time benchmarks", "Tariff calculations", "Quote generation"],
-      cta: "Get insights",
-      preview: (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-3 bg-surface/10 rounded-lg">
-              <div className="text-2xl font-bold text-accent">$2,450</div>
-              <div className="text-xs text-text-on-dark/60">Avg Rate</div>
-            </div>
-            <div className="text-center p-3 bg-surface/10 rounded-lg">
-              <div className="text-2xl font-bold text-success">12.5%</div>
-              <div className="text-xs text-text-on-dark/60">Tariff</div>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text-on-dark/60">Market Position</span>
-            <Badge className="bg-brand/20 text-brand border-brand/30">Competitive</Badge>
-          </div>
-        </div>
-      )
+      title: "Market Analytics",
+      subtitle: "Comprehensive trade intelligence",
+      description: "Analyze market trends, competitor movements, and trade opportunities with advanced analytics and reporting tools.",
+      benefits: [
+        "Market trend analysis and forecasting",
+        "Competitor tracking and benchmarking",
+        "Custom dashboard creation",
+        "Automated report generation"
+      ],
+      cta: "View analytics"
+    },
+    reports: {
+      icon: FileText,
+      title: "Custom Reports",
+      subtitle: "Tailored insights for your business",
+      description: "Generate comprehensive reports tailored to your specific trade requirements and business objectives.",
+      benefits: [
+        "Customizable report templates",
+        "Automated data collection",
+        "Professional PDF exports",
+        "Scheduled delivery options"
+      ],
+      cta: "Create reports"
+    },
+    insights: {
+      icon: BarChart3,
+      title: "Trade Insights",
+      subtitle: "Deep market intelligence",
+      description: "Unlock hidden opportunities with AI-powered insights into trade patterns, market shifts, and emerging trends.",
+      benefits: [
+        "AI-powered pattern recognition",
+        "Emerging market identification",
+        "Risk assessment tools",
+        "Opportunity scoring"
+      ],
+      cta: "Explore insights"
     }
   };
 
   const tabs = [
     { id: "search", label: "Search", icon: Search },
     { id: "contacts", label: "Contacts", icon: Users },
-    { id: "intelligence", label: "Intelligence", icon: TrendingUp }
+    { id: "analytics", label: "Analytics", icon: TrendingUp },
+    { id: "reports", label: "Reports", icon: FileText },
+    { id: "insights", label: "Insights", icon: BarChart3 }
   ];
 
   return (
@@ -107,18 +99,19 @@ const FeatureGrid = () => {
           </p>
         </div>
 
-        {/* Feature Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 lg:gap-4 mb-12 lg:mb-16">
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap justify-center gap-2 lg:gap-4 mb-12 lg:mb-16">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <Button
                 key={tab.id}
                 variant={activeFeature === tab.id ? "default" : "outline"}
-                className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base ${
+                size="lg"
+                className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base transition-all duration-300 ${
                   activeFeature === tab.id 
-                    ? "cta-gradient text-white shadow-lg" 
-                    : "border-border text-text-on-dark hover:bg-elevated/30 bg-elevated/10"
+                    ? "cta-gradient text-white shadow-lg scale-105" 
+                    : "border-border text-text-on-dark hover:bg-elevated/30 bg-transparent"
                 }`}
                 onClick={() => setActiveFeature(tab.id)}
               >
@@ -130,74 +123,144 @@ const FeatureGrid = () => {
           })}
         </div>
 
-        {/* Active Feature Display */}
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-7xl mx-auto">
-          <div className="space-y-6 lg:space-y-8 order-2 lg:order-1 px-4 lg:px-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              {(() => {
-                const Icon = features[activeFeature as keyof typeof features].icon;
-                return (
-                  <div className="w-16 h-16 bg-brand/10 rounded-2xl flex items-center justify-center">
-                    <Icon className="w-8 h-8 text-brand" />
-                  </div>
-                );
-              })()}
-              <div>
-                <h3 className="text-2xl lg:text-3xl font-semibold text-text-on-dark mb-2">
-                  {features[activeFeature as keyof typeof features].title}
-                </h3>
-                <p className="text-text-on-dark/60 text-lg">
-                  {features[activeFeature as keyof typeof features].subtitle}
-                </p>
-              </div>
-            </div>
-            
-            <p className="text-lg lg:text-xl text-text-on-dark/80 leading-relaxed">
-              {features[activeFeature as keyof typeof features].description}
-            </p>
-            
-            <div className="space-y-4">
-              <h4 className="font-semibold text-text-on-dark text-lg">Key Benefits:</h4>
-              <div className="grid grid-cols-1 gap-3">
-                {features[activeFeature as keyof typeof features].benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-border/30 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-6 h-6 bg-success/20 rounded-full flex items-center justify-center flex-shrink-0">
-                      <div className="w-3 h-3 bg-success rounded-full"></div>
+        {/* Tool Interface Snippet */}
+        <div className="bg-canvas/50 backdrop-blur-sm border border-border-glass rounded-2xl p-6 lg:p-12 shadow-xl">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            {/* Left Side - Tool Preview */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 mb-6">
+                {(() => {
+                  const Icon = features[activeFeature as keyof typeof features].icon;
+                  return (
+                    <div className="w-12 h-12 bg-brand/20 rounded-xl flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-brand" />
                     </div>
-                    <span className="text-text-dark font-medium">{benefit}</span>
+                  );
+                })()}
+                <div>
+                  <h3 className="text-xl font-semibold text-text-on-dark">
+                    {features[activeFeature as keyof typeof features].title}
+                  </h3>
+                  <p className="text-text-on-dark/70">
+                    {features[activeFeature as keyof typeof features].subtitle}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Tool Interface Mockup */}
+              <div className="bg-canvas border border-border-glass rounded-xl overflow-hidden shadow-lg">
+                <div className="bg-elevated/50 px-4 py-3 border-b border-border-glass">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-destructive/60 rounded-full"></div>
+                    <div className="w-3 h-3 bg-warning/60 rounded-full"></div>
+                    <div className="w-3 h-3 bg-success/60 rounded-full"></div>
+                    <span className="ml-2 text-xs text-text-on-dark/50 font-mono">
+                      {features[activeFeature as keyof typeof features].title}
+                    </span>
                   </div>
-                ))}
+                </div>
+                <div className="p-6 space-y-4">
+                  {(() => {
+                    if (activeFeature === 'search') {
+                      return (
+                        <>
+                          <div className="bg-brand/5 border border-brand/20 rounded-lg p-3">
+                            <div className="text-sm text-text-on-dark/70 mb-2">Search Query</div>
+                            <div className="font-mono text-brand">Electronics • China → USA • Last 30 days</div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-text-on-dark/70">Results Found</span>
+                              <span className="text-success font-medium">2,847 shipments</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-text-on-dark/70">Top Importer</span>
+                              <span className="text-text-on-dark">TechCorp Solutions</span>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    } else if (activeFeature === 'contacts') {
+                      return (
+                        <>
+                          <div className="bg-success/5 border border-success/20 rounded-lg p-3">
+                            <div className="text-sm text-text-on-dark/70 mb-2">Contact Verification</div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-success rounded-full"></div>
+                              <span className="font-mono text-success">94% verified accuracy</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-text-on-dark/70">Sarah Chen</span>
+                              <span className="text-success">✓ Verified</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-text-on-dark/70">Supply Chain Director</span>
+                              <span className="text-text-on-dark">TechFlow Corp</span>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    } else {
+                      return (
+                        <>
+                          <div className="bg-accent/5 border border-accent/20 rounded-lg p-3">
+                            <div className="text-sm text-text-on-dark/70 mb-2">Analysis Results</div>
+                            <div className="font-mono text-accent">Real-time market data</div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-text-on-dark/70">Status</span>
+                              <span className="text-success font-medium">Active</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-text-on-dark/70">Coverage</span>
+                              <span className="text-text-on-dark">Global</span>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    }
+                  })()}
+                </div>
               </div>
             </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button className="cta-gradient text-white px-8 py-3 text-lg hover:scale-105 transition-transform shadow-lg">
-                {features[activeFeature as keyof typeof features].cta}
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button variant="outline" className="border-border text-text-on-dark hover:bg-elevated/30 bg-elevated/10 px-8 py-3 text-lg">
-                <Play className="w-5 h-5 mr-2" />
-                Watch demo
-              </Button>
+
+            {/* Right Side - Key Features */}
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-lg font-semibold text-text-on-dark mb-4">Key Features</h4>
+                <div className="space-y-4">
+                  {features[activeFeature as keyof typeof features].benefits.map((benefit, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="w-5 h-5 bg-brand/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-2 h-2 bg-brand rounded-full"></div>
+                      </div>
+                      <span className="text-text-on-dark/80 leading-relaxed">{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="pt-4">
+                <p className="text-text-on-dark/70 leading-relaxed mb-6">
+                  {features[activeFeature as keyof typeof features].description}
+                </p>
+                
+                <div className="flex flex-col gap-3">
+                  <Button className="cta-gradient text-white px-6 py-3 hover:scale-105 transition-transform shadow-lg">
+                    {features[activeFeature as keyof typeof features].cta}
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" className="text-text-on-dark/70 hover:text-text-on-dark hover:bg-elevated/20">
+                    <Play className="w-4 h-4 mr-2" />
+                    Watch demo
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-
-          <Card className="bg-white border border-border/20 shadow-xl hover:shadow-2xl transition-all duration-300 order-1 lg:order-2 mx-4 lg:mx-0 relative z-10">
-            <CardContent className="p-6 lg:p-8">
-              <div className="mb-6">
-                <Badge className="bg-brand/10 text-brand border-brand/30 mb-3">
-                  Live Preview
-                </Badge>
-                <h4 className="text-xl font-semibold text-text-dark mb-2">
-                  {features[activeFeature as keyof typeof features].title} Interface
-                </h4>
-                <p className="text-text-dark/60">See how it works in real-time</p>
-              </div>
-              <div className="bg-canvas/30 rounded-xl p-6 min-h-[250px] lg:min-h-[300px] flex items-center justify-center border border-border/10">
-                {features[activeFeature as keyof typeof features].preview}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </Container>
     </section>
