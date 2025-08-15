@@ -7,7 +7,6 @@ import { Users, Search, Mail, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-
   const overviewMetrics = [
     {
       title: "Companies Tracked",
