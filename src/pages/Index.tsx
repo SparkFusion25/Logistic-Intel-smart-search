@@ -6,6 +6,9 @@ import Container from "@/components/ui/Container";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import { ResourcesHighlight } from "@/components/landing/ResourcesHighlight";
 import { ProductStrip } from "@/components/landing/ProductStrip";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { SearchDemo } from "@/components/landing/SearchDemo";
+import { PricingSection } from "@/components/landing/PricingSection";
 import { HeroContactChip } from "@/components/marketing/HeroContactChip";
 import { ArrowRight, Search, Users, TrendingUp, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -89,33 +92,19 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden xeneta-hero-bg">
-        <Container className="py-16 sm:py-20 lg:py-32 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
-              <div className="space-y-4 lg:space-y-6">
-                <Badge className="bg-accent/20 text-accent border-accent/30">
-                  Discover • Analyze • Connect
-                </Badge>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl text-text-on-dark leading-tight font-semibold">
-                  Navigate freight 
-                  <span className="text-accent"> intelligence</span> with
-                  confidence
-                </h1>
-                <p className="text-lg sm:text-xl lg:text-2xl text-text-on-dark/80 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                  Discover every air, ocean, and cross‑border importer, find decision‑makers, and supercharge your sales.
-                </p>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+      <HeroSection />
+
+      {/* Search Demo */}
+      <SearchDemo />
 
       {/* Feature Grid */}
       <FeatureGrid />
 
       {/* Product Strip */}
       <ProductStrip />
+
+      {/* Pricing Section */}
+      <PricingSection />
 
       {/* Resources Highlight */}
       <ResourcesHighlight />
