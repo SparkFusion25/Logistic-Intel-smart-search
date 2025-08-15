@@ -1,69 +1,54 @@
 import { LucideIcon } from 'lucide-react'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 interface StatCardProps {
   title: string
   value: string
   change?: string
-  changeType?: 'increase' | 'decrease' | 'stable'
+  changeType?: 'increase' | 'decrease'
   icon: LucideIcon
   color?: string
-  trend?: 'up' | 'down' | 'stable'
-  description?: string
+  trend?: 'up' | 'down'
 }
 
 export default function StatCard({ 
   title, 
   value, 
   change, 
-  changeType = 'stable', 
+  changeType = 'increase', 
   icon: Icon, 
-  color = 'bg-gradient-to-r from-sky-400 to-blue-500',
-  trend = 'stable',
-  description 
+  color = 'from-sky-400 to-blue-500',
+  trend = 'up' 
 }: StatCardProps) {
-  const getTrendIcon = () => {
-    switch (trend) {
-      case 'up':
-        return <TrendingUp className="w-4 h-4" />
-      case 'down':
-        return <TrendingDown className="w-4 h-4" />
-      default:
-        return <Minus className="w-4 h-4" />
-    }
-  }
-
-  const getTrendColor = () => {
-    switch (changeType) {
-      case 'increase':
-        return 'text-emerald-600'
-      case 'decrease':
-        return 'text-red-600'
-      default:
-        return 'text-gray-500'
-    }
-  }
-
   return (
-    <div className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-shadow">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-lg ${color}`}>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
+          <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
+          {change && (
+            <div className="flex items-center">
+              {trend === 'up' && (
+                <svg className="w-4 h-4 text-emerald-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              )}
+              {trend === 'down' && (
+                <svg className="w-4 h-4 text-red-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                </svg>
+              )}
+              <span className={`text-sm font-medium ${
+                changeType === 'increase' ? 'text-emerald-600' : 'text-red-600'
+              }`}>
+                {change}
+              </span>
+              <span className="text-sm text-gray-500 ml-1">vs last period</span>
+            </div>
+          )}
+        </div>
+        <div className={`w-12 h-12 bg-gradient-to-br ${color} rounded-xl flex items-center justify-center flex-shrink-0`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
-        {change && (
-          <div className={`flex items-center space-x-1 ${getTrendColor()}`}>
-            {getTrendIcon()}
-            <span className="text-sm font-medium">{change}</span>
-          </div>
-        )}
-      </div>
-      
-      <div>
-        <h3 className="text-sm font-medium text-muted-foreground mb-1">{title}</h3>
-        <p className="text-2xl font-bold text-foreground">{value}</p>
-        {description && (
-          <p className="text-sm text-muted-foreground mt-2">{description}</p>
-        )}
       </div>
     </div>
   )
