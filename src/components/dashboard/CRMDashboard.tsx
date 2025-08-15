@@ -4,10 +4,12 @@ import {
   Building2, MapPin, Calendar, Star, Tag, Eye, Edit3,
   UserPlus, Download, RefreshCw, ArrowUpRight
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 export function CRMDashboard() {
   const [activeTab, setActiveTab] = useState('contacts')
   const [viewMode, setViewMode] = useState('grid')
+  const { toast } = useToast()
 
   const stats = [
     { name: 'Total Contacts', value: '1,247', change: '+12.5%', icon: Users, color: 'from-blue-400 to-blue-500' },
@@ -111,6 +113,69 @@ export function CRMDashboard() {
     }
   }
 
+  // Action handlers
+  const handleAddContact = () => {
+    toast({
+      title: "Add Contact",
+      description: "Contact form would open here",
+    })
+  }
+
+  const handleExport = () => {
+    toast({
+      title: "Export Started",
+      description: "Your CRM data is being exported...",
+    })
+  }
+
+  const handleSendEmail = (contact: any) => {
+    toast({
+      title: "Email Composer",
+      description: `Opening email to ${contact.name}`,
+    })
+  }
+
+  const handleCall = (contact: any) => {
+    if (contact.phone) {
+      window.open(`tel:${contact.phone}`)
+    } else {
+      toast({
+        title: "Phone Not Available",
+        description: "No phone number on file for this contact",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleViewContact = (contact: any) => {
+    toast({
+      title: "Contact Details",
+      description: `Viewing details for ${contact.name}`,
+    })
+  }
+
+  const handleEditContact = (contact: any) => {
+    toast({
+      title: "Edit Contact",
+      description: `Editing ${contact.name}`,
+    })
+  }
+
+  const handleStarContact = (contact: any) => {
+    toast({
+      title: "Contact Starred",
+      description: `${contact.name} has been added to favorites`,
+    })
+  }
+
+  const handleTabClick = (tabId: string) => {
+    setActiveTab(tabId)
+    toast({
+      title: `Switched to ${tabId}`,
+      description: `Now viewing ${tabId} data`,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -121,11 +186,17 @@ export function CRMDashboard() {
             <p className="mt-2 text-gray-600">Manage contacts, deals, and relationships</p>
           </div>
           <div className="mt-4 lg:mt-0 flex items-center space-x-3">
-            <button className="flex items-center px-4 py-2 text-sky-600 border border-sky-200 rounded-lg hover:bg-sky-50 transition-colors">
+            <button 
+              onClick={handleExport}
+              className="flex items-center px-4 py-2 text-sky-600 border border-sky-200 rounded-lg hover:bg-sky-50 transition-colors"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </button>
-            <button className="flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors">
+            <button 
+              onClick={handleAddContact}
+              className="flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+            >
               <UserPlus className="w-4 h-4 mr-2" />
               Add Contact
             </button>
@@ -163,7 +234,7 @@ export function CRMDashboard() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabClick(tab.label)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? 'border-sky-500 text-sky-600'
@@ -189,15 +260,22 @@ export function CRMDashboard() {
                   type="text"
                   placeholder="Search contacts..."
                   className="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  onChange={(e) => console.log('Search:', e.target.value)}
                 />
               </div>
-              <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={() => toast({ title: "Filters", description: "Filter panel would open here" })}
+                className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
                 <Filter className="w-4 h-4 mr-2" />
                 Filter
               </button>
             </div>
             <div className="flex items-center space-x-3">
-              <select className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+              <select 
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                onChange={(e) => console.log('Sort:', e.target.value)}
+              >
                 <option>Sort by: Last Contact</option>
                 <option>Sort by: Name</option>
                 <option>Sort by: Company</option>
@@ -217,7 +295,10 @@ export function CRMDashboard() {
                   <Building2 className="w-4 h-4" />
                 </button>
               </div>
-              <button className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button 
+                onClick={() => toast({ title: "Refreshed", description: "Contact data has been refreshed" })}
+                className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
                 <RefreshCw className="w-4 h-4" />
               </button>
             </div>
@@ -242,7 +323,10 @@ export function CRMDashboard() {
                         <p className="text-sm text-gray-600">{contact.title}</p>
                       </div>
                     </div>
-                    <button className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-gray-600 transition-all">
+                    <button 
+                      onClick={() => toast({ title: "Menu", description: "Contact menu options" })}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-gray-600 transition-all"
+                    >
                       <MoreVertical className="w-4 h-4" />
                     </button>
                   </div>
@@ -279,17 +363,40 @@ export function CRMDashboard() {
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleSendEmail(contact)}
+                        className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        title="Send Email"
+                      >
                         <Mail className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleCall(contact)}
+                        className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        title="Call Contact"
+                      >
                         <Phone className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleViewContact(contact)}
+                        className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        title="View Details"
+                      >
                         <Eye className="w-4 h-4" />
                       </button>
+                      <button 
+                        onClick={() => handleStarContact(contact)}
+                        className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                        title="Add to Favorites"
+                      >
+                        <Star className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                    <button 
+                      onClick={() => handleEditContact(contact)}
+                      className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                      title="Edit Contact"
+                    >
                       <Edit3 className="w-4 h-4" />
                     </button>
                   </div>
@@ -321,13 +428,25 @@ export function CRMDashboard() {
                       {contact.stage}
                     </span>
                     <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleSendEmail(contact)}
+                        className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        title="Send Email"
+                      >
                         <Mail className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleCall(contact)}
+                        className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        title="Call Contact"
+                      >
                         <Phone className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleEditContact(contact)}
+                        className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        title="Edit Contact"
+                      >
                         <Edit3 className="w-4 h-4" />
                       </button>
                     </div>
