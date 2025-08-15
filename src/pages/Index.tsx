@@ -94,8 +94,6 @@ const Index = () => {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Search Demo */}
-      <SearchDemo />
 
       {/* Feature Grid */}
       <FeatureGrid />
