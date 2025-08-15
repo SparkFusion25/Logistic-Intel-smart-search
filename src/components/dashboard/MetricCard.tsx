@@ -13,34 +13,32 @@ interface MetricCardProps {
 
 export function MetricCard({ title, value, change, icon }: MetricCardProps) {
   return (
-    <Card className="bg-card border-border">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-2xl font-semibold text-card-foreground">{value}</p>
-            {change && (
-              <div className="flex items-center gap-1">
-                {change.type === 'increase' ? (
-                  <TrendingUp className="w-4 h-4 text-success" />
-                ) : (
-                  <TrendingDown className="w-4 h-4 text-danger" />
-                )}
-                <span className={`text-sm font-medium ${
-                  change.type === 'increase' ? 'text-success' : 'text-danger'
-                }`}>
-                  {change.value}
-                </span>
-              </div>
-            )}
-          </div>
-          {icon && (
-            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-              {icon}
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          {change && (
+            <div className="flex items-center gap-1">
+              {change.type === 'increase' ? (
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-red-600" />
+              )}
+              <span className={`text-sm font-medium ${
+                change.type === 'increase' ? 'text-emerald-600' : 'text-red-600'
+              }`}>
+                {change.value}
+              </span>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+        {icon && (
+          <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center">
+            {icon}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
