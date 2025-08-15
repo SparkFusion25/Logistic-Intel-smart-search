@@ -23,11 +23,9 @@ export const HeroSection = () => {
   ]
 
   return (
-    <section className="relative min-h-screen flex items-center xeneta-hero-bg overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-accent/10 to-transparent rounded-full blur-3xl animate-pulse" />
+    <section className="relative min-h-screen flex items-center hero-streaks overflow-hidden">
+      {/* Overlay for content readability */}
+      <div className="absolute inset-0 bg-slate-900/40" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
