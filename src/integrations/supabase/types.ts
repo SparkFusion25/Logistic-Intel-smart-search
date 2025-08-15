@@ -1766,6 +1766,54 @@ export type Database = {
           },
         ]
       }
+      market_benchmark_cache: {
+        Row: {
+          destination: string
+          hs_code: string | null
+          id: string
+          lane_hash: string
+          last_computed_at: string
+          mode: string
+          origin: string
+          p25: number | null
+          p50: number | null
+          p75: number | null
+          sample_size: number | null
+          source_breakdown: Json | null
+          unit: string
+        }
+        Insert: {
+          destination: string
+          hs_code?: string | null
+          id?: string
+          lane_hash: string
+          last_computed_at?: string
+          mode: string
+          origin: string
+          p25?: number | null
+          p50?: number | null
+          p75?: number | null
+          sample_size?: number | null
+          source_breakdown?: Json | null
+          unit: string
+        }
+        Update: {
+          destination?: string
+          hs_code?: string | null
+          id?: string
+          lane_hash?: string
+          last_computed_at?: string
+          mode?: string
+          origin?: string
+          p25?: number | null
+          p50?: number | null
+          p75?: number | null
+          sample_size?: number | null
+          source_breakdown?: Json | null
+          unit?: string
+        }
+        Relationships: []
+      }
       oauth_tokens: {
         Row: {
           account_email: string | null
@@ -1906,6 +1954,38 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: []
+      }
+      org_feature_flags: {
+        Row: {
+          enabled: boolean
+          id: string
+          key: string
+          org_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          key: string
+          org_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          key?: string
+          org_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_feature_flags_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orgs: {
         Row: {
