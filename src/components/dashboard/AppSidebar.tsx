@@ -1,4 +1,7 @@
-import { Home, Search, Users, Mail, BarChart3, Settings, HelpCircle } from "lucide-react"
+import { 
+  LayoutDashboard, Search, Contact, Mail, BarChart3, Flag, LineChart, 
+  Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle 
+} from "lucide-react"
 import { NavLink } from "react-router-dom"
 import {
   Sidebar,
@@ -15,11 +18,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const navigationItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Search", url: "/dashboard?view=search", icon: Search },
-  { title: "CRM", url: "/dashboard?view=crm", icon: Users },
-  { title: "Campaigns", url: "/dashboard?view=campaigns", icon: Mail },
-  { title: "Analytics", url: "/dashboard?view=analytics", icon: BarChart3 },
+  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Search", url: "/dashboard/search", icon: Search },
+  { title: "CRM", url: "/dashboard/crm", icon: Contact },
+  { title: "Email", url: "/dashboard/email", icon: Mail },
+  { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
+  { title: "Campaigns", url: "/dashboard/campaigns", icon: Flag },
+  { title: "Campaign Analytics", url: "/dashboard/campaigns/analytics", icon: LineChart },
+  { title: "Follow‑Ups", url: "/dashboard/campaigns/follow-ups", icon: Clock8 },
+  { title: "Widgets", url: "/dashboard/widgets", icon: Boxes },
+  { title: "Quote Generator", url: "/dashboard/widgets/quote", icon: FileText },
+  { title: "Tariff Calculator", url: "/dashboard/widgets/tariff", icon: Calculator },
+  { title: "Benchmark", url: "/dashboard/widgets/benchmark", icon: Activity },
+  { title: "Admin", url: "/admin", icon: ShieldCheck },
 ]
 
 const bottomItems = [

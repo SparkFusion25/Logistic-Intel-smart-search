@@ -1,28 +1,12 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { SearchIntelligence } from "@/components/dashboard/SearchIntelligence";
-import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
 import { Users, Search, Mail, TrendingUp } from "lucide-react";
-
-type ActiveView = 'overview' | 'search' | 'crm' | 'campaigns' | 'analytics';
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  const [activeView, setActiveView] = useState<ActiveView>('overview');
-  const location = useLocation();
-
-  // Handle URL-based view switching
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const view = searchParams.get('view') as ActiveView;
-    if (view && ['overview', 'search', 'crm', 'campaigns', 'analytics'].includes(view)) {
-      setActiveView(view);
-    }
-  }, [location]);
 
   const overviewMetrics = [
     {
