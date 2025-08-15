@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Container from "@/components/ui/Container";
 import {
   Search,
   Users,
@@ -115,8 +116,8 @@ const Dashboard = () => {
 
   if (activeView === ('search' as ActiveView)) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="min-h-screen bg-canvas">
+        <Container className="py-8">
           <div className="mb-8">
             <Button 
               variant="outline" 
@@ -125,40 +126,40 @@ const Dashboard = () => {
             >
               ← Back to Dashboard
             </Button>
-            <h1 className="text-3xl font-bold text-gray-900">Search Trade Data</h1>
-            <p className="text-gray-600 mt-2">Find importers, exporters, and trade opportunities</p>
+            <h1 className="text-3xl font-bold text-text-on-dark">Search Trade Data</h1>
+            <p className="text-text-on-dark/70 mt-2">Find importers, exporters, and trade opportunities</p>
           </div>
 
           {/* Search Interface */}
-          <Card className="shadow-sm border-0">
+          <Card className="card-enterprise">
             <CardContent className="p-8">
               <div className="space-y-6">
                 <div className="grid lg:grid-cols-4 gap-4">
                   <div className="lg:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Search Query</label>
+                    <label className="block text-sm font-medium text-text-on-dark/80 mb-2">Search Query</label>
                     <input 
                       type="text" 
                       placeholder="e.g., electronics importers from China"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-border-glass rounded-lg bg-canvas text-text-on-dark focus:ring-2 focus:ring-brand focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Mode</label>
-                    <select className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label className="block text-sm font-medium text-text-on-dark/80 mb-2">Mode</label>
+                    <select className="w-full px-4 py-3 border border-border-glass rounded-lg bg-canvas text-text-on-dark focus:ring-2 focus:ring-brand focus:border-transparent">
                       <option>All</option>
                       <option>Air</option>
                       <option>Ocean</option>
                     </select>
                   </div>
                   <div className="flex items-end">
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3">
+                    <Button className="w-full cta-gradient text-white py-3">
                       <Search className="w-4 h-4 mr-2" />
                       Search
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                <div className="flex items-center space-x-4 text-sm text-text-on-dark/70">
                   <Button variant="outline" size="sm">
                     <Filter className="w-4 h-4 mr-2" />
                     More Filters
@@ -178,19 +179,19 @@ const Dashboard = () => {
           {/* Sample Results */}
           <div className="mt-8 space-y-4">
             {topContacts.map((contact, index) => (
-              <Card key={index} className="shadow-sm border-0 hover:shadow-md transition-shadow">
+              <Card key={index} className="card-enterprise hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-elevated rounded-lg flex items-center justify-center">
                         {contact.icon}
                       </div>
                       <div className="space-y-2">
                         <div>
-                          <h3 className="font-semibold text-gray-900">{contact.name}</h3>
-                          <p className="text-sm text-gray-600">{contact.title} at {contact.company}</p>
+                          <h3 className="font-semibold text-text-on-dark">{contact.name}</h3>
+                          <p className="text-sm text-text-on-dark/70">{contact.title} at {contact.company}</p>
                         </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <div className="flex items-center space-x-4 text-sm text-text-on-dark/60">
                           <span className="flex items-center space-x-1">
                             <Mail className="w-4 h-4" />
                             <span>{contact.email}</span>
@@ -207,15 +208,15 @@ const Dashboard = () => {
                     <div className="flex items-center space-x-3">
                       <Badge 
                         className={
-                          contact.status === 'verified' ? 'bg-green-100 text-green-800' :
-                          contact.status === 'active' ? 'bg-blue-100 text-blue-800' :
-                          'bg-orange-100 text-orange-800'
+                          contact.status === 'verified' ? 'bg-success/20 text-success border-success/30' :
+                          contact.status === 'active' ? 'bg-brand/20 text-brand border-brand/30' :
+                          'bg-warning/20 text-warning border-warning/30'
                         }
                       >
                         {contact.status === 'verified' ? 'Verified' :
                          contact.status === 'active' ? 'Active' : 'High Value'}
                       </Badge>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Button size="sm" className="cta-gradient text-white">
                         Add to CRM
                       </Button>
                     </div>
@@ -224,16 +225,16 @@ const Dashboard = () => {
               </Card>
             ))}
           </div>
-        </div>
+        </Container>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-canvas">
       {/* Top Navigation */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6">
+      <nav className="bg-surface border-b border-border-glass sticky top-0 z-40">
+        <Container>
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <Button
@@ -244,7 +245,7 @@ const Dashboard = () => {
               >
                 <Menu className="w-5 h-5" />
               </Button>
-              <div className="text-xl font-bold text-gray-900">LOGISTIC INTEL</div>
+              <div className="text-xl font-bold text-text-on-dark">LOGISTIC INTEL</div>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -255,23 +256,23 @@ const Dashboard = () => {
                 <Settings className="w-5 h-5" />
               </Button>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">JD</span>
                 </div>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
+                <ChevronDown className="w-4 h-4 text-text-on-dark/50" />
+              </div>
               </div>
             </div>
-          </div>
 
-          {/* Tab Navigation */}
+            {/* Tab Navigation */}
           <div className="flex items-center space-x-8 -mb-px">
             <Button
               variant={activeView === 'overview' ? 'default' : 'ghost'}
               onClick={() => setActiveView('overview' as ActiveView)}
               className={`border-b-2 rounded-none px-0 py-4 ${
                 activeView === 'overview' 
-                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+                  ? 'border-brand bg-transparent text-brand hover:bg-transparent' 
+                  : 'border-transparent text-text-on-dark/70 hover:text-text-on-dark hover:bg-transparent'
               }`}
             >
               Overview
@@ -281,8 +282,8 @@ const Dashboard = () => {
               onClick={() => setActiveView('search' as ActiveView)}
               className={`border-b-2 rounded-none px-0 py-4 ${
                 activeView === ('search' as ActiveView)
-                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+                  ? 'border-brand bg-transparent text-brand hover:bg-transparent' 
+                  : 'border-transparent text-text-on-dark/70 hover:text-text-on-dark hover:bg-transparent'
               }`}
             >
               Search
@@ -292,8 +293,8 @@ const Dashboard = () => {
               onClick={() => setActiveView('crm' as ActiveView)}
               className={`border-b-2 rounded-none px-0 py-4 ${
                 activeView === 'crm'
-                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+                  ? 'border-brand bg-transparent text-brand hover:bg-transparent' 
+                  : 'border-transparent text-text-on-dark/70 hover:text-text-on-dark hover:bg-transparent'
               }`}
             >
               CRM
@@ -303,8 +304,8 @@ const Dashboard = () => {
               onClick={() => setActiveView('campaigns' as ActiveView)}
               className={`border-b-2 rounded-none px-0 py-4 ${
                 activeView === 'campaigns'
-                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+                  ? 'border-brand bg-transparent text-brand hover:bg-transparent' 
+                  : 'border-transparent text-text-on-dark/70 hover:text-text-on-dark hover:bg-transparent'
               }`}
             >
               Campaigns
@@ -314,40 +315,40 @@ const Dashboard = () => {
               onClick={() => setActiveView('widgets' as ActiveView)}
               className={`border-b-2 rounded-none px-0 py-4 ${
                 activeView === 'widgets'
-                  ? 'border-blue-600 bg-transparent text-blue-600 hover:bg-transparent' 
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-transparent'
+                  ? 'border-brand bg-transparent text-brand hover:bg-transparent' 
+                  : 'border-transparent text-text-on-dark/70 hover:text-text-on-dark hover:bg-transparent'
               }`}
             >
               Widgets
             </Button>
-          </div>
-        </div>
+            </div>
+        </Container>
       </nav>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <Container className="py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your freight intelligence.</p>
+          <h1 className="text-3xl font-bold text-text-on-dark">Dashboard</h1>
+          <p className="text-text-on-dark/70 mt-2">Welcome back! Here's what's happening with your freight intelligence.</p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <Card key={index} className="shadow-sm border-0">
+            <Card key={index} className="card-enterprise">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
+                    <p className="text-sm font-medium text-text-on-dark/70">{stat.title}</p>
+                    <p className="text-2xl font-bold text-text-on-dark mt-2">{stat.value}</p>
                     <p className={`text-sm mt-1 ${
-                      stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                      stat.trend === 'up' ? 'text-success' : 'text-destructive'
                     }`}>
                       {stat.change} from last month
                     </p>
                   </div>
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-elevated rounded-lg flex items-center justify-center">
                     {stat.icon}
                   </div>
                 </div>
@@ -358,16 +359,16 @@ const Dashboard = () => {
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Recent Searches */}
-          <Card className="lg:col-span-2 shadow-sm border-0">
+          <Card className="lg:col-span-2 card-enterprise">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Recent Searches</CardTitle>
-                  <CardDescription>Your latest trade data queries</CardDescription>
+                  <CardTitle className="text-text-on-dark">Recent Searches</CardTitle>
+                  <CardDescription className="text-text-on-dark/70">Your latest trade data queries</CardDescription>
                 </div>
                 <Button 
                   onClick={() => setActiveView('search' as ActiveView)}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="cta-gradient text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   New Search
@@ -377,10 +378,10 @@ const Dashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {recentSearches.map((search, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-4 bg-elevated/30 rounded-lg border border-border-glass">
                     <div>
-                      <p className="font-medium text-gray-900">{search.query}</p>
-                      <p className="text-sm text-gray-600">{search.results} results • {search.timestamp}</p>
+                      <p className="font-medium text-text-on-dark">{search.query}</p>
+                      <p className="text-sm text-text-on-dark/70">{search.results} results • {search.timestamp}</p>
                     </div>
                     <Button variant="outline" size="sm">
                       <ArrowUpRight className="w-4 h-4" />
@@ -392,12 +393,12 @@ const Dashboard = () => {
           </Card>
 
           {/* Top Contacts */}
-          <Card className="shadow-sm border-0">
+          <Card className="card-enterprise">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Top Contacts</CardTitle>
-                  <CardDescription>High-value prospects</CardDescription>
+                  <CardTitle className="text-text-on-dark">Top Contacts</CardTitle>
+                  <CardDescription className="text-text-on-dark/70">High-value prospects</CardDescription>
                 </div>
                 <Button 
                   variant="outline" 
@@ -412,18 +413,18 @@ const Dashboard = () => {
               <div className="space-y-4">
                 {topContacts.slice(0, 3).map((contact, index) => (
                   <div key={index} className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-elevated rounded-lg flex items-center justify-center">
                       {contact.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{contact.name}</p>
-                      <p className="text-sm text-gray-600 truncate">{contact.company}</p>
+                      <p className="font-medium text-text-on-dark truncate">{contact.name}</p>
+                      <p className="text-sm text-text-on-dark/70 truncate">{contact.company}</p>
                     </div>
                     <Badge 
                       className={
-                        contact.status === 'verified' ? 'bg-green-100 text-green-800' :
-                        contact.status === 'active' ? 'bg-blue-100 text-blue-800' :
-                        'bg-orange-100 text-orange-800'
+                        contact.status === 'verified' ? 'bg-success/20 text-success border-success/30' :
+                        contact.status === 'active' ? 'bg-brand/20 text-brand border-brand/30' :
+                        'bg-warning/20 text-warning border-warning/30'
                       }
                     >
                       {contact.status === 'verified' ? 'Verified' :
@@ -437,10 +438,10 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <Card className="mt-8 shadow-sm border-0">
+        <Card className="mt-8 card-enterprise">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Get started with your freight intelligence workflow</CardDescription>
+            <CardTitle className="text-text-on-dark">Quick Actions</CardTitle>
+            <CardDescription className="text-text-on-dark/70">Get started with your freight intelligence workflow</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-4 gap-4">
@@ -479,7 +480,7 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </Container>
     </div>
   );
 };
