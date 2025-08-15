@@ -2,16 +2,19 @@ import { useState } from 'react'
 import { User, Bell, Shield, CreditCard, Database, Users, Globe, Save, Upload, Mail, Smartphone, Eye, EyeOff } from 'lucide-react'
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/dashboard/AppSidebar"
+import { useNotifications } from "@/hooks/useNotifications"
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile')
   const [showPassword, setShowPassword] = useState(false)
-  const [notifications, setNotifications] = useState({
-    email: true,
-    browser: false,
-    mobile: true,
-    weekly: true
-  })
+  const { 
+    preferences, 
+    setPreferences, 
+    savePreferences, 
+    toggleBrowserNotifications,
+    isLoading,
+    isPushSupported 
+  } = useNotifications()
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -158,9 +161,13 @@ export default function SettingsPage() {
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-6">
                           <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
-                          <button className="flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors">
+                          <button 
+                            onClick={() => savePreferences(preferences)}
+                            disabled={isLoading}
+                            className="flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors disabled:opacity-50"
+                          >
                             <Save className="w-4 h-4 mr-2" />
-                            Save Changes
+                            {isLoading ? 'Saving...' : 'Save Changes'}
                           </button>
                         </div>
 
@@ -178,8 +185,8 @@ export default function SettingsPage() {
                                 </div>
                                 <input
                                   type="checkbox"
-                                  checked={notifications.email}
-                                  onChange={(e) => setNotifications(prev => ({ ...prev, email: e.target.checked }))}
+                                  checked={preferences.email}
+                                  onChange={(e) => setPreferences(prev => ({ ...prev, email: e.target.checked }))}
                                   className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
                                 />
                               </div>
@@ -189,14 +196,22 @@ export default function SettingsPage() {
                                   <Bell className="w-5 h-5 text-gray-400 mr-3" />
                                   <div>
                                     <p className="font-medium text-gray-900">Browser Notifications</p>
-                                    <p className="text-sm text-gray-600">Show notifications in your browser</p>
+                                    <p className="text-sm text-gray-600">
+                                      Show notifications in your browser
+                                      {!isPushSupported && (
+                                        <span className="text-amber-600 block">
+                                          Not supported in this browser
+                                        </span>
+                                      )}
+                                    </p>
                                   </div>
                                 </div>
                                 <input
                                   type="checkbox"
-                                  checked={notifications.browser}
-                                  onChange={(e) => setNotifications(prev => ({ ...prev, browser: e.target.checked }))}
-                                  className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
+                                  checked={preferences.browser}
+                                  onChange={(e) => toggleBrowserNotifications(e.target.checked)}
+                                  disabled={!isPushSupported}
+                                  className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 disabled:opacity-50"
                                 />
                               </div>
 
@@ -205,14 +220,15 @@ export default function SettingsPage() {
                                   <Smartphone className="w-5 h-5 text-gray-400 mr-3" />
                                   <div>
                                     <p className="font-medium text-gray-900">Mobile Push Notifications</p>
-                                    <p className="text-sm text-gray-600">Receive alerts on your mobile device</p>
+                                    <p className="text-sm text-gray-600">Receive alerts on your mobile device (coming soon)</p>
                                   </div>
                                 </div>
                                 <input
                                   type="checkbox"
-                                  checked={notifications.mobile}
-                                  onChange={(e) => setNotifications(prev => ({ ...prev, mobile: e.target.checked }))}
-                                  className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
+                                  checked={preferences.mobile}
+                                  onChange={(e) => setPreferences(prev => ({ ...prev, mobile: e.target.checked }))}
+                                  disabled
+                                  className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500 opacity-50"
                                 />
                               </div>
                             </div>
@@ -228,13 +244,27 @@ export default function SettingsPage() {
                                 </div>
                                 <input
                                   type="checkbox"
-                                  checked={notifications.weekly}
-                                  onChange={(e) => setNotifications(prev => ({ ...prev, weekly: e.target.checked }))}
+                                  checked={preferences.weekly}
+                                  onChange={(e) => setPreferences(prev => ({ ...prev, weekly: e.target.checked }))}
                                   className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
                                 />
                               </div>
                             </div>
                           </div>
+
+                          {preferences.browser && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <div className="flex items-center">
+                                <Bell className="w-5 h-5 text-green-600 mr-3" />
+                                <div>
+                                  <p className="font-medium text-green-900">Browser notifications enabled</p>
+                                  <p className="text-sm text-green-700">
+                                    You'll receive notifications about campaign updates, new shipment matches, and CRM activities.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
