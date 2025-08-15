@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Container } from "@/components/ui/Container";
 import { ArrowRight, Search, Users, TrendingUp, FileText, BarChart3, Play } from "lucide-react";
 
 const FeatureGrid = () => {
@@ -93,7 +94,7 @@ const FeatureGrid = () => {
 
   return (
     <section className="py-16 lg:py-24 bg-canvas">
-      <div className="container mx-auto px-4 sm:px-6">
+      <Container>
         <div className="text-center mb-12 lg:mb-20">
           <Badge className="bg-accent/20 text-accent border-accent/30 mb-6">
             Platform Features
@@ -198,7 +199,7 @@ const FeatureGrid = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </Container>
     </section>
   );
 };

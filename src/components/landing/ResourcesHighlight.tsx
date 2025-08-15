@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Container } from "@/components/ui/Container";
 import { ArrowRight, BookOpen, TrendingUp, Users } from "lucide-react";
 
 export const ResourcesHighlight = () => {
@@ -33,7 +34,7 @@ export const ResourcesHighlight = () => {
 
   return (
     <section className="py-20 bg-canvas">
-      <div className="container mx-auto px-6">
+      <Container>
         <div className="text-center mb-16">
           <h2 className="text-h2 text-text-on-dark mb-4">
             Learn from the experts
@@ -103,7 +104,7 @@ export const ResourcesHighlight = () => {
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </div>
-      </div>
+      </Container>
     </section>
   );
 };

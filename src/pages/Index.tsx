@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Container } from "@/components/ui/Container";
 import { ContactCard } from "@/components/landing/ContactCard";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import { ProofSection } from "@/components/landing/ProofSection";
 import { ResourcesHighlight } from "@/components/landing/ResourcesHighlight";
+import { ProductStrip } from "@/components/landing/ProductStrip";
+import { HeroContactChip } from "@/components/marketing/HeroContactChip";
 import { ArrowRight, Search, Users, TrendingUp, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -55,7 +58,7 @@ const Index = () => {
     <div className="min-h-screen bg-canvas">
       {/* Navigation */}
       <nav className="relative z-50">
-        <div className="container mx-auto px-6 py-4">
+        <Container className="py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img 
@@ -83,12 +86,12 @@ const Index = () => {
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
-        </div>
+        </Container>
       </nav>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden xeneta-hero-bg">
-        <div className="container mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-32 relative z-10">
+        <Container className="py-16 sm:py-20 lg:py-32 relative z-10">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
               <div className="space-y-4 lg:space-y-6">
@@ -129,35 +132,33 @@ const Index = () => {
               </div>
             </div>
             <div className="relative order-first lg:order-last">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 max-w-2xl mx-auto">
-                {contactCards.map((contact, index) => (
-                  <ContactCard
+              <div className="flex flex-wrap gap-3 justify-center lg:justify-start max-w-lg mx-auto lg:mx-0">
+                {contactCards.slice(0, 6).map((contact, index) => (
+                  <HeroContactChip
                     key={index}
-                    {...contact}
-                    className={`animate-[fadeInUp_0.8s_ease-out_forwards] opacity-0 ${
-                      index % 2 === 1 ? 'sm:mt-8' : ''
-                    }`}
-                    style={contact.style}
+                    name={contact.name}
+                    title={contact.title}
+                    company={contact.company}
                   />
                 ))}
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Feature Grid */}
       <FeatureGrid />
 
-      {/* Proof Section */}
-      <ProofSection />
+      {/* Product Strip */}
+      <ProductStrip />
 
       {/* Resources Highlight */}
       <ResourcesHighlight />
 
       {/* Final CTA */}
       <section className="py-20 bg-canvas">
-        <div className="container mx-auto px-6 text-center">
+        <Container className="text-center">
           <h2 className="text-h2 text-text-on-dark mb-6">Ready to see it live?</h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="cta-gradient text-white px-8 py-3 text-lg hover:scale-105 transition-transform">
@@ -170,7 +171,7 @@ const Index = () => {
               </Button>
             </Link>
           </div>
-        </div>
+        </Container>
       </section>
     </div>
   );

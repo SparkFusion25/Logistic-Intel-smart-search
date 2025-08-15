@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Container } from "@/components/ui/Container";
 import { Star } from "lucide-react";
 
 export const ProofSection = () => {
@@ -38,7 +39,7 @@ export const ProofSection = () => {
 
   return (
     <section className="py-20 bg-elevated">
-      <div className="container mx-auto px-6">
+      <Container>
         {/* Testimonials */}
         <div className="text-center mb-16">
           <h2 className="text-h2 text-text-on-dark mb-4">
@@ -87,7 +88,7 @@ export const ProofSection = () => {
             ))}
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Container } from "@/components/ui/Container";
 import { Search, Contact, TrendingUp, Calculator, FileText } from "lucide-react";
 
 export const ProductStrip = () => {
@@ -64,7 +65,7 @@ export const ProductStrip = () => {
 
   return (
     <section className="py-20 bg-canvas">
-      <div className="container mx-auto px-6">
+      <Container>
         <div className="text-center mb-16">
           <h2 className="text-h2 text-text-on-dark mb-4">
             Everything you need to win in global trade
@@ -120,7 +121,7 @@ export const ProductStrip = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </Container>
     </section>
   );
 };
