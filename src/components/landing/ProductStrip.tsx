@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Container } from "@/components/ui/Container";
+import Container from "@/components/ui/Container";
 import { Search, Contact, TrendingUp, Calculator, FileText } from "lucide-react";
 
 export const ProductStrip = () => {

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Container } from "@/components/ui/Container";
+import Container from "@/components/ui/Container";
 import { Star } from "lucide-react";
 
 export const ProofSection = () => {

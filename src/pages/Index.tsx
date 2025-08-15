@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Container } from "@/components/ui/Container";
+import Container from "@/components/ui/Container";
 import { ContactCard } from "@/components/landing/ContactCard";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import { ProofSection } from "@/components/landing/ProofSection";

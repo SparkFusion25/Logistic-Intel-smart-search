@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Container } from "@/components/ui/Container";
+import Container from "@/components/ui/Container";
 import { ArrowRight, Search, Users, TrendingUp, FileText, BarChart3, Play } from "lucide-react";
 
 const FeatureGrid = () => {

@@ -8,3 +8,5 @@ export function Container({ className = "", ...props }: React.HTMLAttributes<HTM
     />
   );
 }
+
+export default Container;
