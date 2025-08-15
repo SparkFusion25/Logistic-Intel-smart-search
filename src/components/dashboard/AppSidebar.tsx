@@ -48,8 +48,7 @@ export function AppSidebar() {
       side="left"
       variant="sidebar" 
       collapsible="icon"
-      className="border-r-0"
-      style={{ background: 'var(--nav-gradient)' }}
+      className="border-r-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900"
     >
       <SidebarHeader className="p-4 border-b border-white/10">
         <div className="flex items-center gap-3">

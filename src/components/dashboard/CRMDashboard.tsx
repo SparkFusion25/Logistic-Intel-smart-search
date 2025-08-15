@@ -170,10 +170,6 @@ export function CRMDashboard() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId)
-    toast({
-      title: `Switched to ${tabId}`,
-      description: `Now viewing ${tabId} data`,
-    })
   }
 
   return (
@@ -305,11 +301,13 @@ export function CRMDashboard() {
           </div>
         </div>
 
-        {/* Contacts Grid */}
+        {/* Content Area */}
         <div className="p-6">
-          {viewMode === 'grid' ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {contacts.map((contact) => (
+          {activeTab === 'contacts' ? (
+            <>
+              {viewMode === 'grid' ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {contacts.map((contact) => (
                 <div key={contact.id} className="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors cursor-pointer group">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
@@ -453,6 +451,87 @@ export function CRMDashboard() {
                   </div>
                 </div>
               ))}
+                </div>
+              )}
+            </>
+          ) : activeTab === 'deals' ? (
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-gray-900">Active Deals</h3>
+              <div className="grid gap-4">
+                {contacts.filter(c => c.stage !== 'Closed Won').map((deal) => (
+                  <div key={deal.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="text-lg font-bold text-gray-900">{deal.company}</h4>
+                        <p className="text-sm text-gray-600">{deal.name} - {deal.title}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-bold text-gray-900">{deal.dealValue}</p>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStageColor(deal.stage)}`}>
+                          {deal.stage}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Last contact: {deal.lastContact}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : activeTab === 'companies' ? (
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-gray-900">Companies</h3>
+              <div className="grid gap-4">
+                {[...new Set(contacts.map(c => c.company))].map((company, index) => {
+                  const companyContacts = contacts.filter(c => c.company === company)
+                  const totalValue = companyContacts.reduce((sum, c) => sum + parseInt(c.dealValue.replace(/[$K]/g, '')), 0)
+                  return (
+                    <div key={index} className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h4 className="text-lg font-bold text-gray-900">{company}</h4>
+                          <p className="text-sm text-gray-600">{companyContacts.length} contact{companyContacts.length > 1 ? 's' : ''}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-gray-900">${totalValue}K</p>
+                          <p className="text-sm text-gray-600">Total value</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Building2 className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">{companyContacts[0]?.industry}</span>
+                        <MapPin className="w-4 h-4 text-gray-400 ml-4" />
+                        <span className="text-sm text-gray-600">{companyContacts[0]?.location}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-gray-900">Recent Activities</h3>
+              <div className="space-y-4">
+                {[
+                  { type: 'email', contact: 'Sarah Chen', action: 'Sent proposal email', time: '2 hours ago', icon: Mail },
+                  { type: 'call', contact: 'Marcus Rodriguez', action: 'Had discovery call', time: '1 day ago', icon: Phone },
+                  { type: 'meeting', contact: 'Emily Watson', action: 'Scheduled demo meeting', time: '2 days ago', icon: Calendar },
+                  { type: 'email', contact: 'David Kim', action: 'Follow-up email sent', time: '3 days ago', icon: Mail },
+                  { type: 'note', contact: 'Lisa Thompson', action: 'Added contact notes', time: '1 week ago', icon: Edit3 },
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
+                      <activity.icon className="w-5 h-5 text-sky-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{activity.action}</p>
+                      <p className="text-sm text-gray-600">{activity.contact} • {activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
