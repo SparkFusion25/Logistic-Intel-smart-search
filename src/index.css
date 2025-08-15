@@ -4,33 +4,39 @@
 
 @layer base {
   :root {
-    /* Enterprise Dark-First Design System */
-    /* Canvas Background - Deep Navy */
-    --bg-canvas: 220 60% 8%;           /* #0B132B */
-    --bg-elevated: 221 55% 11%;        /* #111A3A */
+    /* Professional Dashboard Design System */
+    /* Main Background - White/Light */
+    --bg-canvas: 0 0% 98%;             /* #FAFAFA */
+    --bg-elevated: 0 0% 100%;          /* #FFFFFF */
+    
+    /* Sidebar - Navy Blue */
+    --sidebar-dark: 214 32% 18%;       /* #1e293b */
+    --sidebar-darker: 214 32% 12%;     /* #0f172a */
     
     /* Surface - Clean White */
     --surface: 0 0% 100%;              /* #FFFFFF */
-    --surface-glass: 0 0% 100% / 0.06; /* rgba(255,255,255,0.06) */
+    --surface-secondary: 220 13% 96%;  /* #f1f5f9 */
     
     /* Text Colors */
-    --text-on-dark: 220 43% 95%;       /* #EAF1FF */
-    --text-dark: 220 70% 12%;          /* #0C1730 */
-    --muted-text: 215 20% 58%;         /* #94A3B8 */
+    --text-primary: 222 47% 11%;       /* #0f172a */
+    --text-secondary: 215 25% 27%;     /* #334155 */
+    --text-muted: 215 20% 65%;         /* #64748b */
+    --text-on-dark: 210 40% 98%;       /* #f8fafc */
     
     /* Brand Colors */
-    --brand: 225 100% 59%;             /* #2F6BFF */
-    --brand-hover: 225 100% 62%;       /* #3B76FF */
+    --brand: 217 91% 60%;              /* #2F6BFF */
+    --brand-hover: 217 91% 55%;        /* #1e40af */
     --accent: 192 91% 56%;             /* #21D4FD */
     --accent-muted: 230 74% 71%;       /* #6A8BFF */
     
     /* Status Colors */
-    --success: 142 70% 40%;            /* #11B581 */
-    --warning: 42 94% 60%;             /* #F6B73C */
-    --danger: 4 69% 61%;               /* #E25555 */
+    --success: 142 76% 36%;            /* #10b981 */
+    --warning: 42 96% 59%;             /* #f59e0b */
+    --danger: 0 84% 60%;               /* #ef4444 */
     
     /* Borders */
-    --border-glass: 0 0% 100% / 0.10;  /* rgba(255,255,255,0.10) */
+    --border-light: 214 32% 91%;       /* #e2e8f0 */
+    --border-medium: 215 20% 83%;      /* #cbd5e1 */
     
     /* Effects */
     --radius-card: 20px;
@@ -42,32 +48,32 @@
     
     /* Semantic tokens for components */
     --background: var(--bg-canvas);
-    --foreground: var(--text-on-dark);
+    --foreground: var(--text-primary);
     --card: var(--surface);
-    --card-foreground: var(--text-dark);
+    --card-foreground: var(--text-primary);
     --popover: var(--surface);
-    --popover-foreground: var(--text-dark);
+    --popover-foreground: var(--text-primary);
     --primary: var(--brand);
     --primary-foreground: var(--surface);
-    --secondary: var(--bg-elevated);
-    --secondary-foreground: var(--text-on-dark);
-    --muted: hsl(var(--surface));
-    --muted-foreground: var(--muted-text);
+    --secondary: var(--surface-secondary);
+    --secondary-foreground: var(--text-secondary);
+    --muted: var(--surface-secondary);
+    --muted-foreground: var(--text-muted);
     --destructive: var(--danger);
     --destructive-foreground: var(--surface);
-    --border: hsl(var(--border-glass));
-    --input: hsl(var(--border-glass));
+    --border: var(--border-light);
+    --input: var(--border-medium);
     --ring: var(--brand);
-    --radius: var(--radius-card);
+    --radius: 8px;
     
     /* Sidebar tokens */
-    --sidebar-background: var(--bg-canvas);
+    --sidebar-background: var(--sidebar-dark);
     --sidebar-foreground: var(--text-on-dark);
     --sidebar-primary: var(--brand);
     --sidebar-primary-foreground: var(--surface);
     --sidebar-accent: var(--accent);
-    --sidebar-accent-foreground: var(--text-dark);
-    --sidebar-border: hsl(var(--border-glass));
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--sidebar-darker);
     --sidebar-ring: var(--brand);
   }
   
@@ -101,7 +107,7 @@
   body {
     @apply font-sans antialiased;
     background: hsl(var(--bg-canvas));
-    color: hsl(var(--text-on-dark));
+    color: hsl(var(--text-primary));
     font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
     font-weight: 400;
     min-height: 100vh;
