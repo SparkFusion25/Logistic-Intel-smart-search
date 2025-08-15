@@ -54,5 +54,17 @@ enable_confirmations = false
 enabled = true
 ip_version = "ipv4"
 
+[functions.search-run]
+verify_jwt = true
+
+[functions.search-quick]
+verify_jwt = true
+
+[functions.crm-add-contact]
+verify_jwt = true
+
+[functions.dashboard-summary]
+verify_jwt = true
+
 [functions.send-notification]
 verify_jwt = false
