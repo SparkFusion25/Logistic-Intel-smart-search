@@ -17,36 +17,38 @@ import {
 } from "lucide-react";
 import { SearchPanel } from "@/components/search/SearchPanel";
 
+type ActiveView = 'overview' | 'search' | 'crm' | 'campaigns' | 'widgets';
+
 const Dashboard = () => {
-  const [activeView, setActiveView] = useState<'overview' | 'search' | 'crm' | 'campaigns' | 'widgets'>('overview');
+  const [activeView, setActiveView] = useState<ActiveView>('overview');
 
   const stats = [
     {
       title: "Total Searches",
       value: "12,847",
       change: "+12%",
-      trend: "up",
+      trend: "up" as const,
       icon: <Search className="w-4 h-4" />
     },
     {
       title: "CRM Contacts",
       value: "3,291",
       change: "+8%",
-      trend: "up",
+      trend: "up" as const,
       icon: <Users className="w-4 h-4" />
     },
     {
       title: "Email Campaigns",
       value: "47",
       change: "+23%",
-      trend: "up",
+      trend: "up" as const,
       icon: <Mail className="w-4 h-4" />
     },
     {
       title: "Response Rate",
       value: "18.3%",
       change: "-2%",
-      trend: "down",
+      trend: "down" as const,
       icon: <BarChart3 className="w-4 h-4" />
     }
   ];
@@ -83,36 +85,36 @@ const Dashboard = () => {
       title: "New Search",
       description: "Search freight data",
       icon: <Search className="w-5 h-5" />,
-      action: () => setActiveView('search')
+      action: () => setActiveView('search' as ActiveView)
     },
     {
       title: "Add Contacts",
       description: "Import or enrich CRM",
       icon: <Users className="w-5 h-5" />,
-      action: () => setActiveView('crm')
+      action: () => setActiveView('crm' as ActiveView)
     },
     {
       title: "Create Campaign",
       description: "Start email sequence",
       icon: <Mail className="w-5 h-5" />,
-      action: () => setActiveView('campaigns')
+      action: () => setActiveView('campaigns' as ActiveView)
     },
     {
       title: "Calculate Tariff",
       description: "Get current rates",
       icon: <Calculator className="w-5 h-5" />,
-      action: () => setActiveView('widgets')
+      action: () => setActiveView('widgets' as ActiveView)
     }
   ];
 
-  if (activeView === 'search') {
+  if (activeView === ('search' as ActiveView)) {
     return (
       <div className="min-h-screen bg-gradient-primary p-6">
         <div className="container mx-auto">
           <div className="mb-6">
             <Button 
               variant="outline" 
-              onClick={() => setActiveView('overview')}
+              onClick={() => setActiveView('overview' as ActiveView)}
               className="border-white/20 text-foreground hover:bg-white/10"
             >
               ← Back to Dashboard
@@ -144,35 +146,35 @@ const Dashboard = () => {
             <div className="flex items-center space-x-6">
               <Button
                 variant={activeView === 'overview' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('overview')}
+                onClick={() => setActiveView('overview' as ActiveView)}
                 size="sm"
               >
                 Overview
               </Button>
               <Button
-                variant={activeView === 'search' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('search')}
+                variant={activeView === ('search' as ActiveView) ? 'default' : 'ghost'}
+                onClick={() => setActiveView('search' as ActiveView)}
                 size="sm"
               >
                 Search
               </Button>
               <Button
                 variant={activeView === 'crm' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('crm')}
+                onClick={() => setActiveView('crm' as ActiveView)}
                 size="sm"
               >
                 CRM
               </Button>
               <Button
                 variant={activeView === 'campaigns' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('campaigns')}
+                onClick={() => setActiveView('campaigns' as ActiveView)}
                 size="sm"
               >
                 Campaigns
               </Button>
               <Button
                 variant={activeView === 'widgets' ? 'default' : 'ghost'}
-                onClick={() => setActiveView('widgets')}
+                onClick={() => setActiveView('widgets' as ActiveView)}
                 size="sm"
               >
                 Widgets
