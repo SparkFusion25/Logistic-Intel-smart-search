@@ -250,9 +250,9 @@
     border: 1px solid hsl(var(--border-glass));
   }
 
-  /* Light Streak Hero Effect */
+  /* Light Streak Hero Effect - Exact Match */
   .hero-streaks {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #0f172a 100%);
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
     position: relative;
     overflow: hidden;
   }
@@ -261,48 +261,43 @@
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
-    width: 200%;
+    left: 0;
+    width: 100%;
     height: 100%;
-    background: 
-      linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.3) 25%, transparent 50%),
-      linear-gradient(90deg, transparent 20%, rgba(147, 51, 234, 0.2) 45%, transparent 70%),
-      linear-gradient(90deg, transparent 40%, rgba(236, 72, 153, 0.15) 65%, transparent 90%),
-      linear-gradient(90deg, transparent 60%, rgba(59, 130, 246, 0.25) 85%, transparent 100%);
-    animation: lightStreaks 8s linear infinite;
+    background-image: 
+      linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.6) 50%, transparent 100%),
+      linear-gradient(90deg, transparent 20%, rgba(147, 51, 234, 0.4) 70%, transparent 100%),
+      linear-gradient(90deg, transparent 40%, rgba(236, 72, 153, 0.3) 90%, transparent 100%);
+    background-size: 200px 4px, 300px 2px, 400px 3px;
+    background-position: -200px 20%, -300px 40%, -400px 60%;
+    background-repeat: repeat-x;
+    animation: streaksMove 4s linear infinite;
+    opacity: 0.8;
   }
 
   .hero-streaks::after {
     content: '';
     position: absolute;
-    top: 10%;
-    left: -50%;
-    width: 150%;
-    height: 80%;
-    background: 
-      repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        rgba(59, 130, 246, 0.1) 2px,
-        transparent 4px,
-        transparent 40px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        rgba(147, 51, 234, 0.08) 1px,
-        transparent 2px,
-        transparent 60px
-      );
-    animation: lightStreaks 12s linear infinite reverse;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.4) 50%, transparent 100%),
+      linear-gradient(90deg, transparent 30%, rgba(147, 51, 234, 0.3) 80%, transparent 100%);
+    background-size: 250px 2px, 350px 1px;
+    background-position: -250px 80%, -350px 30%;
+    background-repeat: repeat-x;
+    animation: streaksMove 6s linear infinite reverse;
+    opacity: 0.6;
   }
 
-  @keyframes lightStreaks {
+  @keyframes streaksMove {
     0% {
-      transform: translateX(-100%);
+      background-position: -200px 20%, -300px 40%, -400px 60%;
     }
     100% {
-      transform: translateX(100%);
+      background-position: 100vw 20%, calc(100vw + 100px) 40%, calc(100vw + 200px) 60%;
     }
   }
 }
