@@ -5,12 +5,15 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Plus, Mail, MessageCircle, Clock, Users, ChevronUp, ChevronDown, Trash2, FileText, AlertTriangle } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { CampaignTemplate, Step as TemplateStep, ValidationError } from '@/types/campaign'
 import { validateCampaignSequence, addComplianceFooter } from '@/utils/campaign-validation'
+import { CTAEditor } from './CTAEditor'
+import { AssetEditor } from './AssetEditor'
 
 type StepType = 'delay' | 'email' | 'linkedin_connect' | 'linkedin_message'
 
@@ -239,14 +242,33 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
 
       {/* Template Selection */}
       <div className="lg:col-span-3 mb-4">
-        <Button 
-          variant="outline" 
-          onClick={() => setShowTemplateModal(true)}
-          className="border-primary/30 hover:bg-primary/5"
-        >
-          <FileText className="w-4 h-4 mr-2" />
-          Load from Template
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="border-primary/30 hover:bg-primary/5"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Load from Template
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Choose Template</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Navigate to Templates page to browse and preview available templates.
+              </p>
+              <Button 
+                onClick={() => window.location.href = '/dashboard/campaigns/templates'}
+                className="w-full"
+              >
+                Browse Templates
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       {/* Audience & Settings */}
       <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 transform-gpu">
@@ -390,21 +412,34 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
 
                       {/* Step-specific fields */}
                       {step.type === 'email' && (
-                        <div className="space-y-3">
-                          <Input
-                            placeholder="Email subject"
-                            value={step.subject || ''}
-                            onChange={(e) => updateStep(step.id, { subject: e.target.value })}
-                          />
-                          <Textarea
-                            placeholder="Email body (supports {{first_name}}, {{company}} variables)"
-                            value={step.body_html || ''}
-                            onChange={(e) => {
-                              const newValue = addComplianceFooter(e.target.value)
-                              updateStep(step.id, { body_html: newValue })
-                            }}
-                            rows={4}
-                          />
+                        <div className="space-y-4">
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="Email subject"
+                              value={step.subject || ''}
+                              onChange={(e) => updateStep(step.id, { subject: e.target.value })}
+                            />
+                            <Textarea
+                              placeholder="Email body (supports {{first_name}}, {{company}} variables)"
+                              value={step.body_html || ''}
+                              onChange={(e) => {
+                                const newValue = addComplianceFooter(e.target.value)
+                                updateStep(step.id, { body_html: newValue })
+                              }}
+                              rows={4}
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <CTAEditor
+                              ctas={step.ctas || []}
+                              onChange={(ctas) => updateStep(step.id, { ctas })}
+                            />
+                            <AssetEditor
+                              assets={step.assets || []}
+                              onChange={(assets) => updateStep(step.id, { assets })}
+                            />
+                          </div>
                         </div>
                       )}
 

@@ -9,11 +9,12 @@ import { AppSidebar } from "@/components/dashboard/AppSidebar"
 import { TopBar } from "@/components/ui/TopBar"
 import { 
   Mail, MessageCircle, Users, Filter, Search, ArrowRight, 
-  Book, ChartLine, Download, Calendar, FileText, Zap 
+  Book, ChartLine, Download, Calendar, FileText, Zap, Eye 
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import TEMPLATES from '@/data/campaign-templates'
 import { CampaignTemplate, Channel, PlanType } from '@/types/campaign'
+import { TemplatePreviewModal } from '@/components/campaigns/TemplatePreviewModal'
 
 // Mock user plan - in real app this would come from user context
 const USER_PLAN: PlanType = 'pro' // can be 'free', 'pro', 'enterprise'
@@ -87,8 +88,7 @@ export default function CampaignTemplatesPage() {
   }
 
   const handlePreviewTemplate = (template: CampaignTemplate) => {
-    // Open preview modal
-    console.log('Preview template:', template)
+    // Preview handled by modal
   }
 
   const getStepCount = (template: CampaignTemplate) => {
@@ -217,13 +217,17 @@ export default function CampaignTemplatesPage() {
                           <FileText className="w-4 h-4 mr-2" />
                           {canUseTemplate(template) ? 'Use Template' : 'Upgrade to Use'}
                         </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => handlePreviewTemplate(template)}
-                          className="border-muted-foreground/30"
-                        >
-                          Preview
-                        </Button>
+                        <TemplatePreviewModal
+                          template={template}
+                          onUseTemplate={() => handleUseTemplate(template)}
+                          canUse={canUseTemplate(template)}
+                          trigger={
+                            <Button variant="outline" className="border-muted-foreground/30">
+                              <Eye className="w-4 h-4 mr-2" />
+                              Preview
+                            </Button>
+                          }
+                        />
                       </div>
                     </CardContent>
                   </Card>
