@@ -839,11 +839,16 @@ export type Database = {
           company: string | null
           created_at: string | null
           email: string | null
+          enriched_data: Json | null
           full_name: string | null
           id: string
           linkedin: string | null
+          org_id: string | null
           persona: Json | null
           phone: string | null
+          search_vector: unknown | null
+          source_file: string | null
+          summary: string | null
           title: string | null
         }
         Insert: {
@@ -851,11 +856,16 @@ export type Database = {
           company?: string | null
           created_at?: string | null
           email?: string | null
+          enriched_data?: Json | null
           full_name?: string | null
           id?: string
           linkedin?: string | null
+          org_id?: string | null
           persona?: Json | null
           phone?: string | null
+          search_vector?: unknown | null
+          source_file?: string | null
+          summary?: string | null
           title?: string | null
         }
         Update: {
@@ -863,11 +873,16 @@ export type Database = {
           company?: string | null
           created_at?: string | null
           email?: string | null
+          enriched_data?: Json | null
           full_name?: string | null
           id?: string
           linkedin?: string | null
+          org_id?: string | null
           persona?: Json | null
           phone?: string | null
+          search_vector?: unknown | null
+          source_file?: string | null
+          summary?: string | null
           title?: string | null
         }
         Relationships: [
@@ -1000,48 +1015,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      crm_contacts_staging: {
-        Row: {
-          city: string | null
-          company_name: string | null
-          country: string | null
-          email: string | null
-          full_name: string | null
-          linkedin: string | null
-          loaded_at: string | null
-          panjiva_id: string | null
-          phone: string | null
-          source: string | null
-          title: string | null
-        }
-        Insert: {
-          city?: string | null
-          company_name?: string | null
-          country?: string | null
-          email?: string | null
-          full_name?: string | null
-          linkedin?: string | null
-          loaded_at?: string | null
-          panjiva_id?: string | null
-          phone?: string | null
-          source?: string | null
-          title?: string | null
-        }
-        Update: {
-          city?: string | null
-          company_name?: string | null
-          country?: string | null
-          email?: string | null
-          full_name?: string | null
-          linkedin?: string | null
-          loaded_at?: string | null
-          panjiva_id?: string | null
-          phone?: string | null
-          source?: string | null
-          title?: string | null
-        }
-        Relationships: []
       }
       email_activity: {
         Row: {
@@ -1458,30 +1431,6 @@ export type Database = {
           },
         ]
       }
-      import_companies: {
-        Row: {
-          added_by_user: string | null
-          company_name: string | null
-          country: string | null
-          created_at: string | null
-          industry: string | null
-        }
-        Insert: {
-          added_by_user?: string | null
-          company_name?: string | null
-          country?: string | null
-          created_at?: string | null
-          industry?: string | null
-        }
-        Update: {
-          added_by_user?: string | null
-          company_name?: string | null
-          country?: string | null
-          created_at?: string | null
-          industry?: string | null
-        }
-        Relationships: []
-      }
       import_contacts: {
         Row: {
           added_by_user: string | null
@@ -1542,80 +1491,69 @@ export type Database = {
       import_job_errors: {
         Row: {
           created_at: string
+          error_message: string
           id: string
-          job_id: string | null
-          payload: Json | null
-          reason: string | null
-          row_number: number | null
+          import_job_id: string
+          org_id: string
+          record: Json | null
+          row_number: number
         }
         Insert: {
           created_at?: string
+          error_message: string
           id?: string
-          job_id?: string | null
-          payload?: Json | null
-          reason?: string | null
-          row_number?: number | null
+          import_job_id: string
+          org_id: string
+          record?: Json | null
+          row_number: number
         }
         Update: {
           created_at?: string
+          error_message?: string
           id?: string
-          job_id?: string | null
-          payload?: Json | null
-          reason?: string | null
-          row_number?: number | null
+          import_job_id?: string
+          org_id?: string
+          record?: Json | null
+          row_number?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "import_job_errors_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "import_jobs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       import_jobs: {
         Row: {
-          created_at: string | null
-          error_message: string | null
-          error_rows: number | null
-          finished_at: string | null
+          completed_at: string | null
+          created_at: string
+          error_records: number
           id: string
-          object_path: string
-          ok_rows: number | null
-          org_id: string | null
-          source_bucket: string
-          started_at: string | null
+          org_id: string
+          processed_records: number
+          source_file_name: string
           status: string
-          total_rows: number | null
+          total_records: number
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
-          error_message?: string | null
-          error_rows?: number | null
-          finished_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_records?: number
           id?: string
-          object_path: string
-          ok_rows?: number | null
-          org_id?: string | null
-          source_bucket: string
-          started_at?: string | null
-          status: string
-          total_rows?: number | null
+          org_id: string
+          processed_records?: number
+          source_file_name: string
+          status?: string
+          total_records: number
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          error_message?: string | null
-          error_rows?: number | null
-          finished_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_records?: number
           id?: string
-          object_path?: string
-          ok_rows?: number | null
-          org_id?: string | null
-          source_bucket?: string
-          started_at?: string | null
+          org_id?: string
+          processed_records?: number
+          source_file_name?: string
           status?: string
-          total_rows?: number | null
+          total_records?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1699,72 +1637,27 @@ export type Database = {
       }
       imported_contacts: {
         Row: {
-          city: string | null
-          company_name: string | null
-          country: string | null
           created_at: string
-          email: string | null
-          error_message: string | null
-          full_name: string | null
           id: string
-          job_id: string | null
-          linkedin: string | null
+          import_job_id: string
           org_id: string
-          phone: string | null
-          raw: Json | null
-          status: string
-          title: string | null
+          raw_data: Json | null
         }
         Insert: {
-          city?: string | null
-          company_name?: string | null
-          country?: string | null
           created_at?: string
-          email?: string | null
-          error_message?: string | null
-          full_name?: string | null
           id?: string
-          job_id?: string | null
-          linkedin?: string | null
+          import_job_id: string
           org_id: string
-          phone?: string | null
-          raw?: Json | null
-          status?: string
-          title?: string | null
+          raw_data?: Json | null
         }
         Update: {
-          city?: string | null
-          company_name?: string | null
-          country?: string | null
           created_at?: string
-          email?: string | null
-          error_message?: string | null
-          full_name?: string | null
           id?: string
-          job_id?: string | null
-          linkedin?: string | null
+          import_job_id?: string
           org_id?: string
-          phone?: string | null
-          raw?: Json | null
-          status?: string
-          title?: string | null
+          raw_data?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "imported_contacts_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "import_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "imported_contacts_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       market_benchmark_cache: {
         Row: {
@@ -1811,6 +1704,36 @@ export type Database = {
           sample_size?: number | null
           source_breakdown?: Json | null
           unit?: string
+        }
+        Relationships: []
+      }
+      market_benchmarks: {
+        Row: {
+          benchmark_data: Json | null
+          created_at: string
+          id: string
+          org_id: string
+          origin_country: string
+          transport_mode: string
+          updated_at: string
+        }
+        Insert: {
+          benchmark_data?: Json | null
+          created_at?: string
+          id?: string
+          org_id: string
+          origin_country: string
+          transport_mode: string
+          updated_at?: string
+        }
+        Update: {
+          benchmark_data?: Json | null
+          created_at?: string
+          id?: string
+          org_id?: string
+          origin_country?: string
+          transport_mode?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2089,48 +2012,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      panjiva_contacts_raw: {
-        Row: {
-          city: string | null
-          company_name: string | null
-          country: string | null
-          email: string | null
-          full_name: string | null
-          imported_at: string | null
-          linkedin: string | null
-          panjiva_id: string | null
-          phone: string | null
-          source_file: string | null
-          title: string | null
-        }
-        Insert: {
-          city?: string | null
-          company_name?: string | null
-          country?: string | null
-          email?: string | null
-          full_name?: string | null
-          imported_at?: string | null
-          linkedin?: string | null
-          panjiva_id?: string | null
-          phone?: string | null
-          source_file?: string | null
-          title?: string | null
-        }
-        Update: {
-          city?: string | null
-          company_name?: string | null
-          country?: string | null
-          email?: string | null
-          full_name?: string | null
-          imported_at?: string | null
-          linkedin?: string | null
-          panjiva_id?: string | null
-          phone?: string | null
-          source_file?: string | null
-          title?: string | null
-        }
-        Relationships: []
       }
       personas: {
         Row: {
@@ -2461,42 +2342,6 @@ export type Database = {
           source?: string | null
           source_uid?: string | null
           website?: string | null
-        }
-        Relationships: []
-      }
-      staging_contacts: {
-        Row: {
-          company_name: string | null
-          country: string | null
-          email: string | null
-          full_name: string | null
-          phone: string | null
-          role: string | null
-          source: string | null
-          source_uid: string | null
-          title: string | null
-        }
-        Insert: {
-          company_name?: string | null
-          country?: string | null
-          email?: string | null
-          full_name?: string | null
-          phone?: string | null
-          role?: string | null
-          source?: string | null
-          source_uid?: string | null
-          title?: string | null
-        }
-        Update: {
-          company_name?: string | null
-          country?: string | null
-          email?: string | null
-          full_name?: string | null
-          phone?: string | null
-          role?: string | null
-          source?: string | null
-          source_uid?: string | null
-          title?: string | null
         }
         Relationships: []
       }
