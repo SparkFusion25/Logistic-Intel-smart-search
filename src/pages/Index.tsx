@@ -99,8 +99,6 @@ const Index = () => {
       {/* Platform Showcase */}
       <PlatformShowcase />
 
-      {/* Feature Grid */}
-      <FeatureGrid />
 
 
       {/* Pricing Section */}
