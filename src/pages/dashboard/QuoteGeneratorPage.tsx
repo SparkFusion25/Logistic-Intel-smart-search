@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { FileText, Download, Calculator, Plus, Mail, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,8 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/dashboard/AppSidebar"
 import { supabase } from "@/integrations/supabase/client"
 import LoadingSpinner from "@/components/shared/LoadingSpinner"
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 export default function QuoteGeneratorPage() {
   const [quote, setQuote] = useState({
@@ -50,11 +52,64 @@ export default function QuoteGeneratorPage() {
   const totalSell = quote.charges.reduce((sum, charge) => sum + (charge.sell || 0), 0)
   const totalMargin = quote.charges.reduce((sum, charge) => sum + (charge.margin || 0), 0)
 
-  const handleDownloadPDF = () => {
-    toast({
-      title: "Generating PDF",
-      description: "Your branded quote PDF is being generated..."
-    })
+  const printRef = useRef<HTMLDivElement>(null)
+
+  const handleDownloadPDF = async () => {
+    if (!printRef.current) return
+
+    try {
+      setEmailLoading(true)
+      
+      // Generate PDF
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      })
+      
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        unit: 'pt',
+        format: 'a4'
+      })
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      
+      // Save quote to database first
+      const { data: quoteData, error: quoteError } = await supabase.functions.invoke('quote-handler', {
+        body: {
+          org_id: 'default-org',
+          payload: {
+            quote,
+            totals: { sell: totalSell, margin: totalMargin },
+            generated_at: new Date().toISOString()
+          },
+          created_by: 'user'
+        }
+      })
+
+      if (quoteError) throw quoteError
+
+      // Download PDF
+      pdf.save(`quote-${quote.quote_number}.pdf`)
+      
+      toast({
+        title: "PDF Generated",
+        description: `Quote ${quote.quote_number} has been downloaded successfully`
+      })
+    } catch (error) {
+      console.error('PDF generation error:', error)
+      toast({
+        title: "PDF Generation Failed",
+        description: "Unable to generate PDF. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setEmailLoading(false)
+    }
   }
 
   const handleEmailQuote = async () => {
@@ -371,6 +426,74 @@ export default function QuoteGeneratorPage() {
                   </div>
                 </DialogContent>
               </Dialog>
+
+              {/* PDF Preview Section */}
+              <div ref={printRef} className="bg-white rounded-lg border border-border shadow-sm p-8 print:shadow-none print:border-none">
+                <div className="mb-6 text-center">
+                  <h2 className="text-2xl font-bold text-gray-900">FREIGHT QUOTE</h2>
+                  <p className="text-gray-600">Professional Logistics Services</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8 mb-6">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Quote Details</h3>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Quote #:</strong> {quote.quote_number}</p>
+                      <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
+                      <p><strong>Mode:</strong> {quote.mode.charAt(0).toUpperCase() + quote.mode.slice(1)}</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Customer Information</h3>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Company:</strong> {quote.customer_company || 'N/A'}</p>
+                      <p><strong>Email:</strong> {quote.customer_email || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2">Route Information</h3>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <p className="text-center text-lg">
+                      <strong>{quote.origin || 'Origin'}</strong> → <strong>{quote.destination || 'Destination'}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-4">Charges Breakdown</h3>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b-2 border-gray-300">
+                        <th className="text-left py-2">Description</th>
+                        <th className="text-right py-2">Amount (USD)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quote.charges.map((charge, index) => (
+                        <tr key={index} className="border-b border-gray-200">
+                          <td className="py-2">{charge.name || `Charge ${index + 1}`}</td>
+                          <td className="py-2 text-right">${charge.sell.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-gray-300">
+                        <th className="text-left py-3 text-lg">Total Quote Amount</th>
+                        <th className="text-right py-3 text-lg">${totalSell.toFixed(2)} USD</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                <div className="mt-8 text-xs text-gray-500">
+                  <p>This quote is valid for 30 days from the date of issue.</p>
+                  <p>All rates are subject to fuel surcharge adjustments and may vary based on final shipment details.</p>
+                  <p>Generated by LogisticIntel Platform - {new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
             </div>
           </main>
         </SidebarInset>

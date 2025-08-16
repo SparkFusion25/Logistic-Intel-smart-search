@@ -14,6 +14,7 @@ import CRMPage from "./pages/dashboard/CRMPage";
 import EmailPage from "./pages/dashboard/EmailPage";
 import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
 import CampaignsPage from "./pages/dashboard/CampaignsPage";
+import CampaignBuilderPage from "./pages/dashboard/CampaignBuilderPage";
 import CampaignAnalyticsPage from "./pages/dashboard/CampaignAnalyticsPage";
 import FollowUpsPage from "./pages/dashboard/FollowUpsPage";
 import WidgetsPage from "./pages/dashboard/WidgetsPage";
@@ -39,8 +40,9 @@ const App = () => (
             <Route path="/dashboard/crm" element={<CRMPage />} />
             <Route path="/dashboard/email" element={<EmailPage />} />
             <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-            <Route path="/dashboard/campaigns" element={<CampaignsPage />} />
-            <Route path="/dashboard/campaigns/analytics" element={<CampaignAnalyticsPage />} />
+          <Route path="/dashboard/campaigns" element={<CampaignsPage />} />
+          <Route path="/dashboard/campaigns/builder" element={<CampaignBuilderPage />} />
+          <Route path="/dashboard/campaigns/analytics" element={<CampaignAnalyticsPage />} />
             <Route path="/dashboard/campaigns/follow-ups" element={<FollowUpsPage />} />
             <Route path="/dashboard/widgets" element={<WidgetsPage />} />
             <Route path="/dashboard/widgets/quote" element={<QuoteGeneratorPage />} />
