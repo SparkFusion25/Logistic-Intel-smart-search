@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Container from "@/components/ui/Container";
@@ -5,6 +6,18 @@ import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Users, Award, Globe } from "lucide-react";
 
 const CompanyPage = () => {
+  useEffect(() => {
+    document.title = "About Logistic Intel | Our Mission & Team | Global Trade Intelligence";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Learn about Logistic Intel\'s mission to democratize global trade intelligence. Meet our leadership team and discover our journey in transforming international trade data.');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = 'Learn about Logistic Intel\'s mission to democratize global trade intelligence. Meet our leadership team and discover our journey in transforming international trade data.';
+      document.head.appendChild(meta);
+    }
+  }, []);
   const stats = [
     { number: "10K+", label: "Active Users" },
     { number: "50M+", label: "Trade Records Analyzed" },
@@ -60,7 +73,7 @@ const CompanyPage = () => {
       </nav>
 
       {/* Hero */}
-      <section className="pt-20 pb-16">
+      <header className="pt-20 pb-16">
         <Container>
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-h1 text-text-on-dark mb-6">
@@ -71,10 +84,11 @@ const CompanyPage = () => {
             </p>
           </div>
         </Container>
-      </section>
+      </header>
 
       {/* Stats */}
-      <section className="pb-16">
+      <main>
+        <section className="pb-16">
         <Container>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -180,6 +194,7 @@ const CompanyPage = () => {
           </div>
         </Container>
       </section>
+      </main>
     </div>
   );
 };

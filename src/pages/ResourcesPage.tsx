@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Container from "@/components/ui/Container";
@@ -5,6 +6,18 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, FileText, Video, Download, Calendar, Users } from "lucide-react";
 
 const ResourcesPage = () => {
+  useEffect(() => {
+    document.title = "Resources & Learning Center | Guides, Reports & Training | Logistic Intel";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Master global trade intelligence with our comprehensive learning center. Access guides, research reports, video tutorials, templates, webinars & community resources.');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = 'Master global trade intelligence with our comprehensive learning center. Access guides, research reports, video tutorials, templates, webinars & community resources.';
+      document.head.appendChild(meta);
+    }
+  }, []);
   const resources = [
     {
       icon: BookOpen,
@@ -84,7 +97,7 @@ const ResourcesPage = () => {
       </nav>
 
       {/* Hero */}
-      <section className="pt-20 pb-16">
+      <header className="pt-20 pb-16">
         <Container>
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-h1 text-text-on-dark mb-6">
@@ -95,10 +108,11 @@ const ResourcesPage = () => {
             </p>
           </div>
         </Container>
-      </section>
+      </header>
 
       {/* Featured Resources */}
-      <section className="pb-16">
+      <main>
+        <section className="pb-16">
         <Container>
           <h2 className="text-h2 text-text-on-dark mb-8 text-center">Featured Resources</h2>
           <div className="grid md:grid-cols-3 gap-6 mb-16">
@@ -166,6 +180,7 @@ const ResourcesPage = () => {
           </div>
         </Container>
       </section>
+      </main>
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Container from "@/components/ui/Container";
@@ -5,6 +6,18 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Search, Database, TrendingUp, Shield, Globe, Zap } from "lucide-react";
 
 const SolutionsPage = () => {
+  useEffect(() => {
+    document.title = "Complete Solutions for Global Trade Excellence | Logistic Intel";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Comprehensive tools and intelligence to dominate international trade markets. Global trade intelligence, CRM, analytics, compliance, market expansion & automation.');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = 'Comprehensive tools and intelligence to dominate international trade markets. Global trade intelligence, CRM, analytics, compliance, market expansion & automation.';
+      document.head.appendChild(meta);
+    }
+  }, []);
   const solutions = [
     {
       icon: Search,
@@ -66,7 +79,7 @@ const SolutionsPage = () => {
       </nav>
 
       {/* Hero */}
-      <section className="pt-20 pb-16">
+      <header className="pt-20 pb-16">
         <Container>
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-h1 text-text-on-dark mb-6">
@@ -77,11 +90,12 @@ const SolutionsPage = () => {
             </p>
           </div>
         </Container>
-      </section>
+      </header>
 
       {/* Solutions Grid */}
-      <section className="pb-20">
-        <Container>
+      <main>
+        <section className="pb-20">
+          <Container>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {solutions.map((solution, index) => (
               <Card key={index} className="bg-surface border-border-glass hover:shadow-lg transition-shadow">
@@ -103,6 +117,7 @@ const SolutionsPage = () => {
           </div>
         </Container>
       </section>
+      </main>
 
       {/* CTA */}
       <section className="py-20">
