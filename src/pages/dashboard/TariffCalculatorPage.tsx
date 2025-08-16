@@ -53,14 +53,15 @@ export default function TariffCalculatorPage() {
                 <p className="text-lg text-muted-foreground">Calculate import duties and fees for U.S. customs</p>
               </div>
 
-              <Card className="glass shadow-elegant border-0 transform hover:scale-[1.02] transition-transform duration-300">
-                <CardHeader className="bg-gradient-to-r from-primary/5 to-primary-variant/5 rounded-t-lg">
+              <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 transform-gpu">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                <CardHeader className="bg-gradient-to-r from-primary/5 to-primary-variant/5 rounded-t-lg relative">
                   <CardTitle className="flex items-center text-xl">
                     <Calculator className="w-6 h-6 mr-3 text-primary" />
                     Import Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8 space-y-6">
+                <CardContent className="p-8 space-y-6 relative">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="text-sm font-semibold text-foreground mb-3 block">Origin Country *</label>
@@ -127,7 +128,7 @@ export default function TariffCalculatorPage() {
                   <div className="flex justify-center pt-4">
                     <Button 
                       onClick={handleCalculate} 
-                      className="px-8 py-4 text-lg h-auto bg-gradient-to-r from-primary to-primary-variant hover:from-primary-variant hover:to-primary transform hover:scale-105 transition-all duration-200 shadow-lg"
+                      className="px-8 py-4 text-lg h-auto bg-gradient-to-r from-primary to-primary-variant hover:from-primary-variant hover:to-primary group-hover:shadow-md group-hover:shadow-primary/20 transition-all duration-300"
                     >
                       <Calculator className="w-5 h-5 mr-3" />
                       Calculate Tariffs
@@ -144,7 +145,8 @@ export default function TariffCalculatorPage() {
               </Alert>
 
               {calculation && (
-                <Card className="glass shadow-elegant border-0 transform hover:scale-[1.02] transition-transform duration-300">
+                <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-success/10 transition-all duration-300 hover:-translate-y-0.5 transform-gpu">
+                  <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
                   <CardHeader className="bg-gradient-to-r from-success/5 to-success-variant/5 rounded-t-lg">
                     <CardTitle className="flex items-center text-xl">
                       <DollarSign className="w-6 h-6 mr-3 text-success" />

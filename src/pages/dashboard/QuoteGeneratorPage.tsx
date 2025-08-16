@@ -142,14 +142,15 @@ export default function QuoteGeneratorPage() {
 
               <div className="grid lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
-                  <Card className="glass shadow-elegant border-0 transform hover:scale-[1.02] transition-transform duration-300">
-                    <CardHeader className="bg-gradient-to-r from-primary/5 to-primary-variant/5 rounded-t-lg">
+                  <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 transform-gpu">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                    <CardHeader className="bg-gradient-to-r from-primary/5 to-primary-variant/5 rounded-t-lg relative">
                       <CardTitle className="flex items-center text-xl">
                         <FileText className="w-6 h-6 mr-3 text-primary" />
                         Quote Details
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-6">
+                    <CardContent className="p-8 space-y-6 relative">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label className="text-sm font-semibold text-foreground mb-3 block">Quote Number</label>
