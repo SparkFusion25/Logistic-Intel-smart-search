@@ -89,6 +89,65 @@ const Index = () => {
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
+          
+          {/* Mobile Menu */}
+          {isMenuOpen && (
+            <div className="lg:hidden absolute top-full left-0 right-0 bg-canvas/95 backdrop-blur-sm border-t border-border-glass">
+              <Container className="py-4">
+                <div className="flex flex-col space-y-4">
+                  <Link 
+                    to="/solutions" 
+                    className="text-text-on-dark/80 hover:text-text-on-dark font-medium py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Solutions
+                  </Link>
+                  <Link 
+                    to="/who-we-serve" 
+                    className="text-text-on-dark/80 hover:text-text-on-dark font-medium py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Who We Serve
+                  </Link>
+                  <Link 
+                    to="/resources" 
+                    className="text-text-on-dark/80 hover:text-text-on-dark font-medium py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Resources
+                  </Link>
+                  <Link 
+                    to="/blog" 
+                    className="text-text-on-dark/80 hover:text-text-on-dark font-medium py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Blog
+                  </Link>
+                  <Link 
+                    to="/company" 
+                    className="text-text-on-dark/80 hover:text-text-on-dark font-medium py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Company
+                  </Link>
+                  <Link 
+                    to="/login" 
+                    className="text-text-on-dark/80 hover:text-text-on-dark hover:bg-surface/10 px-4 py-2 rounded-md transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/dashboard" 
+                    className="cta-gradient text-white px-6 py-2 rounded-md hover:scale-105 transition-transform text-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Get Demo
+                  </Link>
+                </div>
+              </Container>
+            </div>
+          )}
         </Container>
       </nav>
 
