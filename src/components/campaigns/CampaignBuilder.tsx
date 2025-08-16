@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Mail, MessageCircle, Clock, Users, ChevronUp, ChevronDown, Trash2 } from 'lucide-react'
+import { Plus, Mail, MessageCircle, Clock, Users, ChevronUp, ChevronDown, Trash2, FileText, AlertTriangle } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { useLocation } from 'react-router-dom'
+import { CampaignTemplate, Step as TemplateStep, ValidationError } from '@/types/campaign'
+import { validateCampaignSequence, addComplianceFooter } from '@/utils/campaign-validation'
 
 type StepType = 'delay' | 'email' | 'linkedin_connect' | 'linkedin_message'
 
@@ -18,7 +21,20 @@ interface CampaignStep {
   subject?: string
   body_html?: string
   text?: string
+  note?: string
   condition?: 'no_reply' | 'any' | 'connected'
+  ctas?: Array<{
+    label: string
+    href: string
+    variant?: 'primary' | 'secondary' | 'ghost' | 'card'
+    icon?: string
+  }>
+  assets?: Array<{
+    type: 'image'
+    url: string
+    alt?: string
+    position?: 'header' | 'inline' | 'footer'
+  }>
 }
 
 interface CampaignBuilderProps {
@@ -26,30 +42,71 @@ interface CampaignBuilderProps {
 }
 
 export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
-  const [channel, setChannel] = useState<'email' | 'linkedin' | 'hybrid'>('email')
-  const [name, setName] = useState('New Campaign')
-  const [audience, setAudience] = useState<any>({ tags: [] })
-  const [sequence, setSequence] = useState<CampaignStep[]>([
-    { 
-      id: '1',
-      type: 'email', 
-      subject: 'Introduction', 
-      body_html: 'Hi {{first_name}},\n\nI hope this email finds you well...' 
-    },
-    { 
-      id: '2',
-      type: 'delay', 
-      hours: 48 
+  const location = useLocation()
+  const template = location.state?.template as CampaignTemplate
+  
+  const [channel, setChannel] = useState<'email' | 'linkedin' | 'hybrid'>(template?.channel || 'email')
+  const [name, setName] = useState(template?.name || 'New Campaign')
+  const [audience, setAudience] = useState<any>({ 
+    tags: template?.recommendedAudience?.tags || [] 
+  })
+  const [sequence, setSequence] = useState<CampaignStep[]>(() => {
+    if (template?.sequence) {
+      return template.sequence.map((step, index) => ({
+        id: `${Date.now()}-${index}`,
+        ...step
+      }))
     }
-  ])
+    return [
+      { 
+        id: '1',
+        type: 'email', 
+        subject: 'Introduction', 
+        body_html: 'Hi {{first_name}},\n\nI hope this email finds you well...' 
+      },
+      { 
+        id: '2',
+        type: 'delay', 
+        hours: 48 
+      }
+    ]
+  })
   const [loading, setLoading] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
   const { toast } = useToast()
 
+  // Load template if provided
+  useEffect(() => {
+    if (template) {
+      setChannel(template.channel)
+      setName(template.name)
+      setAudience({ 
+        tags: template.recommendedAudience?.tags || [],
+        title_includes: template.recommendedAudience?.title_includes || []
+      })
+      const mappedSequence = template.sequence.map((step, index) => ({
+        id: `${Date.now()}-${index}`,
+        ...step
+      }))
+      setSequence(mappedSequence)
+    }
+  }, [template])
+
+  // Validate sequence on changes
+  useEffect(() => {
+    const audienceFields = ['first_name', 'company', 'lane'] // Mock audience fields
+    // Convert CampaignStep to Step for validation
+    const convertedSequence = sequence.map(({ id, ...step }) => step)
+    const errors = validateCampaignSequence(convertedSequence as any, channel, audienceFields)
+    setValidationErrors(errors)
+  }, [sequence, channel])
+
   const stepTemplates: Record<StepType, Partial<CampaignStep>> = {
-    email: { type: 'email', subject: '', body_html: '' },
+    email: { type: 'email', subject: '', body_html: '', ctas: [] },
     delay: { type: 'delay', hours: 24 },
-    linkedin_connect: { type: 'linkedin_connect' },
-    linkedin_message: { type: 'linkedin_message', text: '', condition: 'connected' }
+    linkedin_connect: { type: 'linkedin_connect', note: '' },
+    linkedin_message: { type: 'linkedin_message', text: '' }
   }
 
   const addStep = (type: StepType) => {
@@ -157,6 +214,40 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
+      {/* Validation Errors */}
+      {validationErrors.length > 0 && (
+        <div className="lg:col-span-3">
+          <Card className="border-destructive bg-destructive/5">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-destructive mt-0.5" />
+                <div className="space-y-2">
+                  <h4 className="font-medium text-destructive">Validation Issues</h4>
+                  <ul className="space-y-1">
+                    {validationErrors.map((error, index) => (
+                      <li key={index} className="text-sm text-destructive">
+                        {error.step ? `Step ${error.step}: ` : ''}{error.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Template Selection */}
+      <div className="lg:col-span-3 mb-4">
+        <Button 
+          variant="outline" 
+          onClick={() => setShowTemplateModal(true)}
+          className="border-primary/30 hover:bg-primary/5"
+        >
+          <FileText className="w-4 h-4 mr-2" />
+          Load from Template
+        </Button>
+      </div>
       {/* Audience & Settings */}
       <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 transform-gpu">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
@@ -225,7 +316,7 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
 
           <Button 
             onClick={saveCampaign} 
-            disabled={loading}
+            disabled={loading || validationErrors.length > 0}
             className="w-full bg-gradient-to-r from-primary to-primary-variant"
           >
             {loading ? 'Saving...' : 'Save Campaign'}
@@ -308,10 +399,22 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
                           <Textarea
                             placeholder="Email body (supports {{first_name}}, {{company}} variables)"
                             value={step.body_html || ''}
-                            onChange={(e) => updateStep(step.id, { body_html: e.target.value })}
+                            onChange={(e) => {
+                              const newValue = addComplianceFooter(e.target.value)
+                              updateStep(step.id, { body_html: newValue })
+                            }}
                             rows={4}
                           />
                         </div>
+                      )}
+
+                      {step.type === 'linkedin_connect' && (
+                        <Textarea
+                          placeholder="Connection note (optional)"
+                          value={step.note || ''}
+                          onChange={(e) => updateStep(step.id, { note: e.target.value })}
+                          rows={2}
+                        />
                       )}
 
                       {step.type === 'linkedin_message' && (
@@ -331,12 +434,14 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
                             value={step.hours || 24}
                             onChange={(e) => updateStep(step.id, { hours: Number(e.target.value) })}
                             className="w-32"
+                            min="1"
+                            max="168"
                           />
-                          <span className="text-sm text-muted-foreground">hours delay</span>
+                          <span className="text-sm text-muted-foreground">hours delay (1-168 max)</span>
                         </div>
                       )}
 
-                      {step.type === 'linkedin_connect' && (
+                      {step.type === 'linkedin_connect' && !step.note && (
                         <div className="text-sm text-muted-foreground">
                           Send LinkedIn connection request with automated note
                         </div>

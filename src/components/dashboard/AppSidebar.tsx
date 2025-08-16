@@ -25,6 +25,7 @@ const navigationItems = [
   { title: "Email", url: "/dashboard/email", icon: Mail },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
   { title: "Campaigns", url: "/dashboard/campaigns", icon: Flag },
+  { title: "Templates", url: "/dashboard/campaigns/templates", icon: FileText },
   { title: "Campaign Analytics", url: "/dashboard/campaigns/analytics", icon: LineChart },
   { title: "Follow‑Ups", url: "/dashboard/campaigns/follow-ups", icon: Clock8 },
   { title: "Widgets", url: "/dashboard/widgets", icon: Boxes },
