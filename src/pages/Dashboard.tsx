@@ -6,6 +6,7 @@ import {
   MoreHorizontal, RefreshCw, Filter, BarChart3, Zap
 } from "lucide-react";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
+import { TopBar } from "@/components/ui/TopBar";
 import { StatCard } from "@/components/shared";
 import { Link } from "react-router-dom";
 
@@ -108,29 +109,32 @@ const Dashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          <main className="flex-1 p-6">
+          <TopBar />
+          <main className="flex-1 p-4 sm:p-6">
             <div className="max-w-7xl mx-auto space-y-6">
               {/* Header */}
               <div className="mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-                    <p className="mt-2 text-gray-600">Welcome back. Here's what's happening with your trade intelligence.</p>
-                  </div>
-                  <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-                    <button className="flex items-center px-4 py-2 text-sky-600 border border-sky-200 rounded-lg hover:bg-sky-50 transition-colors">
-                      <Download className="w-4 h-4 mr-2" />
-                      Export Data
-                    </button>
-                    <Link to="/dashboard/search" className="flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors">
-                      <Plus className="w-4 h-4 mr-2" />
-                      New Search
-                    </Link>
-                  </div>
-                </div>
+                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                   <div>
+                     <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard Overview</h1>
+                     <p className="mt-2 text-muted-foreground">Welcome back. Here's what's happening with your trade intelligence.</p>
+                   </div>
+                   <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                     <Button variant="outline" className="flex items-center justify-center px-4 py-2">
+                       <Download className="w-4 h-4 mr-2" />
+                       Export Data
+                     </Button>
+                     <Link to="/dashboard/search">
+                       <Button className="w-full sm:w-auto flex items-center justify-center px-4 py-2">
+                         <Plus className="w-4 h-4 mr-2" />
+                         New Search
+                       </Button>
+                     </Link>
+                   </div>
+                 </div>
               </div>
 
               {/* Key Metrics */}
@@ -149,12 +153,12 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              <div className="grid lg:grid-cols-3 gap-6 mb-8">
-                {/* Recent Searches */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-bold text-gray-900">Recent Searches</h2>
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                 {/* Recent Searches */}
+                 <div className="lg:col-span-2 bg-card rounded-xl shadow-sm border border-border">
+                   <div className="p-4 sm:p-6 border-b border-border">
+                     <div className="flex items-center justify-between">
+                       <h2 className="text-lg sm:text-xl font-bold text-foreground">Recent Searches</h2>
                       <div className="flex items-center space-x-2">
                         <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
                           <RefreshCw className="w-4 h-4" />
@@ -194,12 +198,12 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
-                    <p className="text-sm text-gray-600 mt-1">Common workflow shortcuts</p>
-                  </div>
+                 {/* Quick Actions */}
+                 <div className="bg-card rounded-xl shadow-sm border border-border">
+                   <div className="p-4 sm:p-6 border-b border-border">
+                     <h2 className="text-lg sm:text-xl font-bold text-foreground">Quick Actions</h2>
+                     <p className="text-sm text-muted-foreground mt-1">Common workflow shortcuts</p>
+                   </div>
                   <div className="p-6">
                     <div className="space-y-3">
                       <Link 
@@ -258,19 +262,19 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Top Companies */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-900">Top Discovered Companies</h2>
-                    <div className="flex items-center space-x-3">
-                      <button className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <Filter className="w-4 h-4" />
-                      </button>
-                      <Link to="/dashboard/search" className="text-sky-600 hover:text-sky-700 font-semibold text-sm">
-                        View All Results
-                      </Link>
-                    </div>
+               {/* Top Companies */}
+               <div className="bg-card rounded-xl shadow-sm border border-border">
+                 <div className="p-4 sm:p-6 border-b border-border">
+                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                     <h2 className="text-lg sm:text-xl font-bold text-foreground">Top Discovered Companies</h2>
+                     <div className="flex items-center space-x-3">
+                       <Button variant="outline" size="sm" className="p-2">
+                         <Filter className="w-4 h-4" />
+                       </Button>
+                       <Link to="/dashboard/search" className="text-primary hover:text-primary/80 font-semibold text-sm">
+                         View All Results
+                       </Link>
+                     </div>
                   </div>
                 </div>
                 <div className="p-6">
