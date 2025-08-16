@@ -154,179 +154,194 @@ const Dashboard = () => {
               </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                 {/* Recent Searches */}
-                 <div className="lg:col-span-2 bg-card rounded-xl shadow-sm border border-border">
-                   <div className="p-4 sm:p-6 border-b border-border">
-                     <div className="flex items-center justify-between">
-                       <h2 className="text-lg sm:text-xl font-bold text-foreground">Recent Searches</h2>
-                      <div className="flex items-center space-x-2">
-                        <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
-                          <RefreshCw className="w-4 h-4" />
-                        </button>
-                        <Link to="/dashboard/search" className="text-sky-600 hover:text-sky-700 font-semibold text-sm">
-                          View All
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="space-y-4">
-                      {recentSearches.map((search) => (
-                        <div key={search.id} className="flex items-center justify-between p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center">
-                              <Search className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{search.query}</p>
-                              <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                <span className="flex items-center">
-                                  <Globe className="w-3 h-3 mr-1" />
-                                  {search.location}
-                                </span>
-                                <span>{search.results.toLocaleString()} results</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-xs text-gray-500">{search.time}</span>
-                            <p className="text-sm text-emerald-600 font-medium">Completed</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                 {/* Quick Actions */}
-                 <div className="bg-card rounded-xl shadow-sm border border-border">
-                   <div className="p-4 sm:p-6 border-b border-border">
-                     <h2 className="text-lg sm:text-xl font-bold text-foreground">Quick Actions</h2>
-                     <p className="text-sm text-muted-foreground mt-1">Common workflow shortcuts</p>
-                   </div>
-                  <div className="p-6">
-                    <div className="space-y-3">
-                      <Link 
-                        to="/dashboard/search" 
-                        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-sky-50 hover:border-sky-200 transition-colors group"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center">
-                            <Search className="w-4 h-4 text-sky-600" />
-                          </div>
-                          <span className="font-medium text-gray-900">New Search</span>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all" />
-                      </Link>
-                      
-                      <Link 
-                        to="/dashboard/crm" 
-                        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 transition-colors group"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                            <Users className="w-4 h-4 text-emerald-600" />
-                          </div>
-                          <span className="font-medium text-gray-900">Add Contact</span>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
-                      </Link>
-                      
-                      <Link 
-                        to="/dashboard/analytics" 
-                        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-purple-50 hover:border-purple-200 transition-colors group"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <BarChart3 className="w-4 h-4 text-purple-600" />
-                          </div>
-                          <span className="font-medium text-gray-900">View Analytics</span>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
-                      </Link>
-                      
-                      <Link 
-                        to="/dashboard/settings" 
-                        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-orange-50 hover:border-orange-200 transition-colors group"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                            <Zap className="w-4 h-4 text-orange-600" />
-                          </div>
-                          <span className="font-medium text-gray-900">Settings</span>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-               {/* Top Companies */}
-               <div className="bg-card rounded-xl shadow-sm border border-border">
-                 <div className="p-4 sm:p-6 border-b border-border">
-                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                     <h2 className="text-lg sm:text-xl font-bold text-foreground">Top Discovered Companies</h2>
-                     <div className="flex items-center space-x-3">
-                       <Button variant="outline" size="sm" className="p-2">
-                         <Filter className="w-4 h-4" />
-                       </Button>
+                {/* Recent Searches */}
+                <div className="lg:col-span-2 bg-card rounded-xl shadow-sm border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+                  <div className="p-4 sm:p-6 border-b border-border">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                      <h2 className="text-lg sm:text-xl font-bold text-foreground">Recent Searches</h2>
+                     <div className="flex items-center space-x-2">
+                       <button className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent transition-colors">
+                         <RefreshCw className="w-4 h-4" />
+                       </button>
                        <Link to="/dashboard/search" className="text-primary hover:text-primary/80 font-semibold text-sm">
-                         View All Results
+                         View All
                        </Link>
                      </div>
+                   </div>
+                 </div>
+                 <div className="p-4 sm:p-6">
+                   <div className="space-y-3">
+                     {recentSearches.map((search) => (
+                       <div key={search.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 cursor-pointer group">
+                         <div className="flex items-center space-x-3 sm:space-x-4 mb-2 sm:mb-0">
+                           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary/20 to-primary/30 rounded-lg flex items-center justify-center group-hover:from-primary/30 group-hover:to-primary/40 transition-colors">
+                             <Search className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                           </div>
+                           <div className="min-w-0 flex-1">
+                             <p className="font-medium text-foreground text-sm sm:text-base truncate">{search.query}</p>
+                             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-0">
+                               <span className="flex items-center">
+                                 <Globe className="w-3 h-3 mr-1 flex-shrink-0" />
+                                 <span className="truncate">{search.location}</span>
+                               </span>
+                               <span className="hidden sm:inline">{search.results.toLocaleString()} results</span>
+                             </div>
+                           </div>
+                         </div>
+                         <div className="text-left sm:text-right flex sm:flex-col justify-between sm:justify-center space-x-2 sm:space-x-0">
+                           <span className="text-xs text-muted-foreground">{search.time}</span>
+                           <p className="text-xs sm:text-sm text-emerald-600 font-medium">Completed</p>
+                           <span className="sm:hidden text-xs text-muted-foreground">{search.results.toLocaleString()} results</span>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               </div>
+
+                {/* Quick Actions */}
+                <div className="bg-card rounded-xl shadow-sm border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+                  <div className="p-4 sm:p-6 border-b border-border">
+                    <h2 className="text-lg sm:text-xl font-bold text-foreground">Quick Actions</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Common workflow shortcuts</p>
                   </div>
-                </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {topCompanies.map((company, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center">
-                            <Building2 className="w-6 h-6 text-sky-600" />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-gray-900 group-hover:text-sky-600 transition-colors">
-                              {company.name}
-                            </h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span className="flex items-center">
-                                <MapPin className="w-3 h-3 mr-1" />
-                                {company.location}
-                              </span>
-                              <span>{company.industry}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-6">
-                          <div className="text-right">
-                            <p className="font-bold text-gray-900">{company.volume}</p>
-                            <p className="text-xs text-gray-500">Trade Volume</p>
-                          </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            company.status === 'Hot Lead' ? 'bg-red-100 text-red-800' :
-                            company.status === 'Prospect' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-green-100 text-green-800'
-                          }`}>
-                            {company.status}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            <button className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors">
-                              <Star className="w-4 h-4" />
-                            </button>
-                            <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                              <ExternalLink className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                 <div className="p-4 sm:p-6">
+                   <div className="space-y-2 sm:space-y-3">
+                     <Link 
+                       to="/dashboard/search" 
+                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
+                     >
+                       <div className="flex items-center space-x-3">
+                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                           <Search className="w-4 h-4 text-primary" />
+                         </div>
+                         <span className="font-medium text-foreground text-sm sm:text-base">New Search</span>
+                       </div>
+                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                     </Link>
+                     
+                     <Link 
+                       to="/dashboard/crm" 
+                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
+                     >
+                       <div className="flex items-center space-x-3">
+                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                           <Users className="w-4 h-4 text-primary" />
+                         </div>
+                         <span className="font-medium text-foreground text-sm sm:text-base">Add Contact</span>
+                       </div>
+                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                     </Link>
+                     
+                     <Link 
+                       to="/dashboard/analytics" 
+                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
+                     >
+                       <div className="flex items-center space-x-3">
+                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                           <BarChart3 className="w-4 h-4 text-primary" />
+                         </div>
+                         <span className="font-medium text-foreground text-sm sm:text-base">View Analytics</span>
+                       </div>
+                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                     </Link>
+                     
+                     <Link 
+                       to="/dashboard/settings" 
+                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
+                     >
+                       <div className="flex items-center space-x-3">
+                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                           <Zap className="w-4 h-4 text-primary" />
+                         </div>
+                         <span className="font-medium text-foreground text-sm sm:text-base">Settings</span>
+                       </div>
+                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                     </Link>
+                   </div>
+                 </div>
+               </div>
               </div>
+
+              {/* Top Companies */}
+              <div className="bg-card rounded-xl shadow-sm border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+                <div className="p-4 sm:p-6 border-b border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                    <h2 className="text-lg sm:text-xl font-bold text-foreground">Top Discovered Companies</h2>
+                    <div className="flex items-center space-x-3">
+                      <Button variant="outline" size="sm" className="p-2">
+                        <Filter className="w-4 h-4" />
+                      </Button>
+                      <Link to="/dashboard/search" className="text-primary hover:text-primary/80 font-semibold text-sm">
+                        View All Results
+                      </Link>
+                    </div>
+                 </div>
+               </div>
+               <div className="p-4 sm:p-6">
+                 <div className="space-y-3 sm:space-y-4">
+                   {topCompanies.map((company, index) => (
+                     <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 cursor-pointer group space-y-3 sm:space-y-0">
+                       <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl flex items-center justify-center group-hover:from-primary/20 group-hover:to-primary/30 transition-colors flex-shrink-0">
+                           <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                         </div>
+                         <div className="min-w-0 flex-1">
+                           <h3 className="font-bold text-foreground group-hover:text-primary transition-colors text-sm sm:text-base truncate">
+                             {company.name}
+                           </h3>
+                           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-0">
+                             <span className="flex items-center">
+                               <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                               <span className="truncate">{company.location}</span>
+                             </span>
+                             <span className="hidden sm:inline">{company.industry}</span>
+                           </div>
+                           <div className="sm:hidden text-xs text-muted-foreground mt-1">
+                             {company.industry}
+                           </div>
+                         </div>
+                       </div>
+                       <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-6 w-full sm:w-auto">
+                         <div className="text-left sm:text-right">
+                           <p className="font-bold text-foreground text-sm sm:text-base">{company.volume}</p>
+                           <p className="text-xs text-muted-foreground">Trade Volume</p>
+                         </div>
+                         <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                           company.status === 'Hot Lead' ? 'bg-destructive/10 text-destructive' :
+                           company.status === 'Prospect' ? 'bg-warning/10 text-warning' :
+                           'bg-success/10 text-success'
+                         }`}>
+                           {company.status}
+                         </span>
+                         <div className="hidden sm:flex items-center space-x-2">
+                           <button className="p-2 text-muted-foreground hover:text-warning hover:bg-warning/10 rounded-lg transition-colors">
+                             <Star className="w-4 h-4" />
+                           </button>
+                           <button className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                             <Eye className="w-4 h-4" />
+                           </button>
+                           <button className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                             <ExternalLink className="w-4 h-4" />
+                           </button>
+                         </div>
+                         <div className="flex sm:hidden items-center space-x-1">
+                           <button className="p-1.5 text-muted-foreground hover:text-warning hover:bg-warning/10 rounded-lg transition-colors">
+                             <Star className="w-3.5 h-3.5" />
+                           </button>
+                           <button className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                             <Eye className="w-3.5 h-3.5" />
+                           </button>
+                           <button className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                             <ExternalLink className="w-3.5 h-3.5" />
+                           </button>
+                         </div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             </div>
             </div>
           </main>
         </SidebarInset>
