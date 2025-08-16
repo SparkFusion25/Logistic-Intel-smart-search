@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/dashboard/AppSidebar"
+import { supabase } from "@/integrations/supabase/client"
 
 export default function TariffCalculatorPage() {
   const [inputs, setInputs] = useState({
@@ -17,9 +18,10 @@ export default function TariffCalculatorPage() {
     mode: "ocean"
   })
   const [calculation, setCalculation] = useState(null)
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     if (!inputs.origin_country || !inputs.hs_code || !inputs.customs_value) {
       toast({
         title: "Missing Information",
@@ -29,16 +31,34 @@ export default function TariffCalculatorPage() {
       return
     }
 
-    const duty = parseFloat(inputs.customs_value) * 0.035
-    const mpf = Math.max(31.67, Math.min(614.35, parseFloat(inputs.customs_value) * 0.003464))
-    const hmf = inputs.mode === "ocean" ? parseFloat(inputs.customs_value) * 0.00125 : 0
-    const total = duty + mpf + hmf
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('tariff-calculator', {
+        body: {
+          hs_code: inputs.hs_code,
+          origin_country: inputs.origin_country,
+          customs_value: parseFloat(inputs.customs_value),
+          mode: inputs.mode
+        }
+      })
 
-    setCalculation({ duty, mpf, hmf, total })
-    toast({
-      title: "Calculation Complete",
-      description: "Tariff estimate generated"
-    })
+      if (error) throw error
+
+      setCalculation(data)
+      toast({
+        title: "Calculation Complete",
+        description: `Tariff estimate generated using ${data.source} data`
+      })
+    } catch (error) {
+      console.error('Tariff calculation error:', error)
+      toast({
+        title: "Calculation Failed",
+        description: "Unable to calculate tariff. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -128,10 +148,11 @@ export default function TariffCalculatorPage() {
                   <div className="flex justify-center pt-4">
                     <Button 
                       onClick={handleCalculate} 
+                      disabled={loading}
                       className="px-8 py-4 text-lg h-auto bg-gradient-to-r from-primary to-primary-variant hover:from-primary-variant hover:to-primary group-hover:shadow-md group-hover:shadow-primary/20 transition-all duration-300"
                     >
                       <Calculator className="w-5 h-5 mr-3" />
-                      Calculate Tariffs
+                      {loading ? 'Calculating...' : 'Calculate Tariffs'}
                     </Button>
                   </div>
                 </CardContent>
@@ -159,11 +180,11 @@ export default function TariffCalculatorPage() {
                         <div className="flex items-center space-x-3">
                           <div className="w-3 h-3 rounded-full bg-primary"></div>
                           <div>
-                            <span className="font-semibold text-foreground">Import Duty (3.5%)</span>
-                            <div className="text-sm text-muted-foreground">Based on customs value</div>
+                            <span className="font-semibold text-foreground">Import Duty ({(calculation.duty_rate * 100).toFixed(2)}%)</span>
+                            <div className="text-sm text-muted-foreground">Based on {calculation.source} classification</div>
                           </div>
                         </div>
-                        <span className="text-lg font-bold text-foreground">${calculation.duty.toFixed(2)}</span>
+                        <span className="text-lg font-bold text-foreground">${calculation.components.duty}</span>
                       </div>
                       
                       <div className="flex justify-between items-center p-5 bg-canvas rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -171,13 +192,13 @@ export default function TariffCalculatorPage() {
                           <div className="w-3 h-3 rounded-full bg-accent"></div>
                           <div>
                             <span className="font-semibold text-foreground">MPF (Merchandise Processing Fee)</span>
-                            <div className="text-sm text-muted-foreground">0.3464% of value (min/max applied)</div>
+                            <div className="text-sm text-muted-foreground">0.3464% of value (min $31.67, max $614.35)</div>
                           </div>
                         </div>
-                        <span className="text-lg font-bold text-foreground">${calculation.mpf.toFixed(2)}</span>
+                        <span className="text-lg font-bold text-foreground">${calculation.components.mpf}</span>
                       </div>
                       
-                      {calculation.hmf > 0 && (
+                      {calculation.components.hmf > 0 && (
                         <div className="flex justify-between items-center p-5 bg-canvas rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
                           <div className="flex items-center space-x-3">
                             <div className="w-3 h-3 rounded-full bg-secondary"></div>
@@ -186,7 +207,7 @@ export default function TariffCalculatorPage() {
                               <div className="text-sm text-muted-foreground">0.125% for ocean shipments only</div>
                             </div>
                           </div>
-                          <span className="text-lg font-bold text-foreground">${calculation.hmf.toFixed(2)}</span>
+                          <span className="text-lg font-bold text-foreground">${calculation.components.hmf}</span>
                         </div>
                       )}
                       
@@ -195,7 +216,7 @@ export default function TariffCalculatorPage() {
                           <div className="w-4 h-4 rounded-full bg-success"></div>
                           <span className="text-xl font-bold text-foreground">Total Estimated Cost</span>
                         </div>
-                        <span className="text-2xl font-bold text-success">${calculation.total.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-success">${calculation.total}</span>
                       </div>
                     </div>
                     
