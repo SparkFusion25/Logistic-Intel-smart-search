@@ -1,5 +1,9 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/dashboard/AppSidebar"
+import { Button } from "@/components/ui/button"
+import { Home, ArrowLeft } from "lucide-react"
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,15 +16,36 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-canvas">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center max-w-md mx-auto p-6">
+              <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-4xl font-bold text-red-600">404</span>
+              </div>
+              <h1 className="text-3xl font-bold text-foreground mb-4">Page Not Found</h1>
+              <p className="text-lg text-muted-foreground mb-8">
+                Sorry, we couldn't find the page you're looking for. It may have been moved or deleted.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link to="/dashboard">
+                  <Button className="w-full sm:w-auto">
+                    <Home className="w-4 h-4 mr-2" />
+                    Go to Dashboard
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={() => window.history.back()} className="w-full sm:w-auto">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Go Back
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

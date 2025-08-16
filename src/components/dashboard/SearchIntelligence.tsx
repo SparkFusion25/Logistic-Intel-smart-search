@@ -293,8 +293,8 @@ export function SearchIntelligence() {
   return (
     <div className="space-y-6">
       {/* Search Bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center space-x-4 mb-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
           <div className="relative flex-1">
             <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
@@ -302,18 +302,18 @@ export function SearchIntelligence() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Search companies, HS codes, lanes (e.g., 'Tesla suppliers CN→US last 90d')"
+              placeholder="Search companies, HS codes, lanes..."
               className="w-full pl-12 pr-4 py-3 text-base"
             />
           </div>
-          <Button onClick={handleSearch} className="px-8">
+          <Button onClick={handleSearch} className="px-8 w-full sm:w-auto">
             <Search className="w-4 h-4 mr-2" />
             Search
           </Button>
         </div>
         
-        {/* Advanced Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Advanced Filters - Mobile Optimized */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
           <Select value={filters.mode} onValueChange={(value) => setFilters(prev => ({ ...prev, mode: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Mode" />
@@ -338,7 +338,7 @@ export function SearchIntelligence() {
           
           <Select value={filters.origin_country} onValueChange={(value) => setFilters(prev => ({ ...prev, origin_country: value }))}>
             <SelectTrigger>
-              <SelectValue placeholder="Origin Country" />
+              <SelectValue placeholder="Origin" />
             </SelectTrigger>
             <SelectContent>
               {countries.map(country => (
@@ -362,13 +362,14 @@ export function SearchIntelligence() {
             placeholder="HS Codes"
             value={filters.hs_codes}
             onChange={(e) => setFilters(prev => ({ ...prev, hs_codes: e.target.value }))}
+            className="col-span-1 sm:col-span-2 lg:col-span-1"
           />
           
-          <div className="flex space-x-2">
-            <Button onClick={handleSaveSearch} variant="outline" size="sm">
-              Save Search
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 col-span-1 sm:col-span-2 lg:col-span-1">
+            <Button onClick={handleSaveSearch} variant="outline" size="sm" className="w-full sm:w-auto">
+              Save
             </Button>
-            <Button onClick={handleExport} variant="outline" size="sm">
+            <Button onClick={handleExport} variant="outline" size="sm" className="w-full sm:w-auto">
               <Download className="w-4 h-4 mr-1" />
               Export
             </Button>
@@ -378,18 +379,18 @@ export function SearchIntelligence() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <TabsList className="grid w-full max-w-md grid-cols-4">
-              <TabsTrigger value="companies">Companies</TabsTrigger>
-              <TabsTrigger value="shipments">Shipments</TabsTrigger>
-              <TabsTrigger value="routes">Routes</TabsTrigger>
-              <TabsTrigger value="contacts">Contacts</TabsTrigger>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 mb-4">
+            <TabsList className="grid w-full max-w-md grid-cols-4 mx-auto lg:mx-0">
+              <TabsTrigger value="companies" className="text-xs sm:text-sm">Companies</TabsTrigger>
+              <TabsTrigger value="shipments" className="text-xs sm:text-sm">Shipments</TabsTrigger>
+              <TabsTrigger value="routes" className="text-xs sm:text-sm">Routes</TabsTrigger>
+              <TabsTrigger value="contacts" className="text-xs sm:text-sm">Contacts</TabsTrigger>
             </TabsList>
             
             <div className="flex items-center space-x-3">
               <Select>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="Sort by Relevance" />
                 </SelectTrigger>
                 <SelectContent>
@@ -410,62 +411,64 @@ export function SearchIntelligence() {
 
         <TabsContent value="companies" className="space-y-4">
           {companyResults.map((company) => (
-            <div key={company.company_id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4 flex-1">
-                  <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-8 h-8 text-sky-600" />
+            <div key={company.company_id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+                <div className="flex items-start space-x-3 sm:space-x-4 flex-1">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-sky-600" />
                   </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">{company.name}</h3>
-                      <Badge variant="secondary">{company.industry}</Badge>
-                      <div className="flex items-center">
-                        {company.trend === 'up' ? (
-                          <TrendingUp className="w-4 h-4 text-emerald-500" />
-                        ) : (
-                          <TrendingDown className="w-4 h-4 text-red-500" />
-                        )}
-                        <span className="text-xs text-gray-500 ml-1">Trending</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-3">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{company.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary" className="text-xs">{company.industry}</Badge>
+                        <div className="flex items-center">
+                          {company.trend === 'up' ? (
+                            <TrendingUp className="w-4 h-4 text-emerald-500" />
+                          ) : (
+                            <TrendingDown className="w-4 h-4 text-red-500" />
+                          )}
+                          <span className="text-xs text-gray-500 ml-1 hidden sm:inline">Trending</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4 mb-4">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                        {company.location}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4">
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{company.location}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Globe className="w-4 h-4 mr-2 text-gray-400" />
-                        Trade Volume: <span className="font-semibold ml-1">{formatCurrency(company.trade_volume_usd)}</span>
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Globe className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">Volume: <span className="font-semibold">{formatCurrency(company.trade_volume_usd)}</span></span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                        Last shipment: {formatDate(company.last_shipment_at)}
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">Last: {formatDate(company.last_shipment_at)}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Ship className="w-4 h-4 mr-2 text-gray-400" />
-                        {company.shipment_count.toLocaleString()} shipments
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Ship className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{company.shipment_count.toLocaleString()} shipments</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-6 text-sm">
+                    <div className="flex items-center space-x-4 text-xs sm:text-sm">
                       <div className="flex items-center">
                         <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
                         <span className="font-medium">{company.confidence}%</span>
-                        <span className="text-gray-500 ml-1">confidence</span>
+                        <span className="text-gray-500 ml-1 hidden sm:inline">confidence</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2 ml-4">
+                <div className="flex items-center justify-end space-x-2 lg:ml-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleWatchCompany(company)}
-                    className={watchlist.has(company.company_id) ? "text-yellow-500" : ""}
+                    className={`${watchlist.has(company.company_id) ? "text-yellow-500" : ""} p-2`}
                   >
                     <Star className={`w-4 h-4 ${watchlist.has(company.company_id) ? "fill-current" : ""}`} />
                   </Button>
@@ -473,6 +476,7 @@ export function SearchIntelligence() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleViewCompany(company)}
+                    className="p-2"
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
@@ -481,9 +485,22 @@ export function SearchIntelligence() {
                     size="sm"
                     onClick={() => handleAddToCRM(company)}
                     disabled={crmLoading}
+                    className="hidden sm:flex"
                   >
                     <Plus className="w-4 h-4 mr-1" />
-                    {crmLoading ? "Adding..." : "Add to CRM"}
+                    CRM
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddToCRM(company)}
+                    disabled={crmLoading}
+                    className="sm:hidden p-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <MoreHorizontal className="w-4 h-4" />
                   </Button>
                 </div>
               </div>

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Calendar, User, ArrowRight, Tag, Clock } from 'lucide-react'
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/dashboard/AppSidebar"
 
 export default function BlogPage() {
   const featuredPost = {
@@ -80,7 +82,11 @@ export default function BlogPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-white">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -270,7 +276,10 @@ export default function BlogPage() {
             </div>
           </div>
         </div>
+          </div>
+        </div>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }
