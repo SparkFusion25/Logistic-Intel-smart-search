@@ -24,7 +24,6 @@ export default function BenchmarkPage() {
   const [benchmarkData, setBenchmarkData] = useState<any>(null)
   const { toast } = useToast()
 
-  const countries = ["China", "Germany", "Japan", "South Korea", "United Kingdom"]
   const modes = [
     { value: "Ocean", label: "Ocean" },
     { value: "Air", label: "Air" },
@@ -131,16 +130,11 @@ export default function BenchmarkPage() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-2 block">Origin Country</label>
-                      <Select value={filters.origin_country} onValueChange={(value) => setFilters(prev => ({ ...prev, origin_country: value }))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select origin" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {countries.map(country => (
-                            <SelectItem key={country} value={country}>{country}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        placeholder="e.g., China, Germany, Brazil"
+                        value={filters.origin_country}
+                        onChange={(e) => setFilters(prev => ({ ...prev, origin_country: e.target.value }))}
+                      />
                     </div>
 
                     <div>
