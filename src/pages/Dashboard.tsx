@@ -3,14 +3,48 @@ import { Button } from "@/components/ui/button";
 import { 
   Plus, Download, Search, Users, Mail, TrendingUp, Building2, 
   MapPin, Globe, Calendar, ArrowRight, Star, Eye, ExternalLink,
-  MoreHorizontal, RefreshCw, Filter, BarChart3, Zap
+  MoreHorizontal, RefreshCw, Filter, BarChart3, Zap, User
 } from "lucide-react";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { TopBar } from "@/components/ui/TopBar";
 import { StatCard } from "@/components/shared";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
+  const [user, setUser] = useState<any>(null);
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    // Get current user
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    
+    getUser();
+
+    // Set time-based greeting
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 18) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
+  }, []);
+
+  // Extract first name from user metadata or email
+  const getDisplayName = () => {
+    if (user?.user_metadata?.first_name) {
+      return user.user_metadata.first_name;
+    }
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name.split(' ')[0];
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return "there";
+  };
   const overviewMetrics = [
     {
       title: "Total Companies",
@@ -117,24 +151,48 @@ const Dashboard = () => {
             <div className="max-w-7xl mx-auto space-y-6">
               {/* Header */}
               <div className="mb-8">
-                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                   <div>
-                     <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard Overview</h1>
-                     <p className="mt-2 text-muted-foreground">Welcome back. Here's what's happening with your trade intelligence.</p>
-                   </div>
-                   <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                     <Button variant="outline" className="flex items-center justify-center px-4 py-2">
-                       <Download className="w-4 h-4 mr-2" />
-                       Export Data
-                     </Button>
-                     <Link to="/dashboard/search">
-                       <Button className="w-full sm:w-auto flex items-center justify-center px-4 py-2">
-                         <Plus className="w-4 h-4 mr-2" />
-                         New Search
-                       </Button>
-                     </Link>
-                   </div>
-                 </div>
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/95 to-primary/80 p-6 sm:p-8">
+                  {/* Background patterns */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"></div>
+                  <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full -translate-x-48 -translate-y-48 blur-3xl"></div>
+                  <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-48 translate-y-48 blur-3xl"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                      <div className="mb-6 sm:mb-0">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                            <User className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white">
+                              {greeting}, {getDisplayName()}! 👋
+                            </h1>
+                            <p className="text-white/80 mt-1">Ready to discover new trade opportunities?</p>
+                          </div>
+                        </div>
+                        <p className="text-white/70 text-sm sm:text-base max-w-2xl">
+                          Your trade intelligence dashboard is ready. Here's what's happening with your searches and contacts.
+                        </p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                        <Button 
+                          variant="outline" 
+                          className="flex items-center justify-center px-4 py-2 bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Export Data
+                        </Button>
+                        <Link to="/dashboard/search">
+                          <Button className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-white text-primary hover:bg-white/90">
+                            <Plus className="w-4 h-4 mr-2" />
+                            New Search
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Key Metrics */}
