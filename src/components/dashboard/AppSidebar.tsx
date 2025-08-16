@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -51,16 +52,19 @@ export function AppSidebar() {
       className="border-r-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900"
     >
       <SidebarHeader className="p-4 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <div className="w-4 h-4 bg-white rounded-sm"></div>
-          </div>
-          {!collapsed && (
-            <div>
-              <h2 className="font-semibold text-white">LogisticIntel</h2>
-              <p className="text-xs text-white/60">Trade Intelligence</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+              <div className="w-4 h-4 bg-white rounded-sm"></div>
             </div>
-          )}
+            {!collapsed && (
+              <div>
+                <h2 className="font-semibold text-white">LogisticIntel</h2>
+                <p className="text-xs text-white/60">Trade Intelligence</p>
+              </div>
+            )}
+          </div>
+          <SidebarTrigger className="text-white/80 hover:text-white hover:bg-white/10 lg:hidden" />
         </div>
       </SidebarHeader>
 
