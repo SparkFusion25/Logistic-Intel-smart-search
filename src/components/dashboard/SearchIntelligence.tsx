@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { 
   Search, Filter, Download, ArrowRight, Star, Eye, ExternalLink, 
   MoreHorizontal, Building2, MapPin, Calendar, Globe, Ship, TrendingUp,
@@ -15,6 +16,7 @@ import { useCRMAPI } from "@/hooks/useAPI"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
 
 export function SearchIntelligence() {
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("companies")
   const [hasSearched, setHasSearched] = useState(false)
@@ -192,8 +194,8 @@ export function SearchIntelligence() {
   }
 
   const handleViewFullProfile = (company: any) => {
-    // Navigate to dedicated company profile page
-    window.open(`/dashboard/company/${company.company_id}`, '_blank')
+    // Navigate to dedicated company profile page in the same tab
+    navigate(`/dashboard/company/${company.company_id}`)
     toast({
       title: "Opening Full Profile",
       description: `Loading detailed profile for ${company.name}...`
