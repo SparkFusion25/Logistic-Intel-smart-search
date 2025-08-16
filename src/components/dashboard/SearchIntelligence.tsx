@@ -192,13 +192,16 @@ export function SearchIntelligence() {
   }
 
   const handleViewFullProfile = (company: any) => {
-    // Navigate to company detail page or open external view
+    // Close the modal dialog and open the detailed drawer instead
+    setSelectedCompany(null)
+    setTimeout(() => {
+      setSelectedCompany(company)
+      setDrawerOpen(true)
+    }, 100)
     toast({
-      title: "Opening Profile",
-      description: `Loading full profile for ${company.name}...`
+      title: "Opening Full Profile",
+      description: `Loading detailed profile for ${company.name}...`
     })
-    // In a real app, this would navigate to /company/[id] route
-    window.open(`/dashboard/company/${company.company_id}`, '_blank')
   }
 
   const handleWatchCompany = (company: any) => {
