@@ -175,53 +175,61 @@ export default function CompanyProfilePage() {
 
             {/* Company Overview Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <Card>
+              <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-blue-100/30 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Trade Volume</p>
-                      <p className="text-2xl font-bold">{formatCurrency(company.trade_volume_usd)}</p>
+                      <p className="text-2xl font-bold text-blue-700">{formatCurrency(company.trade_volume_usd)}</p>
                     </div>
-                    <Globe className="w-8 h-8 text-primary" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <Globe className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Shipments</p>
-                      <p className="text-2xl font-bold">{company.shipment_count.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-emerald-700">{company.shipment_count.toLocaleString()}</p>
                     </div>
-                    <Ship className="w-8 h-8 text-primary" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <Ship className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-purple-100/30 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Trade Partners</p>
-                      <p className="text-2xl font-bold">{company.trade_partners}</p>
+                      <p className="text-2xl font-bold text-purple-700">{company.trade_partners}</p>
                     </div>
-                    <Users className="w-8 h-8 text-primary" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-amber-100/30 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Confidence Score</p>
                       <div className="flex items-center space-x-2">
-                        <p className="text-2xl font-bold">{company.confidence}%</p>
+                        <p className="text-2xl font-bold text-amber-700">{company.confidence}%</p>
                         <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
                       </div>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-emerald-500" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <TrendingUp className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
