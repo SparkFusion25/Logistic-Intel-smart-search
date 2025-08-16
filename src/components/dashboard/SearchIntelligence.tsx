@@ -192,12 +192,8 @@ export function SearchIntelligence() {
   }
 
   const handleViewFullProfile = (company: any) => {
-    // Close the modal dialog and open the detailed drawer instead
-    setSelectedCompany(null)
-    setTimeout(() => {
-      setSelectedCompany(company)
-      setDrawerOpen(true)
-    }, 100)
+    // Navigate to dedicated company profile page
+    window.open(`/dashboard/company/${company.company_id}`, '_blank')
     toast({
       title: "Opening Full Profile",
       description: `Loading detailed profile for ${company.name}...`

@@ -28,6 +28,7 @@ import QuoteGeneratorPage from "./pages/dashboard/QuoteGeneratorPage";
 import TariffCalculatorPage from "./pages/dashboard/TariffCalculatorPage";
 import BenchmarkPage from "./pages/dashboard/BenchmarkPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
+import CompanyProfilePage from "./pages/dashboard/CompanyProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/dashboard/widgets/quote" element={<QuoteGeneratorPage />} />
             <Route path="/dashboard/widgets/tariff" element={<TariffCalculatorPage />} />
             <Route path="/dashboard/widgets/benchmark" element={<BenchmarkPage />} />
+            <Route path="/dashboard/company/:companyId" element={<CompanyProfilePage />} />
             <Route path="/dashboard/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
