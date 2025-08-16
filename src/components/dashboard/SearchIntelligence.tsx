@@ -12,12 +12,14 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { useCRMAPI } from "@/hooks/useAPI"
+import { CompanyContactDrawer } from "./CompanyContactDrawer"
 
 export function SearchIntelligence() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("companies")
   const [hasSearched, setHasSearched] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [watchlist, setWatchlist] = useState(new Set())
   const [filters, setFilters] = useState({
     mode: "all",
@@ -181,6 +183,12 @@ export function SearchIntelligence() {
 
   const handleViewCompany = (company: any) => {
     setSelectedCompany(company)
+    setDrawerOpen(true)
+  }
+
+  const handleCloseDrawer = () => {
+    setDrawerOpen(false)
+    setSelectedCompany(null)
   }
 
   const handleViewFullProfile = (company: any) => {
@@ -713,6 +721,14 @@ export function SearchIntelligence() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Company Contact Drawer */}
+      <CompanyContactDrawer
+        company={selectedCompany}
+        isOpen={drawerOpen}
+        onClose={handleCloseDrawer}
+        userPlan="free" // This should come from user context/state
+      />
     </div>
   )
 }
