@@ -111,70 +111,81 @@ export default function QuoteGeneratorPage() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-canvas">
         <AppSidebar />
         <SidebarInset className="flex-1">
           <main className="flex-1 p-6">
-            <div className="max-w-6xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Quote Generator</h1>
-                  <p className="mt-2 text-gray-600">Create professional, branded freight quotes</p>
+                <div className="text-center lg:text-left">
+                  <h1 className="text-4xl font-bold text-foreground mb-3">Quote Generator</h1>
+                  <p className="text-lg text-muted-foreground">Create professional, branded freight quotes</p>
                 </div>
-                <div className="mt-4 lg:mt-0 flex items-center space-x-3">
-                  <Button variant="outline" onClick={openEmailDialog}>
-                    <Mail className="w-4 h-4 mr-2" />
+                <div className="mt-6 lg:mt-0 flex items-center space-x-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={openEmailDialog}
+                    className="px-6 py-3 h-auto text-base border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transform hover:scale-105 transition-all duration-200"
+                  >
+                    <Mail className="w-5 h-5 mr-2" />
                     Email Quote
                   </Button>
-                  <Button onClick={handleDownloadPDF}>
-                    <Download className="w-4 h-4 mr-2" />
+                  <Button 
+                    onClick={handleDownloadPDF}
+                    className="px-6 py-3 h-auto text-base bg-gradient-to-r from-primary to-primary-variant hover:from-primary-variant hover:to-primary transform hover:scale-105 transition-all duration-200 shadow-lg"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
                     Download PDF
                   </Button>
                 </div>
               </div>
 
-              <div className="grid lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <FileText className="w-5 h-5 mr-2" />
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                  <Card className="glass shadow-elegant border-0 transform hover:scale-[1.02] transition-transform duration-300">
+                    <CardHeader className="bg-gradient-to-r from-primary/5 to-primary-variant/5 rounded-t-lg">
+                      <CardTitle className="flex items-center text-xl">
+                        <FileText className="w-6 h-6 mr-3 text-primary" />
                         Quote Details
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <CardContent className="p-8 space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="text-sm font-medium text-gray-700 mb-2 block">Quote Number</label>
+                          <label className="text-sm font-semibold text-foreground mb-3 block">Quote Number</label>
                           <Input
                             value={quote.quote_number}
                             onChange={(e) => setQuote(prev => ({ ...prev, quote_number: e.target.value }))}
+                            className="h-12 text-base"
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-700 mb-2 block">Customer Company</label>
+                          <label className="text-sm font-semibold text-foreground mb-3 block">Customer Company</label>
                           <Input
                             value={quote.customer_company}
                             onChange={(e) => setQuote(prev => ({ ...prev, customer_company: e.target.value }))}
+                            className="h-12 text-base"
+                            placeholder="Customer Company Name"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">Customer Email</label>
+                        <label className="text-sm font-semibold text-foreground mb-3 block">Customer Email</label>
                         <Input
                           type="email"
                           placeholder="customer@company.com"
                           value={quote.customer_email}
                           onChange={(e) => setQuote(prev => ({ ...prev, customer_email: e.target.value }))}
+                          className="h-12 text-base"
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                          <label className="text-sm font-medium text-gray-700 mb-2 block">Mode</label>
+                          <label className="text-sm font-semibold text-foreground mb-3 block">Mode</label>
                           <Select value={quote.mode} onValueChange={(value) => setQuote(prev => ({ ...prev, mode: value }))}>
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 text-base">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -185,63 +196,79 @@ export default function QuoteGeneratorPage() {
                           </Select>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-700 mb-2 block">Origin</label>
+                          <label className="text-sm font-semibold text-foreground mb-3 block">Origin</label>
                           <Input
                             placeholder="Port/City"
                             value={quote.origin}
                             onChange={(e) => setQuote(prev => ({ ...prev, origin: e.target.value }))}
+                            className="h-12 text-base"
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-700 mb-2 block">Destination</label>
+                          <label className="text-sm font-semibold text-foreground mb-3 block">Destination</label>
                           <Input
                             placeholder="Port/City"
                             value={quote.destination}
                             onChange={(e) => setQuote(prev => ({ ...prev, destination: e.target.value }))}
+                            className="h-12 text-base"
                           />
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
+                  <Card className="glass shadow-elegant border-0 transform hover:scale-[1.02] transition-transform duration-300">
+                    <CardHeader className="bg-gradient-to-r from-secondary/5 to-secondary-variant/5 rounded-t-lg">
+                      <CardTitle className="flex items-center justify-between text-xl">
                         <div className="flex items-center">
-                          <Calculator className="w-5 h-5 mr-2" />
-                          Charges
+                          <Calculator className="w-6 h-6 mr-3 text-secondary" />
+                          Charge Lines
                         </div>
-                        <Button onClick={addCharge} size="sm">
-                          <Plus className="w-4 h-4 mr-1" />
+                        <Button 
+                          onClick={addCharge} 
+                          className="bg-gradient-to-r from-accent to-accent-variant hover:from-accent-variant hover:to-accent transform hover:scale-105 transition-all duration-200"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
                           Add Charge
                         </Button>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="p-8 space-y-4">
+                      <div className="grid grid-cols-4 gap-4 pb-3 border-b border-border/50">
+                        <span className="text-sm font-semibold text-muted-foreground">Description</span>
+                        <span className="text-sm font-semibold text-muted-foreground">Buy Price</span>
+                        <span className="text-sm font-semibold text-muted-foreground">Sell Price</span>
+                        <span className="text-sm font-semibold text-muted-foreground">Margin</span>
+                      </div>
                       {quote.charges.map((charge, index) => (
-                        <div key={index} className="grid grid-cols-4 gap-2 items-center p-3 bg-gray-50 rounded-lg">
+                        <div key={index} className="grid grid-cols-4 gap-4 items-center p-4 bg-canvas rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-all duration-200">
                           <Input
-                            placeholder="Charge name"
+                            placeholder="Charge description"
                             value={charge.name}
                             onChange={(e) => {
                               const newCharges = [...quote.charges]
                               newCharges[index].name = e.target.value
                               setQuote(prev => ({ ...prev, charges: newCharges }))
                             }}
+                            className="h-10"
                           />
                           <Input
                             type="number"
-                            placeholder="Buy"
+                            placeholder="0.00"
                             value={charge.buy}
                             onChange={(e) => updateCharge(index, 'buy', e.target.value)}
+                            className="h-10"
                           />
                           <Input
                             type="number"
-                            placeholder="Sell"
+                            placeholder="0.00"
                             value={charge.sell}
                             onChange={(e) => updateCharge(index, 'sell', e.target.value)}
+                            className="h-10"
                           />
-                          <div className="text-sm font-medium">
+                          <div className={`text-base font-semibold px-3 py-2 rounded-lg text-center ${
+                            charge.margin >= 0 ? 'text-success bg-success/10' : 'text-destructive bg-destructive/10'
+                          }`}>
                             ${charge.margin.toFixed(2)}
                           </div>
                         </div>
@@ -250,32 +277,41 @@ export default function QuoteGeneratorPage() {
                   </Card>
                 </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quote Summary</CardTitle>
+                <Card className="glass shadow-elegant border-0 transform hover:scale-[1.02] transition-transform duration-300 sticky top-6">
+                  <CardHeader className="bg-gradient-to-r from-success/5 to-success-variant/5 rounded-t-lg">
+                    <CardTitle className="text-xl text-center">Quote Summary</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="p-8 space-y-6">
                     <div className="text-center">
-                      <p className="text-2xl font-bold">{quote.quote_number}</p>
+                      <p className="text-3xl font-bold text-primary">{quote.quote_number}</p>
+                      <p className="text-sm text-muted-foreground mt-1">Quote Reference</p>
                     </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Mode:</span>
-                        <span className="font-medium capitalize">{quote.mode}</span>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 bg-canvas rounded-xl border border-border/50">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Transport Mode:</span>
+                          <span className="font-semibold capitalize text-foreground">{quote.mode}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Route:</span>
-                        <span className="font-medium">{quote.origin || "Origin"} → {quote.destination || "Destination"}</span>
+                      
+                      <div className="p-4 bg-canvas rounded-xl border border-border/50">
+                        <div className="text-sm text-muted-foreground mb-1">Route:</div>
+                        <div className="font-semibold text-foreground text-center">
+                          {quote.origin || "Origin"} → {quote.destination || "Destination"}
+                        </div>
                       </div>
                     </div>
-                    <div className="border-t pt-4 space-y-2">
-                      <div className="flex justify-between">
-                        <span>Total:</span>
-                        <span className="font-bold">${totalSell.toFixed(2)}</span>
+                    
+                    <div className="space-y-4 pt-4 border-t border-border/50">
+                      <div className="flex justify-between items-center p-4 bg-canvas rounded-xl border border-border/50">
+                        <span className="font-semibold text-foreground">Total Quote:</span>
+                        <span className="text-xl font-bold text-success">${totalSell.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Margin:</span>
-                        <span className={`font-bold ${totalMargin >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      
+                      <div className="flex justify-between items-center p-4 bg-canvas rounded-xl border border-border/50">
+                        <span className="font-semibold text-foreground">Profit Margin:</span>
+                        <span className={`text-xl font-bold ${totalMargin >= 0 ? 'text-success' : 'text-destructive'}`}>
                           ${totalMargin.toFixed(2)}
                         </span>
                       </div>
