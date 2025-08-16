@@ -87,16 +87,10 @@ const FeatureGrid = () => {
   return (
     <section className="py-16 lg:py-24 bg-canvas">
       <Container>
-        <div className="text-center mb-12 lg:mb-20">
+        <div className="text-center mb-12 lg:mb-16">
           <Badge className="bg-accent/20 text-accent border-accent/30 mb-6">
             Platform Features
           </Badge>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-text-on-dark mb-6">
-            Everything you need to dominate global trade
-          </h2>
-          <p className="text-lg lg:text-xl text-text-on-dark/70 max-w-4xl mx-auto leading-relaxed">
-            From intelligent search to contact discovery and market analysis—all in one powerful platform.
-          </p>
         </div>
 
         {/* Tab Navigation */}
