@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { User, Bell, Shield, CreditCard, Database, Users, Globe, Save, Upload, Mail, Smartphone, Eye, EyeOff } from 'lucide-react'
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/dashboard/AppSidebar"
+import { Card } from "@/components/ui/card"
 import { useNotifications } from "@/hooks/useNotifications"
 
 export default function SettingsPage() {
@@ -41,27 +42,29 @@ export default function SettingsPage() {
               <div className="grid lg:grid-cols-4 gap-6">
                 {/* Sidebar Navigation */}
                 <div className="lg:col-span-1">
-                  <nav className="space-y-1 bg-white rounded-lg shadow p-4">
-                    {tabs.map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                          activeTab === tab.id
-                            ? 'bg-sky-50 text-sky-700 border-l-4 border-sky-500'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                        }`}
-                      >
-                        <tab.icon className="w-5 h-5 mr-3" />
-                        {tab.label}
-                      </button>
-                    ))}
-                  </nav>
+                  <Card className="p-4">
+                    <nav className="space-y-1">
+                      {tabs.map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            activeTab === tab.id
+                              ? 'bg-sky-50 text-sky-700 border-l-4 border-sky-500'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
+                        >
+                          <tab.icon className="w-5 h-5 mr-3" />
+                          {tab.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </Card>
                 </div>
 
                 {/* Content Area */}
                 <div className="lg:col-span-3">
-                  <div className="bg-white rounded-lg shadow">
+                  <Card className="p-6">
                     
                     {/* Profile Tab */}
                     {activeTab === 'profile' && (
@@ -271,7 +274,7 @@ export default function SettingsPage() {
 
                     {/* Security Tab */}
                     {activeTab === 'security' && (
-                      <div className="p-6">
+                      <div>
                         <div className="flex items-center justify-between mb-6">
                           <h2 className="text-xl font-semibold text-gray-900">Security Settings</h2>
                           <button className="flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors">
@@ -384,7 +387,7 @@ export default function SettingsPage() {
                         </div>
                       </div>
                     )}
-                  </div>
+                  </Card>
                 </div>
               </div>
             </div>

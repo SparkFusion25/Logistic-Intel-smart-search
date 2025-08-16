@@ -13,11 +13,11 @@ interface MetricCardProps {
 
 export function MetricCard({ title, value, change, icon }: MetricCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <Card className="p-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
           {change && (
             <div className="flex items-center gap-1">
               {change.type === 'increase' ? (
@@ -34,11 +34,11 @@ export function MetricCard({ title, value, change, icon }: MetricCardProps) {
           )}
         </div>
         {icon && (
-          <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center">
             {icon}
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
