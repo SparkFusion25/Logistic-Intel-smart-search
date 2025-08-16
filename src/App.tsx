@@ -7,6 +7,11 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import BlogPage from "./pages/BlogPage";
+import SolutionsPage from "./pages/SolutionsPage";
+import WhoWeServePage from "./pages/WhoWeServePage";
+import ResourcesPage from "./pages/ResourcesPage";
+import CompanyPage from "./pages/CompanyPage";
+import LoginPage from "./pages/LoginPage";
 
 // Dashboard Pages
 import SearchIntelligencePage from "./pages/dashboard/SearchIntelligencePage";
@@ -35,6 +40,11 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/solutions" element={<SolutionsPage />} />
+            <Route path="/who-we-serve" element={<WhoWeServePage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/company" element={<CompanyPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/search" element={<SearchIntelligencePage />} />

@@ -70,15 +70,15 @@ const Index = () => {
               />
             </div>
             <div className="hidden lg:flex items-center space-x-8">
-              <a href="#solutions" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Solutions</a>
-              <a href="#who-we-serve" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Who We Serve</a>
-              <a href="#resources" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Resources</a>
+              <Link to="/solutions" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Solutions</Link>
+              <Link to="/who-we-serve" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Who We Serve</Link>
+              <Link to="/resources" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Resources</Link>
               <Link to="/blog" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Blog</Link>
-              <a href="#company" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Company</a>
-              <Button variant="ghost" className="text-text-on-dark/80 hover:text-text-on-dark hover:bg-surface/10">
+              <Link to="/company" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Company</Link>
+              <Link to="/login" className="text-text-on-dark/80 hover:text-text-on-dark hover:bg-surface/10 px-4 py-2 rounded-md transition-colors">
                 Login
-              </Button>
-              <Link to="/dashboard" className="cta-gradient text-white px-6 hover:scale-105 transition-transform">
+              </Link>
+              <Link to="/dashboard" className="cta-gradient text-white px-6 py-2 rounded-md hover:scale-105 transition-transform">
                 Get Demo
               </Link>
             </div>
