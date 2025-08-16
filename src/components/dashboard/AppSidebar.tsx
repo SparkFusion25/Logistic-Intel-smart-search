@@ -17,6 +17,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { SidebarBrand } from "./SidebarBrand"
 
 const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
@@ -52,21 +53,8 @@ export function AppSidebar() {
       collapsible="icon"
       className="border-r-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900"
     >
-      <SidebarHeader className="p-4 border-b border-white/10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-              <div className="w-4 h-4 bg-white rounded-sm"></div>
-            </div>
-            {!collapsed && (
-              <div>
-                <h2 className="font-semibold text-white">LogisticIntel</h2>
-                <p className="text-xs text-white/60">Trade Intelligence</p>
-              </div>
-            )}
-          </div>
-          <SidebarTrigger className="text-white/80 hover:text-white hover:bg-white/10 lg:hidden" />
-        </div>
+      <SidebarHeader className="p-0">
+        <SidebarBrand collapsed={collapsed} />
       </SidebarHeader>
 
       <SidebarContent className="bg-transparent">
@@ -78,11 +66,13 @@ export function AppSidebar() {
                   <SidebarMenuButton 
                     asChild
                     tooltip={collapsed ? item.title : undefined}
-                    className="data-[active=true]:bg-white/16 data-[active=true]:text-white hover:bg-white/10 text-white/85 hover:text-white transition-all mx-2 my-1 rounded-lg"
+                    className="data-[active=true]:bg-white/10 hover:bg-white/5 text-white/85 hover:text-white transition-all mx-2 my-1 rounded-xl group"
                   >
                     <NavLink to={item.url} className="flex items-center gap-3 px-3 py-2">
-                      <item.icon className="w-5 h-5 text-white/90" />
-                      {!collapsed && <span className="text-white font-medium">{item.title}</span>}
+                      <div className="w-5 h-5 shrink-0 rounded-md bg-white/10 transition-colors group-data-[active=true]:bg-[#2D9CDB] group-hover:bg-[#2D9CDB] flex items-center justify-center">
+                        <item.icon className="w-3 h-3 text-white" />
+                      </div>
+                      {!collapsed && <span className="text-white font-medium truncate text-[15px] leading-5">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -99,11 +89,13 @@ export function AppSidebar() {
               <SidebarMenuButton 
                 asChild
                 tooltip={collapsed ? item.title : undefined}
-                className="hover:bg-white/10 text-white/85 hover:text-white transition-all mx-2 my-1 rounded-lg"
+                className="hover:bg-white/5 text-white/85 hover:text-white transition-all mx-2 my-1 rounded-xl group"
               >
                 <NavLink to={item.url} className="flex items-center gap-3 px-3 py-2">
-                  <item.icon className="w-5 h-5 text-white/90" />
-                  {!collapsed && <span className="text-white font-medium">{item.title}</span>}
+                  <div className="w-5 h-5 shrink-0 rounded-md bg-white/10 transition-colors group-hover:bg-[#2D9CDB] flex items-center justify-center">
+                    <item.icon className="w-3 h-3 text-white" />
+                  </div>
+                  {!collapsed && <span className="text-white font-medium truncate text-[15px] leading-5">{item.title}</span>}
                 </NavLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
