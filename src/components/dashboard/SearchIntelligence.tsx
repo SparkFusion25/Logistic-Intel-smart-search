@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
+import { useAPI } from "@/hooks/useAPI"
 import { CompanyCard } from "./CompanyCard"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
 
@@ -34,6 +35,7 @@ export function SearchIntelligence() {
     min_confidence: ""
   })
   const { toast } = useToast()
+  const { makeRequest } = useAPI()
   
   const countries = [
     "United States", "China", "Germany", "Japan", "United Kingdom", 
@@ -171,14 +173,9 @@ export function SearchIntelligence() {
         description: `Adding ${company.name} to CRM pipeline...`
       })
       
-      const response = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-add-from-search`, {
+      const response = await makeRequest('/crm-add-from-search', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`,
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0'
-        },
-        body: JSON.stringify({
+        body: {
           company: {
             name: company.name,
             location: company.location,
@@ -186,31 +183,31 @@ export function SearchIntelligence() {
             trade_volume_usd: company.trade_volume_usd,
             contact: {
               name: `Contact at ${company.name}`,
-              title: "Trade Manager",
+              title: "Trade Manager", 
               email: `contact@${company.name.toLowerCase().replace(/\s+/g, '')}.com`
             }
           },
           pipeline_name: 'Search Intelligence',
           stage_name: 'Prospect Identified',
           source: 'search'
-        })
+        }
       })
 
-      const result = await response.json()
+      console.log('API Response:', response)
       
-      if (result.success) {
+      if (response?.success) {
         toast({
           title: "Success",
-          description: result.message || `${company.name} added to CRM pipeline`
+          description: response.message || `${company.name} added to CRM pipeline`
         })
       } else {
-        throw new Error(result.error || 'Failed to add to CRM')
+        throw new Error(response?.error || 'Failed to add to CRM')
       }
     } catch (error) {
       console.error('Error adding to CRM:', error)
       toast({
         title: "Error",
-        description: "Failed to add company to CRM",
+        description: error instanceof Error ? error.message : "Failed to add company to CRM",
         variant: "destructive"
       })
     }
