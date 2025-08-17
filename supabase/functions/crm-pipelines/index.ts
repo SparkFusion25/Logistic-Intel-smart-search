@@ -29,28 +29,7 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       console.error('Auth error:', userError);
-      
-      // Create demo user if none exists
-      const { data: demoData, error: demoError } = await supabase.auth.signUp({
-        email: 'demo@logisticintel.com',
-        password: 'demo123456',
-      });
-      
-      if (demoError) {
-        console.error('Demo user creation error:', demoError);
-        return new Response(JSON.stringify({ 
-          success: false, 
-          error: 'Authentication required. Please sign in with demo@logisticintel.com / demo123456' 
-        }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'Demo user created. Please sign in with demo@logisticintel.com / demo123456' 
-      }), {
+      return new Response(JSON.stringify({ success: false, error: 'Authentication required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

@@ -78,7 +78,7 @@ serve(async (req) => {
         org_id: orgId,
         pipeline_id: body.pipelineId,
         stage_id: body.stageId,
-        contact_id: body.contact_id ?? null,
+        contact_id: body.contact_id && body.contact_id !== "1" ? body.contact_id : null,
         company_name: body.company_name ?? null,
         title: body.title ?? "Untitled Deal",
         value_usd: body.value_usd ?? null,
