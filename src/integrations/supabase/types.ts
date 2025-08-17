@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          body: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string | null
+          created_by: string | null
+          deal_id: string | null
+          due_at: string | null
+          id: string
+          org_id: string
+          subject: string | null
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deal_id?: string | null
+          due_at?: string | null
+          id?: string
+          org_id: string
+          subject?: string | null
+          type: string
+        }
+        Update: {
+          body?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deal_id?: string | null
+          due_at?: string | null
+          id?: string
+          org_id?: string
+          subject?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_links: {
         Row: {
           affiliate_id: string | null
@@ -933,6 +990,123 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_attachments: {
+        Row: {
+          created_at: string | null
+          deal_id: string
+          id: string
+          meta: Json | null
+          org_id: string
+          title: string | null
+          type: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          deal_id: string
+          id?: string
+          meta?: Json | null
+          org_id: string
+          title?: string | null
+          type: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          deal_id?: string
+          id?: string
+          meta?: Json | null
+          org_id?: string
+          title?: string | null
+          type?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_attachments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          company_name: string | null
+          contact_id: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          expected_close_date: string | null
+          id: string
+          lost_reason: string | null
+          org_id: string
+          pipeline_id: string
+          stage_id: string
+          status: string
+          title: string | null
+          updated_at: string | null
+          value_usd: number | null
+        }
+        Insert: {
+          company_name?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lost_reason?: string | null
+          org_id: string
+          pipeline_id: string
+          stage_id: string
+          status?: string
+          title?: string | null
+          updated_at?: string | null
+          value_usd?: number | null
+        }
+        Update: {
+          company_name?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lost_reason?: string | null
+          org_id?: string
+          pipeline_id?: string
+          stage_id?: string
+          status?: string
+          title?: string | null
+          updated_at?: string | null
+          value_usd?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_stages"
             referencedColumns: ["id"]
           },
         ]
@@ -1982,6 +2156,62 @@ export type Database = {
           segment?: string | null
           tone?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      pipeline_stages: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          org_id: string
+          pipeline_id: string
+          stage_order: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          org_id: string
+          pipeline_id: string
+          stage_order: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          pipeline_id?: string
+          stage_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_stages_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pipelines: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          org_id?: string
         }
         Relationships: []
       }

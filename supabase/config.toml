@@ -68,3 +68,15 @@ verify_jwt = true
 
 [functions.send-notification]
 verify_jwt = false
+
+[functions.crm-pipelines]
+verify_jwt = true
+
+[functions.crm-deals]
+verify_jwt = true
+
+[functions.crm-deal-move]
+verify_jwt = true
+
+[functions.crm-activities]
+verify_jwt = true
