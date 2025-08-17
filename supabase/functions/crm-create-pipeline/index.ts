@@ -52,7 +52,7 @@ serve(async (req) => {
 
     // Create the pipeline
     const { data: pipeline, error: pipelineError } = await supabaseClient
-      .from('crm_pipelines')
+      .from('pipelines')
       .insert({
         name: name.trim(),
         user_id: user.id,
@@ -92,7 +92,7 @@ serve(async (req) => {
     }))
 
     const { data: stages, error: stagesError } = await supabaseClient
-      .from('crm_pipeline_stages')
+      .from('pipeline_stages')
       .insert(stagesToInsert)
       .select()
 
@@ -100,7 +100,7 @@ serve(async (req) => {
       console.error('Stages creation error:', stagesError)
       // Clean up the pipeline if stages failed
       await supabaseClient
-        .from('crm_pipelines')
+        .from('pipelines')
         .delete()
         .eq('id', pipeline.id)
       
