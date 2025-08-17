@@ -100,8 +100,7 @@ serve(async (req) => {
       const stagesToInsert = defaultStages.map(stage => ({
         ...stage,
         pipeline_id: pipeline.id,
-        org_id: user.id,
-        created_at: new Date().toISOString()
+        org_id: user.id
       }))
 
       await supabaseClient
