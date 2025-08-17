@@ -20,6 +20,7 @@ export default function DealsPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [dealsByStage, setDealsByStage] = useState<Record<string, Deal[]>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadPipelines();
@@ -27,17 +28,29 @@ export default function DealsPage() {
 
   async function loadPipelines() {
     try {
+      console.log('Attempting to load pipelines...');
       const { data, error } = await supabase.functions.invoke('crm-pipelines');
-      if (error) throw error;
+      console.log('Response:', { data, error });
       
-      if (data.success) {
+      if (error) {
+        console.error('Supabase function error:', error);
+        setError(`Failed to load pipelines: ${error.message}`);
+        return;
+      }
+      
+      if (data && data.success) {
+        console.log('Successfully loaded pipelines:', data.data);
         setPipelines(data.data);
         const first = data.data?.[0]?.id ?? null;
         setSelected(first);
         if (first) loadDeals(first);
+      } else {
+        console.error('Unexpected response format:', data);
+        setError(data?.error || 'Unexpected response format');
       }
     } catch (error) {
       console.error('Error loading pipelines:', error);
+      setError(`Error loading pipelines: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -101,7 +114,7 @@ export default function DealsPage() {
     );
   }
 
-  if (!current) {
+  if (!current && !loading) {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
@@ -109,8 +122,22 @@ export default function DealsPage() {
           <SidebarInset className="flex-1">
             <TopBar />
             <main className="flex-1 p-6">
-              <div className="flex items-center justify-center h-64">
-                <div className="text-muted-foreground">No pipeline found.</div>
+              <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                <div className="text-lg font-semibold text-foreground">Deal Pipeline</div>
+                {error ? (
+                  <div className="text-destructive text-center">
+                    <p className="font-medium">Error loading pipeline:</p>
+                    <p className="text-sm">{error}</p>
+                    <button 
+                      onClick={() => { setError(null); setLoading(true); loadPipelines(); }}
+                      className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground">No pipeline found.</div>
+                )}
               </div>
             </main>
           </SidebarInset>
