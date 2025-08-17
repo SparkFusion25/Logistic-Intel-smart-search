@@ -7,16 +7,48 @@ import Container from "@/components/ui/Container";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Mail, Lock, TrendingUp, Search, BarChart, Database } from "lucide-react";
 import Typewriter from 'typewriter-effect';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For demo purposes, redirect to dashboard
-    navigate("/dashboard");
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: error.message,
+        });
+      } else if (data.user) {
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "An unexpected error occurred.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -156,9 +188,10 @@ const LoginPage = () => {
                     <Button 
                       type="submit" 
                       size="lg" 
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-blue-500/25 hover:scale-105 transition-all duration-300"
+                      disabled={loading}
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-blue-500/25 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Sign In
+                      {loading ? "Signing In..." : "Sign In"}
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </form>

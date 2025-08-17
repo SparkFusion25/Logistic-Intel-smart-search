@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/components/AuthProvider";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -12,6 +13,7 @@ import WhoWeServePage from "./pages/WhoWeServePage";
 import ResourcesPage from "./pages/ResourcesPage";
 import CompanyPage from "./pages/CompanyPage";
 import LoginPage from "./pages/LoginPage";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Dashboard Pages
 import SearchIntelligencePage from "./pages/dashboard/SearchIntelligencePage";
@@ -35,11 +37,12 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <div>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <AuthProvider>
+      <TooltipProvider>
+        <div>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/solutions" element={<SolutionsPage />} />
@@ -48,28 +51,29 @@ const App = () => (
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/blog" element={<BlogPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/search" element={<SearchIntelligencePage />} />
-            <Route path="/dashboard/crm" element={<CRMPage />} />
-            <Route path="/dashboard/deals" element={<DealsPage />} />
-            <Route path="/dashboard/email" element={<EmailPage />} />
-            <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-            <Route path="/dashboard/campaigns" element={<CampaignsPage />} />
-            <Route path="/dashboard/campaigns/builder" element={<CampaignBuilderPage />} />
-            <Route path="/dashboard/campaigns/templates" element={<CampaignTemplatesPage />} />
-          <Route path="/dashboard/campaigns/analytics" element={<CampaignAnalyticsPage />} />
-            <Route path="/dashboard/campaigns/follow-ups" element={<FollowUpsPage />} />
-            <Route path="/dashboard/widgets" element={<WidgetsPage />} />
-            <Route path="/dashboard/widgets/quote" element={<QuoteGeneratorPage />} />
-            <Route path="/dashboard/widgets/tariff" element={<TariffCalculatorPage />} />
-            <Route path="/dashboard/widgets/benchmark" element={<BenchmarkPage />} />
-            <Route path="/dashboard/company/:companyId" element={<CompanyProfilePage />} />
-            <Route path="/dashboard/settings" element={<SettingsPage />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/search" element={<ProtectedRoute><SearchIntelligencePage /></ProtectedRoute>} />
+            <Route path="/dashboard/crm" element={<ProtectedRoute><CRMPage /></ProtectedRoute>} />
+            <Route path="/dashboard/deals" element={<ProtectedRoute><DealsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/email" element={<ProtectedRoute><EmailPage /></ProtectedRoute>} />
+            <Route path="/dashboard/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/campaigns/builder" element={<ProtectedRoute><CampaignBuilderPage /></ProtectedRoute>} />
+            <Route path="/dashboard/campaigns/templates" element={<ProtectedRoute><CampaignTemplatesPage /></ProtectedRoute>} />
+          <Route path="/dashboard/campaigns/analytics" element={<ProtectedRoute><CampaignAnalyticsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/campaigns/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/widgets" element={<ProtectedRoute><WidgetsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/widgets/quote" element={<ProtectedRoute><QuoteGeneratorPage /></ProtectedRoute>} />
+            <Route path="/dashboard/widgets/tariff" element={<ProtectedRoute><TariffCalculatorPage /></ProtectedRoute>} />
+            <Route path="/dashboard/widgets/benchmark" element={<ProtectedRoute><BenchmarkPage /></ProtectedRoute>} />
+            <Route path="/dashboard/company/:companyId" element={<ProtectedRoute><CompanyProfilePage /></ProtectedRoute>} />
+            <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </div>
     </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
