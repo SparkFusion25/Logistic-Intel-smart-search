@@ -56,7 +56,7 @@ serve(async (req) => {
       .from('pipelines')
       .select('id, name')
       .eq('name', pipeline_name || 'Search Intelligence')
-      .eq('user_id', user.id)
+      .eq('org_id', user.id)
       .single()
 
     if (existingPipeline) {
@@ -67,7 +67,7 @@ serve(async (req) => {
         .from('pipelines')
         .insert({
           name: pipeline_name || 'Search Intelligence',
-          user_id: user.id,
+          org_id: user.id,
           created_at: new Date().toISOString()
         })
         .select()
