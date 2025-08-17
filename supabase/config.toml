@@ -80,3 +80,12 @@ verify_jwt = true
 
 [functions.crm-activities]
 verify_jwt = true
+
+[functions.crm-seed-pipeline]
+verify_jwt = true
+
+[functions.crm-create-pipeline]
+verify_jwt = true
+
+[functions.crm-add-from-search]
+verify_jwt = true
