@@ -1,6 +1,7 @@
-import logoImage from "@/assets/logistic-intel-logo.png";
-
 export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
+  const ICON_URL = "https://zupuxlrtixhfnbuhxhum.supabase.co/storage/v1/object/public/branding/logo-icon-white.png";
+  const FULL_URL = "https://zupuxlrtixhfnbuhxhum.supabase.co/storage/v1/object/public/branding/logo-full-white.png";
+
   return (
     <div className="flex items-center h-14 px-3 border-b border-white/10">
       {/* Icon: white by default; blue on hover/active */}
@@ -10,7 +11,7 @@ export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
         aria-label="LogisticIntel"
       >
         <img
-          src={logoImage}
+          src={ICON_URL}
           alt="LogisticIntel"
           className="h-7 w-7"
         />
@@ -20,7 +21,7 @@ export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
       {!collapsed && (
         <div className="ml-2 min-w-0">
           <img
-            src={logoImage}
+            src={FULL_URL}
             alt="LOGISTICINTEL — Trade Intelligence"
             className="max-w-[148px] h-auto"
           />
