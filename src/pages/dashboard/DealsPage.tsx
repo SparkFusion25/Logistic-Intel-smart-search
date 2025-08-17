@@ -65,10 +65,44 @@ export default function DealsPage() {
       console.log('Pipeline response:', json);
       
       if (json.success && json.data) {
-        setPipelines(json.data);
-        if (json.data.length > 0) {
-          setSelected(json.data[0].id);
-          await loadDeals(json.data[0].id);
+        if (json.data.length === 0) {
+          // Auto-seed if no pipelines exist
+          await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-seed-pipeline`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+            },
+            cache: "no-store",
+          });
+          
+          // Re-fetch pipelines after seeding
+          const res2 = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-pipelines`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              "x-client-info": "deals-page",
+              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+            },
+            cache: "no-store",
+          });
+          
+          if (res2.ok) {
+            const json2 = await res2.json();
+            setPipelines(json2.data ?? []);
+            if (json2.data?.length > 0) {
+              setSelected(json2.data[0].id);
+              await loadDeals(json2.data[0].id);
+            }
+          }
+        } else {
+          setPipelines(json.data);
+          if (json.data.length > 0) {
+            setSelected(json.data[0].id);
+            await loadDeals(json.data[0].id);
+          }
         }
       } else {
         throw new Error(json.error || 'Failed to load pipelines');
@@ -87,19 +121,28 @@ export default function DealsPage() {
       const pipeline = pipelines.find(p => p.id === pipelineId) ?? null;
       if (!pipeline) return;
       
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
       const next: Record<string, Deal[]> = {};
       for (const st of pipeline.pipeline_stages) {
-        const { data, error } = await supabase.functions.invoke('crm-deals', {
-          body: { 
-            pipelineId, 
-            stageId: st.id, 
-            limit: 200,
-            q: q || undefined
-          }
+        const res = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-deals?pipelineId=${pipelineId}&stageId=${st.id}&limit=200${q ? `&q=${encodeURIComponent(q)}` : ''}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+          },
+          cache: "no-store",
         });
         
-        if (error) throw error;
-        next[st.id] = data.success ? data.data : [];
+        if (res.ok) {
+          const data = await res.json();
+          next[st.id] = data.success ? data.data : [];
+        } else {
+          console.error('Failed to load deals for stage:', st.id);
+          next[st.id] = [];
+        }
       }
       setDealsByStage(next);
     } catch (error) {
@@ -121,12 +164,26 @@ export default function DealsPage() {
     if (!dealId || !toStageId || dealId === toStageId) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('crm-deal-move', {
-        body: { dealId, stage_id: toStageId }
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const res = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-deal-move`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+        },
+        body: JSON.stringify({ deal_id: dealId, stage_id: toStageId }),
+        cache: "no-store",
       });
-      
-      if (error) throw error;
-      if (data.success && selected) await loadDeals(selected);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && selected) await loadDeals(selected);
+      } else {
+        console.error('Failed to move deal:', res.status, await res.text());
+      }
     } catch (error) {
       console.error('Error moving deal:', error);
     }

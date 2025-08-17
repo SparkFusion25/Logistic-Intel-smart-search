@@ -35,7 +35,22 @@ serve(async (req) => {
       });
     }
 
-    const orgId = user.id;
+    // Get user's org_id
+    const { data: me, error: meErr } = await supabase
+      .from("users")
+      .select("org_id")
+      .eq("id", user.id)
+      .single();
+    
+    if (meErr || !me?.org_id) {
+      console.error('Org lookup error:', meErr);
+      return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const orgId = me.org_id;
 
     if (req.method === 'GET') {
       const url = new URL(req.url);
@@ -74,17 +89,66 @@ serve(async (req) => {
       const body = await req.json();
       console.log('Creating deal with data:', body);
 
+      // Validate stage belongs to this org
+      let stageId = body?.stage_id as string | undefined;
+      let pipelineId = body?.pipeline_id as string | undefined;
+
+      if (!stageId || !pipelineId) {
+        // default to first stage of 'Default' pipeline
+        const { data: pipelines } = await supabase
+          .from("pipelines")
+          .select("id, name, pipeline_stages(id, stage_order)")
+          .eq("org_id", orgId)
+          .order("name", { ascending: true })
+          .order("stage_order", { referencedTable: "pipeline_stages", ascending: true });
+
+        const first = pipelines?.[0];
+        stageId = stageId ?? first?.pipeline_stages?.[0]?.id;
+        pipelineId = pipelineId ?? first?.id;
+      }
+
+      if (!stageId || !pipelineId) {
+        return new Response(JSON.stringify({ success: false, error: "No pipeline/stage available" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Ensure provided stage exists for this org
+      const { data: stg } = await supabase
+        .from("pipeline_stages")
+        .select("id, pipeline_id")
+        .eq("id", stageId)
+        .eq("org_id", orgId)
+        .single();
+      
+      if (!stg) {
+        return new Response(JSON.stringify({ success: false, error: "Invalid stage" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // If client sent pipeline_id, ensure it matches the stage's pipeline
+      if (pipelineId && pipelineId !== stg.pipeline_id) {
+        return new Response(JSON.stringify({ success: false, error: "Stage does not belong to given pipeline" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const payload = {
         org_id: orgId,
-        pipeline_id: body.pipelineId,
-        stage_id: body.stageId,
+        pipeline_id: stg.pipeline_id,
+        stage_id: stg.id,
         contact_id: body.contact_id && body.contact_id !== "1" ? body.contact_id : null,
         company_name: body.company_name ?? null,
         title: body.title ?? "Untitled Deal",
         value_usd: body.value_usd ?? null,
         currency: body.currency ?? "USD",
         expected_close_date: body.expected_close_date ?? null,
-        created_by: orgId
+        status: "open",
+        created_by: user.id
       };
 
       console.log('Inserting deal payload:', payload);

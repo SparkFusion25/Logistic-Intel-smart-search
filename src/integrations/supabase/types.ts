@@ -1103,6 +1103,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "deals_stage_fk"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_stages"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "deals_stage_id_fkey"
             columns: ["stage_id"]
             isOneToOne: false

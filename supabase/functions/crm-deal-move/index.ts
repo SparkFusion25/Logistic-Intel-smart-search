@@ -12,54 +12,111 @@ serve(async (req) => {
   }
 
   try {
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: req.headers.get('Authorization') ?? '',
+          },
+        },
+      }
     );
 
-    // Get the authenticated user from JWT
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ success: false, error: 'Authorization header required' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const orgId = user.id;
-    const url = new URL(req.url);
-    const dealId = url.pathname.split('/').pop();
-
-    if (req.method === 'POST') {
-      const { stage_id } = await req.json();
-
-      const { error } = await supabase.from("deals")
-        .update({ stage_id })
-        .eq("org_id", orgId)
-        .eq("id", dealId);
-
-      if (error) {
-        return new Response(JSON.stringify({ success: false, error: error.message }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      return new Response(JSON.stringify({ success: true }), {
+    // Get user's org_id
+    const { data: me, error: meErr } = await supabase
+      .from("users")
+      .select("org_id")
+      .eq("id", user.id)
+      .single();
+    
+    if (meErr || !me?.org_id) {
+      return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
+        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), {
-      status: 405,
+    const body = await req.json();
+    const dealId = String(body?.deal_id ?? body?.id ?? body?.dealId ?? "");
+    const stageId = String(body?.stage_id ?? "");
+
+    if (!dealId || !stageId) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing deal_id or stage_id' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate deal belongs to org
+    const { data: deal } = await supabase
+      .from("deals")
+      .select("id, org_id, pipeline_id, stage_id")
+      .eq("id", dealId)
+      .eq("org_id", me.org_id)
+      .single();
+    
+    if (!deal) {
+      return new Response(JSON.stringify({ success: false, error: 'Deal not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate stage belongs to org (and optionally same pipeline)
+    const { data: stage } = await supabase
+      .from("pipeline_stages")
+      .select("id, pipeline_id")
+      .eq("id", stageId)
+      .eq("org_id", me.org_id)
+      .single();
+    
+    if (!stage) {
+      return new Response(JSON.stringify({ success: false, error: 'Stage not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Ensure target stage is within the same pipeline as the deal
+    if (stage.pipeline_id !== deal.pipeline_id) {
+      return new Response(JSON.stringify({ success: false, error: 'Stage pipeline mismatch' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { error: updErr } = await supabase
+      .from("deals")
+      .update({ stage_id: stage.id })
+      .eq("id", deal.id)
+      .eq("org_id", me.org_id);
+
+    if (updErr) {
+      return new Response(JSON.stringify({ success: false, error: updErr.message }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
