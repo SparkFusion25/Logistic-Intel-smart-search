@@ -4,6 +4,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, DollarSign, Building, User } from "lucide-react";
+import { SalesAssistant } from "./SalesAssistant";
+import { OpportunityMeter } from "./OpportunityMeter";
+import { LeadScoreChip } from "./LeadScoreChip";
 
 interface DealDrawerProps {
   open: boolean;
@@ -41,6 +44,15 @@ export function DealDrawer({ open, onOpenChange, dealId, onMove }: DealDrawerPro
         </SheetHeader>
         
         <div className="mt-6 space-y-6">
+          {/* Lead Score and Opportunity Meter */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Lead Score:</span>
+              <LeadScoreChip score={78} />
+            </div>
+            <OpportunityMeter score={78} className="col-span-2" />
+          </div>
+          
           {/* Deal Overview */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
@@ -79,6 +91,9 @@ export function DealDrawer({ open, onOpenChange, dealId, onMove }: DealDrawerPro
               </div>
             )}
           </div>
+          
+          {/* AI Sales Assistant for this Deal */}
+          <SalesAssistant subjectType="deal" subjectId={dealId} />
           
           {/* Actions */}
           <div className="space-y-2">
