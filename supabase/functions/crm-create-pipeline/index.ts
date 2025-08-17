@@ -55,8 +55,7 @@ serve(async (req) => {
       .from('pipelines')
       .insert({
         name: name.trim(),
-        user_id: user.id,
-        created_at: new Date().toISOString()
+        org_id: user.id
       })
       .select()
       .single()
@@ -88,7 +87,7 @@ serve(async (req) => {
     const stagesToInsert = defaultStages.map(stage => ({
       ...stage,
       pipeline_id: pipeline.id,
-      created_at: new Date().toISOString()
+      org_id: user.id
     }))
 
     const { data: stages, error: stagesError } = await supabaseClient
