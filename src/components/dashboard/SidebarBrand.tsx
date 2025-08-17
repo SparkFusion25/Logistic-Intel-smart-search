@@ -1,5 +1,4 @@
-const ICON_PNG = "/branding/logo-icon-white.png";
-const FULL_PNG = "/branding/logo-full-white.png";
+import logoImage from "@/assets/logistic-intel-logo.png";
 
 export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
   return (
@@ -11,7 +10,7 @@ export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
         aria-label="LogisticIntel"
       >
         <img
-          src={ICON_PNG}
+          src={logoImage}
           alt="LogisticIntel"
           className="h-7 w-7"
         />
@@ -21,7 +20,7 @@ export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
       {!collapsed && (
         <div className="ml-2 min-w-0">
           <img
-            src={FULL_PNG}
+            src={logoImage}
             alt="LOGISTICINTEL — Trade Intelligence"
             className="max-w-[148px] h-auto"
           />
