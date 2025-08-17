@@ -40,19 +40,8 @@ serve(async (req) => {
       });
     }
 
-    // Get user's org_id
-    const { data: me, error: meErr } = await supabase
-      .from("users")
-      .select("org_id")
-      .eq("id", user.id)
-      .single();
-    
-    if (meErr || !me?.org_id) {
-      return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Use auth.uid() directly as org_id for simplicity
+    const orgId = user.id;
 
     const body = await req.json();
     const dealId = String(body?.deal_id ?? body?.id ?? body?.dealId ?? "");
@@ -65,12 +54,11 @@ serve(async (req) => {
       });
     }
 
-    // Validate deal belongs to org
     const { data: deal } = await supabase
       .from("deals")
       .select("id, org_id, pipeline_id, stage_id")
       .eq("id", dealId)
-      .eq("org_id", me.org_id)
+      .eq("org_id", orgId)
       .single();
     
     if (!deal) {
@@ -80,12 +68,11 @@ serve(async (req) => {
       });
     }
 
-    // Validate stage belongs to org (and optionally same pipeline)
     const { data: stage } = await supabase
       .from("pipeline_stages")
       .select("id, pipeline_id")
       .eq("id", stageId)
-      .eq("org_id", me.org_id)
+      .eq("org_id", orgId)
       .single();
     
     if (!stage) {
@@ -107,7 +94,7 @@ serve(async (req) => {
       .from("deals")
       .update({ stage_id: stage.id })
       .eq("id", deal.id)
-      .eq("org_id", me.org_id);
+      .eq("org_id", orgId);
 
     if (updErr) {
       return new Response(JSON.stringify({ success: false, error: updErr.message }), {

@@ -50,25 +50,13 @@ serve(async (req) => {
       });
     }
 
-    // 2) Resolve org
-    const { data: me, error: meErr } = await supabase
-      .from("users")
-      .select("org_id")
-      .eq("id", user.id)
-      .single();
-    
-    if (meErr || !me?.org_id) {
-      return new Response(JSON.stringify({ success: false, error: "Forbidden" }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // 2) Use auth.uid() directly as org_id for simplicity
+    const orgId = user.id;
 
-    // 3) Do I already have a pipeline?
     const { data: existing } = await supabase
       .from("pipelines")
       .select("id, name")
-      .eq("org_id", me.org_id)
+      .eq("org_id", orgId)
       .order("created_at", { ascending: true })
       .limit(1);
 
@@ -76,7 +64,7 @@ serve(async (req) => {
     if (!existing || existing.length === 0) {
       const { data: inserted, error: insErr } = await supabase
         .from("pipelines")
-        .insert({ org_id: me.org_id, name: "Default" })
+        .insert({ org_id: orgId, name: "Default" })
         .select("id")
         .single();
       
@@ -88,7 +76,7 @@ serve(async (req) => {
       }
 
       const rows = DEFAULT_STAGES.map((name, i) => ({
-        org_id: me.org_id,
+        org_id: orgId,
         pipeline_id: inserted.id,
         name,
         stage_order: i + 1,
@@ -112,14 +100,14 @@ serve(async (req) => {
     const { data: stages } = await supabase
       .from("pipeline_stages")
       .select("id, name, stage_order")
-      .eq("org_id", me.org_id)
+      .eq("org_id", orgId)
       .eq("pipeline_id", pipelineId);
 
     const missing = DEFAULT_STAGES.filter(s => !stages?.some(x => x.name === s));
     if (missing.length) {
       const startOrder = (stages?.length ?? 0) + 1;
       const rows = missing.map((name, idx) => ({
-        org_id: me.org_id,
+        org_id: orgId,
         pipeline_id: pipelineId,
         name,
         stage_order: startOrder + idx,

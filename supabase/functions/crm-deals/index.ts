@@ -35,22 +35,8 @@ serve(async (req) => {
       });
     }
 
-    // Get user's org_id
-    const { data: me, error: meErr } = await supabase
-      .from("users")
-      .select("org_id")
-      .eq("id", user.id)
-      .single();
-    
-    if (meErr || !me?.org_id) {
-      console.error('Org lookup error:', meErr);
-      return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const orgId = me.org_id;
+    // Use auth.uid() directly as org_id for simplicity
+    const orgId = user.id;
 
     if (req.method === 'GET') {
       const url = new URL(req.url);
