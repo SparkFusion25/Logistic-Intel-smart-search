@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { 
   Users, Plus, Search, Filter, MoreVertical, Mail, Phone, 
   Building2, MapPin, Calendar, Star, Tag, Eye, Edit3,
-  UserPlus, Download, RefreshCw, ArrowUpRight
+  UserPlus, Download, RefreshCw, ArrowUpRight, Workflow
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ContactModal } from './ContactModal'
 import { EmailModal } from './EmailModal'
+import { Button } from '@/components/ui/button'
+import { useNavigate } from 'react-router-dom'
 
 export function CRMDashboard() {
   const [activeTab, setActiveTab] = useState('contacts')
@@ -29,6 +31,7 @@ export function CRMDashboard() {
   })
   const [favoriteContacts, setFavoriteContacts] = useState<Set<number>>(new Set())
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   const contacts = [
     {
@@ -231,20 +234,29 @@ export function CRMDashboard() {
             <p className="mt-2 text-gray-600">Manage contacts, deals, and relationships</p>
           </div>
           <div className="mt-4 lg:mt-0 flex items-center space-x-3">
-            <button 
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/dashboard/deals')}
+              className="flex items-center px-4 py-2"
+            >
+              <Workflow className="w-4 h-4 mr-2" />
+              View Deals Pipeline
+            </Button>
+            <Button 
+              variant="outline"
               onClick={handleExport}
-              className="flex items-center px-4 py-2 text-sky-600 border border-sky-200 rounded-lg hover:bg-sky-50 transition-colors"
+              className="flex items-center px-4 py-2"
             >
               <Download className="w-4 h-4 mr-2" />
               Export
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={handleAddContact}
-              className="flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+              className="flex items-center px-4 py-2"
             >
               <UserPlus className="w-4 h-4 mr-2" />
               Add Contact
-            </button>
+            </Button>
           </div>
         </div>
       </div>

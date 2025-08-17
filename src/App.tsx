@@ -16,6 +16,7 @@ import LoginPage from "./pages/LoginPage";
 // Dashboard Pages
 import SearchIntelligencePage from "./pages/dashboard/SearchIntelligencePage";
 import CRMPage from "./pages/dashboard/CRMPage";
+import DealsPage from "./pages/dashboard/DealsPage";
 import EmailPage from "./pages/dashboard/EmailPage";
 import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
 import CampaignsPage from "./pages/dashboard/CampaignsPage"
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/search" element={<SearchIntelligencePage />} />
             <Route path="/dashboard/crm" element={<CRMPage />} />
+            <Route path="/dashboard/deals" element={<DealsPage />} />
             <Route path="/dashboard/email" element={<EmailPage />} />
             <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
             <Route path="/dashboard/campaigns" element={<CampaignsPage />} />
