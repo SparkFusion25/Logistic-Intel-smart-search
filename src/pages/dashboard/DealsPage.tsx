@@ -66,36 +66,55 @@ export default function DealsPage() {
       
       if (json.success && json.data) {
         if (json.data.length === 0) {
+          console.log('No pipelines found, attempting to seed...');
           // Auto-seed if no pipelines exist
-          await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-seed-pipeline`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
-            },
-            cache: "no-store",
-          });
-          
-          // Re-fetch pipelines after seeding
-          const res2 = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-pipelines`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              "x-client-info": "deals-page",
-              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
-            },
-            cache: "no-store",
-          });
-          
-          if (res2.ok) {
-            const json2 = await res2.json();
-            setPipelines(json2.data ?? []);
-            if (json2.data?.length > 0) {
-              setSelected(json2.data[0].id);
-              await loadDeals(json2.data[0].id);
+          try {
+            const seedRes = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-seed-pipeline`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+              },
+              cache: "no-store",
+            });
+            
+            console.log('Seed response status:', seedRes.status);
+            if (seedRes.ok) {
+              const seedJson = await seedRes.json();
+              console.log('Seed response:', seedJson);
+              
+              // Re-fetch pipelines after seeding
+              const res2 = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-pipelines`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                  "x-client-info": "deals-page",
+                  "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+                },
+                cache: "no-store",
+              });
+              
+              if (res2.ok) {
+                const json2 = await res2.json();
+                console.log('Re-fetched pipelines:', json2);
+                setPipelines(json2.data ?? []);
+                if (json2.data?.length > 0) {
+                  setSelected(json2.data[0].id);
+                  await loadDeals(json2.data[0].id);
+                }
+              } else {
+                console.error('Failed to re-fetch pipelines:', res2.status);
+              }
+            } else {
+              const errorText = await seedRes.text();
+              console.error('Seed failed:', seedRes.status, errorText);
+              setError(`Failed to create default pipeline: ${errorText}`);
             }
+          } catch (seedError) {
+            console.error('Seed request failed:', seedError);
+            setError('Failed to create default pipeline. Please try refreshing the page.');
           }
         } else {
           setPipelines(json.data);
@@ -224,16 +243,91 @@ export default function DealsPage() {
                   <div className="text-destructive text-center">
                     <p className="font-medium">Error loading pipeline:</p>
                     <p className="text-sm">{error}</p>
-                    <Button 
-                      onClick={() => { setError(null); setLoading(true); loadPipelines(); }}
-                      className="mt-2"
-                      variant="outline"
-                    >
-                      Retry
-                    </Button>
+                    <div className="flex gap-2 justify-center mt-2">
+                      <Button 
+                        onClick={() => { setError(null); setLoading(true); loadPipelines(); }}
+                        variant="outline"
+                      >
+                        Retry
+                      </Button>
+                      <Button 
+                        onClick={async () => {
+                          setLoading(true);
+                          setError(null);
+                          try {
+                            const { data: { session } } = await supabase.auth.getSession();
+                            const token = session?.access_token;
+                            console.log('Manual seed attempt with token:', !!token);
+                            
+                            const seedRes = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-seed-pipeline`, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+                              },
+                            });
+                            
+                            console.log('Manual seed response status:', seedRes.status);
+                            if (seedRes.ok) {
+                              const seedJson = await seedRes.json();
+                              console.log('Manual seed response:', seedJson);
+                              await loadPipelines();
+                            } else {
+                              const errorText = await seedRes.text();
+                              console.error('Manual seed failed:', seedRes.status, errorText);
+                              setError(`Seed failed: ${errorText}`);
+                            }
+                          } catch (err) {
+                            console.error('Manual seed error:', err);
+                            setError(`Seed error: ${err.message}`);
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        variant="default"
+                      >
+                        Create Pipeline
+                      </Button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-muted-foreground">No pipeline found.</div>
+                  <div className="text-center space-y-4">
+                    <div className="text-muted-foreground">No pipeline found.</div>
+                    <Button 
+                      onClick={async () => {
+                        setLoading(true);
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession();
+                          const token = session?.access_token;
+                          console.log('Creating pipeline with token:', !!token);
+                          
+                          const seedRes = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-seed-pipeline`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+                            },
+                          });
+                          
+                          if (seedRes.ok) {
+                            await loadPipelines();
+                          } else {
+                            const errorText = await seedRes.text();
+                            setError(`Failed to create pipeline: ${errorText}`);
+                          }
+                        } catch (err) {
+                          setError(`Error: ${err.message}`);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Default Pipeline
+                    </Button>
+                  </div>
                 )}
               </div>
             </main>
