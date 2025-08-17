@@ -17,18 +17,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    // Get the authenticated user from JWT
+    // Get user from JWT token in Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ success: false, error: 'Authorization header required' }), {
+      return new Response(JSON.stringify({ success: false, error: 'No authorization header' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+    // Create client with the user's token for auth context
+    const userClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: authHeader,
+          },
+        },
+      }
+    );
+
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Authentication failed' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -37,7 +50,7 @@ serve(async (req) => {
     const orgId = user.id;
 
     if (req.method === 'GET') {
-      const { data: pipelines, error } = await supabase
+      const { data: pipelines, error } = await userClient
         .from("pipelines")
         .select("id, name, created_at, pipeline_stages(id, name, stage_order)")
         .eq("org_id", orgId)
@@ -60,7 +73,7 @@ serve(async (req) => {
       const body = await req.json();
       const name = (body?.name || "Pipeline").toString();
 
-      const { data, error } = await supabase
+      const { data, error } = await userClient
         .from("pipelines")
         .insert({ org_id: orgId, name })
         .select("id, name")

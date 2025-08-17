@@ -17,18 +17,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    // Get the authenticated user from JWT
+    // Get user from JWT token in Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ success: false, error: 'Authorization header required' }), {
+      return new Response(JSON.stringify({ success: false, error: 'No authorization header' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+    // Create client with the user's token for auth context
+    const userClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: authHeader,
+          },
+        },
+      }
+    );
+
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Authentication failed' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -44,7 +57,7 @@ serve(async (req) => {
       const limit = Number(url.searchParams.get("limit") ?? 50);
       const offset = Number(url.searchParams.get("offset") ?? 0);
 
-      let query = supabase
+      let query = userClient
         .from("deals")
         .select("id, title, company_name, value_usd, currency, expected_close_date, status, stage_id, contact_id, created_at, updated_at, crm_contacts(full_name, email, company_name)")
         .eq("org_id", orgId)
@@ -84,7 +97,7 @@ serve(async (req) => {
         created_by: orgId
       };
 
-      const { data, error } = await supabase
+      const { data, error } = await userClient
         .from("deals")
         .insert(payload)
         .select("id, title, company_name, value_usd, stage_id")
