@@ -18,6 +18,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 // Dashboard Pages
 import SearchIntelligencePage from "./pages/dashboard/SearchIntelligencePage";
 import CRMPage from "./pages/dashboard/CRMPage";
+import ContactsPage from "./pages/dashboard/ContactsPage";
 import DealsPage from "./pages/dashboard/DealsPage";
 import EmailPage from "./pages/dashboard/EmailPage";
 import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard/search" element={<ProtectedRoute><SearchIntelligencePage /></ProtectedRoute>} />
             <Route path="/dashboard/crm" element={<ProtectedRoute><CRMPage /></ProtectedRoute>} />
+            <Route path="/dashboard/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
             <Route path="/dashboard/deals" element={<ProtectedRoute><DealsPage /></ProtectedRoute>} />
             <Route path="/dashboard/email" element={<ProtectedRoute><EmailPage /></ProtectedRoute>} />
             <Route path="/dashboard/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />

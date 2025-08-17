@@ -19,6 +19,25 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Phase 21 CRM Brand Colors (Pipedrive-ish)
+				brand: {
+					primary: '#2F80ED',
+					primaryFg: '#FFFFFF',
+					accent: '#00C2A8',
+					warning: '#F2994A',
+					danger: '#EB5757'
+				},
+				surface: {
+					base: '#FFFFFF',
+					subtle: '#F7F9FC',
+					card: '#FFFFFF'
+				},
+				text: {
+					main: '#0F172A',
+					muted: '#64748B'
+				},
+				line: '#E5EAF2',
+
 				/* Enhanced Design System Colors */
 				'canvas': 'hsl(var(--bg-canvas))',
 				'elevated': 'hsl(var(--bg-elevated))',
@@ -130,6 +149,8 @@ export default {
 				'primary-gradient': 'linear-gradient(135deg, hsl(var(--primary-600)), hsl(var(--primary-800)))',
 			},
 			boxShadow: {
+				// Phase 21 CRM Shadows
+				'card': '0 2px 10px rgba(20,23,28,0.05)',
 				'enterprise-lg': 'var(--shadow-lg)',
 				'enterprise-md': 'var(--shadow-md)',
 				'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
@@ -139,6 +160,8 @@ export default {
 				'glow': '0 0 40px hsl(var(--primary) / 0.4)',
 			},
 			borderRadius: {
+				// Phase 21 CRM Border Radius
+				'xl2': '1rem',
 				'card': 'var(--radius-card)',
 				'pill': 'var(--radius-pill)',
 				lg: 'var(--radius)',
