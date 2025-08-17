@@ -35,9 +35,9 @@ serve(async (req) => {
     }
 
     const orgId = user.id;
-    const url = new URL(req.url);
 
     if (req.method === 'GET') {
+      const url = new URL(req.url);
       const pipelineId = url.searchParams.get("pipelineId");
       const stageId = url.searchParams.get("stageId");
       const q = url.searchParams.get("q");
@@ -73,8 +73,8 @@ serve(async (req) => {
 
       const payload = {
         org_id: orgId,
-        pipeline_id: body.pipeline_id,
-        stage_id: body.stage_id,
+        pipeline_id: body.pipelineId,
+        stage_id: body.stageId,
         contact_id: body.contact_id ?? null,
         company_name: body.company_name ?? null,
         title: body.title ?? "Untitled Deal",
@@ -87,7 +87,7 @@ serve(async (req) => {
       const { data, error } = await supabase
         .from("deals")
         .insert(payload)
-        .select("id, title, stage_id")
+        .select("id, title, company_name, value_usd, stage_id")
         .single();
 
       if (error) {

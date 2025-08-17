@@ -7,6 +7,7 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { ContactModal } from './ContactModal'
 import { EmailModal } from './EmailModal'
+import { NewDealDialog } from '@/components/CRM/NewDealDialog'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 
@@ -455,13 +456,22 @@ export function CRMDashboard() {
                         <Star className={`w-4 h-4 ${favoriteContacts.has(contact.id) ? 'fill-current' : ''}`} />
                       </button>
                     </div>
-                    <button 
-                      onClick={() => handleEditContact(contact)}
-                      className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
-                      title="Edit Contact"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <NewDealDialog 
+                        pipelineId="default-pipeline"
+                        stageId="default-stage"
+                        contactId={contact.id.toString()}
+                        companyName={contact.company}
+                        onCreated={() => toast({ title: "Success", description: "Deal created successfully" })}
+                      />
+                      <button 
+                        onClick={() => handleEditContact(contact)}
+                        className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        title="Edit Contact"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
