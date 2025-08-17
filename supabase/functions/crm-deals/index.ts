@@ -17,15 +17,24 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    // For demo purposes, use first user as org_id
-    const { data: authUsers } = await supabase.auth.admin.listUsers();
-    if (!authUsers.users || authUsers.users.length === 0) {
-      return new Response(JSON.stringify({ success: false, error: 'No users found' }), {
-        status: 400,
+    // Get the authenticated user from JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ success: false, error: 'Authorization header required' }), {
+        status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const orgId = authUsers.users[0].id;
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (userError || !user) {
+      return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const orgId = user.id;
     const url = new URL(req.url);
 
     if (req.method === 'GET') {
