@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { DealCard } from "@/components/CRM/DealCard";
 import { NewDealDialog } from "@/components/CRM/NewDealDialog";
+import { SalesAssistant } from "@/components/CRM/SalesAssistant";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -21,6 +23,7 @@ export default function DealsPage() {
   const [dealsByStage, setDealsByStage] = useState<Record<string, Deal[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     loadPipelines();
@@ -68,7 +71,8 @@ export default function DealsPage() {
             method: 'GET',
             pipelineId, 
             stageId: st.id, 
-            limit: 200 
+            limit: 200,
+            q: q || undefined
           }
         });
         
@@ -152,32 +156,69 @@ export default function DealsPage() {
         <AppSidebar />
         <SidebarInset className="flex-1">
           <TopBar />
-          <main className="flex-1 p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-semibold">Deals — {current.name}</h1>
-              <NewDealDialog 
-                pipelineId={current.id} 
-                stageId={current.pipeline_stages?.[0]?.id} 
-                onCreated={() => loadDeals(current.id)} 
-              />
+          <div className="flex h-[calc(100vh-64px)]">
+            <div className="flex-1 overflow-auto p-5">
+              <div className="mb-4 flex items-center gap-3">
+                <h1 className="text-xl font-semibold">Deals {current ? `— ${current.name}` : ""}</h1>
+                <div className="ml-auto flex items-center gap-2">
+                  <Input 
+                    placeholder="Search deals" 
+                    value={q} 
+                    onChange={(e) => setQ(e.target.value)} 
+                    onKeyDown={(e) => { 
+                      if (e.key === "Enter" && current) loadDeals(current.id); 
+                    }} 
+                    className="w-48"
+                  />
+                  {current && (
+                    <NewDealDialog 
+                      pipelineId={current.id} 
+                      stageId={current.pipeline_stages?.[0]?.id} 
+                      onCreated={() => loadDeals(current.id)} 
+                    />
+                  )}
+                </div>
+              </div>
+
+              {current ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                  {current.pipeline_stages.map((stage) => (
+                    <div key={stage.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium">{stage.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {(dealsByStage[stage.id] ?? []).length} deals
+                        </div>
+                      </div>
+                      <div className={cn("rounded-2xl p-2 border bg-background min-h-[320px]")}>
+                        {(dealsByStage[stage.id] ?? []).map((deal) => (
+                          <DealCard key={deal.id} deal={deal} onMove={onDealMoved} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-6">
+                  {error ? (
+                    <div className="text-center">
+                      <p className="text-destructive mb-2">{error}</p>
+                      <Button onClick={() => { setError(null); setLoading(true); loadPipelines(); }}>
+                        Retry
+                      </Button>
+                    </div>
+                  ) : (
+                    "No pipeline found."
+                  )}
+                </Card>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
-              {current.pipeline_stages.map((stage) => (
-                <div key={stage.id} className="space-y-2">
-                  <div className="font-medium">{stage.name}</div>
-                  <div className={cn("rounded-2xl p-2 border bg-background min-h-[280px]")}>
-                    {(dealsByStage[stage.id] ?? []).map((deal) => (
-                      <DealCard key={deal.id} deal={deal} onMove={onDealMoved} />
-                    ))}
-                  </div>
-                  <div className="text-xs text-muted-foreground px-2">
-                    {(dealsByStage[stage.id] ?? []).length} deals
-                  </div>
-                </div>
-              ))}
+            {/* Right rail assistant, like Pipedrive's Sales Assistant */}
+            <div className="hidden xl:block w-[360px] border-l bg-muted/30">
+              <SalesAssistant />
             </div>
-          </main>
+          </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
