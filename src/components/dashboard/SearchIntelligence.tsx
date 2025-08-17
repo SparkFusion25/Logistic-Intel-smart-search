@@ -167,14 +167,52 @@ export function SearchIntelligence() {
     try {
       // Show immediate feedback
       toast({
-        title: "Adding to CRM",
-        description: `Adding ${company.name} to pipeline...`
+        title: "Adding to Pipeline",
+        description: `Adding ${company.name} to CRM pipeline...`
       })
       
-      // The CompanyCard will handle the actual API call
-      // This is just for any additional SearchIntelligence-specific logic
+      const response = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-add-from-search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0'
+        },
+        body: JSON.stringify({
+          company: {
+            name: company.name,
+            location: company.location,
+            industry: company.industry,
+            trade_volume_usd: company.trade_volume_usd,
+            contact: {
+              name: `Contact at ${company.name}`,
+              title: "Trade Manager",
+              email: `contact@${company.name.toLowerCase().replace(/\s+/g, '')}.com`
+            }
+          },
+          pipeline_name: 'Search Intelligence',
+          stage_name: 'Prospect Identified',
+          source: 'search'
+        })
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: result.message || `${company.name} added to CRM pipeline`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to add to CRM')
+      }
     } catch (error) {
-      console.error('Error in search intelligence add to CRM:', error)
+      console.error('Error adding to CRM:', error)
+      toast({
+        title: "Error",
+        description: "Failed to add company to CRM",
+        variant: "destructive"
+      })
     }
   }
 
@@ -407,29 +445,98 @@ export function SearchIntelligence() {
 
         <TabsContent value="companies" className="space-y-4">
           {companyResults.map((company) => (
-            <CompanyCard
-              key={company.company_id}
-              company={{
-                name: company.name,
-                location: company.location,
-                industry: company.industry,
-                trade_volume_usd: company.trade_volume_usd,
-                shipments: company.shipment_count,
-                company_id: company.company_id,
-                contact: {
-                  name: `Contact at ${company.name}`,
-                  title: "Trade Manager",
-                  email: `contact@${company.name.toLowerCase().replace(/\s+/g, '')}.com`
-                }
-              }}
-              source="search"
-              onAddedToCRM={() => {
-                toast({
-                  title: "Success",
-                  description: `${company.name} added to CRM pipeline`
-                })
-              }}
-            />
+            <div key={company.company_id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+                <div className="flex items-start space-x-3 sm:space-x-4 flex-1">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-sky-600" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-3">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{company.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary" className="text-xs">{company.industry}</Badge>
+                        <div className="flex items-center">
+                          {company.trend === 'up' ? (
+                            <TrendingUp className="w-4 h-4 text-emerald-500" />
+                          ) : (
+                            <TrendingDown className="w-4 h-4 text-red-500" />
+                          )}
+                          <span className="text-xs text-gray-500 ml-1 hidden sm:inline">Trending</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4">
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{company.location}</span>
+                      </div>
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Globe className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">Volume: <span className="font-semibold">{formatCurrency(company.trade_volume_usd)}</span></span>
+                      </div>
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">Last: {formatDate(company.last_shipment_at)}</span>
+                      </div>
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                        <Ship className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{company.shipment_count.toLocaleString()} shipments</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4 text-xs sm:text-sm">
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+                        <span className="font-medium">{company.confidence}%</span>
+                        <span className="text-gray-500 ml-1 hidden sm:inline">confidence</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end space-x-2 lg:ml-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleWatchCompany(company)}
+                    className={`${watchlist.has(company.company_id) ? "text-yellow-500" : ""} p-2`}
+                  >
+                    <Star className={`w-4 h-4 ${watchlist.has(company.company_id) ? "fill-current" : ""}`} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewCompany(company)}
+                    className="p-2"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddToCRM(company)}
+                    className="hidden sm:flex"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add to Pipeline
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddToCRM(company)}
+                    className="sm:hidden p-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           ))}
         </TabsContent>
 
