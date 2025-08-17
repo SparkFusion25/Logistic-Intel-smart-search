@@ -17,14 +17,10 @@ export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
         />
       </a>
 
-      {/* Wordmark + tagline (hidden when collapsed) */}
+      {/* LIT text (hidden when collapsed) */}
       {!collapsed && (
-        <div className="ml-2 min-w-0">
-          <img
-            src={FULL_URL}
-            alt="LOGISTICINTEL — Trade Intelligence"
-            className="max-w-[148px] h-auto"
-          />
+        <div className="ml-2">
+          <span className="text-white font-semibold text-xl">LIT</span>
         </div>
       )}
     </div>
