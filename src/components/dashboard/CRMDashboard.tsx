@@ -5,18 +5,30 @@ import {
   UserPlus, Download, RefreshCw, ArrowUpRight
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { ContactModal } from './ContactModal'
+import { EmailModal } from './EmailModal'
 
 export function CRMDashboard() {
   const [activeTab, setActiveTab] = useState('contacts')
   const [viewMode, setViewMode] = useState('grid')
+  const [contactModal, setContactModal] = useState<{
+    isOpen: boolean
+    contact: any
+    mode: 'view' | 'edit' | 'create'
+  }>({
+    isOpen: false,
+    contact: null,
+    mode: 'view'
+  })
+  const [emailModal, setEmailModal] = useState<{
+    isOpen: boolean
+    contact: any
+  }>({
+    isOpen: false,
+    contact: null
+  })
+  const [favoriteContacts, setFavoriteContacts] = useState<Set<number>>(new Set())
   const { toast } = useToast()
-
-  const stats = [
-    { name: 'Total Contacts', value: '1,247', change: '+12.5%', icon: Users, color: 'from-blue-400 to-blue-500' },
-    { name: 'Active Deals', value: '89', change: '+8.2%', icon: Star, color: 'from-emerald-400 to-emerald-500' },
-    { name: 'This Month Revenue', value: '$2.4M', change: '+15.7%', icon: ArrowUpRight, color: 'from-purple-400 to-purple-500' },
-    { name: 'Conversion Rate', value: '23.8%', change: '+3.1%', icon: Tag, color: 'from-orange-400 to-orange-500' },
-  ]
 
   const contacts = [
     {
@@ -101,6 +113,15 @@ export function CRMDashboard() {
     },
   ]
 
+  const [contactList, setContactList] = useState(contacts)
+
+  const stats = [
+    { name: 'Total Contacts', value: '1,247', change: '+12.5%', icon: Users, color: 'from-blue-400 to-blue-500' },
+    { name: 'Active Deals', value: '89', change: '+8.2%', icon: Star, color: 'from-emerald-400 to-emerald-500' },
+    { name: 'This Month Revenue', value: '$2.4M', change: '+15.7%', icon: ArrowUpRight, color: 'from-purple-400 to-purple-500' },
+    { name: 'Conversion Rate', value: '23.8%', change: '+3.1%', icon: Tag, color: 'from-orange-400 to-orange-500' },
+  ]
+
   const getStageColor = (stage: string) => {
     switch (stage) {
       case 'Discovery': return 'bg-blue-100 text-blue-800'
@@ -115,9 +136,10 @@ export function CRMDashboard() {
 
   // Action handlers
   const handleAddContact = () => {
-    toast({
-      title: "Add Contact",
-      description: "Contact form would open here",
+    setContactModal({
+      isOpen: true,
+      contact: null,
+      mode: 'create'
     })
   }
 
@@ -129,9 +151,9 @@ export function CRMDashboard() {
   }
 
   const handleSendEmail = (contact: any) => {
-    toast({
-      title: "Email Composer",
-      description: `Opening email to ${contact.name}`,
+    setEmailModal({
+      isOpen: true,
+      contact
     })
   }
 
@@ -148,24 +170,47 @@ export function CRMDashboard() {
   }
 
   const handleViewContact = (contact: any) => {
-    toast({
-      title: "Contact Details",
-      description: `Viewing details for ${contact.name}`,
+    setContactModal({
+      isOpen: true,
+      contact,
+      mode: 'view'
     })
   }
 
   const handleEditContact = (contact: any) => {
-    toast({
-      title: "Edit Contact",
-      description: `Editing ${contact.name}`,
+    setContactModal({
+      isOpen: true,
+      contact,
+      mode: 'edit'
     })
   }
 
   const handleStarContact = (contact: any) => {
-    toast({
-      title: "Contact Starred",
-      description: `${contact.name} has been added to favorites`,
-    })
+    const newFavorites = new Set(favoriteContacts)
+    if (newFavorites.has(contact.id)) {
+      newFavorites.delete(contact.id)
+      toast({
+        title: "Removed from Favorites",
+        description: `${contact.name} has been removed from favorites`,
+      })
+    } else {
+      newFavorites.add(contact.id)
+      toast({
+        title: "Added to Favorites",
+        description: `${contact.name} has been added to favorites`,
+      })
+    }
+    setFavoriteContacts(newFavorites)
+  }
+
+  const handleSaveContact = (savedContact: any) => {
+    if (contactModal.mode === 'create') {
+      setContactList(prev => [...prev, savedContact])
+    } else if (contactModal.mode === 'edit') {
+      setContactList(prev => prev.map(c => 
+        c.id === savedContact.id ? savedContact : c
+      ))
+    }
   }
 
   const handleTabClick = (tabId: string) => {
@@ -311,7 +356,7 @@ export function CRMDashboard() {
             <>
               {viewMode === 'grid' ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {contacts.map((contact) => (
+                  {contactList.map((contact) => (
                 <div key={contact.id} className="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors cursor-pointer group">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
@@ -388,10 +433,14 @@ export function CRMDashboard() {
                       </button>
                       <button 
                         onClick={() => handleStarContact(contact)}
-                        className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-                        title="Add to Favorites"
+                        className={`p-2 hover:bg-yellow-50 rounded-lg transition-colors ${
+                          favoriteContacts.has(contact.id) 
+                            ? 'text-yellow-500' 
+                            : 'text-gray-400 hover:text-yellow-600'
+                        }`}
+                        title={favoriteContacts.has(contact.id) ? "Remove from Favorites" : "Add to Favorites"}
                       >
-                        <Star className="w-4 h-4" />
+                        <Star className={`w-4 h-4 ${favoriteContacts.has(contact.id) ? 'fill-current' : ''}`} />
                       </button>
                     </div>
                     <button 
@@ -408,7 +457,7 @@ export function CRMDashboard() {
           ) : (
             /* List View */
             <div className="space-y-4">
-              {contacts.map((contact) => (
+              {contactList.map((contact) => (
                 <div key={contact.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
@@ -540,6 +589,22 @@ export function CRMDashboard() {
           )}
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={contactModal.isOpen}
+        onClose={() => setContactModal({ isOpen: false, contact: null, mode: 'view' })}
+        contact={contactModal.contact}
+        mode={contactModal.mode}
+        onSave={handleSaveContact}
+      />
+
+      {/* Email Modal */}
+      <EmailModal
+        isOpen={emailModal.isOpen}
+        onClose={() => setEmailModal({ isOpen: false, contact: null })}
+        contact={emailModal.contact}
+      />
     </div>
   )
 }
