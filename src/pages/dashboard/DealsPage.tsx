@@ -140,30 +140,33 @@ export default function DealsPage() {
       const pipeline = pipelines.find(p => p.id === pipelineId) ?? null;
       if (!pipeline) return;
       
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      console.log('Loading deals for pipeline:', pipelineId, 'with stages:', pipeline.pipeline_stages);
       
       const next: Record<string, Deal[]> = {};
       for (const st of pipeline.pipeline_stages) {
-        const res = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-deals?pipelineId=${pipelineId}&stageId=${st.id}&limit=200${q ? `&q=${encodeURIComponent(q)}` : ''}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
-          },
-          cache: "no-store",
+        console.log('Loading deals for stage:', st.id);
+        const { data, error } = await supabase.functions.invoke('crm-deals', {
+          body: {},
+          headers: { 'Content-Type': 'application/json' }
         });
         
-        if (res.ok) {
-          const data = await res.json();
-          next[st.id] = data.success ? data.data : [];
+        if (error) {
+          console.error('Error loading deals for stage:', st.id, error);
+          next[st.id] = [];
+        } else if (data && data.success) {
+          // Filter deals by pipeline and stage
+          const stageDeals = data.data.filter((deal: Deal) => 
+            deal.stage_id === st.id && (!q || deal.title.toLowerCase().includes(q.toLowerCase()))
+          );
+          next[st.id] = stageDeals;
+          console.log('Loaded deals for stage:', st.id, stageDeals);
         } else {
-          console.error('Failed to load deals for stage:', st.id);
+          console.log('No deals found for stage:', st.id);
           next[st.id] = [];
         }
       }
       setDealsByStage(next);
+      console.log('Final deals by stage:', next);
     } catch (error) {
       console.error('Error loading deals:', error);
     }
