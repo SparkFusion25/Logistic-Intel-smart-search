@@ -1,155 +1,254 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, TrendingUp, Target, Clock, Phone, Mail, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TrendingUp, Users, Calendar, Phone, Mail, ExternalLink, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-type Suggestion = {
+interface Suggestion {
   id: string;
-  type: "follow_up" | "schedule_call" | "advance_stage" | "send_email";
-  title: string;
-  confidence: "Low" | "Medium" | "High";
-  note: string;
-  priority: number;
-  cta?: { label: string; onClick: () => void };
-};
+  subject_type: 'deal' | 'contact' | 'campaign';
+  subject_id?: string;
+  suggestion_type: string;
+  score: number;
+  confidence: 'Low' | 'Medium' | 'High';
+  rationale: string;
+  source_signals: Record<string, any>;
+  status: 'new' | 'applied' | 'dismissed';
+  created_at: string;
+}
 
-export function SalesAssistant() {
+interface SalesAssistantProps {
+  subjectType?: 'deal' | 'contact' | 'campaign';
+  subjectId?: string;
+}
+
+export function SalesAssistant({ subjectType, subjectId }: SalesAssistantProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats] = useState({
-    dealsThisWeek: 12,
-    callsScheduled: 5,
-    followUpsNeeded: 8,
-    hotLeads: 3
-  });
 
   useEffect(() => {
-    // Mock suggestions
-    const mockSuggestions: Suggestion[] = [
-      {
-        id: "1",
-        type: "follow_up",
-        title: "Follow up with Global Logistics Corp",
-        confidence: "High",
-        note: "Last contact was 3 days ago. They showed strong interest in ocean freight.",
-        priority: 1,
-        cta: { label: "Send Follow-up", onClick: () => console.log("Follow up") }
-      },
-      {
-        id: "2", 
-        type: "schedule_call",
-        title: "Schedule discovery call",
-        confidence: "High",
-        note: "Contact opened email 3 times and clicked pricing link.",
-        priority: 2,
-        cta: { label: "Schedule Call", onClick: () => console.log("Schedule call") }
-      }
-    ];
-    
-    setSuggestions(mockSuggestions);
-    setLoading(false);
-  }, []);
+    loadSuggestions();
+  }, [subjectType, subjectId]);
 
-  const getActionIcon = (type: string) => {
-    switch (type) {
-      case "follow_up": return <Mail className="w-4 h-4" />;
-      case "schedule_call": return <Phone className="w-4 h-4" />;
-      case "advance_stage": return <TrendingUp className="w-4 h-4" />;
-      default: return <Target className="w-4 h-4" />;
+  const loadSuggestions = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (subjectType) params.append('subjectType', subjectType);
+      if (subjectId) params.append('subjectId', subjectId);
+      params.append('limit', '5');
+
+      const { data, error } = await supabase.functions.invoke('assistant-next-best-action', {
+        body: {},
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (error) {
+        console.error('Error loading suggestions:', error);
+        setSuggestions([]);
+      } else if (data?.success) {
+        setSuggestions(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error loading suggestions:', error);
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="h-full flex flex-col">
-      <div className="p-6 border-b">
-        <h2 className="text-lg font-semibold">Sales Assistant</h2>
-        <p className="text-sm text-muted-foreground mt-1">AI-powered next best actions</p>
-      </div>
+  const applySuggestion = async (suggestion: Suggestion) => {
+    try {
+      const { data, error } = await supabase.functions.invoke(`assistant-apply/${suggestion.id}`, {
+        body: { mode: "execute" },
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      <div className="flex-1 overflow-auto p-6 space-y-6">
+      if (error) {
+        console.error('Error applying suggestion:', error);
+        toast.error('Failed to apply suggestion');
+        return;
+      }
+
+      if (data?.success) {
+        toast.success('Suggestion applied successfully');
+        setSuggestions(prev => 
+          prev.map(s => s.id === suggestion.id ? { ...s, status: 'applied' } : s)
+        );
+      }
+    } catch (error) {
+      console.error('Error applying suggestion:', error);
+      toast.error('Failed to apply suggestion');
+    }
+  };
+
+  const getActionIcon = (type: string) => {
+    switch (type) {
+      case 'follow_up':
+        return <Mail className="h-4 w-4" />;
+      case 'schedule_call':
+        return <Phone className="h-4 w-4" />;
+      case 'advance_stage':
+        return <TrendingUp className="h-4 w-4" />;
+      case 'send_email':
+        return <Mail className="h-4 w-4" />;
+      default:
+        return <Sparkles className="h-4 w-4" />;
+    }
+  };
+
+  const getConfidenceColor = (confidence: string) => {
+    switch (confidence) {
+      case 'High':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'Medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Low':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const formatActionTitle = (type: string) => {
+    switch (type) {
+      case 'follow_up':
+        return 'Send Follow-up';
+      case 'schedule_call':
+        return 'Schedule Call';
+      case 'advance_stage':
+        return 'Advance Stage';
+      case 'send_email':
+        return 'Send Email';
+      case 'attach_quote':
+        return 'Attach Quote';
+      case 'share_tariff':
+        return 'Share Tariff';
+      default:
+        return 'Take Action';
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI Sales Assistant
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <Skeleton className="h-8 w-full mb-2" />
+              <Skeleton className="h-4 w-16 mx-auto" />
+            </div>
+            <div className="text-center">
+              <Skeleton className="h-8 w-full mb-2" />
+              <Skeleton className="h-4 w-16 mx-auto" />
+            </div>
+          </div>
+          <div>
+            <Skeleton className="h-6 w-32 mb-3" />
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full mb-3" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          AI Sales Assistant
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Smart recommendations to boost your sales performance
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
         {/* Quick Stats */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium">This Week</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-bold">{stats.dealsThisWeek}</div>
-                  <div className="text-xs text-muted-foreground">New Deals</div>
-                </div>
-                <TrendingUp className="w-4 h-4 text-green-600" />
-              </div>
-            </Card>
-            <Card className="p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-bold">{stats.callsScheduled}</div>
-                  <div className="text-xs text-muted-foreground">Calls Scheduled</div>
-                </div>
-                <Phone className="w-4 h-4 text-blue-600" />
-              </div>
-            </Card>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">12</div>
+            <div className="text-xs text-muted-foreground">Deals this week</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">3</div>
+            <div className="text-xs text-muted-foreground">Calls scheduled</div>
           </div>
         </div>
 
         {/* AI Suggestions */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Next Best Actions</h3>
-            <Badge variant="secondary" className="text-xs">AI Powered</Badge>
-          </div>
+        <div>
+          <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Next Best Actions
+          </h4>
           
-          {loading ? (
-            <div className="space-y-3">
-              {[1, 2].map(i => (
-                <Card key={i} className="p-4">
-                  <div className="animate-pulse space-y-2">
-                    <div className="h-4 bg-muted rounded"></div>
-                    <div className="h-3 bg-muted rounded w-3/4"></div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+          {suggestions.length === 0 ? (
+            <Card className="p-4 text-center">
+              <div className="text-muted-foreground">
+                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">You're all caught up!</p>
+                <p className="text-xs text-muted-foreground">
+                  No new recommendations at this time.
+                </p>
+              </div>
+            </Card>
           ) : (
             <div className="space-y-3">
               {suggestions.map((suggestion) => (
-                <Card key={suggestion.id} className="p-4 hover:shadow-md transition-shadow">
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-2">
-                        {getActionIcon(suggestion.type)}
-                        <div className="font-medium text-sm">
-                          {suggestion.title}
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {suggestion.confidence}
-                      </Badge>
+                <Card key={suggestion.id} className="p-4 transition-all hover:shadow-md">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                      {getActionIcon(suggestion.suggestion_type)}
                     </div>
-                    
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {suggestion.note}
-                    </p>
-                    
-                    {suggestion.cta && (
-                      <Button 
-                        size="sm" 
-                        className="w-full text-xs"
-                        onClick={suggestion.cta.onClick}
-                      >
-                        {suggestion.cta.label}
-                      </Button>
-                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h5 className="font-medium text-sm">
+                          {formatActionTitle(suggestion.suggestion_type)}
+                        </h5>
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${getConfidenceColor(suggestion.confidence)}`}
+                        >
+                          {suggestion.confidence}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        {suggestion.rationale}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => applySuggestion(suggestion)}
+                          disabled={suggestion.status === 'applied'}
+                          className="text-xs h-7"
+                        >
+                          {suggestion.status === 'applied' ? 'Applied' : 'Apply'}
+                        </Button>
+                        {suggestion.status === 'applied' && (
+                          <Badge variant="secondary" className="text-xs">
+                            ✓ Done
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </Card>
               ))}
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

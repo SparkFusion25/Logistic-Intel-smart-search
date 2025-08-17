@@ -121,6 +121,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_suggestions: {
+        Row: {
+          confidence: string
+          created_at: string
+          id: string
+          org_id: string
+          rationale: string
+          score: number
+          source_signals: Json | null
+          status: string
+          subject_id: string | null
+          subject_type: string
+          suggestion_type: string
+          updated_at: string
+        }
+        Insert: {
+          confidence: string
+          created_at?: string
+          id?: string
+          org_id: string
+          rationale: string
+          score?: number
+          source_signals?: Json | null
+          status?: string
+          subject_id?: string | null
+          subject_type: string
+          suggestion_type: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          rationale?: string
+          score?: number
+          source_signals?: Json | null
+          status?: string
+          subject_id?: string | null
+          subject_type?: string
+          suggestion_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       airfreight_insights: {
         Row: {
           arrival_city: string | null
@@ -1035,6 +1080,36 @@ export type Database = {
           },
         ]
       }
+      deal_scores: {
+        Row: {
+          created_at: string
+          deal_id: string
+          id: string
+          last_updated: string
+          org_id: string
+          score: number
+          signals: Json | null
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          id?: string
+          last_updated?: string
+          org_id: string
+          score?: number
+          signals?: Json | null
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          id?: string
+          last_updated?: string
+          org_id?: string
+          score?: number
+          signals?: Json | null
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           company_name: string | null
@@ -1754,6 +1829,36 @@ export type Database = {
           org_id?: string
           raw_data?: Json | null
           source_file_name?: string | null
+        }
+        Relationships: []
+      }
+      lead_scores: {
+        Row: {
+          contact_id: string
+          created_at: string
+          id: string
+          last_updated: string
+          org_id: string
+          score: number
+          signals: Json | null
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          id?: string
+          last_updated?: string
+          org_id: string
+          score?: number
+          signals?: Json | null
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          id?: string
+          last_updated?: string
+          org_id?: string
+          score?: number
+          signals?: Json | null
         }
         Relationships: []
       }
