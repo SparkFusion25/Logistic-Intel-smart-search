@@ -53,6 +53,8 @@ export function DealPipeline() {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
   const [newDealOpen, setNewDealOpen] = useState(false);
   const [selectedStageId, setSelectedStageId] = useState<string>("");
+  const [newPipelineName, setNewPipelineName] = useState("");
+  const [isCreatingPipeline, setIsCreatingPipeline] = useState(false);
 
   const { makeRequest } = useAPI();
 
@@ -154,6 +156,30 @@ export function DealPipeline() {
     }
   };
 
+  const createPipeline = async () => {
+    if (!newPipelineName.trim()) return;
+    
+    try {
+      setIsCreatingPipeline(true);
+      const response = await makeRequest('/crm-create-pipeline', {
+        method: 'POST',
+        body: { name: newPipelineName }
+      });
+
+      if (response?.success) {
+        // Reload pipelines to include the new one
+        await loadPipelines();
+        setNewPipelineName("");
+      } else {
+        console.error('Failed to create pipeline:', response?.error);
+      }
+    } catch (error) {
+      console.error('Error creating pipeline:', error);
+    } finally {
+      setIsCreatingPipeline(false);
+    }
+  };
+
   const currentPipeline = useMemo(() => 
     pipelines.find(p => p.id === selectedPipeline),
     [pipelines, selectedPipeline]
@@ -183,14 +209,36 @@ export function DealPipeline() {
   if (!currentPipeline) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto">
           <Target className="h-12 w-12 text-text-muted mx-auto mb-4" />
           <h3 className="text-lg font-medium text-text-main mb-2">No Pipeline Found</h3>
           <p className="text-text-muted mb-4">Create your first sales pipeline to get started.</p>
-          <Button onClick={loadPipelines}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Pipeline
-          </Button>
+          
+          <div className="space-y-3">
+            <Input
+              placeholder="Enter pipeline name"
+              value={newPipelineName}
+              onChange={(e) => setNewPipelineName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && createPipeline()}
+            />
+            <Button 
+              onClick={createPipeline}
+              disabled={!newPipelineName.trim() || isCreatingPipeline}
+              className="w-full"
+            >
+              {isCreatingPipeline ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Pipeline
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     );
