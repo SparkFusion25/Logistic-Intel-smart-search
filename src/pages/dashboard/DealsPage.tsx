@@ -375,9 +375,11 @@ export default function DealsPage() {
                     </div>
                     {current && (
                       <NewDealDialog 
+                        open={false}
+                        onOpenChange={() => {}}
                         pipelineId={current.id} 
-                        stageId={current.pipeline_stages?.[0]?.id} 
-                        onCreated={() => loadDeals(current.id)} 
+                        preselectedStageId={current.pipeline_stages?.[0]?.id} 
+                        onSuccess={() => loadDeals(current.id)} 
                       />
                     )}
                   </div>
@@ -426,10 +428,8 @@ export default function DealsPage() {
                                   {stageDeals.map((deal) => (
                                     <DealCard 
                                       key={deal.id} 
-                                      deal={deal} 
-                                      onMove={async (dealId, toStageId) => {
-                                        await onDragEnd({ active: { id: dealId }, over: { id: toStageId } } as DragEndEvent);
-                                      }}
+                                      deal={{...deal, expected_close_date: null, probability: null, contact_name: null, activities_count: 0, notes_count: 0}} 
+                                      stageId={stage.id}
                                     />
                                   ))}
                                   {stageDeals.length === 0 && (
@@ -447,7 +447,7 @@ export default function DealsPage() {
                     <DragOverlay>
                       {draggedDeal ? (
                         <div className="opacity-80">
-                          <DealCard deal={draggedDeal} />
+                          <DealCard deal={{...draggedDeal, expected_close_date: null, probability: null, contact_name: null, activities_count: 0, notes_count: 0}} stageId="" />
                         </div>
                       ) : null}
                     </DragOverlay>

@@ -11,15 +11,16 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface NewDealDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   pipelineId: string;
-  stageId?: string;
-  onCreated: () => void;
+  preselectedStageId?: string;
+  onSuccess: () => void;
   contactId?: string;
   companyName?: string;
 }
 
-export function NewDealDialog({ pipelineId, stageId, onCreated, contactId, companyName }: NewDealDialogProps) {
-  const [open, setOpen] = useState(false);
+export function NewDealDialog({ open, onOpenChange, pipelineId, preselectedStageId, onSuccess, contactId, companyName }: NewDealDialogProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -42,7 +43,7 @@ export function NewDealDialog({ pipelineId, stageId, onCreated, contactId, compa
       const { data, error } = await supabase.functions.invoke('crm-deals', {
         body: {
           pipelineId,
-          stageId,
+          stageId: preselectedStageId,
           title: formData.title,
           company_name: formData.company_name || null,
           value_usd: formData.value_usd ? parseFloat(formData.value_usd) : null,
@@ -56,7 +57,7 @@ export function NewDealDialog({ pipelineId, stageId, onCreated, contactId, compa
       if (!data.success) throw new Error(data.error);
 
       toast.success("Deal created successfully");
-      setOpen(false);
+      onOpenChange(false);
       setFormData({
         title: "",
         company_name: companyName || "",
@@ -65,7 +66,7 @@ export function NewDealDialog({ pipelineId, stageId, onCreated, contactId, compa
         expected_close_date: "",
         contact_id: contactId || "",
       });
-      onCreated();
+      onSuccess();
     } catch (error) {
       console.error('Error creating deal:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create deal');
@@ -75,13 +76,7 @@ export function NewDealDialog({ pipelineId, stageId, onCreated, contactId, compa
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          New Deal
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create New Deal</DialogTitle>
@@ -146,7 +141,7 @@ export function NewDealDialog({ pipelineId, stageId, onCreated, contactId, compa
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

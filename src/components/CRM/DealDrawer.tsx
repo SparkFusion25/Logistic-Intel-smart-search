@@ -12,10 +12,9 @@ interface DealDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   dealId: string;
-  onMove?: (dealId: string, toStageId: string) => void;
 }
 
-export function DealDrawer({ open, onOpenChange, dealId, onMove }: DealDrawerProps) {
+export function DealDrawer({ open, onOpenChange, dealId }: DealDrawerProps) {
   // Mock deal data - in real app this would fetch from API
   const deal = {
     id: dealId,

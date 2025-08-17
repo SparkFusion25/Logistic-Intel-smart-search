@@ -146,3 +146,28 @@ export const useDashboardAPI = () => {
     error
   }
 }
+
+export const useAPI = () => {
+  const makeRequest = useCallback(async (endpoint: string, options: {
+    method?: string;
+    body?: any;
+    params?: Record<string, any>;
+  } = {}) => {
+    const { method = 'GET', body, params } = options;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke(endpoint.replace('/', ''), {
+        body: method === 'GET' ? undefined : body,
+        method: method as any
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (err: any) {
+      console.error(`API request failed for ${endpoint}:`, err);
+      throw err;
+    }
+  }, []);
+
+  return { makeRequest };
+};

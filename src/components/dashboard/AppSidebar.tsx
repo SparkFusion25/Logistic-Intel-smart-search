@@ -23,7 +23,7 @@ const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
   { title: "Search", url: "/dashboard/search", icon: Search },
   { title: "CRM", url: "/dashboard/crm", icon: Contact },
-  { title: "Contacts", url: "/dashboard/contacts", icon: Contact },
+  
   { title: "Deals", url: "/dashboard/deals", icon: Target },
   { title: "Email", url: "/dashboard/email", icon: Mail },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
