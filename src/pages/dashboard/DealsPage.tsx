@@ -35,30 +35,48 @@ export default function DealsPage() {
 
   async function loadPipelines() {
     try {
+      setLoading(true);
       setError(null);
-      console.log('Loading pipelines...');
-      const { data, error } = await supabase.functions.invoke('crm-pipelines');
-      console.log('Pipeline response:', { data, error });
       
-      if (error) {
-        console.error('Supabase function error:', error);
-        setError(`Failed to load pipelines: ${error.message}`);
+      // Get the Supabase session token and pass it to the Edge Function
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const res = await fetch(`https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/crm-pipelines`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          "x-client-info": "deals-page",
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0"
+        },
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        // Graceful fallback (UI shouldn't hard crash)
+        console.error("crm-pipelines failed", res.status, await res.text());
+        setPipelines([]); // don't block the page
+        setError("Pipelines failed to load. Please refresh or contact support.");
         return;
       }
+
+      const json = await res.json();
+      console.log('Pipeline response:', json);
       
-      if (data && data.success) {
-        console.log('Successfully loaded pipelines:', data.data);
-        setPipelines(data.data);
-        const first = data.data?.[0]?.id ?? null;
-        setSelected(first);
-        if (first) await loadDeals(first);
+      if (json.success && json.data) {
+        setPipelines(json.data);
+        if (json.data.length > 0) {
+          setSelected(json.data[0].id);
+          await loadDeals(json.data[0].id);
+        }
       } else {
-        console.error('Unexpected response format:', data);
-        setError(data?.error || 'Unexpected response format');
+        throw new Error(json.error || 'Failed to load pipelines');
       }
-    } catch (error) {
-      console.error('Error loading pipelines:', error);
-      setError(`Error loading pipelines: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } catch (err) {
+      console.error('Error loading pipelines:', err);
+      setPipelines([]);
+      setError("Network error loading pipelines.");
     } finally {
       setLoading(false);
     }
