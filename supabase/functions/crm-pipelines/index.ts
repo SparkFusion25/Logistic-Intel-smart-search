@@ -12,36 +12,24 @@ serve(async (req) => {
   }
 
   try {
+    // Create Supabase client using anon key and user's JWT
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    );
-
-    // Get user from JWT token in Authorization header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ success: false, error: 'No authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Create client with the user's token for auth context
-    const userClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
           headers: {
-            Authorization: authHeader,
+            Authorization: req.headers.get('Authorization') ?? '',
           },
         },
       }
     );
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ success: false, error: 'Authentication failed' }), {
+      console.error('Auth error:', userError);
+      return new Response(JSON.stringify({ success: false, error: 'Authentication required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -50,7 +38,7 @@ serve(async (req) => {
     const orgId = user.id;
 
     if (req.method === 'GET') {
-      const { data: pipelines, error } = await userClient
+      const { data: pipelines, error } = await supabase
         .from("pipelines")
         .select("id, name, created_at, pipeline_stages(id, name, stage_order)")
         .eq("org_id", orgId)
@@ -58,6 +46,7 @@ serve(async (req) => {
         .order("stage_order", { referencedTable: "pipeline_stages", ascending: true });
 
       if (error) {
+        console.error('Pipeline query error:', error);
         return new Response(JSON.stringify({ success: false, error: error.message }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -73,13 +62,14 @@ serve(async (req) => {
       const body = await req.json();
       const name = (body?.name || "Pipeline").toString();
 
-      const { data, error } = await userClient
+      const { data, error } = await supabase
         .from("pipelines")
         .insert({ org_id: orgId, name })
         .select("id, name")
-        .single();
+        .maybeSingle();
 
       if (error) {
+        console.error('Pipeline insert error:', error);
         return new Response(JSON.stringify({ success: false, error: error.message }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -98,7 +88,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in crm-pipelines function:', error);
-    return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ success: false, error: 'Internal server error', details: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

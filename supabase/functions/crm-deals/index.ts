@@ -12,36 +12,24 @@ serve(async (req) => {
   }
 
   try {
+    // Create Supabase client using anon key and user's JWT
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    );
-
-    // Get user from JWT token in Authorization header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ success: false, error: 'No authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Create client with the user's token for auth context
-    const userClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
           headers: {
-            Authorization: authHeader,
+            Authorization: req.headers.get('Authorization') ?? '',
           },
         },
       }
     );
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ success: false, error: 'Authentication failed' }), {
+      console.error('Auth error:', userError);
+      return new Response(JSON.stringify({ success: false, error: 'Authentication required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -57,7 +45,7 @@ serve(async (req) => {
       const limit = Number(url.searchParams.get("limit") ?? 50);
       const offset = Number(url.searchParams.get("offset") ?? 0);
 
-      let query = userClient
+      let query = supabase
         .from("deals")
         .select("id, title, company_name, value_usd, currency, expected_close_date, status, stage_id, contact_id, created_at, updated_at, crm_contacts(full_name, email, company_name)")
         .eq("org_id", orgId)
@@ -70,6 +58,7 @@ serve(async (req) => {
 
       const { data, error, count } = await query;
       if (error) {
+        console.error('Query error:', error);
         return new Response(JSON.stringify({ success: false, error: error.message }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -83,6 +72,7 @@ serve(async (req) => {
 
     if (req.method === 'POST') {
       const body = await req.json();
+      console.log('Creating deal with data:', body);
 
       const payload = {
         org_id: orgId,
@@ -97,19 +87,23 @@ serve(async (req) => {
         created_by: orgId
       };
 
-      const { data, error } = await userClient
+      console.log('Inserting deal payload:', payload);
+
+      const { data, error } = await supabase
         .from("deals")
         .insert(payload)
         .select("id, title, company_name, value_usd, stage_id")
-        .single();
+        .maybeSingle();
 
       if (error) {
+        console.error('Insert error:', error);
         return new Response(JSON.stringify({ success: false, error: error.message }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
+      console.log('Deal created successfully:', data);
       return new Response(JSON.stringify({ success: true, data }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -122,7 +116,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in crm-deals function:', error);
-    return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ success: false, error: 'Internal server error', details: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
