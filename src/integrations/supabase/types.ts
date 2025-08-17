@@ -304,13 +304,6 @@ export type Database = {
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "audit_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       bts_route_matches: {
@@ -424,27 +417,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "campaign_follow_ups_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "campaign_follow_ups_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_contact_funnel"
-            referencedColumns: ["campaign_id"]
-          },
-          {
-            foreignKeyName: "campaign_follow_ups_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_metrics"
-            referencedColumns: ["campaign_id"]
-          },
-          {
             foreignKeyName: "campaign_follow_ups_rule_id_fkey"
             columns: ["rule_id"]
             isOneToOne: false
@@ -489,27 +461,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "campaign_queue_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "campaign_queue_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_contact_funnel"
-            referencedColumns: ["campaign_id"]
-          },
-          {
-            foreignKeyName: "campaign_queue_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_metrics"
-            referencedColumns: ["campaign_id"]
-          },
-          {
             foreignKeyName: "campaign_queue_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
@@ -543,29 +494,7 @@ export type Database = {
           step_order?: number
           step_type?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "campaign_steps_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "campaign_steps_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_contact_funnel"
-            referencedColumns: ["campaign_id"]
-          },
-          {
-            foreignKeyName: "campaign_steps_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_metrics"
-            referencedColumns: ["campaign_id"]
-          },
-        ]
+        Relationships: []
       }
       campaign_targets: {
         Row: {
@@ -594,27 +523,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "campaign_targets_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "campaign_targets_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_contact_funnel"
-            referencedColumns: ["campaign_id"]
-          },
-          {
-            foreignKeyName: "campaign_targets_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_metrics"
-            referencedColumns: ["campaign_id"]
-          },
-          {
             foreignKeyName: "campaign_targets_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
@@ -625,54 +533,36 @@ export type Database = {
       }
       campaigns: {
         Row: {
-          created_at: string | null
-          created_by: string | null
+          created_at: string
+          creator_id: string
+          description: string | null
           id: string
-          industry: string | null
-          name: string | null
-          org_id: string | null
-          status: string | null
-          tradelane: string | null
-          user_id: string | null
+          name: string
+          org_id: string
+          status: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
-          created_by?: string | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
           id?: string
-          industry?: string | null
-          name?: string | null
-          org_id?: string | null
-          status?: string | null
-          tradelane?: string | null
-          user_id?: string | null
+          name: string
+          org_id: string
+          status?: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          created_by?: string | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
           id?: string
-          industry?: string | null
-          name?: string | null
-          org_id?: string | null
-          status?: string | null
-          tradelane?: string | null
-          user_id?: string | null
+          name?: string
+          org_id?: string
+          status?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "campaigns_created_by_user_fk"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "campaigns_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       census_trade_data: {
         Row: {
@@ -819,55 +709,43 @@ export type Database = {
       }
       company_profiles: {
         Row: {
-          air_confidence_score: number | null
-          air_match: boolean | null
-          air_match_score: number | null
-          bts_route_matches: Json | null
-          company_name: string
-          created_at: string | null
-          headquarters_city: string | null
-          headquarters_country: string | null
+          company_name: string | null
+          created_at: string
+          domain: string
+          employees: number | null
+          enriched_data: Json | null
           id: string
-          last_air_analysis: string | null
-          likely_air_shipper: boolean | null
-          normalized_name: string | null
-          ocean_match: boolean | null
-          ocean_match_score: number | null
-          primary_industry: string | null
+          industry: string | null
+          location: string | null
+          org_id: string
+          revenue: string | null
+          updated_at: string
         }
         Insert: {
-          air_confidence_score?: number | null
-          air_match?: boolean | null
-          air_match_score?: number | null
-          bts_route_matches?: Json | null
-          company_name: string
-          created_at?: string | null
-          headquarters_city?: string | null
-          headquarters_country?: string | null
+          company_name?: string | null
+          created_at?: string
+          domain: string
+          employees?: number | null
+          enriched_data?: Json | null
           id?: string
-          last_air_analysis?: string | null
-          likely_air_shipper?: boolean | null
-          normalized_name?: string | null
-          ocean_match?: boolean | null
-          ocean_match_score?: number | null
-          primary_industry?: string | null
+          industry?: string | null
+          location?: string | null
+          org_id: string
+          revenue?: string | null
+          updated_at?: string
         }
         Update: {
-          air_confidence_score?: number | null
-          air_match?: boolean | null
-          air_match_score?: number | null
-          bts_route_matches?: Json | null
-          company_name?: string
-          created_at?: string | null
-          headquarters_city?: string | null
-          headquarters_country?: string | null
+          company_name?: string | null
+          created_at?: string
+          domain?: string
+          employees?: number | null
+          enriched_data?: Json | null
           id?: string
-          last_air_analysis?: string | null
-          likely_air_shipper?: boolean | null
-          normalized_name?: string | null
-          ocean_match?: boolean | null
-          ocean_match_score?: number | null
-          primary_industry?: string | null
+          industry?: string | null
+          location?: string | null
+          org_id?: string
+          revenue?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -950,29 +828,7 @@ export type Database = {
           summary?: string | null
           title?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contacts_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_contact_funnel"
-            referencedColumns: ["campaign_id"]
-          },
-          {
-            foreignKeyName: "contacts_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_metrics"
-            referencedColumns: ["campaign_id"]
-          },
-        ]
+        Relationships: []
       }
       crm_contacts: {
         Row: {
@@ -1202,47 +1058,48 @@ export type Database = {
       }
       email_sends: {
         Row: {
-          body_html: string | null
-          contact_id: string | null
+          body: string | null
+          campaign_id: string
+          campaign_step_id: string | null
+          contact_id: string
           created_at: string
           id: string
-          message_id: string | null
           org_id: string
-          provider: string | null
-          send_status: string
+          sender_id: string | null
+          sent_at: string
+          status: string
           subject: string | null
+          updated_at: string
         }
         Insert: {
-          body_html?: string | null
-          contact_id?: string | null
+          body?: string | null
+          campaign_id: string
+          campaign_step_id?: string | null
+          contact_id: string
           created_at?: string
           id?: string
-          message_id?: string | null
           org_id: string
-          provider?: string | null
-          send_status?: string
+          sender_id?: string | null
+          sent_at?: string
+          status: string
           subject?: string | null
+          updated_at?: string
         }
         Update: {
-          body_html?: string | null
-          contact_id?: string | null
+          body?: string | null
+          campaign_id?: string
+          campaign_step_id?: string | null
+          contact_id?: string
           created_at?: string
           id?: string
-          message_id?: string | null
           org_id?: string
-          provider?: string | null
-          send_status?: string
+          sender_id?: string | null
+          sent_at?: string
+          status?: string
           subject?: string | null
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "email_sends_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "crm_contacts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       email_templates: {
         Row: {
@@ -1445,15 +1302,7 @@ export type Database = {
           trigger_type?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "follow_up_rules_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       follow_up_steps: {
         Row: {
@@ -1707,6 +1556,7 @@ export type Database = {
           import_job_id: string
           org_id: string
           raw_data: Json | null
+          source_file_name: string | null
         }
         Insert: {
           created_at?: string
@@ -1714,6 +1564,7 @@ export type Database = {
           import_job_id: string
           org_id: string
           raw_data?: Json | null
+          source_file_name?: string | null
         }
         Update: {
           created_at?: string
@@ -1721,6 +1572,7 @@ export type Database = {
           import_job_id?: string
           org_id?: string
           raw_data?: Json | null
+          source_file_name?: string | null
         }
         Relationships: []
       }
@@ -1945,35 +1797,57 @@ export type Database = {
       }
       org_feature_flags: {
         Row: {
+          created_at: string
           enabled: boolean
+          feature_name: string
           id: string
-          key: string
-          org_id: string | null
+          org_id: string
           updated_at: string
         }
         Insert: {
+          created_at?: string
           enabled?: boolean
+          feature_name: string
           id?: string
-          key: string
-          org_id?: string | null
+          org_id: string
           updated_at?: string
         }
         Update: {
+          created_at?: string
           enabled?: boolean
+          feature_name?: string
           id?: string
-          key?: string
-          org_id?: string | null
+          org_id?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "org_feature_flags_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          plan: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          plan?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          plan?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       orgs: {
         Row: {
@@ -2109,15 +1983,7 @@ export type Database = {
           tone?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "personas_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       "public.crm_contacts": {
         Row: {
@@ -2160,53 +2026,36 @@ export type Database = {
       }
       quotes: {
         Row: {
-          commodity: string | null
-          company_name: string
-          created_at: string | null
-          destination: string
-          hs_code: string | null
+          amount: number
+          created_at: string
+          creator_id: string
           id: string
-          mode: string
+          line_items: Json | null
           org_id: string
-          origin: string
-          output_url: string | null
-          price_usd: number | null
+          status: string
+          updated_at: string
         }
         Insert: {
-          commodity?: string | null
-          company_name: string
-          created_at?: string | null
-          destination: string
-          hs_code?: string | null
+          amount: number
+          created_at?: string
+          creator_id: string
           id?: string
-          mode: string
+          line_items?: Json | null
           org_id: string
-          origin: string
-          output_url?: string | null
-          price_usd?: number | null
+          status?: string
+          updated_at?: string
         }
         Update: {
-          commodity?: string | null
-          company_name?: string
-          created_at?: string | null
-          destination?: string
-          hs_code?: string | null
+          amount?: number
+          created_at?: string
+          creator_id?: string
           id?: string
-          mode?: string
+          line_items?: Json | null
           org_id?: string
-          origin?: string
-          output_url?: string | null
-          price_usd?: number | null
+          status?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "quotes_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       referrals: {
         Row: {
@@ -2274,13 +2123,6 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "search_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -2563,34 +2405,32 @@ export type Database = {
       tracking_events: {
         Row: {
           created_at: string
-          email_send_id: string | null
-          event: string | null
-          event_payload: Json | null
+          email_send_id: string
+          event_data: Json | null
+          event_timestamp: string
+          event_type: string
           id: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          email_send_id?: string | null
-          event?: string | null
-          event_payload?: Json | null
+          email_send_id: string
+          event_data?: Json | null
+          event_timestamp?: string
+          event_type: string
           id?: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          email_send_id?: string | null
-          event?: string | null
-          event_payload?: Json | null
+          email_send_id?: string
+          event_data?: Json | null
+          event_timestamp?: string
+          event_type?: string
           id?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "tracking_events_email_send_id_fkey"
-            columns: ["email_send_id"]
-            isOneToOne: false
-            referencedRelation: "email_sends"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       unified_shipments: {
         Row: {
@@ -2807,31 +2647,28 @@ export type Database = {
       }
       users: {
         Row: {
-          created_at: string | null
+          created_at: string
           email: string
+          full_name: string | null
           id: string
-          is_admin: boolean | null
-          name: string | null
-          org_id: string | null
-          plan: string | null
+          org_id: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           email: string
-          id?: string
-          is_admin?: boolean | null
-          name?: string | null
-          org_id?: string | null
-          plan?: string | null
+          full_name?: string | null
+          id: string
+          org_id: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           email?: string
+          full_name?: string | null
           id?: string
-          is_admin?: boolean | null
-          name?: string | null
-          org_id?: string | null
-          plan?: string | null
+          org_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2861,57 +2698,6 @@ export type Database = {
           vessel_name: string | null
         }
         Relationships: []
-      }
-      v_campaign_contact_funnel: {
-        Row: {
-          bounced: number | null
-          campaign_id: string | null
-          clicked: number | null
-          contact_id: string | null
-          last_event_at: string | null
-          opened: number | null
-          replied: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "campaign_targets_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "crm_contacts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      v_campaign_metrics: {
-        Row: {
-          bounces: number | null
-          campaign_id: string | null
-          click_rate_pct: number | null
-          clicks: number | null
-          emails_sent: number | null
-          name: string | null
-          open_rate_pct: number | null
-          opens: number | null
-          replies: number | null
-          reply_rate_pct: number | null
-        }
-        Relationships: []
-      }
-      v_email_send_latest_event: {
-        Row: {
-          email_send_id: string | null
-          event: string | null
-          event_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tracking_events_email_send_id_fkey"
-            columns: ["email_send_id"]
-            isOneToOne: false
-            referencedRelation: "email_sends"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Functions: {
