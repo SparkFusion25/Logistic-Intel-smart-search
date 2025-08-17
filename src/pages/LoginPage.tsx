@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 const LoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("info@getb3acon.com");
+  const [password, setPassword] = useState("7354$$");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
