@@ -165,7 +165,7 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
       // Process in batches
       for (let i = 0; i < records.length; i += batchSize) {
         const batch = records.slice(i, i + batchSize);
-        const processedBatch = await processBatch(batch, import_id, user.id, supabaseClient);
+        const processedBatch = await processBatch(batch, import_id, userId, supabaseClient);
         
         processedCount += processedBatch.processed;
         duplicateCount += processedBatch.duplicates;
@@ -183,28 +183,8 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
           .eq('id', import_id);
       }
 
-      // Mark as completed
-      await supabaseClient
-        .from('bulk_imports')
-        .update({
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', import_id);
-
-      // Queue enrichment for companies
-      // Queue enrichment in background to avoid timeout
+      // Queue enrichment for companies in background
       EdgeRuntime.waitUntil(queueEnrichment(import_id, supabaseClient));
-
-      return new Response(JSON.stringify({
-        success: true,
-        processed: processedCount,
-        duplicates: duplicateCount,
-        errors: errorCount
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
 
     } catch (parseError) {
       console.error('Parse error:', parseError);
@@ -223,13 +203,19 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
     }
 
   } catch (error) {
-    console.error('Error in bulk-import-processor:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error in background processing:', error);
+    
+    // Mark import as error if not already marked
+    await supabaseClient
+      .from('bulk_imports')
+      .update({
+        status: 'error',
+        error_details: { message: error.message },
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', import_id);
   }
-});
+}
 
 function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
   try {
