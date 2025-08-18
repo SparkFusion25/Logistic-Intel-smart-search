@@ -1,12 +1,32 @@
-import React from "react";
+import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
-export function Container({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={`mx-auto w-full max-w-[1200px] px-4 sm:px-5 md:px-6 ${className}`}
-      {...props}
-    />
-  );
+interface ContainerProps {
+  children: ReactNode;
+  className?: string;
+  size?: "sm" | "md" | "lg" | "xl" | "full";
 }
 
-export default Container;
+const containerSizes = {
+  sm: "max-w-2xl",
+  md: "max-w-4xl", 
+  lg: "max-w-6xl",
+  xl: "max-w-7xl",
+  full: "max-w-[var(--container-max)]"
+};
+
+export default function Container({ 
+  children, 
+  className,
+  size = "full"
+}: ContainerProps) {
+  return (
+    <div className={cn(
+      "mx-auto px-4 sm:px-6 lg:px-8 w-full",
+      containerSizes[size],
+      className
+    )}>
+      {children}
+    </div>
+  );
+}
