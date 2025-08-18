@@ -684,8 +684,10 @@ function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
   const validRecords = records.filter(record => {
     // Basic validation requirements
     if (!record.org_id) return false;
-    if (!record.hs_code || record.hs_code === 'UNKNOWN') return false;
-    if (!record.mode || record.mode === 'unknown') return false;
+    
+    // Accept fallback values set by enrichment - these are valid placeholders
+    if (!record.hs_code) return false; // hs_code can be 'UNKNOWN' as fallback
+    if (!record.mode) return false; // mode can be 'unknown' as fallback
     
     // At least one location field should be present
     const hasLocation = record.origin_country || record.destination_country || 
