@@ -18,11 +18,24 @@
     --brand-grad-start: 225 100% 53%; /* #0F3BFF */
     --brand-grad-end: 206 100% 66%;   /* #54A4FF */
     
-    /* Status Colors */
-    --success-500: 142 76% 36%;       /* #16A34A */
-    --warning-500: 43 96% 56%;        /* #F59E0B */
-    --danger-500: 0 72% 51%;          /* #EF4444 */
-    --neutral-600: 215 25% 27%;       /* #475569 */
+    /* Vibrant CRM Pipeline Colors (Pipedrive-style) */
+    --pipeline-primary: 47 107 255;      /* #2F6BFF - Electric Blue */
+    --pipeline-success: 16 185 129;      /* #10B981 - Emerald Green */
+    --pipeline-warning: 245 158 11;      /* #F59E0B - Amber */
+    --pipeline-danger: 239 68 68;        /* #EF4444 - Red */
+    --pipeline-purple: 139 92 246;       /* #8B5CF6 - Purple */
+    --pipeline-teal: 20 184 166;         /* #14B8A6 - Teal */
+    --pipeline-pink: 236 72 153;         /* #EC4899 - Pink */
+    --pipeline-indigo: 99 102 241;       /* #6366F1 - Indigo */
+    
+    /* Stage-specific colors */
+    --stage-prospect: var(--pipeline-primary);
+    --stage-contact: var(--pipeline-teal);
+    --stage-qualified: var(--pipeline-purple);
+    --stage-proposal: var(--pipeline-warning);
+    --stage-negotiation: var(--pipeline-pink);
+    --stage-won: var(--pipeline-success);
+    --stage-lost: var(--pipeline-danger);
     
     /* Navigation Gradient */
     --nav-gradient: linear-gradient(180deg, hsl(var(--brand-grad-start)), hsl(var(--brand-grad-end)));

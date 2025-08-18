@@ -76,72 +76,79 @@ export function DealCard({ deal, stageId }: DealCardProps) {
           setDrawerOpen(true);
         }}
         className={cn(
-          "cursor-pointer rounded-xl p-4 bg-surface-primary border border-line transition-all duration-200",
-          "hover:shadow-card hover:border-brand-primary/20",
-          isDragging && "opacity-50 shadow-lg rotate-3"
+          "cursor-pointer rounded-xl p-4 bg-white border border-slate-200 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10",
+          "hover:border-blue-300 hover:-translate-y-1 group",
+          isDragging && "opacity-50 shadow-xl rotate-3 scale-105"
         )}
       >
         {/* Deal Title */}
-        <div className="font-medium text-sm text-text-main mb-2 line-clamp-2">
+        <div className="font-semibold text-slate-800 mb-3 line-clamp-2 group-hover:text-blue-700 transition-colors">
           {deal.title}
         </div>
 
         {/* Company */}
         {deal.company_name && (
-          <div className="flex items-center gap-1 text-xs text-text-muted mb-2">
-            <Building className="h-3 w-3 flex-shrink-0" />
-            <span className="truncate">{deal.company_name}</span>
+          <div className="flex items-center gap-2 text-sm text-slate-600 mb-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+              <Building className="h-3 w-3 text-white" />
+            </div>
+            <span className="truncate font-medium">{deal.company_name}</span>
           </div>
         )}
 
         {/* Contact */}
         {deal.contact_name && (
-          <div className="flex items-center gap-1 text-xs text-text-muted mb-2">
-            <User className="h-3 w-3 flex-shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-slate-600 mb-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+              <User className="h-3 w-3 text-white" />
+            </div>
             <span className="truncate">{deal.contact_name}</span>
           </div>
         )}
 
         {/* Value */}
         {deal.value_usd && (
-          <div className="flex items-center gap-1 text-sm font-semibold text-brand-accent mb-2">
-            <DollarSign className="h-3 w-3" />
-            {deal.value_usd.toLocaleString()}
+          <div className="flex items-center gap-2 mb-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+              <DollarSign className="h-3 w-3 text-white" />
+            </div>
+            <span className="text-green-700 font-bold text-lg">
+              ${deal.value_usd.toLocaleString()}
+            </span>
           </div>
         )}
 
         {/* Expected Close Date */}
         {deal.expected_close_date && (
-          <div className="flex items-center gap-1 text-xs text-text-muted mb-2">
-            <Calendar className="h-3 w-3 flex-shrink-0" />
-            <span>{formatDate(deal.expected_close_date)}</span>
+          <div className="flex items-center gap-2 text-sm text-slate-600 mb-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+              <Calendar className="h-3 w-3 text-white" />
+            </div>
+            <span className="font-medium">{formatDate(deal.expected_close_date)}</span>
           </div>
         )}
 
         {/* Probability Badge */}
         {deal.probability !== null && (
-          <div className="mb-2">
-            <Badge 
-              variant="secondary" 
-              className={cn("text-xs", getProbabilityColor(deal.probability))}
-            >
-              {deal.probability}% probability
-            </Badge>
+          <div className="mb-3">
+            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border border-purple-200">
+              {deal.probability}% chance
+            </div>
           </div>
         )}
 
         {/* Activity Indicators */}
-        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-line">
+        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-slate-100">
           {deal.activities_count > 0 && (
-            <div className="flex items-center gap-1 text-xs text-text-muted">
-              <MessageSquare className="h-3 w-3" />
-              <span>{deal.activities_count}</span>
+            <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-md">
+              <MessageSquare className="h-3 w-3 text-blue-600" />
+              <span className="text-xs font-medium text-blue-700">{deal.activities_count}</span>
             </div>
           )}
           {deal.notes_count > 0 && (
-            <div className="flex items-center gap-1 text-xs text-text-muted">
-              <FileText className="h-3 w-3" />
-              <span>{deal.notes_count}</span>
+            <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-md">
+              <FileText className="h-3 w-3 text-amber-600" />
+              <span className="text-xs font-medium text-amber-700">{deal.notes_count}</span>
             </div>
           )}
         </div>
