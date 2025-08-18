@@ -231,6 +231,27 @@ export const useCRMAPI = () => {
     }
   }, [])
 
+  const deleteDeal = useCallback(async (dealId: string) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { error } = await supabase
+        .from('deals')
+        .delete()
+        .eq('id', dealId);
+
+      if (error) throw error
+
+      return { success: true }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete deal')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   return {
     addContact,
     getPipelines,
@@ -239,6 +260,7 @@ export const useCRMAPI = () => {
     createStage,
     moveDeal,
     getPipelineAnalytics,
+    deleteDeal,
     loading,
     error
   }
