@@ -437,6 +437,95 @@ function parseXML(text: string): TradeRecord[] {
   return records;
 }
 
+function validateFileStructure(records: TradeRecord[], metadata: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  // Define field requirements for different file types
+  const fieldRequirements = {
+    air: {
+      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'importer', 'exporter'],
+      locationFields: ['origin_airport', 'dest_airport', 'origin_port', 'destination_port', 'origin_country', 'destination_country'],
+      requiredAny: [
+        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' },
+        { fields: ['origin_airport', 'dest_airport', 'origin_port', 'destination_port'], name: 'location information' }
+      ]
+    },
+    ocean: {
+      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'importer', 'exporter'],
+      locationFields: ['port_of_lading', 'port_of_unlading', 'origin_port', 'destination_port', 'origin_country', 'destination_country'],
+      requiredAny: [
+        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' },
+        { fields: ['port_of_lading', 'port_of_unlading', 'origin_port', 'destination_port'], name: 'port information' }
+      ]
+    },
+    domestic: {
+      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'carrier_name'],
+      locationFields: ['origin_city', 'destination_city', 'origin_state', 'destination_state', 'origin_zip', 'destination_zip'],
+      requiredAny: [
+        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' },
+        { fields: ['origin_city', 'destination_city', 'origin_state', 'destination_state'], name: 'location information' }
+      ]
+    },
+    default: {
+      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'importer', 'exporter'],
+      locationFields: ['origin_country', 'destination_country', 'origin_port', 'destination_port'],
+      requiredAny: [
+        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' }
+      ]
+    }
+  };
+
+  // Detect file type based on field presence and metadata
+  let fileType = 'default';
+  const sampleRecord = records[0] || {};
+  const fieldNames = Object.keys(sampleRecord);
+  
+  if (fieldNames.some(f => ['origin_airport', 'dest_airport', 'carrier'].includes(f)) || 
+      metadata?.filename?.toLowerCase().includes('air')) {
+    fileType = 'air';
+  } else if (fieldNames.some(f => ['port_of_lading', 'port_of_unlading', 'vessel'].includes(f)) ||
+             metadata?.filename?.toLowerCase().includes('ocean')) {
+    fileType = 'ocean';
+  } else if (fieldNames.some(f => ['origin_zip', 'destination_zip'].includes(f)) ||
+             metadata?.filename?.toLowerCase().includes('domestic')) {
+    fileType = 'domestic';
+  }
+
+  const requirements = fieldRequirements[fileType];
+  
+  // Check if at least some records meet the requirements
+  let validRecordCount = 0;
+  
+  for (const record of records.slice(0, 10)) { // Check first 10 records
+    let recordValid = true;
+    
+    for (const requirement of requirements.requiredAny) {
+      const hasRequiredField = requirement.fields.some(field => 
+        record[field] && record[field].toString().trim().length > 0
+      );
+      
+      if (!hasRequiredField) {
+        recordValid = false;
+        break;
+      }
+    }
+    
+    if (recordValid) {
+      validRecordCount++;
+    }
+  }
+  
+  if (validRecordCount === 0) {
+    const reqDescriptions = requirements.requiredAny.map(req => req.name).join(' and ');
+    errors.push(`No records found with required ${reqDescriptions} for ${fileType} file type`);
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
 function normalizeFieldName(field: string): string | null {
   const normalized = field.toLowerCase().replace(/[^a-z0-9]/g, '');
   
@@ -612,20 +701,98 @@ function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
   console.log(`Validating ${records.length} enriched records`);
   const validRecords: TradeRecord[] = [];
   
+  // Flexible validation based on file type detection
+  const fileTypeValidation = detectFileTypeAndValidate(records);
+  console.log(`Detected file type: ${fileTypeValidation.fileType}`);
+  
   for (const record of records) {
-    // CRITICAL VALIDATION: Check all REQUIRED fields for unified_shipments
-    const hasCompanyName = !!(record.shipper_name || record.consignee_name);
-    const hasMode = !!record.transportation_mode;
-    
-    if (hasCompanyName && hasMode) {
+    // Use flexible validation rules
+    if (fileTypeValidation.validator(record)) {
       validRecords.push(record);
     } else {
-      console.warn(`Skipping invalid record: missing company=${!hasCompanyName}, missing mode=${!hasMode}`);
+      console.warn(`Skipping invalid record for ${fileTypeValidation.fileType} file type:`, {
+        hasCompany: !!(record.shipper_name || record.consignee_name),
+        hasMode: !!record.transportation_mode,
+        hasLocation: fileTypeValidation.hasRequiredLocation(record)
+      });
     }
   }
   
   console.log(`Validation completed: ${validRecords.length}/${records.length} records passed validation`);
   return validRecords;
+}
+
+function detectFileTypeAndValidate(records: TradeRecord[]) {
+  const sampleRecord = records[0] || {};
+  const fieldNames = Object.keys(sampleRecord);
+  
+  // Air freight validation
+  const isAirFreight = fieldNames.some(f => 
+    ['origin_airport', 'dest_airport', 'departure_port', 'arrival_port'].includes(f)
+  ) || records.some(r => r.transportation_mode?.toLowerCase().includes('air'));
+  
+  // Ocean freight validation  
+  const isOceanFreight = fieldNames.some(f => 
+    ['port_of_lading', 'port_of_unlading', 'vessel_name', 'bol_number'].includes(f)
+  ) || records.some(r => r.transportation_mode?.toLowerCase().includes('ocean'));
+  
+  // Domestic validation
+  const isDomestic = fieldNames.some(f => 
+    ['origin_zip', 'destination_zip', 'origin_state', 'destination_state'].includes(f)
+  ) || records.some(r => r.transportation_mode?.toLowerCase().includes('truck'));
+  
+  if (isAirFreight) {
+    return {
+      fileType: 'air',
+      validator: (record: TradeRecord) => {
+        const hasCompany = !!(record.shipper_name || record.consignee_name);
+        const hasMode = !!record.transportation_mode;
+        const hasAirLocation = !!(record.origin_airport || record.dest_airport || 
+                                  record.departure_port || record.arrival_port);
+        return hasCompany && hasMode && hasAirLocation;
+      },
+      hasRequiredLocation: (record: TradeRecord) => !!(record.origin_airport || record.dest_airport)
+    };
+  }
+  
+  if (isOceanFreight) {
+    return {
+      fileType: 'ocean',
+      validator: (record: TradeRecord) => {
+        const hasCompany = !!(record.shipper_name || record.consignee_name);
+        const hasMode = !!record.transportation_mode;
+        const hasOceanLocation = !!(record.port_of_lading || record.port_of_unlading || 
+                                    record.origin_port || record.destination_port);
+        return hasCompany && hasMode && hasOceanLocation;
+      },
+      hasRequiredLocation: (record: TradeRecord) => !!(record.port_of_lading || record.port_of_unlading)
+    };
+  }
+  
+  if (isDomestic) {
+    return {
+      fileType: 'domestic',
+      validator: (record: TradeRecord) => {
+        const hasCompany = !!(record.shipper_name || record.consignee_name);
+        const hasMode = !!record.transportation_mode;
+        const hasDomesticLocation = !!(record.origin_city || record.destination_city || 
+                                       record.origin_state || record.destination_state);
+        return hasCompany && hasMode && hasDomesticLocation;
+      },
+      hasRequiredLocation: (record: TradeRecord) => !!(record.origin_city || record.destination_city)
+    };
+  }
+  
+  // Default validation for mixed or unknown file types
+  return {
+    fileType: 'mixed',
+    validator: (record: TradeRecord) => {
+      const hasCompany = !!(record.shipper_name || record.consignee_name);
+      const hasMode = !!record.transportation_mode;
+      return hasCompany && hasMode;
+    },
+    hasRequiredLocation: (record: TradeRecord) => true // Less strict for mixed files
+  };
 }
 
 async function processBatch(
