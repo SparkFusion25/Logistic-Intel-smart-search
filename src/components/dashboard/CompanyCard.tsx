@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Building2, Mail, Phone, MapPin, ExternalLink, Plus, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAPI } from "@/hooks/useAPI"
+import { ComprehensiveDealDrawer } from "@/components/CRM/ComprehensiveDealDrawer"
 
 interface CompanyCardProps {
   company: {
@@ -31,6 +32,7 @@ interface CompanyCardProps {
 
 export function CompanyCard({ company, source = "manual", onAddedToCRM }: CompanyCardProps) {
   const [isAdding, setIsAdding] = useState(false)
+  const [showDetailsDrawer, setShowDetailsDrawer] = useState(false)
   const { toast } = useToast()
   const { makeRequest } = useAPI()
 
@@ -91,7 +93,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
   }
 
   return (
-    <Card className="bg-card border-border hover:shadow-md transition-shadow w-36 sm:w-39 min-h-20 sm:min-h-24">
+    <Card className="bg-card border-border hover:shadow-md transition-shadow w-64 min-h-20 sm:min-h-24 cursor-pointer" onClick={() => setShowDetailsDrawer(true)}>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12">
@@ -209,6 +211,13 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
           </div>
         </div>
       </CardContent>
+      
+      <ComprehensiveDealDrawer 
+        open={showDetailsDrawer}
+        onOpenChange={setShowDetailsDrawer}
+        dealId={company.company_id || `temp-${company.name}`}
+        companyData={company}
+      />
     </Card>
   )
 }

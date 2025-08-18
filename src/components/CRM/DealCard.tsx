@@ -78,7 +78,7 @@ export function DealCard({ deal, stageId }: DealCardProps) {
         className={cn(
           "cursor-pointer rounded-lg p-2 sm:p-2.5 bg-white border border-slate-200 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
           "hover:border-blue-300 hover:-translate-y-0.5 group touch-manipulation",
-          "min-h-20 sm:min-h-24 w-36 sm:w-39",
+          "min-h-20 sm:min-h-24 w-64",
           isDragging && "opacity-50 shadow-lg rotate-2 scale-105"
         )}
       >

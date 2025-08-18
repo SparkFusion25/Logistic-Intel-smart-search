@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Calendar, 
   DollarSign, 
@@ -28,7 +29,16 @@ import {
   FileText,
   ExternalLink,
   Edit3,
-  Save
+  Save,
+  Clock,
+  Globe,
+  Building2,
+  Users,
+  BarChart3,
+  ArrowRight,
+  MessageSquare,
+  Target,
+  Zap
 } from "lucide-react";
 import { SalesAssistant } from "./SalesAssistant";
 import { OpportunityMeter } from "./OpportunityMeter";
@@ -53,18 +63,21 @@ export function ComprehensiveDealDrawer({
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<any>({});
   const [isEnriching, setIsEnriching] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
 
-  // Mock deal data with shipment information
+  // Enhanced mock deal data with comprehensive company information
   const mockDeal = {
     id: dealId,
-    title: companyData?.name || "Ocean Import Deal",
+    title: companyData?.name ? `${companyData.name} - Logistics Partnership` : "Ocean Import Deal",
     company_name: companyData?.name || "Global Logistics Corp",
     value_usd: companyData?.trade_volume_usd || 50000,
     currency: "USD",
-    expected_close_date: "2025-01-31",
+    expected_close_date: "2025-03-15",
     status: "open",
-    stage: "Proposal Sent",
+    stage: "Prospect Identified",
+    probability: 75,
+    source: companyData?.source || "Search Intelligence",
     contact: {
       name: companyData?.contact?.name || "John Smith",
       email: companyData?.contact?.email || "john@globallogistics.com",
@@ -74,24 +87,82 @@ export function ComprehensiveDealDrawer({
     },
     company: {
       ...companyData,
+      name: companyData?.name || "Global Logistics Corp",
       website: "https://globallogistics.com",
       employees: "500-1000",
       industry: companyData?.industry || "Logistics & Supply Chain",
-      revenue: companyData?.revenue || "$50M - $100M"
+      revenue: companyData?.revenue || "$50M - $100M",
+      location: companyData?.location || "Los Angeles, CA",
+      founded: "2010",
+      description: "Leading logistics provider specializing in Asia-Pacific trade routes"
     },
     shipments: {
       total: companyData?.shipments || 1250,
+      last_30_days: 125,
       recent: [
-        { date: "2025-01-15", type: "Ocean", value: "$125K", route: "Shanghai → Los Angeles" },
-        { date: "2025-01-12", type: "Air", value: "$85K", route: "Hong Kong → Chicago" },
-        { date: "2025-01-08", type: "Ocean", value: "$200K", route: "Rotterdam → New York" }
+        { 
+          id: "1",
+          date: "2025-01-15", 
+          type: "Ocean", 
+          value: "$125K", 
+          route: "Shanghai → Los Angeles",
+          status: "In Transit",
+          hs_code: "8517.12.00",
+          weight: "2,500 kg"
+        },
+        { 
+          id: "2",
+          date: "2025-01-12", 
+          type: "Air", 
+          value: "$85K", 
+          route: "Hong Kong → Chicago",
+          status: "Delivered",
+          hs_code: "8471.30.01",
+          weight: "850 kg"
+        },
+        { 
+          id: "3",
+          date: "2025-01-08", 
+          type: "Ocean", 
+          value: "$200K", 
+          route: "Rotterdam → New York",
+          status: "Customs",
+          hs_code: "8708.99.81",
+          weight: "5,200 kg"
+        }
       ],
       trends: {
         monthly_growth: "+12%",
         yearly_volume: "$2.4M",
-        top_routes: ["Asia → US West Coast", "Europe → US East Coast"]
+        top_routes: ["Asia → US West Coast", "Europe → US East Coast"],
+        avg_shipment_value: "$45K",
+        preferred_mode: "Ocean (78%)"
       }
-    }
+    },
+    activities: [
+      {
+        id: "1",
+        type: "email",
+        date: "2025-01-16",
+        description: "Sent initial proposal",
+        user: "Sales Team"
+      },
+      {
+        id: "2", 
+        type: "call",
+        date: "2025-01-14",
+        description: "Discovery call with procurement team",
+        user: "Account Manager"
+      }
+    ],
+    notes: [
+      {
+        id: "1",
+        date: "2025-01-16",
+        content: "Company shows strong interest in our Asia-Pacific routes. Current provider contracts expire in Q2.",
+        user: "Sales Rep"
+      }
+    ]
   };
 
   useEffect(() => {
@@ -159,59 +230,105 @@ export function ComprehensiveDealDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[90vw] sm:w-[800px] max-w-[800px] overflow-y-auto">
-        <SheetHeader className="pb-6">
+      <SheetContent className="w-[95vw] sm:w-[900px] max-w-[900px] overflow-y-auto">
+        <SheetHeader className="pb-6 border-b">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12">
+            <div className="flex items-center gap-4">
+              <Avatar className="w-16 h-16">
                 <AvatarImage src={dealData.company?.logo} />
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  <Building className="w-6 h-6" />
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-bold">
+                  {dealData.company_name.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <SheetTitle className="text-xl">{dealData.company_name}</SheetTitle>
-                <p className="text-sm text-muted-foreground">{dealData.company?.industry}</p>
+                <SheetTitle className="text-2xl text-slate-900">{dealData.company_name}</SheetTitle>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="text-sm text-slate-600">{dealData.company?.industry}</p>
+                  <Badge variant="outline" className="text-xs">{dealData.stage}</Badge>
+                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                    {dealData.source}
+                  </Badge>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">{dealData.stage}</Badge>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-2xl font-bold text-green-600">
+                  ${dealData.value_usd?.toLocaleString()}
+                </p>
+                <p className="text-sm text-slate-500">{dealData.probability}% probability</p>
+              </div>
               <Button
                 variant={isEditing ? "default" : "outline"}
                 size="sm"
                 onClick={() => isEditing ? handleSave() : setIsEditing(true)}
               >
                 {isEditing ? <Save className="w-4 h-4 mr-1" /> : <Edit3 className="w-4 h-4 mr-1" />}
-                {isEditing ? "Save" : "Edit"}
+                {isEditing ? "Save" : "Edit Deal"}
               </Button>
             </div>
           </div>
         </SheetHeader>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="contact">Contact</TabsTrigger>
             <TabsTrigger value="shipments">Shipments</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
+            <TabsTrigger value="email">Email</TabsTrigger>
             <TabsTrigger value="ai-assistant">AI Assistant</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Key Metrics */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
+            {/* Quick Actions Bar */}
+            <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
+              <Button onClick={handleSendEmail} className="flex-1">
+                <Mail className="w-4 h-4 mr-2" />
+                Send Email
+              </Button>
+              <Button variant="outline" onClick={handleEnrichContact} disabled={isEnriching}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isEnriching ? "Enriching..." : "Enrich"}
+              </Button>
+              <Button variant="outline">
+                <Calendar className="w-4 h-4 mr-2" />
+                Schedule
+              </Button>
+              <Button variant="outline">
+                <FileText className="w-4 h-4 mr-2" />
+                Proposal
+              </Button>
+            </div>
+
+            {/* Key Metrics Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="border-l-4 border-l-green-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <DollarSign className="w-5 h-5 text-green-600" />
-                    <span className="font-medium">Deal Value</span>
+                    <span className="font-medium text-sm">Deal Value</span>
                   </div>
                   {isEditing ? (
-                    <Input
-                      value={editedData.value_usd || ""}
-                      onChange={(e) => setEditedData({...editedData, value_usd: Number(e.target.value)})}
-                      placeholder="Deal value"
-                    />
+                    <div className="space-y-2">
+                      <Input
+                        type="number"
+                        value={editedData.value_usd || ""}
+                        onChange={(e) => setEditedData({...editedData, value_usd: Number(e.target.value)})}
+                        placeholder="Deal value"
+                        className="text-lg font-bold"
+                      />
+                      <Select value={editedData.currency || "USD"} onValueChange={(value) => setEditedData({...editedData, currency: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="GBP">GBP</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   ) : (
                     <div className="text-2xl font-bold text-green-700">
                       ${dealData.value_usd?.toLocaleString()}
@@ -220,77 +337,140 @@ export function ComprehensiveDealDrawer({
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-l-4 border-l-blue-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-5 h-5 text-blue-600" />
+                    <span className="font-medium text-sm">Probability</span>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-700">{dealData.probability}%</div>
+                  <div className="w-full bg-blue-100 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${dealData.probability}%` }}
+                    ></div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-orange-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Calendar className="w-5 h-5 text-orange-600" />
-                    <span className="font-medium">Expected Close</span>
+                    <span className="font-medium text-sm">Close Date</span>
                   </div>
                   {isEditing ? (
                     <Input
                       type="date"
                       value={editedData.expected_close_date || ""}
                       onChange={(e) => setEditedData({...editedData, expected_close_date: e.target.value})}
+                      className="text-lg font-semibold"
                     />
                   ) : (
-                    <div className="text-lg font-semibold">{dealData.expected_close_date}</div>
+                    <div className="text-lg font-semibold text-orange-700">
+                      {new Date(dealData.expected_close_date).toLocaleDateString()}
+                    </div>
                   )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-purple-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Ship className="w-5 h-5 text-purple-600" />
+                    <span className="font-medium text-sm">Shipments</span>
+                  </div>
+                  <div className="text-2xl font-bold text-purple-700">{dealData.shipments.last_30_days}</div>
+                  <div className="text-xs text-purple-600">Last 30 days</div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Lead Score and Opportunity */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Lead Score:</span>
-                <LeadScoreChip score={78} />
-              </div>
-              <OpportunityMeter score={78} className="col-span-2" />
-            </div>
-
-            {/* Company Information */}
+            {/* Company Details */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Building className="w-5 h-5" />
-                  Company Details
+                  <Building2 className="w-5 h-5" />
+                  Company Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   <div>
-                    <Label className="text-sm font-medium">Website</Label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{dealData.company?.website}</span>
-                      <ExternalLink className="w-4 h-4 text-muted-foreground cursor-pointer" />
+                    <Label className="text-sm font-medium text-slate-600">Website</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Globe className="w-4 h-4 text-slate-400" />
+                      <a href={dealData.company?.website} target="_blank" rel="noopener noreferrer" 
+                         className="text-blue-600 hover:underline text-sm">
+                        {dealData.company?.website}
+                      </a>
                     </div>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium">Employees</Label>
-                    <div className="text-sm">{dealData.company?.employees}</div>
+                    <Label className="text-sm font-medium text-slate-600">Employees</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Users className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm">{dealData.company?.employees}</span>
+                    </div>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium">Revenue</Label>
-                    <div className="text-sm">{dealData.company?.revenue}</div>
+                    <Label className="text-sm font-medium text-slate-600">Revenue</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <BarChart3 className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm">{dealData.company?.revenue}</span>
+                    </div>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium">Location</Label>
-                    <div className="text-sm">{dealData.company?.location}</div>
+                    <Label className="text-sm font-medium text-slate-600">Location</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm">{dealData.company?.location}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-slate-600">Founded</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Clock className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm">{dealData.company?.founded}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-slate-600">Industry</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Building className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm">{dealData.company?.industry}</span>
+                    </div>
                   </div>
                 </div>
+                {dealData.company?.description && (
+                  <div className="mt-4 pt-4 border-t">
+                    <Label className="text-sm font-medium text-slate-600">Description</Label>
+                    <p className="text-sm text-slate-700 mt-1">{dealData.company.description}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={handleSendEmail} className="w-full">
-                <Mail className="w-4 h-4 mr-2" />
-                Compose Email
-              </Button>
-              <Button variant="outline" onClick={handleEnrichContact} disabled={isEnriching}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                {isEnriching ? "Enriching..." : "Enrich Contact"}
-              </Button>
+            {/* Lead Score & Opportunity Meter */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium">Lead Score</span>
+                    <LeadScoreChip score={78} />
+                  </div>
+                  <div className="space-y-2 text-xs text-slate-600">
+                    <div>• Strong trade volume history</div>
+                    <div>• Active shipping patterns</div>
+                    <div>• Geographic match</div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <OpportunityMeter score={78} />
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -303,15 +483,39 @@ export function ComprehensiveDealDrawer({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ContactFields contact={dealData.contact} />
+                <div className="flex items-start gap-4 mb-6">
+                  <Avatar className="w-16 h-16">
+                    <AvatarFallback className="bg-blue-100 text-blue-700 text-lg font-semibold">
+                      {dealData.contact?.name?.substring(0, 2).toUpperCase() || "JD"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{dealData.contact?.name}</h3>
+                    <p className="text-slate-600">{dealData.contact?.title}</p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <a href={`mailto:${dealData.contact?.email}`} 
+                         className="flex items-center gap-1 text-blue-600 hover:underline">
+                        <Mail className="w-4 h-4" />
+                        {dealData.contact?.email}
+                      </a>
+                      <a href={`tel:${dealData.contact?.phone}`} 
+                         className="flex items-center gap-1 text-blue-600 hover:underline">
+                        <Phone className="w-4 h-4" />
+                        {dealData.contact?.phone}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
                 <Separator className="my-4" />
+                
                 <div className="grid grid-cols-2 gap-3">
                   <Button onClick={handleEnrichContact} disabled={isEnriching}>
-                    <UserPlus className="w-4 h-4 mr-2" />
+                    <Sparkles className="w-4 h-4 mr-2" />
                     {isEnriching ? "Enriching..." : "Enrich with Apollo"}
                   </Button>
                   <Button variant="outline">
-                    <Settings className="w-4 h-4 mr-2" />
+                    <Zap className="w-4 h-4 mr-2" />
                     PhantomBuster
                   </Button>
                 </div>
@@ -320,79 +524,137 @@ export function ComprehensiveDealDrawer({
 
             <Card>
               <CardHeader>
-                <CardTitle>Additional Contacts</CardTitle>
-                <CardDescription>Discover more contacts at this company</CardDescription>
+                <CardTitle>Find More Contacts</CardTitle>
+                <CardDescription>Discover additional decision-makers at this company</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Find More Contacts
-                </Button>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Find Procurement Team
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Find Supply Chain Directors
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Find C-Level Executives
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="shipments" className="space-y-6">
+            {/* Shipment Overview */}
             <div className="grid grid-cols-3 gap-4">
-              <Card>
+              <Card className="border-l-4 border-l-blue-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Ship className="w-5 h-5 text-blue-600" />
-                    <span className="font-medium">Total Shipments</span>
+                    <span className="font-medium text-sm">Total Shipments</span>
                   </div>
-                  <div className="text-2xl font-bold">{dealData.shipments.total}</div>
+                  <div className="text-2xl font-bold text-blue-900">{dealData.shipments.total}</div>
+                  <div className="text-xs text-blue-600">All time</div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-l-4 border-l-green-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="w-5 h-5 text-green-600" />
-                    <span className="font-medium">Monthly Growth</span>
+                    <span className="font-medium text-sm">Growth</span>
                   </div>
-                  <div className="text-2xl font-bold text-green-700">
+                  <div className="text-2xl font-bold text-green-900">
                     {dealData.shipments.trends.monthly_growth}
                   </div>
+                  <div className="text-xs text-green-600">Month over month</div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-l-4 border-l-purple-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <DollarSign className="w-5 h-5 text-purple-600" />
-                    <span className="font-medium">Yearly Volume</span>
+                    <span className="font-medium text-sm">Avg Value</span>
                   </div>
-                  <div className="text-2xl font-bold">
-                    {dealData.shipments.trends.yearly_volume}
+                  <div className="text-2xl font-bold text-purple-900">
+                    {dealData.shipments.trends.avg_shipment_value}
                   </div>
+                  <div className="text-xs text-purple-600">Per shipment</div>
                 </CardContent>
               </Card>
             </div>
 
+            {/* Recent Shipments */}
             <Card>
               <CardHeader>
                 <CardTitle>Recent Shipments</CardTitle>
+                <CardDescription>Latest shipment activity for analysis</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {dealData.shipments.recent.map((shipment: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded">
-                      <div className="flex items-center gap-3">
-                        <Badge variant="outline">{shipment.type}</Badge>
-                        <div>
-                          <div className="font-medium">{shipment.route}</div>
-                          <div className="text-sm text-muted-foreground">{shipment.date}</div>
+                    <div key={index} className="border rounded-lg p-4 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <Badge 
+                            variant={shipment.type === 'Ocean' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {shipment.type}
+                          </Badge>
+                          <span className="font-medium">{shipment.route}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-green-600">{shipment.value}</div>
+                          <div className="text-xs text-slate-500">{shipment.date}</div>
                         </div>
                       </div>
-                      <div className="font-semibold">{shipment.value}</div>
+                      <div className="grid grid-cols-3 gap-4 text-sm text-slate-600">
+                        <div>
+                          <span className="font-medium">Status:</span> {shipment.status}
+                        </div>
+                        <div>
+                          <span className="font-medium">HS Code:</span> {shipment.hs_code}
+                        </div>
+                        <div>
+                          <span className="font-medium">Weight:</span> {shipment.weight}
+                        </div>
+                      </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Trade Insights */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Trade Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <Label className="text-sm font-medium text-slate-600">Top Routes</Label>
+                    <div className="mt-2 space-y-1">
+                      {dealData.shipments.trends.top_routes.map((route: string, index: number) => (
+                        <div key={index} className="text-sm">{route}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-slate-600">Preferred Mode</Label>
+                    <div className="mt-2 text-sm">{dealData.shipments.trends.preferred_mode}</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="activities" className="space-y-6">
+            {/* Quick Actions */}
             <div className="grid grid-cols-3 gap-3">
               <Button>
                 <Calendar className="w-4 h-4 mr-2" />
@@ -408,13 +670,92 @@ export function ComprehensiveDealDrawer({
               </Button>
             </div>
 
+            {/* Recent Activities */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activities</CardTitle>
+                <CardTitle>Timeline</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center text-muted-foreground py-8">
-                  No activities yet. Start engaging with this prospect!
+                <div className="space-y-4">
+                  {dealData.activities.map((activity: any) => (
+                    <div key={activity.id} className="flex items-start gap-3 pb-4 border-b last:border-b-0">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        {activity.type === 'email' ? 
+                          <Mail className="w-4 h-4 text-blue-600" /> : 
+                          <Phone className="w-4 h-4 text-blue-600" />
+                        }
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{activity.description}</span>
+                          <span className="text-xs text-slate-500">{activity.date}</span>
+                        </div>
+                        <div className="text-sm text-slate-600">{activity.user}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Notes Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {dealData.notes.map((note: any) => (
+                    <div key={note.id} className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                      <div className="text-sm">{note.content}</div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {note.user} • {note.date}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-4">
+                    <Textarea placeholder="Add a note..." className="mb-2" />
+                    <Button size="sm">Add Note</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="email" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  Email Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Button>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Compose Email
+                  </Button>
+                  <Button variant="outline">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Email Templates
+                  </Button>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h4 className="font-medium mb-3">Recent Email Activity</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-green-50 rounded">
+                      <span className="text-sm">Initial proposal sent</span>
+                      <span className="text-xs text-slate-500">2 days ago</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-blue-50 rounded">
+                      <span className="text-sm">Follow-up email opened</span>
+                      <span className="text-xs text-slate-500">1 day ago</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
