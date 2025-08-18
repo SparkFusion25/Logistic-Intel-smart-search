@@ -127,16 +127,27 @@ export function DealPipeline() {
     const { active, over } = event;
     setDraggedDeal(null);
 
-    if (!over || active.id === over.id) return;
+    console.log('🔧 Drag End:', { activeId: active.id, overId: over?.id, overData: over?.data?.current });
+
+    if (!over) {
+      console.log('🔧 No drop target');
+      return;
+    }
 
     const activeStageId = active.data.current?.stageId;
     const overStageId = over.data.current?.stageId || over.id;
 
-    if (activeStageId === overStageId) return;
+    console.log('🔧 Stage IDs:', { activeStageId, overStageId });
+
+    if (activeStageId === overStageId) {
+      console.log('🔧 Same stage, no move needed');
+      return;
+    }
 
     // Optimistic update first
     const dealToMove = dealsByStage[activeStageId]?.find(d => d.id === active.id);
     if (dealToMove) {
+      console.log('🔧 Moving deal:', dealToMove.title);
       const newDealsByStage = { ...dealsByStage };
       // Remove from old stage
       newDealsByStage[activeStageId] = newDealsByStage[activeStageId].filter(d => d.id !== active.id);
@@ -147,6 +158,7 @@ export function DealPipeline() {
     }
 
     try {
+      console.log('🔧 Making API call to move deal');
       await makeRequest('/crm-deal-move', {
         method: 'POST',
         body: {
@@ -154,8 +166,9 @@ export function DealPipeline() {
           to_stage_id: overStageId
         }
       });
+      console.log('🔧 Deal moved successfully');
     } catch (error) {
-      console.error('Failed to move deal:', error);
+      console.error('🔧 Failed to move deal:', error);
       // Revert on error
       loadDeals(selectedPipeline);
     }

@@ -70,86 +70,100 @@ export function DealCard({ deal, stageId }: DealCardProps) {
         ref={setNodeRef}
         style={style}
         {...attributes}
-        {...listeners}
-        onClick={(e) => {
-          e.stopPropagation();
-          setDrawerOpen(true);
-        }}
         className={cn(
           "cursor-pointer rounded-lg p-2 sm:p-2.5 bg-white border border-slate-200 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
-          "hover:border-blue-300 hover:-translate-y-0.5 group touch-manipulation",
+          "hover:border-blue-300 hover:-translate-y-0.5 group touch-manipulation relative",
           "min-h-20 sm:min-h-24 w-72 xl:w-80",
           isDragging && "opacity-50 shadow-lg rotate-2 scale-105"
         )}
       >
-        {/* Deal Title - Compact */}
-        <div className="font-medium text-slate-800 mb-1.5 sm:mb-2 line-clamp-1 group-hover:text-blue-700 transition-colors text-sm leading-tight">
-          {deal.title}
+        {/* Drag Handle - Separate from click area */}
+        <div 
+          {...listeners}
+          className="absolute top-1 right-1 w-6 h-6 bg-slate-100 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing flex items-center justify-center z-10"
+        >
+          <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
+          <div className="w-1 h-1 bg-slate-400 rounded-full ml-0.5"></div>
         </div>
-
-        {/* Company - Compact */}
-        {deal.company_name && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5">
-            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-              <Building className="h-2 w-2 text-white" />
-            </div>
-            <span className="truncate font-medium">{deal.company_name}</span>
+        
+        {/* Clickable Content Area */}
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('🔧 DealCard clicked:', deal.title);
+            setDrawerOpen(true);
+          }}
+          className="w-full h-full relative cursor-pointer"
+        >
+          {/* Deal Title - Compact */}
+          <div className="font-medium text-slate-800 mb-1.5 sm:mb-2 line-clamp-1 group-hover:text-blue-700 transition-colors text-sm leading-tight">
+            {deal.title}
           </div>
-        )}
 
-        {/* Value - Prominent but compact */}
-        {deal.value_usd && (
-          <div className="flex items-center gap-1.5 mb-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md p-1.5">
-            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
-              <DollarSign className="h-2 w-2 text-white" />
-            </div>
-            <span className="text-green-700 font-bold text-sm">
-              ${deal.value_usd.toLocaleString()}
-            </span>
-          </div>
-        )}
-
-        {/* Contact - Only if space allows */}
-        {deal.contact_name && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5 sm:block hidden">
-            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <User className="h-2 w-2 text-white" />
-            </div>
-            <span className="truncate">{deal.contact_name}</span>
-          </div>
-        )}
-
-        {/* Expected Close Date - Compact */}
-        {deal.expected_close_date && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5">
-            <Calendar className="h-3 w-3 text-orange-500 flex-shrink-0" />
-            <span className="font-medium">{formatDate(deal.expected_close_date)}</span>
-          </div>
-        )}
-
-        {/* Bottom row - Probability and Activities */}
-        <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100">
-          {/* Probability - Compact */}
-          {deal.probability !== null && (
-            <div className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-              {deal.probability}%
+          {/* Company - Compact */}
+          {deal.company_name && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5">
+              <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                <Building className="h-2 w-2 text-white" />
+              </div>
+              <span className="truncate font-medium">{deal.company_name}</span>
             </div>
           )}
 
-          {/* Activity Indicators - Compact */}
-          <div className="flex items-center gap-1.5">
-            {deal.activities_count > 0 && (
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 rounded text-xs">
-                <MessageSquare className="h-2.5 w-2.5 text-blue-600" />
-                <span className="text-blue-700 font-medium">{deal.activities_count}</span>
+          {/* Value - Prominent but compact */}
+          {deal.value_usd && (
+            <div className="flex items-center gap-1.5 mb-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md p-1.5">
+              <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                <DollarSign className="h-2 w-2 text-white" />
+              </div>
+              <span className="text-green-700 font-bold text-sm">
+                ${deal.value_usd.toLocaleString()}
+              </span>
+            </div>
+          )}
+
+          {/* Contact - Only if space allows */}
+          {deal.contact_name && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5 sm:block hidden">
+              <div className="w-4 h-4 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                <User className="h-2 w-2 text-white" />
+              </div>
+              <span className="truncate">{deal.contact_name}</span>
+            </div>
+          )}
+
+          {/* Expected Close Date - Compact */}
+          {deal.expected_close_date && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5">
+              <Calendar className="h-3 w-3 text-orange-500 flex-shrink-0" />
+              <span className="font-medium">{formatDate(deal.expected_close_date)}</span>
+            </div>
+          )}
+
+          {/* Bottom row - Probability and Activities */}
+          <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100">
+            {/* Probability - Compact */}
+            {deal.probability !== null && (
+              <div className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                {deal.probability}%
               </div>
             )}
-            {deal.notes_count > 0 && (
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 rounded text-xs">
-                <FileText className="h-2.5 w-2.5 text-amber-600" />
-                <span className="text-amber-700 font-medium">{deal.notes_count}</span>
-              </div>
-            )}
+
+            {/* Activity Indicators - Compact */}
+            <div className="flex items-center gap-1.5">
+              {deal.activities_count > 0 && (
+                <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 rounded text-xs">
+                  <MessageSquare className="h-2.5 w-2.5 text-blue-600" />
+                  <span className="text-blue-700 font-medium">{deal.activities_count}</span>
+                </div>
+              )}
+              {deal.notes_count > 0 && (
+                <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 rounded text-xs">
+                  <FileText className="h-2.5 w-2.5 text-amber-600" />
+                  <span className="text-amber-700 font-medium">{deal.notes_count}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </Card>
