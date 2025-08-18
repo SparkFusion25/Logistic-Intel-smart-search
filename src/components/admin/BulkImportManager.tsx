@@ -75,11 +75,21 @@ export const BulkImportManager = () => {
 
     const file = acceptedFiles[0];
     const allowedTypes = ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/xml', 'application/xml'];
+    const maxFileSize = 50 * 1024 * 1024; // 50MB limit
     
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid File Type",
         description: "Please upload CSV, XLSX, or XML files only",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > maxFileSize) {
+      toast({
+        title: "File Too Large",
+        description: `File size must be under 50MB. Your file is ${Math.round(file.size / 1024 / 1024)}MB.`,
         variant: "destructive",
       });
       return;

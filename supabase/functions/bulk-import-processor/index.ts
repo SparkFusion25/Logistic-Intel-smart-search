@@ -118,8 +118,8 @@ serve(async (req) => {
         })
         .eq('id', import_id);
 
-      // Process records in batches
-      const batchSize = 100;
+      // Process records in batches - adjust based on file size
+      const batchSize = Math.min(records.length > 10000 ? 50 : 100, 500);
       let processedCount = 0;
       let duplicateCount = 0;
       let errorCount = 0;
@@ -162,6 +162,7 @@ serve(async (req) => {
         .eq('id', import_id);
 
       // Queue enrichment for companies
+      // Queue enrichment in background to avoid timeout
       EdgeRuntime.waitUntil(queueEnrichment(import_id, supabaseClient));
 
       return new Response(JSON.stringify({
