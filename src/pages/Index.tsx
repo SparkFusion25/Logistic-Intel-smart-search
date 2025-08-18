@@ -64,9 +64,9 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img 
-                src="/lovable-uploads/eb2815fc-aefa-4b9f-8e44-e6165942adbd.png" 
-                alt="LOGISTIC INTEL"
-                className="h-12 w-auto"
+                src="/lovable-uploads/006777d5-845a-4da1-9783-8eb9964cddc8.png" 
+                alt="LogisticIntel - Trade Intelligence"
+                className="h-12 w-auto bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1"
               />
             </div>
             <div className="hidden lg:flex items-center space-x-8">
