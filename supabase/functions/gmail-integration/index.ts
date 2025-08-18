@@ -65,54 +65,6 @@ serve(async (req) => {
   }
 });
 
-async function sendEmail(to: string, subject: string, body: string, userId: string, dealId?: string) {
-  // This would integrate with Gmail API
-  // For now, using a placeholder implementation
-  console.log('Sending email:', { to, subject, userId, dealId });
-  
-  // Log email activity
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-  );
-  
-  const { error } = await supabase.from('activities').insert({
-    org_id: userId,
-    deal_id: dealId,
-    type: 'email',
-    subject: `Email sent: ${subject}`,
-    body: `To: ${to}\n\n${body}`,
-    created_by: userId
-  });
-
-  if (error) {
-    console.error('Error logging email activity:', error);
-  }
-
-  return new Response(JSON.stringify({ success: true, messageId: 'temp_id_' + Date.now() }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
-}
-
-async function fetchEmails(userId: string) {
-  // This would fetch emails from Gmail API
-  // For now, returning mock data
-  const mockEmails = [
-    {
-      id: '1',
-      threadId: 'thread_1',
-      subject: 'Re: Business Proposal',
-      from: 'contact@example.com',
-      body: 'Thank you for your proposal. We are interested in discussing further.',
-      date: new Date().toISOString(),
-      read: true
-    }
-  ];
-
-  return new Response(JSON.stringify({ success: true, emails: mockEmails }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
-}
 
 async function getAuthUrl() {
   const clientId = Deno.env.get('GMAIL_CLIENT_ID');
@@ -274,7 +226,11 @@ async function sendEmail(to: string, subject: string, body: string, userId: stri
       body
     ].join('\n');
 
-    const encodedEmail = btoa(email).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // Use Deno's standard approach for base64 encoding
+    const encoder = new TextEncoder();
+    const data = encoder.encode(email);
+    const base64 = btoa(String.fromCharCode.apply(null, Array.from(data)));
+    const encodedEmail = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
     // Send via Gmail API
     const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
@@ -437,7 +393,11 @@ async function replyToEmail(threadId: string, body: string, userId: string, deal
       body
     ].join('\n');
 
-    const encodedEmail = btoa(email).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // Use Deno's standard approach for base64 encoding
+    const encoder = new TextEncoder();
+    const data = encoder.encode(email);
+    const base64 = btoa(String.fromCharCode.apply(null, Array.from(data)));
+    const encodedEmail = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
     // Send reply via Gmail API
     const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
