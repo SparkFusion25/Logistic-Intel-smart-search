@@ -199,42 +199,31 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Enhanced Key Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Enhanced Key Metrics - Mobile Optimized */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                 {overviewMetrics.map((metric, index) => (
-                  <div
+                  <StatCard
                     key={index}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-100/50 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300 hover:scale-105 group"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200`}>
-                        <metric.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                        metric.changeType === 'increase' 
-                          ? 'bg-emerald-50 text-emerald-700' 
-                          : 'bg-red-50 text-red-700'
-                      }`}>
-                        <span>↗</span>
-                        <span>{metric.change}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-3xl font-bold text-slate-900">{metric.value}</p>
-                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">{metric.title}</p>
-                    </div>
-                  </div>
+                    title={metric.title}
+                    value={metric.value}
+                    change={metric.change}
+                    changeType={metric.changeType}
+                    icon={metric.icon}
+                    color={metric.color}
+                    trend={metric.trend}
+                    className="bg-white/80 backdrop-blur-sm border-blue-100/50 hover:shadow-xl hover:bg-white/90 transition-all duration-300 hover:scale-105"
+                  />
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                {/* Enhanced Recent Searches */}
-                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
-                  <div className="p-6 border-b border-blue-100/50">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+                {/* Enhanced Recent Searches - Mobile Optimized */}
+                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
+                  <div className="p-4 sm:p-6 border-b border-blue-100/50">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                      <h2 className="text-xl font-bold text-slate-900">Recent Searches</h2>
-                      <div className="flex items-center space-x-3">
-                        <button className="p-2 text-slate-500 hover:text-blue-600 rounded-xl hover:bg-blue-50 transition-colors">
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-900">Recent Searches</h2>
+                      <div className="flex items-center space-x-2 sm:space-x-3">
+                        <button className="p-2 text-slate-500 hover:text-blue-600 rounded-lg sm:rounded-xl hover:bg-blue-50 transition-colors">
                           <RefreshCw className="w-4 h-4" />
                         </button>
                         <Link to="/dashboard/search" className="text-blue-600 hover:text-blue-700 font-semibold text-sm">
@@ -243,28 +232,29 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <div className="space-y-4">
+                  <div className="p-4 sm:p-6">
+                    <div className="space-y-3 sm:space-y-4">
                       {recentSearches.map((search) => (
-                        <div key={search.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl border border-blue-100/50 hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-200 cursor-pointer group">
-                          <div className="flex items-center space-x-4 mb-3 sm:mb-0">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                              <Search className="w-5 h-5 text-white" />
+                        <div key={search.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl border border-blue-100/50 hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-200 cursor-pointer group">
+                          <div className="flex items-center space-x-3 sm:space-x-4 mb-2 sm:mb-0">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200 flex-shrink-0">
+                              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-slate-900 truncate">{search.query}</p>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-slate-500 space-y-1 sm:space-y-0">
+                              <p className="font-medium sm:font-semibold text-slate-900 text-sm sm:text-base truncate">{search.query}</p>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-slate-500 space-y-1 sm:space-y-0">
                                 <span className="flex items-center">
-                                  <Globe className="w-3 h-3 mr-1" />
-                                  {search.location}
+                                  <Globe className="w-3 h-3 mr-1 flex-shrink-0" />
+                                  <span className="truncate">{search.location}</span>
                                 </span>
-                                <span>{search.results.toLocaleString()} results</span>
+                                <span className="hidden sm:inline">{search.results.toLocaleString()} results</span>
                               </div>
                             </div>
                           </div>
-                          <div className="text-left sm:text-right">
+                          <div className="text-left sm:text-right flex sm:flex-col justify-between sm:justify-center space-x-2 sm:space-x-0">
                             <span className="text-xs text-slate-500">{search.time}</span>
-                            <p className="text-sm text-emerald-600 font-semibold">Completed</p>
+                            <p className="text-xs sm:text-sm text-emerald-600 font-medium sm:font-semibold">Completed</p>
+                            <span className="sm:hidden text-xs text-slate-500">{search.results.toLocaleString()} results</span>
                           </div>
                         </div>
                       ))}
@@ -272,14 +262,14 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Enhanced Quick Actions */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
-                  <div className="p-6 border-b border-blue-100/50">
-                    <h2 className="text-xl font-bold text-slate-900">Quick Actions</h2>
+                {/* Enhanced Quick Actions - Mobile Optimized */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
+                  <div className="p-4 sm:p-6 border-b border-blue-100/50">
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900">Quick Actions</h2>
                     <p className="text-sm text-slate-600 mt-1">Common workflow shortcuts</p>
                   </div>
-                  <div className="p-6">
-                    <div className="space-y-3">
+                  <div className="p-4 sm:p-6">
+                    <div className="space-y-2 sm:space-y-3">
                       {[
                         { to: "/dashboard/search", icon: Search, title: "New Search" },
                         { to: "/dashboard/crm", icon: Users, title: "Add Contact" },
@@ -289,13 +279,13 @@ const Dashboard = () => {
                         <Link 
                           key={index}
                           to={action.to} 
-                          className="flex items-center justify-between p-3 rounded-xl border border-blue-100/50 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 transition-all duration-200 group"
+                          className="flex items-center justify-between p-3 rounded-lg sm:rounded-xl border border-blue-100/50 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 transition-all duration-200 group"
                         >
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                              <action.icon className="w-4 h-4 text-white" />
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                              <action.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                             </div>
-                            <span className="font-medium text-slate-900">{action.title}</span>
+                            <span className="font-medium text-slate-900 text-sm sm:text-base">{action.title}</span>
                           </div>
                           <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                         </Link>
