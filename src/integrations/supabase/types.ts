@@ -3374,7 +3374,7 @@ export type Database = {
           id: string
           is_likely_air_shipper: boolean | null
           mode: string
-          org_id: string | null
+          org_id: string
           origin_country: string | null
           port_of_discharge: string | null
           port_of_loading: string | null
@@ -3414,7 +3414,7 @@ export type Database = {
           id?: string
           is_likely_air_shipper?: boolean | null
           mode: string
-          org_id?: string | null
+          org_id: string
           origin_country?: string | null
           port_of_discharge?: string | null
           port_of_loading?: string | null
@@ -3454,7 +3454,7 @@ export type Database = {
           id?: string
           is_likely_air_shipper?: boolean | null
           mode?: string
-          org_id?: string | null
+          org_id?: string
           origin_country?: string | null
           port_of_discharge?: string | null
           port_of_loading?: string | null

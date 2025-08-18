@@ -676,16 +676,38 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
       mode = record.transportation_mode.toLowerCase().includes('air') ? 'air' : 'ocean';
     }
     
-    // Create enriched record with GUARANTEED required fields
+    // Create enriched record with GUARANTEED required fields across ALL tables
     const enrichedRecord: TradeRecord = {
       ...record,
+      // REQUIRED FIELDS FOR ALL TABLES (Non-nullable columns)
       shipper_name: record.shipper_name || companyName,
       consignee_name: record.consignee_name || companyName,
-      transportation_mode: mode,
-      // Ensure we have some destination info
-      destination_country: record.destination_country || 'Unknown',
+      transportation_mode: mode, // CRITICAL: mode is NOT NULL in unified_shipments
+      
+      // AIRFREIGHT INSIGHTS REQUIREMENTS (country_origin, country_destination, hs_code, trade_month NOT NULL)
+      country_origin: record.origin_country || record.shipper_country || 'Unknown',
+      country_destination: record.destination_country || record.consignee_country || 'Unknown', 
+      hs_code: record.commodity_code || record.hs_code || '0000000000',
+      trade_month: record.shipment_date || record.arrival_date || new Date().toISOString().split('T')[0],
+      
+      // AIRFREIGHT SHIPMENTS REQUIREMENTS (hs_code NOT NULL)
+      commodity_code: record.commodity_code || record.hs_code || '0000000000',
+      
+      // CENSUS TRADE DATA REQUIREMENTS (commodity, country, state, transport_mode, year, month NOT NULL)
+      commodity: record.commodity_description || record.description || 'Unknown Commodity',
+      country: record.destination_country || record.consignee_country || 'Unknown',
+      state: record.destination_state || record.consignee_state || 'Unknown',
+      transport_mode: mode,
+      year: new Date(record.shipment_date || record.arrival_date || Date.now()).getFullYear(),
+      month: new Date(record.shipment_date || record.arrival_date || Date.now()).getMonth() + 1,
+      
+      // COMPANY FIELDS NORMALIZATION
+      origin_country: record.origin_country || record.shipper_country || 'Unknown',
+      destination_country: record.destination_country || record.consignee_country || 'Unknown',
       destination_city: record.destination_city || record.destination_country || 'Unknown',
-      // Ensure dates are properly formatted
+      destination_state: record.destination_state || record.consignee_state || 'Unknown',
+      
+      // DATE NORMALIZATION (ensure dates are properly formatted)
       shipment_date: record.shipment_date || record.arrival_date || null,
       arrival_date: record.arrival_date || record.shipment_date || null
     };
@@ -693,32 +715,52 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
     enrichedRecords.push(enrichedRecord);
   }
   
-  console.log(`Enrichment completed: ${enrichedRecords.length} records enriched`);
+  console.log(`Enrichment completed: ${enrichedRecords.length} records enriched with guaranteed required fields`);
   return enrichedRecords;
 }
 
 function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
-  console.log(`Validating ${records.length} enriched records`);
+  console.log(`Validating ${records.length} enriched records against ALL table requirements`);
   const validRecords: TradeRecord[] = [];
   
-  // Flexible validation based on file type detection
-  const fileTypeValidation = detectFileTypeAndValidate(records);
-  console.log(`Detected file type: ${fileTypeValidation.fileType}`);
-  
   for (const record of records) {
-    // Use flexible validation rules
-    if (fileTypeValidation.validator(record)) {
+    // UNIFIED VALIDATION for ALL tables (strictest requirements)
+    const validationChecks = {
+      // unified_shipments CRITICAL requirements (mode and org_id are NOT NULL)
+      hasMode: !!record.transportation_mode,
+      hasCompany: !!(record.shipper_name || record.consignee_name),
+      
+      // airfreight_insights requirements
+      hasOriginCountry: !!record.country_origin,
+      hasDestCountry: !!record.country_destination, 
+      hasHsCode: !!record.hs_code,
+      hasTradeMonth: !!record.trade_month,
+      
+      // airfreight_shipments requirements  
+      hasCommodityCode: !!record.commodity_code,
+      
+      // census_trade_data requirements
+      hasCommodity: !!record.commodity,
+      hasCountry: !!record.country,
+      hasState: !!record.state,
+      hasTransportMode: !!record.transport_mode,
+      hasYear: !!record.year,
+      hasMonth: !!record.month
+    };
+    
+    const allValid = Object.values(validationChecks).every(check => check === true);
+    
+    if (allValid) {
       validRecords.push(record);
     } else {
-      console.warn(`Skipping invalid record for ${fileTypeValidation.fileType} file type:`, {
-        hasCompany: !!(record.shipper_name || record.consignee_name),
-        hasMode: !!record.transportation_mode,
-        hasLocation: fileTypeValidation.hasRequiredLocation(record)
-      });
+      const failedChecks = Object.entries(validationChecks)
+        .filter(([key, value]) => !value)
+        .map(([key]) => key);
+      console.warn(`Skipping invalid record. Failed checks: ${failedChecks.join(', ')}`);
     }
   }
   
-  console.log(`Validation completed: ${validRecords.length}/${records.length} records passed validation`);
+  console.log(`Validation completed: ${validRecords.length}/${records.length} records passed ALL table requirements`);
   return validRecords;
 }
 
