@@ -44,6 +44,7 @@ import { SalesAssistant } from "./SalesAssistant";
 import { OpportunityMeter } from "./OpportunityMeter";
 import { LeadScoreChip } from "./LeadScoreChip";
 import { ContactFields } from "./ContactFields";
+import { EmailModal } from "./EmailModal";
 import { useToast } from "@/hooks/use-toast";
 
 interface ComprehensiveDealDrawerProps {
@@ -64,6 +65,8 @@ export function ComprehensiveDealDrawer({
   const [editedData, setEditedData] = useState<any>({});
   const [isEnriching, setIsEnriching] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [emailType, setEmailType] = useState<'proposal' | 'followup' | 'general'>('general');
   const { toast } = useToast();
 
   // Enhanced mock deal data with comprehensive company information
@@ -796,9 +799,19 @@ export function ComprehensiveDealDrawer({
           <TabsContent value="ai-assistant" className="space-y-6">
             <SalesAssistant subjectType="deal" subjectId={dealId} />
           </TabsContent>
-          </Tabs>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+            </Tabs>
+          </div>
+        </DialogContent>
+
+        {/* Email Modal */}
+        <EmailModal
+          isOpen={emailModalOpen}
+          onClose={() => setEmailModalOpen(false)}
+          contactEmail={dealData.contact?.email}
+          contactName={dealData.contact?.name}
+          dealId={dealData.id}
+          templateType={emailType}
+        />
+      </Dialog>
+    );
+  }

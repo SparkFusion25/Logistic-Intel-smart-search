@@ -163,7 +163,7 @@ export function DealPipeline() {
         method: 'POST',
         body: {
           deal_id: active.id,
-          to_stage_id: overStageId
+          stage_id: overStageId
         }
       });
       console.log('🔧 Deal moved successfully');
