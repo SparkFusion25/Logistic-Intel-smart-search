@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { GmailConnection } from "@/components/CRM/GmailConnection";
 import { Mail, Send, Globe, TestTube, FileText } from "lucide-react";
 
 const EmailPage = () => {
@@ -24,28 +25,8 @@ const EmailPage = () => {
                   <p className="text-lg text-muted-foreground">Connect Gmail or Outlook and launch intelligence‑driven outreach</p>
                 </div>
 
-                {/* Email Provider Connection */}
-                <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 transform-gpu">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-                  <CardHeader className="bg-gradient-to-r from-primary/5 to-primary-variant/5 rounded-t-lg relative">
-                    <CardTitle className="flex items-center text-xl">
-                      <Mail className="w-6 h-6 mr-3 text-primary" />
-                      Connect Email Provider
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4 relative">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Button variant="default" className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-md">
-                        <Mail className="w-4 h-4 mr-2" />
-                        Connect Gmail
-                      </Button>
-                      <Button variant="default" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md">
-                        <Globe className="w-4 h-4 mr-2" />
-                        Connect Outlook
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Gmail Connection */}
+                <GmailConnection />
 
                 {/* Email Composer */}
                 <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-secondary/10 transition-all duration-300 hover:-translate-y-0.5 transform-gpu">
