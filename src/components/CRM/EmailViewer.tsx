@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -145,6 +145,9 @@ export function EmailViewer({ isOpen, onClose, dealId, contactEmail }: EmailView
             <Mail className="h-5 w-5" />
             Email Management
           </DialogTitle>
+          <DialogDescription>
+            Manage your email communications and track engagement with contacts.
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="inbox" className="w-full">

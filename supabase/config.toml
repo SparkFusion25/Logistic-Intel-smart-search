@@ -92,3 +92,12 @@ verify_jwt = true
 
 [functions.contact-enrichment]
 verify_jwt = true
+
+[functions.gmail-integration]
+verify_jwt = true
+
+[functions.apollo-enrichment]
+verify_jwt = true
+
+[functions.calendar-integration]
+verify_jwt = true
