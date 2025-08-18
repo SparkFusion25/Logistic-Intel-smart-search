@@ -151,7 +151,7 @@ const Dashboard = () => {
             <div className="max-w-7xl mx-auto space-y-6">
               {/* Header */}
               <div className="mb-8">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/95 to-primary/80 p-6 sm:p-8">
+                <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8" style={{ background: 'var(--sidebar-background)' }}>
                   {/* Background patterns */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"></div>
                   <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full -translate-x-48 -translate-y-48 blur-3xl"></div>
