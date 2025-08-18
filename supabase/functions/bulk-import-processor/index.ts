@@ -87,6 +87,8 @@ serve(async (req) => {
     let records: TradeRecord[] = [];
 
     try {
+      console.log(`Processing file type: ${file_type}`);
+      
       if (file_type === 'csv') {
         const fileText = await fileData.text();
         records = parseCSV(fileText);
@@ -94,9 +96,12 @@ serve(async (req) => {
         const fileText = await fileData.text();
         records = parseXML(fileText);
       } else if (file_type === 'xlsx') {
+        console.log('Processing XLSX file...');
         // Parse XLSX using binary data
         const arrayBuffer = await fileData.arrayBuffer();
+        console.log(`ArrayBuffer size: ${arrayBuffer.byteLength}`);
         records = parseXLSX(arrayBuffer);
+        console.log(`Parsed ${records.length} records from XLSX`);
       } else {
         throw new Error(`Unsupported file type: ${file_type}`);
       }
@@ -194,21 +199,33 @@ serve(async (req) => {
 });
 
 function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
-  const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-  const sheetName = workbook.SheetNames[0]; // Use first sheet
-  const worksheet = workbook.Sheets[sheetName];
+  try {
+    console.log('parseXLSX: Starting XLSX parsing...');
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    console.log(`parseXLSX: Found ${workbook.SheetNames.length} sheets`);
+    
+    const sheetName = workbook.SheetNames[0]; // Use first sheet
+    console.log(`parseXLSX: Processing sheet: ${sheetName}`);
+    const worksheet = workbook.Sheets[sheetName];
+    
+    // Convert to JSON format
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    console.log(`parseXLSX: Converted to JSON, ${jsonData.length} rows`);
   
-  // Convert to JSON format
-  const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  
-  if (jsonData.length === 0) return [];
+  if (jsonData.length === 0) {
+    console.log('parseXLSX: No data found in worksheet');
+    return [];
+  }
   
   // First row should be headers
   const headers = jsonData[0] as string[];
+  console.log(`parseXLSX: Headers found: ${headers.length} columns`);
+  console.log(`parseXLSX: Sample headers: ${headers.slice(0, 5).join(', ')}`);
+  
   const records: TradeRecord[] = [];
   
   // Process each row (skip header)
-  for (let i = 1; i < jsonData.length; i++) {
+  for (let i = 1; i < Math.min(jsonData.length, 101); i++) { // Limit to 100 records for initial testing
     const row = jsonData[i] as any[];
     const record: TradeRecord = {};
     
@@ -227,7 +244,12 @@ function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
     }
   }
   
+  console.log(`parseXLSX: Successfully parsed ${records.length} records`);
   return records;
+  } catch (error) {
+    console.error('parseXLSX: Error parsing XLSX:', error);
+    throw new Error(`XLSX parsing failed: ${error.message}`);
+  }
 }
 
 function parseCSV(text: string): TradeRecord[] {
@@ -390,12 +412,11 @@ async function processBatch(
 
       // Check for duplicates (basic duplicate detection)
       const { data: existingRecords } = await supabaseClient
-        .from('trade_shipments')
+        .from('unified_shipments')
         .select('id')
-        .eq('org_id', orgId)
-        .eq('inferred_company_name', inferredCompany)
-        .eq('shipment_date', record.shipment_date || null)
-        .eq('commodity_code', record.commodity_code || null)
+        .eq('unified_company_name', inferredCompany)
+        .eq('unified_date', record.shipment_date || null)
+        .eq('hs_code', record.commodity_code || null)
         .limit(1);
 
       if (existingRecords && existingRecords.length > 0) {
@@ -403,29 +424,30 @@ async function processBatch(
         continue;
       }
 
-      // Insert trade shipment record
+      // Insert into unified_shipments table
       const { error: insertError } = await supabaseClient
-        .from('trade_shipments')
+        .from('unified_shipments')
         .insert({
-          import_id: importId,
-          org_id: orgId,
+          unified_company_name: inferredCompany,
+          inferred_company_name: inferredCompany, // Keep this for search compatibility
+          transport_mode: record.transportation_mode || 'unknown',
           shipper_name: record.shipper_name,
           consignee_name: record.consignee_name,
-          inferred_company_name: inferredCompany,
-          confidence_score: confidenceScore,
           origin_country: record.origin_country,
-          origin_state: record.origin_state,
-          origin_city: record.origin_city,
           destination_country: record.destination_country,
-          destination_state: record.destination_state,
           destination_city: record.destination_city,
-          commodity_code: record.commodity_code,
+          unified_date: record.shipment_date || record.arrival_date,
+          shipment_date: record.shipment_date, // Keep for compatibility
+          arrival_date: record.arrival_date,
+          unified_value: record.value_usd,
+          value_usd: record.value_usd, // Keep for compatibility
+          unified_weight: record.weight_kg,
+          weight_kg: record.weight_kg, // Keep for compatibility
+          hs_code: record.commodity_code,
           commodity_description: record.commodity_description,
-          transportation_mode: record.transportation_mode,
-          weight_kg: record.weight_kg,
-          value_usd: record.value_usd,
-          shipment_date: record.shipment_date,
-          arrival_date: record.arrival_date
+          vessel_name: record.vessel_name,
+          port_of_loading: record.origin_port,
+          port_of_discharge: record.destination_port
         });
 
       if (insertError) {
@@ -449,12 +471,11 @@ async function queueEnrichment(importId: string, supabaseClient: any) {
   
   // Get unique companies from this import
   const { data: companies } = await supabaseClient
-    .from('trade_shipments')
-    .select('inferred_company_name, org_id')
-    .eq('import_id', importId)
-    .not('inferred_company_name', 'is', null);
+    .from('unified_shipments')
+    .select('unified_company_name')
+    .not('unified_company_name', 'is', null);
 
-  const uniqueCompanies = [...new Set(companies?.map(c => c.inferred_company_name))];
+  const uniqueCompanies = [...new Set(companies?.map(c => c.unified_company_name))];
 
   // Queue Apollo enrichment for each company
   for (const companyName of uniqueCompanies) {
