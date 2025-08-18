@@ -3357,22 +3357,29 @@ export type Database = {
       unified_shipments: {
         Row: {
           air_confidence_score: number | null
+          arrival_date: string | null
           bol_number: string | null
+          carrier_name: string | null
           commodity_description: string | null
+          consignee_name: string | null
           container_count: number | null
           created_at: string | null
           description: string | null
           destination_city: string | null
           destination_country: string | null
+          destination_state: string | null
           gross_weight_kg: number | null
           hs_code: string | null
           hs_description: string | null
           id: string
           is_likely_air_shipper: boolean | null
           mode: string
+          org_id: string | null
           origin_country: string | null
           port_of_discharge: string | null
           port_of_loading: string | null
+          quantity: number | null
+          shipment_date: string | null
           shipment_mode: string | null
           shipment_type: string | null
           shipper_name: string | null
@@ -3384,26 +3391,35 @@ export type Database = {
           unified_id: string | null
           unified_value: number | null
           unified_weight: number | null
+          value_usd: number | null
           vessel_name: string | null
+          weight_kg: number | null
         }
         Insert: {
           air_confidence_score?: number | null
+          arrival_date?: string | null
           bol_number?: string | null
+          carrier_name?: string | null
           commodity_description?: string | null
+          consignee_name?: string | null
           container_count?: number | null
           created_at?: string | null
           description?: string | null
           destination_city?: string | null
           destination_country?: string | null
+          destination_state?: string | null
           gross_weight_kg?: number | null
           hs_code?: string | null
           hs_description?: string | null
           id?: string
           is_likely_air_shipper?: boolean | null
           mode: string
+          org_id?: string | null
           origin_country?: string | null
           port_of_discharge?: string | null
           port_of_loading?: string | null
+          quantity?: number | null
+          shipment_date?: string | null
           shipment_mode?: string | null
           shipment_type?: string | null
           shipper_name?: string | null
@@ -3415,26 +3431,35 @@ export type Database = {
           unified_id?: string | null
           unified_value?: number | null
           unified_weight?: number | null
+          value_usd?: number | null
           vessel_name?: string | null
+          weight_kg?: number | null
         }
         Update: {
           air_confidence_score?: number | null
+          arrival_date?: string | null
           bol_number?: string | null
+          carrier_name?: string | null
           commodity_description?: string | null
+          consignee_name?: string | null
           container_count?: number | null
           created_at?: string | null
           description?: string | null
           destination_city?: string | null
           destination_country?: string | null
+          destination_state?: string | null
           gross_weight_kg?: number | null
           hs_code?: string | null
           hs_description?: string | null
           id?: string
           is_likely_air_shipper?: boolean | null
           mode?: string
+          org_id?: string | null
           origin_country?: string | null
           port_of_discharge?: string | null
           port_of_loading?: string | null
+          quantity?: number | null
+          shipment_date?: string | null
           shipment_mode?: string | null
           shipment_type?: string | null
           shipper_name?: string | null
@@ -3446,7 +3471,9 @@ export type Database = {
           unified_id?: string | null
           unified_value?: number | null
           unified_weight?: number | null
+          value_usd?: number | null
           vessel_name?: string | null
+          weight_kg?: number | null
         }
         Relationships: []
       }
