@@ -522,13 +522,13 @@ async function processBatch(
       if (record.commodity_code) confidenceScore += 10;
       if (record.value_usd) confidenceScore += 10;
 
-      // Check for duplicates (basic duplicate detection)
+      // Check for duplicates (basic duplicate detection) - improved logic
       const { data: existingRecords } = await supabaseClient
         .from('unified_shipments')
         .select('id')
+        .eq('org_id', orgId) // Check within the same org
         .eq('unified_company_name', inferredCompany)
-        .eq('unified_date', record.shipment_date || null)
-        .eq('hs_code', record.commodity_code || null)
+        .eq('unified_date', record.shipment_date || record.arrival_date || null)
         .limit(1);
 
       if (existingRecords && existingRecords.length > 0) {
@@ -536,36 +536,36 @@ async function processBatch(
         continue;
       }
 
-      // Insert into unified_shipments table with enhanced mapping
+      // Insert into unified_shipments table with proper field mapping
       const insertData = {
-        org_id: orgId,
+        org_id: orgId, // Required for RLS
+        mode: record.transportation_mode === 'air' ? 'air' : 'ocean', // Required field - default to ocean
         unified_company_name: inferredCompany,
-        inferred_company_name: inferredCompany, // Keep this for search compatibility
-        mode: record.transportation_mode === 'air' ? 'air' : 'ocean', // Normalize mode
-        transport_mode: record.transportation_mode || 'ocean',
+        unified_destination: record.destination_city || record.destination_country,
+        unified_value: record.value_usd,
+        unified_weight: record.weight_kg,
+        unified_date: record.shipment_date || record.arrival_date,
+        unified_carrier: record.carrier_name,
+        hs_code: record.commodity_code,
+        description: record.commodity_description,
+        commodity_description: record.commodity_description,
         shipper_name: record.shipper_name,
         consignee_name: record.consignee_name,
         origin_country: record.origin_country,
         destination_country: record.destination_country,
         destination_city: record.destination_city,
         destination_state: record.destination_state,
-        unified_date: record.shipment_date || record.arrival_date,
-        shipment_date: record.shipment_date, // Keep for compatibility
-        arrival_date: record.arrival_date,
-        unified_value: record.value_usd,
-        value_usd: record.value_usd, // Keep for compatibility
-        unified_weight: record.weight_kg,
-        weight_kg: record.weight_kg, // Keep for compatibility
-        hs_code: record.commodity_code,
-        commodity_description: record.commodity_description,
-        description: record.commodity_description, // Alias
-        vessel_name: record.vessel_name,
         port_of_loading: record.origin_port,
         port_of_discharge: record.destination_port,
         bol_number: record.bol_number,
+        vessel_name: record.vessel_name,
         container_count: record.container_count,
         carrier_name: record.carrier_name,
         quantity: record.quantity,
+        value_usd: record.value_usd,
+        weight_kg: record.weight_kg,
+        shipment_date: record.shipment_date,
+        arrival_date: record.arrival_date,
         created_at: new Date().toISOString()
       };
 
