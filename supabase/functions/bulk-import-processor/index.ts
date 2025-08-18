@@ -681,23 +681,44 @@ async function isValidCompanyName(companyName: string, supabaseClient: any): Pro
 function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
   console.log(`Starting validation for ${records.length} enriched records`);
   
-  const validRecords = records.filter(record => {
-    // Basic validation requirements
-    if (!record.org_id) return false;
+  const validRecords = [];
+  const failedRecords = [];
+  
+  for (const record of records) {
+    const failures = [];
     
-    // Accept fallback values set by enrichment - these are valid placeholders
-    if (!record.hs_code) return false; // hs_code can be 'UNKNOWN' as fallback
-    if (!record.mode) return false; // mode can be 'unknown' as fallback
+    // Basic validation requirements
+    if (!record.org_id) failures.push('missing org_id');
+    if (!record.hs_code) failures.push('missing hs_code');
+    if (!record.mode) failures.push('missing mode');
     
     // At least one location field should be present
     const hasLocation = record.origin_country || record.destination_country || 
                        record.origin_city || record.destination_city ||
                        record.port_of_loading || record.port_of_discharge;
     
-    return hasLocation;
-  });
+    if (!hasLocation) failures.push('no location fields');
+    
+    if (failures.length === 0) {
+      validRecords.push(record);
+    } else {
+      failedRecords.push({ failures, sample_data: {
+        org_id: record.org_id,
+        hs_code: record.hs_code,
+        mode: record.mode,
+        origin_country: record.origin_country,
+        destination_country: record.destination_country,
+        unified_company_name: record.unified_company_name
+      }});
+    }
+  }
   
   console.log(`Validation completed: ${validRecords.length}/${records.length} records passed`);
+  
+  if (failedRecords.length > 0) {
+    console.log('Sample validation failures:', JSON.stringify(failedRecords.slice(0, 3), null, 2));
+  }
+  
   return validRecords;
 }
 
