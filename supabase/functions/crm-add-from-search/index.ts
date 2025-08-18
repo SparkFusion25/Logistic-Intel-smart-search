@@ -58,7 +58,7 @@ serve(async (req) => {
       )
     }
 
-    console.log(`🔧 Edge Function: Adding company "${company.name}" to CRM pipeline "${pipeline_name}" from ${source}`)
+    console.log(`🔧 Edge Function: Adding company "${company.name}" to CRM pipeline from ${source}`)
 
     const defaultStages = [
       { name: 'Prospect Identified', stage_order: 1 },
@@ -70,8 +70,8 @@ serve(async (req) => {
       { name: 'Lost', stage_order: 7 }
     ]
 
-    // Get or create the specified pipeline with stages in a single transaction
-    console.log('🔧 Edge Function: Looking for pipeline:', pipeline_name || 'Search Intelligence')
+    // Always use the Default pipeline - create if it doesn't exist
+    console.log('🔧 Edge Function: Looking for Default pipeline')
     
     let pipeline
     let stages
@@ -90,7 +90,7 @@ serve(async (req) => {
           org_id
         )
       `)
-      .eq('name', pipeline_name || 'Search Intelligence')
+      .eq('name', 'Default')
       .eq('org_id', user.id)
       .maybeSingle()
 
@@ -137,7 +137,7 @@ serve(async (req) => {
       const { data: newPipeline, error: pipelineError } = await supabaseClient
         .from('pipelines')
         .insert({
-          name: pipeline_name || 'Search Intelligence',
+          name: 'Default',
           org_id: user.id
         })
         .select('*')
