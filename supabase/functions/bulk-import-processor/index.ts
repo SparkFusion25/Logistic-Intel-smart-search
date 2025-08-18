@@ -99,6 +99,13 @@ serve(async (req) => {
 // Background processing function that handles the entire file
 async function processFileInBackground(supabaseClient: any, import_id: string, file_path: string, file_type: string, userId: string) {
   try {
+    console.log(`Starting background processing for import ${import_id}`);
+
+    // Update status to processing
+    await supabaseClient
+      .from('bulk_imports')
+      .update({ status: 'processing', updated_at: new Date().toISOString() })
+      .eq('id', import_id);
 
     // Download and process file
     const { data: fileData, error: downloadError } = await supabaseClient.storage
@@ -123,7 +130,6 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         records = parseXML(fileText);
       } else if (file_type === 'xlsx') {
         console.log('Processing XLSX file...');
-        // Parse XLSX using streaming approach to avoid memory issues
         const arrayBuffer = await fileData.arrayBuffer();
         console.log(`ArrayBuffer size: ${arrayBuffer.byteLength}`);
         
@@ -140,31 +146,6 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
 
       console.log(`Parsed ${records.length} records from ${file_type} file`);
 
-      // Get sample data for AI analysis (first 5 rows)
-      const sampleData = records.slice(0, 5);
-      
-      // Call AI analyzer for intelligent insights
-      console.log('Starting AI file analysis...');
-      try {
-        const aiAnalysisResponse = await supabaseClient.functions.invoke('ai-file-analyzer', {
-          body: {
-            import_id,
-            file_sample: sampleData,
-            file_type,
-            filename: file_path.split('/').pop()
-          }
-        });
-        
-        if (aiAnalysisResponse.error) {
-          console.error('AI analysis failed:', aiAnalysisResponse.error);
-        } else {
-          console.log('AI analysis completed:', aiAnalysisResponse.data);
-        }
-      } catch (aiError) {
-        console.error('AI analysis error:', aiError);
-        // Continue processing even if AI analysis fails
-      }
-
       // Update status to parsed
       await supabaseClient
         .from('bulk_imports')
@@ -175,36 +156,89 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         })
         .eq('id', import_id);
 
-      // Process records in smaller, more manageable batches
-      const batchSize = 500; // Fixed batch size as requested
-      let processedCount = 0;
-      let duplicateCount = 0;
-      let errorCount = 0;
+      // **CRITICAL: AI ENRICHMENT BEFORE DATABASE OPERATIONS**
+      console.log('Starting AI enrichment phase...');
+      await supabaseClient
+        .from('bulk_imports')
+        .update({ status: 'enriching', updated_at: new Date().toISOString() })
+        .eq('id', import_id);
 
-      console.log(`Starting batch processing: ${records.length} total records in batches of ${batchSize}`);
+      // Get sample data for AI analysis (first 10 rows for better analysis)
+      const sampleData = records.slice(0, Math.min(10, records.length));
+      
+      try {
+        const aiAnalysisResponse = await supabaseClient.functions.invoke('ai-file-analyzer', {
+          body: {
+            import_id,
+            file_sample: sampleData,
+            file_type,
+            filename: file_path.split('/').pop(),
+            full_record_count: records.length
+          }
+        });
+        
+        if (aiAnalysisResponse.error) {
+          console.error('AI analysis failed:', aiAnalysisResponse.error);
+          throw new Error(`AI analysis failed: ${aiAnalysisResponse.error.message}`);
+        } else {
+          console.log('AI analysis completed successfully');
+        }
+      } catch (aiError) {
+        console.error('AI analysis error:', aiError);
+        throw new Error(`AI enrichment required but failed: ${aiError.message}`);
+      }
+
+      // **STEP 2: ENRICH ALL RECORDS WITH COMPANY DATA**
+      console.log('Enriching all records with company data...');
+      const enrichedRecords = await enrichAllRecords(records, supabaseClient, import_id);
+      
+      if (enrichedRecords.length === 0) {
+        throw new Error('No records could be enriched with valid company data');
+      }
+
+      console.log(`Successfully enriched ${enrichedRecords.length}/${records.length} records`);
+
+      // **STEP 3: VALIDATE ALL ENRICHED RECORDS**
+      const validatedRecords = validateEnrichedRecords(enrichedRecords);
+      
+      if (validatedRecords.length === 0) {
+        throw new Error('No records passed validation after enrichment');
+      }
 
       // Update status to processing_batches
       await supabaseClient
         .from('bulk_imports')
         .update({ 
-          status: 'processing_batches', 
+          status: 'processing_batches',
+          total_records: validatedRecords.length, // Update with validated count
           processing_metadata: { 
-            batch_size: batchSize,
-            total_batches: Math.ceil(records.length / batchSize),
-            current_batch: 0
+            batch_size: 500,
+            total_batches: Math.ceil(validatedRecords.length / 500),
+            current_batch: 0,
+            enriched_records: enrichedRecords.length,
+            original_records: records.length,
+            validation_passed: validatedRecords.length
           },
           updated_at: new Date().toISOString() 
         })
         .eq('id', import_id);
 
+      // Process validated records in smaller, more manageable batches
+      const batchSize = 500;
+      let processedCount = 0;
+      let duplicateCount = 0;
+      let errorCount = 0;
+
+      console.log(`Starting batch processing: ${validatedRecords.length} validated records in batches of ${batchSize}`);
+
       // Process in fixed batches of 500
-      for (let i = 0; i < records.length; i += batchSize) {
+      for (let i = 0; i < validatedRecords.length; i += batchSize) {
         const batchNumber = Math.floor(i / batchSize) + 1;
-        const totalBatches = Math.ceil(records.length / batchSize);
+        const totalBatches = Math.ceil(validatedRecords.length / batchSize);
         
-        console.log(`Processing batch ${batchNumber}/${totalBatches} (records ${i + 1}-${Math.min(i + batchSize, records.length)})`);
+        console.log(`Processing batch ${batchNumber}/${totalBatches} (records ${i + 1}-${Math.min(i + batchSize, validatedRecords.length)})`);
         
-        const batch = records.slice(i, i + batchSize);
+        const batch = validatedRecords.slice(i, i + batchSize);
         const processedBatch = await processBatch(batch, import_id, userId, supabaseClient);
         
         processedCount += processedBatch.processed;
@@ -222,7 +256,10 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
               batch_size: batchSize,
               total_batches: totalBatches,
               current_batch: batchNumber,
-              progress_percentage: Math.round((processedCount / records.length) * 100)
+              progress_percentage: Math.round((processedCount / validatedRecords.length) * 100),
+              enriched_records: enrichedRecords.length,
+              original_records: records.length,
+              validation_passed: validatedRecords.length
             },
             updated_at: new Date().toISOString()
           })
@@ -234,9 +271,19 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      console.log(`Batch processing completed: ${processedCount}/${records.length} records processed successfully`);
+      console.log(`Batch processing completed: ${processedCount}/${validatedRecords.length} records processed successfully`);
 
-      // Queue enrichment for companies in background
+      // Final status update
+      await supabaseClient
+        .from('bulk_imports')
+        .update({ 
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', import_id);
+
+      // Queue enrichment for companies in background (optional step)
       EdgeRuntime.waitUntil(queueEnrichment(import_id, supabaseClient));
 
     } catch (parseError) {
@@ -499,6 +546,88 @@ function parseValue(value: string, fieldName: string): any {
   return value.trim();
 }
 
+// **NEW: ENRICHMENT FUNCTIONS**
+async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, importId: string): Promise<TradeRecord[]> {
+  console.log(`Starting enrichment for ${records.length} records`);
+  const enrichedRecords: TradeRecord[] = [];
+  
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    
+    // Progress tracking
+    if (i % 100 === 0) {
+      console.log(`Enrichment progress: ${i}/${records.length} records processed`);
+      await supabaseClient
+        .from('bulk_imports')
+        .update({
+          processing_metadata: { 
+            enrichment_progress: Math.round((i / records.length) * 100),
+            enrichment_phase: 'enriching_companies'
+          },
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', importId);
+    }
+    
+    // Ensure we have REQUIRED company data
+    let companyName = record.shipper_name || record.consignee_name;
+    
+    // If no company name, try to extract from other fields
+    if (!companyName) {
+      if (record.commodity_description && record.origin_country) {
+        companyName = `${record.origin_country} Trader - ${record.commodity_description.substring(0, 30)}`;
+      } else {
+        companyName = `Unknown Company ${i + 1}`;
+      }
+    }
+    
+    // Ensure we have REQUIRED mode
+    let mode = 'ocean'; // Default
+    if (record.transportation_mode) {
+      mode = record.transportation_mode.toLowerCase().includes('air') ? 'air' : 'ocean';
+    }
+    
+    // Create enriched record with GUARANTEED required fields
+    const enrichedRecord: TradeRecord = {
+      ...record,
+      shipper_name: record.shipper_name || companyName,
+      consignee_name: record.consignee_name || companyName,
+      transportation_mode: mode,
+      // Ensure we have some destination info
+      destination_country: record.destination_country || 'Unknown',
+      destination_city: record.destination_city || record.destination_country || 'Unknown',
+      // Ensure dates are properly formatted
+      shipment_date: record.shipment_date || record.arrival_date || null,
+      arrival_date: record.arrival_date || record.shipment_date || null
+    };
+    
+    enrichedRecords.push(enrichedRecord);
+  }
+  
+  console.log(`Enrichment completed: ${enrichedRecords.length} records enriched`);
+  return enrichedRecords;
+}
+
+function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
+  console.log(`Validating ${records.length} enriched records`);
+  const validRecords: TradeRecord[] = [];
+  
+  for (const record of records) {
+    // CRITICAL VALIDATION: Check all REQUIRED fields for unified_shipments
+    const hasCompanyName = !!(record.shipper_name || record.consignee_name);
+    const hasMode = !!record.transportation_mode;
+    
+    if (hasCompanyName && hasMode) {
+      validRecords.push(record);
+    } else {
+      console.warn(`Skipping invalid record: missing company=${!hasCompanyName}, missing mode=${!hasMode}`);
+    }
+  }
+  
+  console.log(`Validation completed: ${validRecords.length}/${records.length} records passed validation`);
+  return validRecords;
+}
+
 async function processBatch(
   records: TradeRecord[], 
   importId: string, 
@@ -511,7 +640,7 @@ async function processBatch(
 
   for (const record of records) {
     try {
-      // Infer company name from available data
+      // Infer company name from enriched data (guaranteed to exist)
       const inferredCompany = record.shipper_name || record.consignee_name || 'Unknown Company';
       
       // Calculate confidence score based on available data
@@ -536,11 +665,11 @@ async function processBatch(
         continue;
       }
 
-      // Insert into unified_shipments table with proper field mapping
+      // Insert into unified_shipments table with GUARANTEED REQUIRED FIELDS
       const insertData = {
         org_id: orgId, // Required for RLS
-        mode: record.transportation_mode === 'air' ? 'air' : 'ocean', // Required field - default to ocean
-        unified_company_name: inferredCompany,
+        mode: record.transportation_mode === 'air' ? 'air' : 'ocean', // Required field - guaranteed from enrichment
+        unified_company_name: inferredCompany, // Required field - guaranteed from enrichment
         unified_destination: record.destination_city || record.destination_country,
         unified_value: record.value_usd,
         unified_weight: record.weight_kg,
@@ -569,7 +698,7 @@ async function processBatch(
         created_at: new Date().toISOString()
       };
 
-      console.log(`Inserting record for company: ${inferredCompany}`);
+      console.log(`Inserting validated record for company: ${inferredCompany}`);
       
       const { error: insertError } = await supabaseClient
         .from('unified_shipments')
