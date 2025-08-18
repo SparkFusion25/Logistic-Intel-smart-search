@@ -323,33 +323,84 @@ function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     console.log(`parseXLSX: Found ${workbook.SheetNames.length} sheets`);
     
-    const sheetName = workbook.SheetNames[0]; // Use first sheet
-    console.log(`parseXLSX: Processing sheet: ${sheetName}`);
-    const worksheet = workbook.Sheets[sheetName];
+    // Check if this is a multi-tab Panjiva file by looking for specific sheet patterns
+    const isPanjivaMultiTab = workbook.SheetNames.length > 1 && 
+      (workbook.SheetNames.some(name => name.toLowerCase().includes('contact')) ||
+       workbook.SheetNames.some(name => name.toLowerCase().includes('company')) ||
+       workbook.SheetNames.some(name => name.toLowerCase().includes('shipment')));
     
-    // Convert to JSON format
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    console.log(`parseXLSX: Converted to JSON, ${jsonData.length} rows`);
+    if (isPanjivaMultiTab) {
+      console.log('parseXLSX: Detected Panjiva multi-tab file, processing all tabs');
+      return parseMultiTabPanjivaXLSX(workbook);
+    }
+    
+    // Default single-tab processing for regular files
+    const sheetName = workbook.SheetNames[0]; // Use first sheet
+      console.log(`parseXLSX: Processing single sheet: ${sheetName}`);
+    return parseSingleSheetXLSX(workbook, sheetName);
+  } catch (error) {
+    console.error('parseXLSX: Error parsing XLSX:', error);
+    throw new Error(`XLSX parsing failed: ${error.message}`);
+  }
+}
+
+// Multi-tab Panjiva XLSX processing (optional feature)
+function parseMultiTabPanjivaXLSX(workbook: any): TradeRecord[] {
+  console.log('parseMultiTabPanjivaXLSX: Starting multi-tab processing');
   
-  if (jsonData.length === 0) {
-    console.log('parseXLSX: No data found in worksheet');
-    return [];
+  const allRecords: TradeRecord[] = [];
+  
+  // Process each sheet
+  for (const sheetName of workbook.SheetNames) {
+    console.log(`Processing sheet: ${sheetName}`);
+    
+    // Determine if this sheet contains contact data or shipment data
+    const isContactSheet = sheetName.toLowerCase().includes('contact') || 
+                          sheetName.toLowerCase().includes('company');
+    
+    if (isContactSheet) {
+      console.log(`Skipping contact sheet for now: ${sheetName}`);
+      // TODO: Process contact sheets in future implementation
+      continue;
+    }
+    
+    // Process as regular shipment data
+    const sheetRecords = parseSingleSheetXLSX(workbook, sheetName);
+    allRecords.push(...sheetRecords);
   }
   
+  console.log(`parseMultiTabPanjivaXLSX: Processed ${allRecords.length} total records from ${workbook.SheetNames.length} sheets`);
+  return allRecords;
+}
+
+// Single sheet XLSX processing (used by both single and multi-tab)
+function parseSingleSheetXLSX(workbook: any, sheetName: string): TradeRecord[] {
+  console.log(`parseSingleSheetXLSX: Processing sheet: ${sheetName}`);
+  const worksheet = workbook.Sheets[sheetName];
+  
+  // Convert to JSON format
+  const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  console.log(`parseSingleSheetXLSX: Converted to JSON, ${jsonData.length} rows`);
+
+  if (jsonData.length === 0) {
+    console.log('parseSingleSheetXLSX: No data found in worksheet');
+    return [];
+  }
+
   // First row should be headers
   const headers = jsonData[0] as string[];
-  console.log(`parseXLSX: Headers found: ${headers.length} columns`);
-  console.log(`parseXLSX: Sample headers: ${headers.slice(0, 5).join(', ')}`);
-  
+  console.log(`parseSingleSheetXLSX: Headers found: ${headers.length} columns`);
+  console.log(`parseSingleSheetXLSX: Sample headers: ${headers.slice(0, 5).join(', ')}`);
+
   const records: TradeRecord[] = [];
-  
-  // Process each row (skip header) - Process ALL records in background
-  console.log(`parseXLSX: Processing ${jsonData.length - 1} data rows`);
-  
+
+  // Process each row (skip header)
+  console.log(`parseSingleSheetXLSX: Processing ${jsonData.length - 1} data rows`);
+
   for (let i = 1; i < jsonData.length; i++) {
     const row = jsonData[i] as any[];
     const record: TradeRecord = {};
-    
+
     headers.forEach((header, index) => {
       const value = row[index];
       if (value !== undefined && value !== null && value !== '') {
@@ -359,13 +410,13 @@ function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
         }
       }
     });
-    
+
     if (Object.keys(record).length > 0) {
       records.push(record);
     }
   }
-  
-  console.log(`parseXLSX: Successfully parsed ${records.length} records`);
+
+  console.log(`parseSingleSheetXLSX: Successfully parsed ${records.length} records from ${sheetName}`);
   return records;
   } catch (error) {
     console.error('parseXLSX: Error parsing XLSX:', error);
