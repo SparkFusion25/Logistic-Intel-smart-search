@@ -103,6 +103,231 @@ export type Database = {
           },
         ]
       }
+      affiliate_payouts: {
+        Row: {
+          affiliate_id: string
+          amount: number
+          created_at: string | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          period_end: string
+          period_start: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string | null
+          stripe_transfer_id: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          amount: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          period_end: string
+          period_start: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string | null
+          stripe_transfer_id?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          amount?: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          period_end?: string
+          period_start?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string | null
+          stripe_transfer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          bio: string | null
+          commission_rate: number
+          created_at: string | null
+          id: string
+          payment_email: string | null
+          social_links: Json | null
+          status: string
+          stripe_account_id: string | null
+          updated_at: string | null
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          commission_rate?: number
+          created_at?: string | null
+          id?: string
+          payment_email?: string | null
+          social_links?: Json | null
+          status?: string
+          stripe_account_id?: string | null
+          updated_at?: string | null
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          commission_rate?: number
+          created_at?: string | null
+          id?: string
+          payment_email?: string | null
+          social_links?: Json | null
+          status?: string
+          stripe_account_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      affiliate_promo_codes: {
+        Row: {
+          affiliate_id: string
+          code: string
+          created_at: string | null
+          current_uses: number | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+        }
+        Insert: {
+          affiliate_id: string
+          code: string
+          created_at?: string | null
+          current_uses?: number | null
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+        }
+        Update: {
+          affiliate_id?: string
+          code?: string
+          created_at?: string | null
+          current_uses?: number | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_promo_codes_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_referrals: {
+        Row: {
+          affiliate_id: string
+          commission_earned: number | null
+          conversion_value: number | null
+          created_at: string | null
+          id: string
+          promo_code: string | null
+          referred_user_id: string
+          status: string | null
+          tracking_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          commission_earned?: number | null
+          conversion_value?: number | null
+          created_at?: string | null
+          id?: string
+          promo_code?: string | null
+          referred_user_id: string
+          status?: string | null
+          tracking_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          commission_earned?: number | null
+          conversion_value?: number | null
+          created_at?: string | null
+          id?: string
+          promo_code?: string | null
+          referred_user_id?: string
+          status?: string | null
+          tracking_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_referrals_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          processed_at: string | null
+          processed_by: string | null
+          reason: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       affiliates: {
         Row: {
           created_at: string | null
@@ -2602,6 +2827,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_content: {
+        Row: {
+          content_type: string
+          content_value: string
+          created_at: string | null
+          id: string
+          meta_data: Json | null
+          page_slug: string
+          section_key: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          content_type: string
+          content_value: string
+          created_at?: string | null
+          id?: string
+          meta_data?: Json | null
+          page_slug: string
+          section_key: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          content_type?: string
+          content_value?: string
+          created_at?: string | null
+          id?: string
+          meta_data?: Json | null
+          page_slug?: string
+          section_key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       staging_companies: {
         Row: {

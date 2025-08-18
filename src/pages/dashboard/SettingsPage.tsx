@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/dashboard/AppSidebar"
 import { Card } from "@/components/ui/card"
 import { useNotifications } from "@/hooks/useNotifications"
+import { AffiliateRequestButton } from "@/components/AffiliateRequestButton"
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile')
@@ -155,6 +156,15 @@ export default function SettingsPage() {
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                             />
                           </div>
+                        </div>
+
+                        {/* Affiliate Section */}
+                        <div className="mt-8 p-4 bg-blue-50 rounded-lg border">
+                          <h3 className="font-semibold text-gray-900 mb-2">Affiliate Program</h3>
+                          <p className="text-sm text-gray-600 mb-4">
+                            Join our affiliate program to earn commissions by referring new customers.
+                          </p>
+                          <AffiliateRequestButton />
                         </div>
                       </div>
                     )}

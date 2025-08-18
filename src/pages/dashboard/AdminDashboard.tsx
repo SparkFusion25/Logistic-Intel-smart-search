@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +25,14 @@ import {
   Trash2,
   ExternalLink,
   Eye,
-  Calculator
+  Calculator,
+  Globe,
+  Type,
+  Image as ImageIcon,
+  Save
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for demonstration
 const systemStats = [
@@ -115,6 +121,111 @@ export function AdminDashboard() {
   const [newAffiliateOpen, setNewAffiliateOpen] = useState(false);
   const [payoutDialogOpen, setPayoutDialogOpen] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
+  const [siteContent, setSiteContent] = useState<any>({});
+  const [contentDialogOpen, setContentDialogOpen] = useState(false);
+  const [selectedContentKey, setSelectedContentKey] = useState('');
+  const [realAffiliates, setRealAffiliates] = useState([]);
+  const [affiliateRequests, setAffiliateRequests] = useState([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadRealData();
+  }, []);
+
+  const loadRealData = async () => {
+    try {
+      // Load site content
+      const { data: content } = await supabase
+        .from('site_content')
+        .select('*');
+      
+      const contentMap = {};
+      content?.forEach(item => {
+        if (!contentMap[item.page_slug]) contentMap[item.page_slug] = {};
+        contentMap[item.page_slug][item.section_key] = item.content_value;
+      });
+      setSiteContent(contentMap);
+
+      // Load affiliate profiles
+      const { data: affiliates } = await supabase
+        .from('affiliate_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      setRealAffiliates(affiliates || []);
+
+      // Load affiliate requests
+      const { data: requests } = await supabase
+        .from('affiliate_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+      setAffiliateRequests(requests || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
+
+  const updateSiteContent = async (pageSlug: string, sectionKey: string, value: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('site_content')
+        .upsert({
+          page_slug: pageSlug,
+          section_key: sectionKey,
+          content_type: 'text',
+          content_value: value,
+          updated_by: user.id
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Content updated successfully"
+      });
+
+      loadRealData();
+    } catch (error) {
+      console.error('Error updating content:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update content",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const approveAffiliateRequest = async (requestId: string, approve: boolean) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase.functions.invoke('admin-affiliate-actions', {
+        body: {
+          action: approve ? 'approve_request' : 'reject_request',
+          request_id: requestId
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Request ${approve ? 'approved' : 'rejected'} successfully`
+      });
+
+      loadRealData();
+    } catch (error) {
+      console.error('Error processing request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process request",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/50">
@@ -182,8 +293,9 @@ export function AdminDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="affiliates">Affiliates</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
@@ -290,6 +402,165 @@ export function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="content" className="space-y-6">
+            <Card className="border-slate-200 shadow-sm bg-white/70 backdrop-blur-sm">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-blue-500" />
+                      Site Content Management
+                    </CardTitle>
+                    <CardDescription>
+                      Manage all website content, titles, and text across different pages
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Home Page Content */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Type className="h-4 w-4" />
+                      Home Page
+                    </h3>
+                    <div className="grid gap-4">
+                      <div>
+                        <Label htmlFor="hero_title">Hero Title</Label>
+                        <div className="flex gap-2">
+                          <Input 
+                            id="hero_title"
+                            defaultValue={siteContent.home?.hero_title || 'Global Trade Intelligence Platform'}
+                            placeholder="Main hero title"
+                          />
+                          <Button 
+                            size="sm"
+                            onClick={() => {
+                              const input = document.getElementById('hero_title') as HTMLInputElement;
+                              updateSiteContent('home', 'hero_title', input.value);
+                            }}
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="hero_subtitle">Hero Subtitle</Label>
+                        <div className="flex gap-2">
+                          <Textarea 
+                            id="hero_subtitle"
+                            defaultValue={siteContent.home?.hero_subtitle || 'Discover hidden opportunities in global supply chains'}
+                            placeholder="Hero subtitle/description"
+                          />
+                          <Button 
+                            size="sm"
+                            onClick={() => {
+                              const input = document.getElementById('hero_subtitle') as HTMLTextAreaElement;
+                              updateSiteContent('home', 'hero_subtitle', input.value);
+                            }}
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="cta_primary">Primary CTA Text</Label>
+                          <div className="flex gap-2">
+                            <Input 
+                              id="cta_primary"
+                              defaultValue={siteContent.home?.cta_primary || 'Start Free Trial'}
+                              placeholder="Primary button text"
+                            />
+                            <Button 
+                              size="sm"
+                              onClick={() => {
+                                const input = document.getElementById('cta_primary') as HTMLInputElement;
+                                updateSiteContent('home', 'cta_primary', input.value);
+                              }}
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="cta_secondary">Secondary CTA Text</Label>
+                          <div className="flex gap-2">
+                            <Input 
+                              id="cta_secondary"
+                              defaultValue={siteContent.home?.cta_secondary || 'Watch Demo'}
+                              placeholder="Secondary button text"
+                            />
+                            <Button 
+                              size="sm"
+                              onClick={() => {
+                                const input = document.getElementById('cta_secondary') as HTMLInputElement;
+                                updateSiteContent('home', 'cta_secondary', input.value);
+                              }}
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pricing Page Content */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" />
+                      Pricing Page
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {['trial', 'starter', 'pro', 'enterprise'].map((plan) => (
+                        <div key={plan}>
+                          <Label htmlFor={`${plan}_title`}>{plan.charAt(0).toUpperCase() + plan.slice(1)} Plan Title</Label>
+                          <div className="flex gap-2">
+                            <Input 
+                              id={`${plan}_title`}
+                              defaultValue={siteContent.pricing?.[`${plan}_title`] || plan.charAt(0).toUpperCase() + plan.slice(1)}
+                              placeholder={`${plan} plan title`}
+                            />
+                            <Button 
+                              size="sm"
+                              onClick={() => {
+                                const input = document.getElementById(`${plan}_title`) as HTMLInputElement;
+                                updateSiteContent('pricing', `${plan}_title`, input.value);
+                              }}
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-4">Quick Actions</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm">
+                        <ImageIcon className="h-4 w-4 mr-2" />
+                        Manage Images
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Globe className="h-4 w-4 mr-2" />
+                        SEO Settings
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Type className="h-4 w-4 mr-2" />
+                        Typography
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="affiliates" className="space-y-6">
             <Card className="border-slate-200 shadow-sm bg-white/70 backdrop-blur-sm">
               <CardHeader>
@@ -341,97 +612,143 @@ export function AdminDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Commission</TableHead>
-                        <TableHead>Referrals</TableHead>
-                        <TableHead>Earnings</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {affiliateData.map((affiliate) => (
-                        <TableRow key={affiliate.id}>
-                          <TableCell className="font-medium">{affiliate.name}</TableCell>
-                          <TableCell>{affiliate.email}</TableCell>
-                          <TableCell>{affiliate.commissionRate}</TableCell>
-                          <TableCell>{affiliate.referrals}</TableCell>
-                          <TableCell className="font-semibold text-green-600">{affiliate.totalEarnings}</TableCell>
-                          <TableCell>
-                            <Badge variant={affiliate.status === 'Active' ? 'default' : 'secondary'}>
-                              {affiliate.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Dialog>
-                                <DialogTrigger asChild>
+                <div className="space-y-6">
+                  {/* Affiliate Requests */}
+                  <div>
+                    <h3 className="font-semibold mb-4">Pending Affiliate Requests</h3>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>User</TableHead>
+                            <TableHead>Reason</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {affiliateRequests.filter(req => req.status === 'pending').map((request) => (
+                            <TableRow key={request.id}>
+                              <TableCell className="font-medium">{request.user_id}</TableCell>
+                              <TableCell className="max-w-xs truncate">{request.reason || 'No reason provided'}</TableCell>
+                              <TableCell>{new Date(request.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
                                   <Button 
-                                    variant="ghost" 
+                                    variant="outline" 
                                     size="sm"
-                                    onClick={() => setSelectedAffiliate(affiliate)}
+                                    onClick={() => approveAffiliateRequest(request.id, true)}
                                   >
-                                    <Calculator className="h-4 w-4" />
+                                    Approve
                                   </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Process Payout</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div>
-                                      <Label>Affiliate</Label>
-                                      <p className="text-sm text-slate-600">{selectedAffiliate?.name}</p>
-                                    </div>
-                                    <div>
-                                      <Label>Current Earnings</Label>
-                                      <p className="text-lg font-semibold text-green-600">{selectedAffiliate?.totalEarnings}</p>
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="payout-amount">Payout Amount</Label>
-                                      <Input id="payout-amount" placeholder="Enter amount" />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="payout-method">Payment Method</Label>
-                                      <Select>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select payment method" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="paypal">PayPal</SelectItem>
-                                          <SelectItem value="stripe">Stripe</SelectItem>
-                                          <SelectItem value="bank">Bank Transfer</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div className="flex gap-2">
-                                      <Button className="flex-1">Process Payout</Button>
-                                      <Button variant="outline">Cancel</Button>
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => approveAffiliateRequest(request.id, false)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+
+                  {/* Active Affiliates */}
+                  <div>
+                    <h3 className="font-semibold mb-4">Active Affiliates</h3>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>User ID</TableHead>
+                            <TableHead>Commission</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Joined</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {realAffiliates.map((affiliate) => (
+                            <TableRow key={affiliate.id}>
+                              <TableCell className="font-medium">{affiliate.user_id}</TableCell>
+                              <TableCell>{affiliate.commission_rate}%</TableCell>
+                              <TableCell>
+                                <Badge variant={affiliate.status === 'approved' ? 'default' : 'secondary'}>
+                                  {affiliate.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{new Date(affiliate.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => setSelectedAffiliate(affiliate)}
+                                      >
+                                        <Calculator className="h-4 w-4" />
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle>Process Payout</DialogTitle>
+                                      </DialogHeader>
+                                      <div className="space-y-4">
+                                        <div>
+                                          <Label>Affiliate</Label>
+                                          <p className="text-sm text-slate-600">{selectedAffiliate?.user_id}</p>
+                                        </div>
+                                         <div>
+                                           <Label>Commission Rate</Label>
+                                           <p className="text-sm text-slate-600">{selectedAffiliate?.commission_rate}%</p>
+                                         </div>
+                                         <div>
+                                           <Label htmlFor="payout-amount">Payout Amount</Label>
+                                           <Input id="payout-amount" placeholder="Enter amount" />
+                                         </div>
+                                         <div>
+                                           <Label htmlFor="payout-method">Payment Method</Label>
+                                           <Select>
+                                             <SelectTrigger>
+                                               <SelectValue placeholder="Select payment method" />
+                                             </SelectTrigger>
+                                             <SelectContent>
+                                               <SelectItem value="stripe">Stripe</SelectItem>
+                                               <SelectItem value="paypal">PayPal</SelectItem>
+                                               <SelectItem value="bank">Bank Transfer</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                         <div className="flex gap-2">
+                                           <Button className="flex-1">Process Payout</Button>
+                                           <Button variant="outline">Cancel</Button>
+                                         </div>
+                                       </div>
+                                     </DialogContent>
+                                   </Dialog>
+                                 </div>
+                               </TableCell>
+                             </TableRow>
+                           ))}
+                         </TableBody>
+                       </Table>
+                     </div>
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
             <Card className="border-slate-200 shadow-sm bg-white/70 backdrop-blur-sm">

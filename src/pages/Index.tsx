@@ -13,6 +13,7 @@ import { PricingSection } from "@/components/landing/PricingSection";
 import { HeroContactChip } from "@/components/marketing/HeroContactChip";
 import { ArrowRight, Search, Users, TrendingUp, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AffiliateRequestButton } from "@/components/AffiliateRequestButton";
 
 const Index = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -183,6 +184,56 @@ const Index = () => {
           </div>
         </Container>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white py-16">
+        <Container>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <img 
+                src="/lovable-uploads/006777d5-845a-4da1-9783-8eb9964cddc8.png" 
+                alt="LogisticIntel"
+                className="h-20 w-auto brightness-0 invert"
+              />
+              <p className="text-slate-400">
+                Global trade intelligence platform helping businesses discover opportunities in supply chains.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Product</h3>
+              <ul className="space-y-2 text-slate-400">
+                <li><Link to="/solutions" className="hover:text-white">Solutions</Link></li>
+                <li><Link to="/dashboard" className="hover:text-white">Dashboard</Link></li>
+                <li><Link to="/resources" className="hover:text-white">Resources</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Company</h3>
+              <ul className="space-y-2 text-slate-400">
+                <li><Link to="/company" className="hover:text-white">About</Link></li>
+                <li><Link to="/blog" className="hover:text-white">Blog</Link></li>
+                <li><a href="#" className="hover:text-white">Contact</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Partners</h3>
+              <div className="space-y-4">
+                <p className="text-slate-400 text-sm">
+                  Join our affiliate program and earn commissions by referring customers.
+                </p>
+                <AffiliateRequestButton />
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-slate-800 mt-12 pt-8 text-center text-slate-400">
+            <p>&copy; 2024 LogisticIntel. All rights reserved.</p>
+          </div>
+        </Container>
+      </footer>
     </div>
   );
 };
