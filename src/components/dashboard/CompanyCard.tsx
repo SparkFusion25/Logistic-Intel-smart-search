@@ -93,7 +93,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
   }
 
   return (
-    <Card className="bg-card border-border hover:shadow-md transition-shadow w-64 min-h-20 sm:min-h-24 cursor-pointer" onClick={() => setShowDetailsDrawer(true)}>
+    <Card className="bg-card border-border hover:shadow-md transition-shadow w-72 xl:w-80 min-h-20 sm:min-h-24 cursor-pointer" onClick={() => setShowDetailsDrawer(true)}>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12">
@@ -181,7 +181,10 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
               <Button 
                 size="sm" 
                 variant="default" 
-                onClick={handleAddToCRM}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click
+                  handleAddToCRM();
+                }}
                 disabled={isAdding}
                 className="bg-brand-primary hover:bg-brand-primary/90"
               >
@@ -198,12 +201,20 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
                 )}
               </Button>
               {company.contact?.email && (
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Mail className="w-4 h-4 mr-1" />
                   Email
                 </Button>
               )}
-              <Button size="sm" variant="outline">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <ExternalLink className="w-4 h-4 mr-1" />
                 View
               </Button>
