@@ -74,6 +74,32 @@ serve(async (req) => {
       .update({ status: 'processing', updated_at: new Date().toISOString() })
       .eq('id', import_id);
 
+    // Start background processing - this allows the entire file to be processed
+    EdgeRuntime.waitUntil(processFileInBackground(supabaseClient, import_id, file_path, file_type, user.id));
+
+    // Return immediate response to prevent timeout
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'File processing started in background',
+      import_id 
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error in bulk import processor:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
+
+// Background processing function that handles the entire file
+async function processFileInBackground(supabaseClient: any, import_id: string, file_path: string, file_type: string, userId: string) {
+  try {
+
     // Download and process file
     const { data: fileData, error: downloadError } = await supabaseClient.storage
       .from('bulk-imports')
@@ -231,11 +257,10 @@ function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
   
   const records: TradeRecord[] = [];
   
-  // Process each row (skip header) - Limit to manageable size for edge functions
-  const maxRows = Math.min(jsonData.length, 1001); // Process up to 1000 records to avoid memory issues
-  console.log(`parseXLSX: Processing ${maxRows - 1} data rows (limited from ${jsonData.length - 1} total)`);
+  // Process each row (skip header) - Process ALL records in background
+  console.log(`parseXLSX: Processing ${jsonData.length - 1} data rows`);
   
-  for (let i = 1; i < maxRows; i++) {
+  for (let i = 1; i < jsonData.length; i++) {
     const row = jsonData[i] as any[];
     const record: TradeRecord = {};
     
