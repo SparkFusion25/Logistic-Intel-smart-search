@@ -320,51 +320,89 @@ function parseXML(text: string): TradeRecord[] {
 function normalizeFieldName(field: string): string | null {
   const normalized = field.toLowerCase().replace(/[^a-z0-9]/g, '');
   
-  // Map common field variations to our schema
+  // Map common field variations to our schema - Enhanced for Panjiva data
   const fieldMap: Record<string, string> = {
-    // Company names
+    // Company names - Panjiva specific
     'shipper': 'shipper_name',
     'shippername': 'shipper_name',
+    'shipperfullname': 'shipper_name',
     'consignee': 'consignee_name',
     'consigneename': 'consignee_name',
+    'consigneefullname': 'consignee_name',
     'company': 'shipper_name',
     'companyname': 'shipper_name',
+    'importer': 'consignee_name',
+    'exporter': 'shipper_name',
     
-    // Locations
+    // Locations - Panjiva specific
     'origincountry': 'origin_country',
-    'originstate': 'origin_state',
+    'originstate': 'origin_state', 
     'origincity': 'origin_city',
+    'originport': 'origin_port',
     'destinationcountry': 'destination_country',
     'destinationstate': 'destination_state',
     'destinationcity': 'destination_city',
+    'destinationport': 'destination_port',
     'destcountry': 'destination_country',
     'deststate': 'destination_state',
     'destcity': 'destination_city',
+    'portofloading': 'origin_port',
+    'portofdischarge': 'destination_port',
+    'portofunlading': 'destination_port',
+    'city': 'destination_city',
+    'state': 'destination_state',
+    'country': 'destination_country',
     
-    // Commodity
+    // Commodity - Panjiva specific
     'commodity': 'commodity_description',
     'commoditycode': 'commodity_code',
     'commoditydescription': 'commodity_description',
     'hscode': 'commodity_code',
     'sctgcode': 'commodity_code',
+    'description': 'commodity_description',
+    'productdescription': 'commodity_description',
+    'goodsdescription': 'commodity_description',
     
-    // Transport
+    // Transport - Panjiva specific
     'mode': 'transportation_mode',
     'transportmode': 'transportation_mode',
+    'transportationmode': 'transportation_mode',
     'vessel': 'vessel_name',
     'vesselname': 'vessel_name',
+    'carriercode': 'carrier_code',
+    'carrier': 'carrier_name',
+    'carriername': 'carrier_name',
     
-    // Values
+    // Values - Panjiva specific
     'weight': 'weight_kg',
     'weightkg': 'weight_kg',
+    'grossweight': 'weight_kg',
+    'netweight': 'weight_kg',
+    'quantity': 'quantity',
+    'qty': 'quantity',
     'value': 'value_usd',
     'valueusd': 'value_usd',
     'totalvalue': 'value_usd',
+    'customsvalue': 'value_usd',
+    'declaredvalue': 'value_usd',
     
-    // Dates
+    // Dates - Panjiva specific
     'shipmentdate': 'shipment_date',
     'arrivaldate': 'arrival_date',
-    'date': 'shipment_date'
+    'date': 'shipment_date',
+    'departuredate': 'shipment_date',
+    'etd': 'shipment_date',
+    'eta': 'arrival_date',
+    
+    // Panjiva specific fields
+    'billofladingno': 'bol_number',
+    'billofladingnumber': 'bol_number',
+    'bolnumber': 'bol_number',
+    'masterbolnumber': 'bol_number',
+    'consigneeid': 'consignee_id',
+    'shipperid': 'shipper_id',
+    'containercount': 'container_count',
+    'teu': 'container_count'
   };
 
   return fieldMap[normalized] || null;
@@ -425,45 +463,62 @@ async function processBatch(
         continue;
       }
 
-      // Insert into unified_shipments table
+      // Insert into unified_shipments table with enhanced mapping
+      const insertData = {
+        org_id: orgId,
+        unified_company_name: inferredCompany,
+        inferred_company_name: inferredCompany, // Keep this for search compatibility
+        mode: record.transportation_mode === 'air' ? 'air' : 'ocean', // Normalize mode
+        transport_mode: record.transportation_mode || 'ocean',
+        shipper_name: record.shipper_name,
+        consignee_name: record.consignee_name,
+        origin_country: record.origin_country,
+        destination_country: record.destination_country,
+        destination_city: record.destination_city,
+        destination_state: record.destination_state,
+        unified_date: record.shipment_date || record.arrival_date,
+        shipment_date: record.shipment_date, // Keep for compatibility
+        arrival_date: record.arrival_date,
+        unified_value: record.value_usd,
+        value_usd: record.value_usd, // Keep for compatibility
+        unified_weight: record.weight_kg,
+        weight_kg: record.weight_kg, // Keep for compatibility
+        hs_code: record.commodity_code,
+        commodity_description: record.commodity_description,
+        description: record.commodity_description, // Alias
+        vessel_name: record.vessel_name,
+        port_of_loading: record.origin_port,
+        port_of_discharge: record.destination_port,
+        bol_number: record.bol_number,
+        container_count: record.container_count,
+        carrier_name: record.carrier_name,
+        quantity: record.quantity,
+        created_at: new Date().toISOString()
+      };
+
+      console.log(`Inserting record for company: ${inferredCompany}`);
+      
       const { error: insertError } = await supabaseClient
         .from('unified_shipments')
-        .insert({
-          unified_company_name: inferredCompany,
-          inferred_company_name: inferredCompany, // Keep this for search compatibility
-          transport_mode: record.transportation_mode || 'unknown',
-          shipper_name: record.shipper_name,
-          consignee_name: record.consignee_name,
-          origin_country: record.origin_country,
-          destination_country: record.destination_country,
-          destination_city: record.destination_city,
-          unified_date: record.shipment_date || record.arrival_date,
-          shipment_date: record.shipment_date, // Keep for compatibility
-          arrival_date: record.arrival_date,
-          unified_value: record.value_usd,
-          value_usd: record.value_usd, // Keep for compatibility
-          unified_weight: record.weight_kg,
-          weight_kg: record.weight_kg, // Keep for compatibility
-          hs_code: record.commodity_code,
-          commodity_description: record.commodity_description,
-          vessel_name: record.vessel_name,
-          port_of_loading: record.origin_port,
-          port_of_discharge: record.destination_port
-        });
+        .insert(insertData);
 
       if (insertError) {
-        console.error('Insert error:', insertError);
+        console.error(`Insert error for company ${inferredCompany}:`, insertError);
+        console.error('Failed record data:', JSON.stringify(insertData, null, 2));
         errors++;
       } else {
+        console.log(`Successfully inserted record for ${inferredCompany}`);
         processed++;
       }
 
     } catch (error) {
-      console.error('Processing error:', error);
+      console.error('Processing error for record:', error);
+      console.error('Record data:', JSON.stringify(record, null, 2));
       errors++;
     }
   }
 
+  console.log(`Batch complete: ${processed} processed, ${duplicates} duplicates, ${errors} errors`);
   return { processed, duplicates, errors };
 }
 
