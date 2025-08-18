@@ -143,7 +143,7 @@ serve(async (req) => {
 
     // Get the appropriate stage
     console.log('🔧 Edge Function: Looking for stages in pipeline:', pipeline.id)
-    const { data: stages, error: stagesError } = await supabaseClient
+    let { data: stages, error: stagesError } = await supabaseClient
       .from('pipeline_stages')
       .select('*')
       .eq('pipeline_id', pipeline.id)
@@ -151,15 +151,57 @@ serve(async (req) => {
 
     console.log('🔧 Edge Function: Stages lookup result:', { stages, stagesError })
 
+    // If no stages exist, create them
+    if (!stages || stages.length === 0) {
+      console.log('🔧 Edge Function: No stages found, creating default stages')
+      const defaultStages = [
+        { name: 'Prospect Identified', stage_order: 1 },
+        { name: 'Initial Contact', stage_order: 2 },
+        { name: 'Qualified Lead', stage_order: 3 },
+        { name: 'Proposal Sent', stage_order: 4 },
+        { name: 'Negotiation', stage_order: 5 },
+        { name: 'Won', stage_order: 6 },
+        { name: 'Lost', stage_order: 7 }
+      ]
+
+      const stagesToInsert = defaultStages.map(stage => ({
+        ...stage,
+        pipeline_id: pipeline.id,
+        org_id: user.id
+      }))
+
+      console.log('🔧 Edge Function: Inserting stages for existing pipeline:', stagesToInsert)
+
+      const { data: newStages, error: stagesInsertError } = await supabaseClient
+        .from('pipeline_stages')
+        .insert(stagesToInsert)
+        .select()
+
+      console.log('🔧 Edge Function: Stages creation result:', { newStages, stagesInsertError })
+
+      if (stagesInsertError) {
+        console.error('🔧 Edge Function: Failed to create stages for existing pipeline:', stagesInsertError)
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to create pipeline stages' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+      
+      stages = newStages
+    }
+
     const targetStage = stages?.find(s => s.name === (stage_name || 'Prospect Identified')) || stages?.[0]
     console.log('🔧 Edge Function: Target stage:', targetStage)
 
     if (!targetStage) {
-      console.log('🔧 Edge Function: No target stage found')
+      console.log('🔧 Edge Function: No target stage found after creation attempt')
       return new Response(
-        JSON.stringify({ success: false, error: 'No stages found in pipeline' }),
+        JSON.stringify({ success: false, error: 'Failed to create or find pipeline stages' }),
         { 
-          status: 400, 
+          status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
