@@ -66,7 +66,7 @@ const Index = () => {
               <img 
                 src="/lovable-uploads/006777d5-845a-4da1-9783-8eb9964cddc8.png" 
                 alt="LogisticIntel - Trade Intelligence"
-                className="h-12 w-auto bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1"
+                className="h-24 md:h-28 w-auto"
               />
             </div>
             <div className="hidden lg:flex items-center space-x-8">
