@@ -8,10 +8,10 @@ const corsHeaders = {
 
 const DEFAULT_STAGES = [
   "Prospect Identified",
-  "Contacted",
-  "Engaged",
-  "Qualified",
+  "Initial Contact", 
+  "Qualified Lead",
   "Proposal Sent",
+  "Negotiation",
   "Won",
   "Lost",
 ];
