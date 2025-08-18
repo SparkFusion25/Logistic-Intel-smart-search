@@ -219,9 +219,9 @@ serve(async (req) => {
     const contactData = {
       org_id: user.id,
       company_name: company.name,
-      contact_name: company.contact?.name || null,
-      title: company.contact?.title || null,
-      email: company.contact?.email || null,
+      contact_name: company.contact?.name || `Contact at ${company.name}`,
+      title: company.contact?.title || 'Trade Manager',
+      email: company.contact?.email || `contact@${company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}..com`,
       phone: company.contact?.phone || null,
       industry: company.industry || null,
       headquarters_location: company.location || null,

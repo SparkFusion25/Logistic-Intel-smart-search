@@ -72,22 +72,18 @@ export function DealPipeline() {
 
   const loadPipelines = async () => {
     try {
+      // Always seed pipeline first to ensure default exists
+      await makeRequest('/crm-seed-pipeline', { method: 'POST' });
+      
       const response = await makeRequest('/crm-pipelines', {
         method: 'GET'
       });
 
       if (response?.pipelines?.length > 0) {
         setPipelines(response.pipelines);
-        setSelectedPipeline(response.pipelines[0].id);
-      } else {
-        // Seed initial pipeline if none exist
-        await makeRequest('/crm-seed-pipeline', { method: 'POST' });
-        // Retry loading
-        const retryResponse = await makeRequest('/crm-pipelines', { method: 'GET' });
-        if (retryResponse?.pipelines?.length > 0) {
-          setPipelines(retryResponse.pipelines);
-          setSelectedPipeline(retryResponse.pipelines[0].id);
-        }
+        // Find Default pipeline or use first one
+        const defaultPipeline = response.pipelines.find((p: Pipeline) => p.name === 'Default') || response.pipelines[0];
+        setSelectedPipeline(defaultPipeline.id);
       }
     } catch (error) {
       console.error('Failed to load pipelines:', error);
