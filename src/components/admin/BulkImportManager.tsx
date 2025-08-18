@@ -20,6 +20,10 @@ interface BulkImport {
   created_at: string;
   updated_at: string;
   processing_metadata?: {
+    batch_size?: number;
+    total_batches?: number;
+    current_batch?: number;
+    progress_percentage?: number;
     ai_analysis?: {
       data_quality_score: number;
       estimated_processing_time: string;
@@ -183,7 +187,7 @@ export const BulkImportManager = () => {
     switch (status) {
       case 'completed': return 'bg-green-500';
       case 'error': return 'bg-red-500';
-      case 'processing': case 'parsing': case 'deduplicating': case 'enriching': return 'bg-blue-500';
+      case 'processing': case 'parsing': case 'deduplicating': case 'enriching': case 'processing_batches': return 'bg-blue-500';
       default: return 'bg-gray-500';
     }
   };
@@ -192,7 +196,7 @@ export const BulkImportManager = () => {
     switch (status) {
       case 'completed': return <CheckCircle className="h-4 w-4" />;
       case 'error': return <AlertTriangle className="h-4 w-4" />;
-      case 'processing': case 'parsing': case 'deduplicating': case 'enriching': return <Database className="h-4 w-4 animate-spin" />;
+      case 'processing': case 'parsing': case 'deduplicating': case 'enriching': case 'processing_batches': return <Database className="h-4 w-4 animate-spin" />;
       default: return <FileText className="h-4 w-4" />;
     }
   };
@@ -325,21 +329,43 @@ export const BulkImportManager = () => {
                          </div>
                        )}
                      </div>
-                   )}
-                   
-                   {item.total_records > 0 && (
-                     <div className="space-y-2">
-                       <Progress value={calculateProgress(item)} className="h-2" />
-                       <div className="flex justify-between text-sm text-muted-foreground">
-                         <span>
-                           {item.processed_records} / {item.total_records} records processed
-                         </span>
-                         <span>
-                           {item.duplicate_records} duplicates, {item.error_records} errors
-                         </span>
-                       </div>
-                     </div>
-                   )}
+                    )}
+
+                    {/* Batch Processing Status */}
+                    {item.processing_metadata?.current_batch && item.processing_metadata?.total_batches && (
+                      <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 className="font-medium text-sm mb-2 text-blue-700">
+                          Batch Processing Status
+                        </h4>
+                        <div className="text-sm space-y-1">
+                          <div>
+                            <span className="font-medium">Current Batch:</span> {item.processing_metadata.current_batch} / {item.processing_metadata.total_batches}
+                          </div>
+                          <div>
+                            <span className="font-medium">Batch Size:</span> {item.processing_metadata.batch_size} records per batch
+                          </div>
+                          {item.processing_metadata.progress_percentage && (
+                            <div>
+                              <span className="font-medium">Progress:</span> {item.processing_metadata.progress_percentage}%
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {item.total_records > 0 && (
+                      <div className="space-y-2">
+                        <Progress value={calculateProgress(item)} className="h-2" />
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>
+                            {item.processed_records} / {item.total_records} records processed
+                          </span>
+                          <span>
+                            {item.duplicate_records} duplicates, {item.error_records} errors
+                          </span>
+                        </div>
+                      </div>
+                    )}
                  </div>
                ))}
             </div>
