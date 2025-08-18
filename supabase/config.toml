@@ -110,3 +110,6 @@ verify_jwt = true
 
 [functions.affiliate-admin-approval]
 verify_jwt = true
+
+[functions.ai-file-analyzer]
+verify_jwt = true

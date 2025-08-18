@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, Database, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useDropzone } from 'react-dropzone';
@@ -19,6 +19,14 @@ interface BulkImport {
   error_records: number;
   created_at: string;
   updated_at: string;
+  processing_metadata?: {
+    ai_analysis?: {
+      data_quality_score: number;
+      estimated_processing_time: string;
+      suggested_cleaning: string[];
+      processing_recommendations: string[];
+    };
+  };
 }
 
 export const BulkImportManager = () => {
@@ -58,7 +66,10 @@ export const BulkImportManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setImports(data || []);
+      setImports((data || []).map(item => ({
+        ...item,
+        processing_metadata: item.processing_metadata as BulkImport['processing_metadata']
+      })));
     } catch (error) {
       toast({
         title: "Error",
@@ -254,36 +265,83 @@ export const BulkImportManager = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {imports.map((item) => (
-                <div key={item.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(item.status)}
-                      <span className="font-medium">{item.filename}</span>
-                      <Badge className={getStatusColor(item.status)}>
-                        {item.status}
-                      </Badge>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  
-                  {item.total_records > 0 && (
-                    <div className="space-y-2">
-                      <Progress value={calculateProgress(item)} className="h-2" />
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>
-                          {item.processed_records} / {item.total_records} records processed
-                        </span>
-                        <span>
-                          {item.duplicate_records} duplicates, {item.error_records} errors
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+               {imports.map((item) => (
+                 <div key={item.id} className="border rounded-lg p-4">
+                   <div className="flex items-center justify-between mb-2">
+                     <div className="flex items-center gap-2">
+                       {getStatusIcon(item.status)}
+                       <span className="font-medium">{item.filename}</span>
+                       <Badge className={getStatusColor(item.status)}>
+                         {item.status}
+                       </Badge>
+                       {item.processing_metadata?.ai_analysis && (
+                         <Badge variant="outline" className="ml-2">
+                           <Brain className="h-3 w-3 mr-1" />
+                           AI Analyzed
+                         </Badge>
+                       )}
+                     </div>
+                     <span className="text-sm text-muted-foreground">
+                       {new Date(item.created_at).toLocaleDateString()}
+                     </span>
+                   </div>
+
+                   {/* AI Analysis Results */}
+                   {item.processing_metadata?.ai_analysis && (
+                     <div className="mb-3 p-3 bg-muted/30 rounded-lg border">
+                       <h4 className="font-medium text-sm mb-2 flex items-center">
+                         <Sparkles className="h-4 w-4 mr-2 text-blue-500" />
+                         AI Analysis Results
+                       </h4>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                         <div>
+                           <span className="font-medium">Data Quality Score:</span>
+                           <div className="flex items-center mt-1">
+                             <Progress 
+                               value={item.processing_metadata.ai_analysis.data_quality_score * 10} 
+                               className="w-16 h-2 mr-2" 
+                             />
+                             <span className="text-xs">{item.processing_metadata.ai_analysis.data_quality_score}/10</span>
+                           </div>
+                         </div>
+                         <div>
+                           <span className="font-medium">Est. Processing Time:</span>
+                           <p className="text-muted-foreground text-xs">
+                             {item.processing_metadata.ai_analysis.estimated_processing_time}
+                           </p>
+                         </div>
+                       </div>
+                       {item.processing_metadata.ai_analysis.suggested_cleaning?.length > 0 && (
+                         <div className="mt-2">
+                           <span className="font-medium text-xs">AI Suggestions:</span>
+                           <div className="text-xs text-muted-foreground mt-1 space-y-1">
+                             {item.processing_metadata.ai_analysis.suggested_cleaning.slice(0, 2).map((suggestion, idx) => (
+                               <div key={idx} className="flex items-start">
+                                 <span className="text-blue-500 mr-1 mt-0.5">•</span>
+                                 <span>{suggestion}</span>
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   )}
+                   
+                   {item.total_records > 0 && (
+                     <div className="space-y-2">
+                       <Progress value={calculateProgress(item)} className="h-2" />
+                       <div className="flex justify-between text-sm text-muted-foreground">
+                         <span>
+                           {item.processed_records} / {item.total_records} records processed
+                         </span>
+                         <span>
+                           {item.duplicate_records} duplicates, {item.error_records} errors
+                         </span>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               ))}
             </div>
           )}
         </CardContent>

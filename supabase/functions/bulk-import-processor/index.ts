@@ -140,6 +140,31 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
 
       console.log(`Parsed ${records.length} records from ${file_type} file`);
 
+      // Get sample data for AI analysis (first 5 rows)
+      const sampleData = records.slice(0, 5);
+      
+      // Call AI analyzer for intelligent insights
+      console.log('Starting AI file analysis...');
+      try {
+        const aiAnalysisResponse = await supabaseClient.functions.invoke('ai-file-analyzer', {
+          body: {
+            import_id,
+            file_sample: sampleData,
+            file_type,
+            filename: file_path.split('/').pop()
+          }
+        });
+        
+        if (aiAnalysisResponse.error) {
+          console.error('AI analysis failed:', aiAnalysisResponse.error);
+        } else {
+          console.log('AI analysis completed:', aiAnalysisResponse.data);
+        }
+      } catch (aiError) {
+        console.error('AI analysis error:', aiError);
+        // Continue processing even if AI analysis fails
+      }
+
       // Update status to parsed
       await supabaseClient
         .from('bulk_imports')
