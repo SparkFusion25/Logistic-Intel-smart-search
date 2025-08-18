@@ -91,7 +91,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
   }
 
   return (
-    <Card className="bg-card border-border hover:shadow-md transition-shadow">
+    <Card className="bg-card border-border hover:shadow-md transition-shadow w-36 sm:w-39 min-h-20 sm:min-h-24">
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12">

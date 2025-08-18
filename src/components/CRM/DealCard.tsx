@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { DealDrawer } from "./DealDrawer";
+import { ComprehensiveDealDrawer } from "./ComprehensiveDealDrawer";
 import { Building, Calendar, User, MessageSquare, FileText, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -78,7 +78,7 @@ export function DealCard({ deal, stageId }: DealCardProps) {
         className={cn(
           "cursor-pointer rounded-lg p-2 sm:p-2.5 bg-white border border-slate-200 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
           "hover:border-blue-300 hover:-translate-y-0.5 group touch-manipulation",
-          "min-h-20 sm:min-h-24 w-48 sm:w-52",
+          "min-h-20 sm:min-h-24 w-36 sm:w-39",
           isDragging && "opacity-50 shadow-lg rotate-2 scale-105"
         )}
       >
@@ -154,7 +154,7 @@ export function DealCard({ deal, stageId }: DealCardProps) {
         </div>
       </Card>
 
-      <DealDrawer 
+      <ComprehensiveDealDrawer 
         open={drawerOpen} 
         onOpenChange={setDrawerOpen} 
         dealId={deal.id}
