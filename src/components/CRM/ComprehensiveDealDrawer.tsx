@@ -66,6 +66,9 @@ export function ComprehensiveDealDrawer({
   const [isEnriching, setIsEnriching] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [enrichmentOpen, setEnrichmentOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [shipmentOpen, setShipmentOpen] = useState(false);
   const [emailType, setEmailType] = useState<'proposal' | 'followup' | 'general'>('general');
   const { toast } = useToast();
 
