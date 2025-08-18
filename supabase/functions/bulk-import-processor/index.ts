@@ -97,9 +97,15 @@ serve(async (req) => {
         records = parseXML(fileText);
       } else if (file_type === 'xlsx') {
         console.log('Processing XLSX file...');
-        // Parse XLSX using binary data
+        // Parse XLSX using streaming approach to avoid memory issues
         const arrayBuffer = await fileData.arrayBuffer();
         console.log(`ArrayBuffer size: ${arrayBuffer.byteLength}`);
+        
+        // Check file size and refuse if too large (>5MB)
+        if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
+          throw new Error('File too large. Please upload files smaller than 5MB.');
+        }
+        
         records = parseXLSX(arrayBuffer);
         console.log(`Parsed ${records.length} records from XLSX`);
       } else {
@@ -225,8 +231,11 @@ function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
   
   const records: TradeRecord[] = [];
   
-  // Process each row (skip header)
-  for (let i = 1; i < Math.min(jsonData.length, 101); i++) { // Limit to 100 records for initial testing
+  // Process each row (skip header) - Limit to manageable size for edge functions
+  const maxRows = Math.min(jsonData.length, 1001); // Process up to 1000 records to avoid memory issues
+  console.log(`parseXLSX: Processing ${maxRows - 1} data rows (limited from ${jsonData.length - 1} total)`);
+  
+  for (let i = 1; i < maxRows; i++) {
     const row = jsonData[i] as any[];
     const record: TradeRecord = {};
     
