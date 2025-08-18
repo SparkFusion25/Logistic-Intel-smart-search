@@ -211,7 +211,6 @@ const Dashboard = () => {
                     icon={metric.icon}
                     color={metric.color}
                     trend={metric.trend}
-                    className="bg-white/80 backdrop-blur-sm border-blue-100/50 hover:shadow-xl hover:bg-white/90 transition-all duration-300 hover:scale-105"
                   />
                 ))}
               </div>
