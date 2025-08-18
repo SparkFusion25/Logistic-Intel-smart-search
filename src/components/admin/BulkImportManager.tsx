@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain } from 'lucide-react';
+import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain, RotateCcw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useDropzone } from 'react-dropzone';
@@ -206,6 +206,31 @@ export const BulkImportManager = () => {
     return Math.round((item.processed_records / item.total_records) * 100);
   };
 
+  const resetStuckImport = async (importId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('reset-stuck-import', {
+        body: { import_id: importId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Import Reset",
+        description: "The stuck import has been reset and can be reprocessed",
+      });
+
+      // Reload imports to show updated status
+      loadImports();
+    } catch (error) {
+      console.error('Reset error:', error);
+      toast({
+        title: "Reset Failed",
+        description: error instanceof Error ? error.message : "Failed to reset import",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center p-8">Loading imports...</div>;
   }
@@ -271,24 +296,37 @@ export const BulkImportManager = () => {
             <div className="space-y-4">
                {imports.map((item) => (
                  <div key={item.id} className="border rounded-lg p-4">
-                   <div className="flex items-center justify-between mb-2">
-                     <div className="flex items-center gap-2">
-                       {getStatusIcon(item.status)}
-                       <span className="font-medium">{item.filename}</span>
-                       <Badge className={getStatusColor(item.status)}>
-                         {item.status}
-                       </Badge>
-                       {item.processing_metadata?.ai_analysis && (
-                         <Badge variant="outline" className="ml-2">
-                           <Brain className="h-3 w-3 mr-1" />
-                           AI Analyzed
-                         </Badge>
-                       )}
-                     </div>
-                     <span className="text-sm text-muted-foreground">
-                       {new Date(item.created_at).toLocaleDateString()}
-                     </span>
-                   </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(item.status)}
+                        <span className="font-medium">{item.filename}</span>
+                        <Badge className={getStatusColor(item.status)}>
+                          {item.status}
+                        </Badge>
+                        {item.processing_metadata?.ai_analysis && (
+                          <Badge variant="outline" className="ml-2">
+                            <Brain className="h-3 w-3 mr-1" />
+                            AI Analyzed
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {(item.status === 'deduplicating' || item.status === 'processing' || item.status === 'parsing') && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => resetStuckImport(item.id)}
+                            className="h-7 px-2"
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Reset
+                          </Button>
+                        )}
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
 
                    {/* AI Analysis Results */}
                    {item.processing_metadata?.ai_analysis && (
