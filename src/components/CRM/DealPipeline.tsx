@@ -183,7 +183,9 @@ export function DealPipeline() {
     );
   }
 
-  const sortedStages = [...currentPipeline.stages].sort((a, b) => a.stage_order - b.stage_order);
+  const sortedStages = [...currentPipeline.stages]
+    .filter(stage => !['Contacted', 'Initial Contact', 'Negotiation'].includes(stage.name))
+    .sort((a, b) => a.stage_order - b.stage_order);
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-blue-50/50">
@@ -258,22 +260,22 @@ export function DealPipeline() {
                 const stageValue = stageDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0);
                 
                 return (
-                  <div key={stage.id} className="w-full">
-                    {/* Mobile Stage Header */}
-                    <div 
-                      className="mb-4 rounded-2xl p-4 shadow-lg border-l-4"
+                    <div key={stage.id} className="w-full">
+                      {/* Mobile Stage Header */}
+                      <div 
+                        className="mb-3 rounded-xl p-3 shadow-md border-l-4"
                       style={{
                         background: `linear-gradient(135deg, ${stageColors.bg}, ${stageColors.bgLight})`,
                         borderLeftColor: stageColors.border
                       }}
                     >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div 
-                            className="w-3 h-3 rounded-full"
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-2.5 h-2.5 rounded-full"
                             style={{ backgroundColor: stageColors.border }}
                           />
-                          <h3 className="font-semibold text-slate-800 text-lg">{stage.name}</h3>
+                            <h3 className="font-semibold text-slate-800 text-base">{stage.name}</h3>
                         </div>
                         <Button
                           variant="ghost"
@@ -282,20 +284,20 @@ export function DealPipeline() {
                             setSelectedStageId(stage.id);
                             setNewDealOpen(true);
                           }}
-                          className="h-8 w-8 p-0 hover:bg-white/50 rounded-lg"
-                        >
-                          <Plus className="h-4 w-4 text-slate-600" />
+                              className="h-7 w-7 p-0 hover:bg-white/50 rounded-lg"
+                            >
+                              <Plus className="h-3.5 w-3.5 text-slate-600" />
                         </Button>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="bg-white/60 rounded-lg px-3 py-1">
-                          <span className="text-slate-600 font-medium">{stageDeals.length} deals</span>
-                        </div>
-                        <div className="bg-white/60 rounded-lg px-3 py-1">
-                          <span className="font-semibold text-slate-700">
-                            ${stageValue.toLocaleString()}
-                          </span>
-                        </div>
+                          <div className="flex items-center justify-between text-xs">{/* smaller text */}
+                            <div className="bg-white/60 rounded-md px-2 py-1">
+                              <span className="text-slate-600 font-medium text-xs">{stageDeals.length} deals</span>
+                            </div>
+                            <div className="bg-white/60 rounded-md px-2 py-1">
+                              <span className="font-semibold text-slate-700 text-xs">
+                                ${stageValue.toLocaleString()}
+                              </span>
+                            </div>
                       </div>
                     </div>
 
@@ -305,10 +307,10 @@ export function DealPipeline() {
                       items={stageDeals.map(d => d.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      <div 
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-xl bg-white/30 backdrop-blur-sm p-3 border border-white/40 min-h-32"
-                        data-stage-id={stage.id}
-                      >
+                        <div 
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-lg bg-white/30 backdrop-blur-sm p-2 border border-white/40 min-h-24"
+                          data-stage-id={stage.id}
+                        >
                         {stageDeals.map((deal) => (
                           <DealCard
                             key={deal.id}
@@ -316,11 +318,11 @@ export function DealPipeline() {
                             stageId={stage.id}
                           />
                         ))}
-                        {stageDeals.length === 0 && (
-                          <div className="col-span-full flex flex-col items-center justify-center py-8 text-slate-400">
-                            <Target className="h-8 w-8 mb-2 opacity-50" />
-                            <p className="text-sm">No deals yet</p>
-                            <p className="text-xs text-center">Tap to add new deals</p>
+                          {stageDeals.length === 0 && (
+                            <div className="col-span-full flex flex-col items-center justify-center py-6 text-slate-400">
+                              <Target className="h-6 w-6 mb-1 opacity-50" />
+                              <p className="text-xs">No deals yet</p>
+                            <p className="text-xs text-center">Tap to add deals</p>
                           </div>
                         )}
                       </div>
@@ -341,23 +343,23 @@ export function DealPipeline() {
                   return (
                     <div
                       key={stage.id}
-                      className="w-80 xl:w-96 flex-shrink-0 flex flex-col h-full"
+                      className="w-72 xl:w-80 flex-shrink-0 flex flex-col h-full"
                     >
-                      {/* Desktop Stage Header */}
-                      <div 
-                        className="mb-4 rounded-2xl p-4 shadow-lg border-l-4"
+                      {/* Desktop Stage Header - More compact */}
+                      <div
+                        className="mb-3 rounded-xl p-3 shadow-md border-l-4"
                         style={{
                           background: `linear-gradient(135deg, ${stageColors.bg}, ${stageColors.bgLight})`,
                           borderLeftColor: stageColors.border
                         }}
                       >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div 
-                              className="w-3 h-3 rounded-full"
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-2.5 h-2.5 rounded-full"
                               style={{ backgroundColor: stageColors.border }}
                             />
-                            <h3 className="font-semibold text-slate-800 text-lg">{stage.name}</h3>
+                            <h3 className="font-semibold text-slate-800 text-base">{stage.name}</h3>
                           </div>
                           <Button
                             variant="ghost"

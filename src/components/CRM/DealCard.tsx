@@ -76,82 +76,81 @@ export function DealCard({ deal, stageId }: DealCardProps) {
           setDrawerOpen(true);
         }}
         className={cn(
-          "cursor-pointer rounded-xl p-3 sm:p-4 bg-white border border-slate-200 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10",
-          "hover:border-blue-300 hover:-translate-y-1 group touch-manipulation",
-          "min-h-32 sm:min-h-36",
-          isDragging && "opacity-50 shadow-xl rotate-3 scale-105"
+          "cursor-pointer rounded-lg p-2.5 sm:p-3 bg-white border border-slate-200 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
+          "hover:border-blue-300 hover:-translate-y-0.5 group touch-manipulation",
+          "min-h-24 sm:min-h-28",
+          isDragging && "opacity-50 shadow-lg rotate-2 scale-105"
         )}
       >
-        {/* Deal Title - Responsive */}
-        <div className="font-semibold text-slate-800 mb-2 sm:mb-3 line-clamp-2 group-hover:text-blue-700 transition-colors text-sm sm:text-base">
+        {/* Deal Title - Compact */}
+        <div className="font-medium text-slate-800 mb-1.5 sm:mb-2 line-clamp-1 group-hover:text-blue-700 transition-colors text-sm leading-tight">
           {deal.title}
         </div>
 
-        {/* Company - Responsive */}
+        {/* Company - Compact */}
         {deal.company_name && (
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 mb-2">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-              <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5">
+            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+              <Building className="h-2 w-2 text-white" />
             </div>
             <span className="truncate font-medium">{deal.company_name}</span>
           </div>
         )}
 
-        {/* Contact - Responsive */}
-        {deal.contact_name && (
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 mb-2">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
-            </div>
-            <span className="truncate">{deal.contact_name}</span>
-          </div>
-        )}
-
-        {/* Value - Responsive */}
+        {/* Value - Prominent but compact */}
         {deal.value_usd && (
-          <div className="flex items-center gap-2 mb-2 sm:mb-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-2">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
-              <DollarSign className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+          <div className="flex items-center gap-1.5 mb-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md p-1.5">
+            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="h-2 w-2 text-white" />
             </div>
-            <span className="text-green-700 font-bold text-sm sm:text-lg">
+            <span className="text-green-700 font-bold text-sm">
               ${deal.value_usd.toLocaleString()}
             </span>
           </div>
         )}
 
-        {/* Expected Close Date - Responsive */}
-        {deal.expected_close_date && (
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 mb-2">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center flex-shrink-0">
-              <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+        {/* Contact - Only if space allows */}
+        {deal.contact_name && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5 sm:block hidden">
+            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+              <User className="h-2 w-2 text-white" />
             </div>
+            <span className="truncate">{deal.contact_name}</span>
+          </div>
+        )}
+
+        {/* Expected Close Date - Compact */}
+        {deal.expected_close_date && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-1.5">
+            <Calendar className="h-3 w-3 text-orange-500 flex-shrink-0" />
             <span className="font-medium">{formatDate(deal.expected_close_date)}</span>
           </div>
         )}
 
-        {/* Probability Badge - Responsive */}
-        {deal.probability !== null && (
-          <div className="mb-2 sm:mb-3">
-            <div className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border border-purple-200">
-              {deal.probability}% chance
+        {/* Bottom row - Probability and Activities */}
+        <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100">
+          {/* Probability - Compact */}
+          {deal.probability !== null && (
+            <div className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+              {deal.probability}%
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Activity Indicators - Responsive */}
-        <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100">
-          {deal.activities_count > 0 && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-md">
-              <MessageSquare className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-600" />
-              <span className="text-xs font-medium text-blue-700">{deal.activities_count}</span>
-            </div>
-          )}
-          {deal.notes_count > 0 && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-md">
-              <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-600" />
-              <span className="text-xs font-medium text-amber-700">{deal.notes_count}</span>
-            </div>
-          )}
+          {/* Activity Indicators - Compact */}
+          <div className="flex items-center gap-1.5">
+            {deal.activities_count > 0 && (
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 rounded text-xs">
+                <MessageSquare className="h-2.5 w-2.5 text-blue-600" />
+                <span className="text-blue-700 font-medium">{deal.activities_count}</span>
+              </div>
+            )}
+            {deal.notes_count > 0 && (
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 rounded text-xs">
+                <FileText className="h-2.5 w-2.5 text-amber-600" />
+                <span className="text-amber-700 font-medium">{deal.notes_count}</span>
+              </div>
+            )}
+          </div>
         </div>
       </Card>
 
