@@ -6,7 +6,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ComprehensiveDealDrawer } from "./ComprehensiveDealDrawer";
-import { Building, Calendar, User, MessageSquare, FileText, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Building, Calendar, User, MessageSquare, FileText, DollarSign, Trash2, MoreVertical } from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 interface Deal {
@@ -25,10 +34,12 @@ interface Deal {
 interface DealCardProps {
   deal: Deal;
   stageId: string;
+  onDelete?: () => void;
 }
 
-export function DealCard({ deal, stageId }: DealCardProps) {
+export function DealCard({ deal, stageId, onDelete }: DealCardProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { toast } = useToast();
   
   const {
     attributes,
@@ -40,10 +51,36 @@ export function DealCard({ deal, stageId }: DealCardProps) {
   } = useSortable({
     id: deal.id,
     data: {
+      type: 'deal',
       stageId,
       deal,
     },
   });
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('deals')
+        .delete()
+        .eq('id', deal.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Deal Deleted",
+        description: "Deal has been successfully deleted"
+      });
+
+      if (onDelete) onDelete();
+    } catch (error) {
+      console.error('Error deleting deal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete deal. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -94,6 +131,39 @@ export function DealCard({ deal, stageId }: DealCardProps) {
             </div>
           </div>
         </div>
+
+        {/* Actions Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="absolute top-1 left-1 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-slate-200"
+            >
+              <MoreVertical className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem 
+              onClick={(e) => {
+                e.stopPropagation();
+                setDrawerOpen(true);
+              }}
+            >
+              View Details
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+              className="text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Deal
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         {/* Clickable Content Area */}
         <div 

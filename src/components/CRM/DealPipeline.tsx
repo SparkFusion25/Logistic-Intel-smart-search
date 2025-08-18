@@ -448,10 +448,10 @@ export function DealPipeline() {
                       </div>
 
                       {/* Desktop Deals Container */}
-                      <DroppableStage
-                        stageId={stage.id}
-                        deals={stageDeals}
-                      />
+                        <DroppableStage
+                          stageId={stage.id}
+                          deals={stageDeals}
+                        />
                     </div>
                   );
                 })}
