@@ -13,6 +13,10 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🔧 Edge Function: crm-add-from-search called')
+    console.log('🔧 Edge Function: Method:', req.method)
+    console.log('🔧 Edge Function: Headers:', Object.fromEntries(req.headers.entries()))
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -24,9 +28,10 @@ serve(async (req) => {
     )
 
     // Get the authenticated user
+    console.log('🔧 Edge Function: Getting authenticated user')
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
     if (authError || !user) {
-      console.error('Authentication error:', authError)
+      console.error('🔧 Edge Function: Authentication error:', authError)
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
         { 
@@ -35,10 +40,16 @@ serve(async (req) => {
         }
       )
     }
+    
+    console.log('🔧 Edge Function: User authenticated:', user.id)
 
-    const { company, pipeline_name, stage_name, source } = await req.json()
+    const requestBody = await req.json()
+    console.log('🔧 Edge Function: Request body:', requestBody)
+    
+    const { company, pipeline_name, stage_name, source } = requestBody
     
     if (!company || !company.name) {
+      console.log('🔧 Edge Function: Missing company data')
       return new Response(
         JSON.stringify({ success: false, error: 'Company data is required' }),
         { 
@@ -48,33 +59,39 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Adding company "${company.name}" to CRM pipeline "${pipeline_name}" from ${source}`)
+    console.log(`🔧 Edge Function: Adding company "${company.name}" to CRM pipeline "${pipeline_name}" from ${source}`)
 
     // Get or create the specified pipeline
+    console.log('🔧 Edge Function: Looking for pipeline:', pipeline_name || 'Search Intelligence')
     let pipeline
-    const { data: existingPipeline } = await supabaseClient
+    const { data: existingPipeline, error: pipelineLookupError } = await supabaseClient
       .from('pipelines')
       .select('id, name')
       .eq('name', pipeline_name || 'Search Intelligence')
       .eq('org_id', user.id)
       .single()
 
+    console.log('🔧 Edge Function: Pipeline lookup result:', { existingPipeline, pipelineLookupError })
+
     if (existingPipeline) {
       pipeline = existingPipeline
+      console.log('🔧 Edge Function: Using existing pipeline:', pipeline)
     } else {
       // Create pipeline if it doesn't exist
+      console.log('🔧 Edge Function: Creating new pipeline')
       const { data: newPipeline, error: pipelineError } = await supabaseClient
         .from('pipelines')
         .insert({
           name: pipeline_name || 'Search Intelligence',
-          org_id: user.id,
-          created_at: new Date().toISOString()
+          org_id: user.id
         })
         .select()
         .single()
 
+      console.log('🔧 Edge Function: Pipeline creation result:', { newPipeline, pipelineError })
+
       if (pipelineError) {
-        console.error('Pipeline creation error:', pipelineError)
+        console.error('🔧 Edge Function: Pipeline creation error:', pipelineError)
         return new Response(
           JSON.stringify({ success: false, error: 'Failed to create pipeline' }),
           { 
@@ -87,6 +104,7 @@ serve(async (req) => {
       pipeline = newPipeline
 
       // Create default stages for the new pipeline
+      console.log('🔧 Edge Function: Creating default stages for new pipeline')
       const defaultStages = [
         { name: 'Prospect Identified', stage_order: 1 },
         { name: 'Initial Contact', stage_order: 2 },
@@ -103,21 +121,41 @@ serve(async (req) => {
         org_id: user.id
       }))
 
-      await supabaseClient
+      console.log('🔧 Edge Function: Inserting stages:', stagesToInsert)
+
+      const { error: stagesError } = await supabaseClient
         .from('pipeline_stages')
         .insert(stagesToInsert)
+
+      console.log('🔧 Edge Function: Stages creation result:', { stagesError })
+
+      if (stagesError) {
+        console.error('🔧 Edge Function: Failed to create stages:', stagesError)
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to create pipeline stages' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
     }
 
     // Get the appropriate stage
-    const { data: stages } = await supabaseClient
+    console.log('🔧 Edge Function: Looking for stages in pipeline:', pipeline.id)
+    const { data: stages, error: stagesError } = await supabaseClient
       .from('pipeline_stages')
       .select('*')
       .eq('pipeline_id', pipeline.id)
       .order('stage_order')
 
+    console.log('🔧 Edge Function: Stages lookup result:', { stages, stagesError })
+
     const targetStage = stages?.find(s => s.name === (stage_name || 'Prospect Identified')) || stages?.[0]
+    console.log('🔧 Edge Function: Target stage:', targetStage)
 
     if (!targetStage) {
+      console.log('🔧 Edge Function: No target stage found')
       return new Response(
         JSON.stringify({ success: false, error: 'No stages found in pipeline' }),
         { 

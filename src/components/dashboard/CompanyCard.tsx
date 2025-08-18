@@ -47,27 +47,39 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
     try {
       setIsAdding(true)
       
+      console.log('🔧 CompanyCard: Starting Add to CRM process')
+      console.log('🔧 CompanyCard: Company data:', company)
+      console.log('🔧 CompanyCard: Source:', source)
+      
+      const requestPayload = {
+        company: company,
+        pipeline_name: 'Search Intelligence',
+        stage_name: 'Prospect Identified',
+        source: source
+      }
+      
+      console.log('🔧 CompanyCard: Request payload:', requestPayload)
+      
       const response = await makeRequest('/crm-add-from-search', {
         method: 'POST',
-        body: {
-          company: company,
-          pipeline_name: 'Search Intelligence',
-          stage_name: 'Prospect Identified',
-          source: source
-        }
+        body: requestPayload
       })
 
+      console.log('🔧 CompanyCard: API Response:', response)
+
       if (response?.success) {
+        console.log('🔧 CompanyCard: Success - adding to pipeline')
         toast({
           title: "Success",
           description: response.message || `${company.name} added to CRM pipeline`
         })
         onAddedToCRM?.()
       } else {
+        console.log('🔧 CompanyCard: Error response:', response)
         throw new Error(response?.error || 'Failed to add to CRM')
       }
     } catch (error) {
-      console.error('Failed to add to CRM:', error)
+      console.error('🔧 CompanyCard: Exception caught:', error)
       toast({
         title: "Error",
         description: "Failed to add company to CRM",

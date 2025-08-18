@@ -155,16 +155,24 @@ export const useAPI = () => {
   } = {}) => {
     const { method = 'GET', body, params } = options;
     
+    console.log('🔧 useAPI: Making request to:', endpoint)
+    console.log('🔧 useAPI: Method:', method)
+    console.log('🔧 useAPI: Body:', body)
+    console.log('🔧 useAPI: Params:', params)
+    
     try {
       const { data, error } = await supabase.functions.invoke(endpoint.replace('/', ''), {
         body: method === 'GET' ? undefined : body,
         method: method as any
       });
 
+      console.log('🔧 useAPI: Supabase response data:', data)
+      console.log('🔧 useAPI: Supabase response error:', error)
+
       if (error) throw error;
       return data;
     } catch (err: any) {
-      console.error(`API request failed for ${endpoint}:`, err);
+      console.error(`🔧 useAPI: API request failed for ${endpoint}:`, err);
       throw err;
     }
   }, []);

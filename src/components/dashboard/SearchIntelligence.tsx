@@ -167,44 +167,53 @@ export function SearchIntelligence() {
 
   const handleAddToCRM = async (company: any) => {
     try {
+      console.log('🔧 SearchIntelligence: Starting Add to CRM process')
+      console.log('🔧 SearchIntelligence: Company data:', company)
+      
       // Show immediate feedback
       toast({
         title: "Adding to Pipeline",
         description: `Adding ${company.name} to CRM pipeline...`
       })
       
+      const requestPayload = {
+        company: {
+          name: company.name,
+          location: company.location,
+          industry: company.industry,
+          trade_volume_usd: company.trade_volume_usd,
+          contact: {
+            name: `Contact at ${company.name}`,
+            title: "Trade Manager", 
+            email: `contact@${company.name.toLowerCase().replace(/\s+/g, '')}.com`
+          }
+        },
+        pipeline_name: 'Search Intelligence',
+        stage_name: 'Prospect Identified',
+        source: 'search'
+      }
+      
+      console.log('🔧 SearchIntelligence: Request payload:', requestPayload)
+      
       const response = await makeRequest('/crm-add-from-search', {
         method: 'POST',
-        body: {
-          company: {
-            name: company.name,
-            location: company.location,
-            industry: company.industry,
-            trade_volume_usd: company.trade_volume_usd,
-            contact: {
-              name: `Contact at ${company.name}`,
-              title: "Trade Manager", 
-              email: `contact@${company.name.toLowerCase().replace(/\s+/g, '')}.com`
-            }
-          },
-          pipeline_name: 'Search Intelligence',
-          stage_name: 'Prospect Identified',
-          source: 'search'
-        }
+        body: requestPayload
       })
 
-      console.log('API Response:', response)
+      console.log('🔧 SearchIntelligence: API Response:', response)
       
       if (response?.success) {
+        console.log('🔧 SearchIntelligence: Success - adding to pipeline')
         toast({
           title: "Success",
           description: response.message || `${company.name} added to CRM pipeline`
         })
       } else {
+        console.log('🔧 SearchIntelligence: Error response:', response)
         throw new Error(response?.error || 'Failed to add to CRM')
       }
     } catch (error) {
-      console.error('Error adding to CRM:', error)
+      console.error('🔧 SearchIntelligence: Exception caught:', error)
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to add company to CRM",
