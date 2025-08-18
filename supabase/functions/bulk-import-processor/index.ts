@@ -658,16 +658,20 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
         .eq('id', importId);
     }
     
-    // Ensure we have REQUIRED company data
-    let companyName = record.shipper_name || record.consignee_name;
-    
-    // If no company name, try to extract from other fields
-    if (!companyName) {
-      if (record.commodity_description && record.origin_country) {
-        companyName = `${record.origin_country} Trader - ${record.commodity_description.substring(0, 30)}`;
-      } else {
-        companyName = `Unknown Company ${i + 1}`;
-      }
+    // Use existing company name or derive from available fields
+    const candidateCompany = record.unified_company_name || 
+      record.shipper_name || 
+      record.consignee_name || 
+      record.inferred_company_name ||
+      record.company_name;
+
+    // Only set if we have a valid company name, otherwise let triggers handle it
+    let companyName;
+    if (candidateCompany && isValidCompanyName(candidateCompany)) {
+      companyName = candidateCompany;
+    } else {
+      // Set to invalid name to trigger enrichment queue
+      companyName = candidateCompany || null;
     }
     
     // Ensure we have REQUIRED mode
@@ -717,6 +721,28 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
   
   console.log(`Enrichment completed: ${enrichedRecords.length} records enriched with guaranteed required fields`);
   return enrichedRecords;
+}
+
+// Company name validation function
+function isValidCompanyName(companyName: string): boolean {
+  if (!companyName || typeof companyName !== 'string') return false;
+  
+  const trimmed = companyName.trim();
+  if (trimmed.length <= 2) return false;
+  
+  // Check for generic/placeholder names
+  const invalidNames = [
+    'unknown', 'unknown company', 'n/a', 'na', 'none', 'null', 
+    'not available', 'tbd', 'pending', 'missing', 'unnamed',
+    'company', 'business', 'corp', 'inc', 'ltd'
+  ];
+  
+  if (invalidNames.includes(trimmed.toLowerCase())) return false;
+  
+  // Must contain at least one letter
+  if (!/[a-zA-Z]/.test(trimmed)) return false;
+  
+  return true;
 }
 
 function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {

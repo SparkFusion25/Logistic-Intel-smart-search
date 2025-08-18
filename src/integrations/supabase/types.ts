@@ -2680,35 +2680,56 @@ export type Database = {
       }
       pending_enrichment_records: {
         Row: {
+          attempt_count: number | null
           attempts: number
           company_name: string
           created_at: string
+          error_message: string | null
           id: string
+          invalid_company_name: string | null
           last_attempt_at: string | null
           org_id: string
           original_data: Json
+          original_record_id: string | null
+          resolved_at: string | null
+          resolved_company_name: string | null
+          source_table: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          attempt_count?: number | null
           attempts?: number
           company_name: string
           created_at?: string
+          error_message?: string | null
           id?: string
+          invalid_company_name?: string | null
           last_attempt_at?: string | null
           org_id: string
           original_data?: Json
+          original_record_id?: string | null
+          resolved_at?: string | null
+          resolved_company_name?: string | null
+          source_table?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          attempt_count?: number | null
           attempts?: number
           company_name?: string
           created_at?: string
+          error_message?: string | null
           id?: string
+          invalid_company_name?: string | null
           last_attempt_at?: string | null
           org_id?: string
           original_data?: Json
+          original_record_id?: string | null
+          resolved_at?: string | null
+          resolved_company_name?: string | null
+          source_table?: string | null
           status?: string
           updated_at?: string
         }
@@ -3847,6 +3868,10 @@ export type Database = {
       show_trgm: {
         Args: { "": string }
         Returns: string[]
+      }
+      standardize_company_name: {
+        Args: { company_name: string }
+        Returns: string
       }
       upsert_crm_contact: {
         Args: {

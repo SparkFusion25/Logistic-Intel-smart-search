@@ -229,14 +229,14 @@ serve(async (req) => {
 
     for (const record of pendingRecords) {
       try {
-        console.log(`Processing record ${record.id} with company: "${record.invalid_company_name}"`);
+        console.log(`Processing record ${record.id} with company: "${record.company_name}" from table: ${record.source_table}`);
 
         // Try to find a valid company name match using AI-enhanced strategies
         let validCompanyName = null;
         const originalData = record.original_data || {};
 
         // Strategy 1: Exact match in unified_shipments with cleaned name
-        const cleanedName = record.invalid_company_name?.trim().toLowerCase();
+        const cleanedName = record.company_name?.trim().toLowerCase();
         if (cleanedName && cleanedName.length > 2) {
           const { data: exactMatch } = await supabaseClient
             .from('unified_shipments')
@@ -273,17 +273,41 @@ serve(async (req) => {
         }
 
         if (validCompanyName) {
-          // Update the original record in unified_shipments
-          const { error: updateError } = await supabaseClient
-            .from('unified_shipments')
-            .update({ 
-              unified_company_name: validCompanyName,
-              inferred_company_name: validCompanyName 
-            })
-            .eq('id', record.original_record_id);
+          // Update the original record in the source table
+          let updateError = null;
+          
+          if (record.source_table === 'unified_shipments') {
+            const { error } = await supabaseClient
+              .from('unified_shipments')
+              .update({ 
+                unified_company_name: validCompanyName,
+                inferred_company_name: validCompanyName 
+              })
+              .eq('id', record.original_record_id);
+            updateError = error;
+          } else if (record.source_table === 'trade_shipments') {
+            const { error } = await supabaseClient
+              .from('trade_shipments')
+              .update({ inferred_company_name: validCompanyName })
+              .eq('id', record.original_record_id);
+            updateError = error;
+          } else if (record.source_table === 'ocean_shipments') {
+            const { error } = await supabaseClient
+              .from('ocean_shipments')
+              .update({ company_name: validCompanyName })
+              .eq('id', record.original_record_id);
+            updateError = error;
+          } else if (record.source_table === 'airfreight_shipments') {
+            // For airfreight, update shipper_name if that was the invalid field
+            const { error } = await supabaseClient
+              .from('airfreight_shipments')
+              .update({ shipper_name: validCompanyName })
+              .eq('id', record.original_record_id);
+            updateError = error;
+          }
 
           if (updateError) {
-            console.error(`Error updating original record ${record.original_record_id}:`, updateError);
+            console.error(`Error updating original record ${record.original_record_id} in ${record.source_table}:`, updateError);
             
             // Mark as failed
             await supabaseClient
@@ -295,7 +319,7 @@ serve(async (req) => {
               })
               .eq('id', record.id);
           } else {
-            console.log(`Successfully updated record ${record.original_record_id} with company: ${validCompanyName}`);
+            console.log(`Successfully updated record ${record.original_record_id} in ${record.source_table} with company: ${validCompanyName}`);
             
             // Mark as resolved
             await supabaseClient
@@ -310,7 +334,7 @@ serve(async (req) => {
             matched++;
           }
         } else {
-          console.log(`No match found for: "${record.invalid_company_name}"`);
+          console.log(`No match found for: "${record.company_name}" from ${record.source_table}`);
           
           // Update last attempt time
           await supabaseClient
