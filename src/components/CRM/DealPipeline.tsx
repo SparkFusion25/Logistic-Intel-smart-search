@@ -74,10 +74,15 @@ export function DealPipeline() {
         method: 'GET'
       });
 
-      if (response?.pipelines?.length > 0) {
-        setPipelines(response.pipelines);
+      if (response?.data?.length > 0) {
+        // Transform the API response to match our expected format
+        const transformedPipelines = response.data.map((pipeline: any) => ({
+          ...pipeline,
+          stages: pipeline.pipeline_stages || []
+        }));
+        setPipelines(transformedPipelines);
         // Always use Default pipeline
-        const defaultPipeline = response.pipelines.find((p: Pipeline) => p.name === 'Default') || response.pipelines[0];
+        const defaultPipeline = transformedPipelines.find((p: Pipeline) => p.name === 'Default') || transformedPipelines[0];
         setSelectedPipeline(defaultPipeline.id);
       }
     } catch (error) {
