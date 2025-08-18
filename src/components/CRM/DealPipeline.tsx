@@ -151,68 +151,97 @@ export function DealPipeline() {
     const { active, over } = event;
     setDraggedDeal(null);
 
-    console.log('🔧 Drag End:', { 
+    console.log('🔧 Drag End EVENT:', { 
       activeId: active.id, 
       overId: over?.id, 
       overData: over?.data?.current,
-      activeData: active.data.current
+      activeData: active.data.current,
+      overRect: over?.rect
     });
 
     if (!over) {
-      console.log('🔧 No drop target');
+      console.log('🔧 No drop target found');
       return;
     }
 
+    // Get stage IDs - try multiple sources
     const activeStageId = active.data.current?.stageId;
-    const overStageId = over.data.current?.stageId || over.id;
-
-    console.log('🔧 Stage IDs:', { activeStageId, overStageId });
-
-    if (activeStageId === overStageId) {
-      console.log('🔧 Same stage, no move needed');
-      return;
+    let overStageId = over.data.current?.stageId || over.id;
+    
+    // If over.id is a deal ID, get the stage from the over data
+    if (over.data.current?.type === 'deal') {
+      overStageId = over.data.current?.stageId;
     }
+
+    console.log('🔧 RESOLVED Stage IDs:', { 
+      activeStageId, 
+      overStageId,
+      overType: over.data.current?.type,
+      overIsStage: over.data.current?.type === 'stage'
+    });
 
     if (!activeStageId || !overStageId) {
-      console.log('🔧 Missing stage IDs');
+      console.log('🔧 Missing stage IDs - cannot proceed');
       return;
     }
 
-    // Optimistic update first
-    const dealToMove = dealsByStage[activeStageId]?.find(d => d.id === active.id);
-    if (dealToMove) {
-      console.log('🔧 Moving deal:', dealToMove.title, 'from', activeStageId, 'to', overStageId);
-      const newDealsByStage = { ...dealsByStage };
-      
-      // Remove from old stage
-      newDealsByStage[activeStageId] = newDealsByStage[activeStageId].filter(d => d.id !== active.id);
-      
-      // Add to new stage
-      if (!newDealsByStage[overStageId]) newDealsByStage[overStageId] = [];
-      newDealsByStage[overStageId] = [...newDealsByStage[overStageId], { ...dealToMove, stage_id: overStageId }];
-      
-      setDealsByStage(newDealsByStage);
+    if (activeStageId === overStageId) {
+      console.log('🔧 Same stage detected, no move needed');
+      return;
+    }
 
-      try {
-        console.log('🔧 Making API call to move deal');
-        const response = await makeRequest('/crm-deal-move', {
-          method: 'POST',
-          body: {
-            deal_id: active.id,
-            stage_id: overStageId
-          }
-        });
-        console.log('🔧 Deal moved successfully:', response);
-      } catch (error) {
-        console.error('🔧 Failed to move deal:', error);
-        // Revert on error
-        toast({
-          title: "Error",
-          description: "Failed to move deal. Please try again.",
-          variant: "destructive"
-        });
-        loadDeals(selectedPipeline);
-      }
+    // Find the deal to move
+    const dealToMove = dealsByStage[activeStageId]?.find(d => d.id === active.id);
+    if (!dealToMove) {
+      console.log('🔧 Deal not found in source stage');
+      return;
+    }
+
+    console.log('🔧 MOVING DEAL:', {
+      deal: dealToMove.title,
+      from: activeStageId,
+      to: overStageId
+    });
+
+    // Optimistic update
+    const newDealsByStage = { ...dealsByStage };
+    
+    // Remove from source stage
+    newDealsByStage[activeStageId] = newDealsByStage[activeStageId].filter(d => d.id !== active.id);
+    
+    // Add to target stage
+    if (!newDealsByStage[overStageId]) {
+      newDealsByStage[overStageId] = [];
+    }
+    newDealsByStage[overStageId] = [...newDealsByStage[overStageId], { ...dealToMove, stage_id: overStageId }];
+    
+    setDealsByStage(newDealsByStage);
+
+    // Show success toast immediately
+    toast({
+      title: "Deal Moved",
+      description: `"${dealToMove.title}" moved successfully`,
+    });
+
+    try {
+      console.log('🔧 Making API call to persist move');
+      const response = await makeRequest('/crm-deal-move', {
+        method: 'POST',
+        body: {
+          deal_id: active.id,
+          stage_id: overStageId
+        }
+      });
+      console.log('🔧 API response:', response);
+    } catch (error) {
+      console.error('🔧 API call failed:', error);
+      // Revert optimistic update on error
+      toast({
+        title: "Error",
+        description: "Failed to save deal move. Reverting changes.",
+        variant: "destructive"
+      });
+      loadDeals(selectedPipeline);
     }
   };
 
