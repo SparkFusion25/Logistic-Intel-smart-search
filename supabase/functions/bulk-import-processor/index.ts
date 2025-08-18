@@ -175,20 +175,35 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         })
         .eq('id', import_id);
 
-      // Process records in batches - adjust based on file size
-      const batchSize = Math.min(records.length > 10000 ? 50 : 100, 500);
+      // Process records in smaller, more manageable batches
+      const batchSize = 500; // Fixed batch size as requested
       let processedCount = 0;
       let duplicateCount = 0;
       let errorCount = 0;
 
-      // Update status to deduplicating
+      console.log(`Starting batch processing: ${records.length} total records in batches of ${batchSize}`);
+
+      // Update status to processing_batches
       await supabaseClient
         .from('bulk_imports')
-        .update({ status: 'deduplicating', updated_at: new Date().toISOString() })
+        .update({ 
+          status: 'processing_batches', 
+          processing_metadata: { 
+            batch_size: batchSize,
+            total_batches: Math.ceil(records.length / batchSize),
+            current_batch: 0
+          },
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', import_id);
 
-      // Process in batches
+      // Process in fixed batches of 500
       for (let i = 0; i < records.length; i += batchSize) {
+        const batchNumber = Math.floor(i / batchSize) + 1;
+        const totalBatches = Math.ceil(records.length / batchSize);
+        
+        console.log(`Processing batch ${batchNumber}/${totalBatches} (records ${i + 1}-${Math.min(i + batchSize, records.length)})`);
+        
         const batch = records.slice(i, i + batchSize);
         const processedBatch = await processBatch(batch, import_id, userId, supabaseClient);
         
@@ -196,17 +211,30 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         duplicateCount += processedBatch.duplicates;
         errorCount += processedBatch.errors;
 
-        // Update progress
+        // Update detailed progress after each batch
         await supabaseClient
           .from('bulk_imports')
           .update({
             processed_records: processedCount,
             duplicate_records: duplicateCount,
             error_records: errorCount,
+            processing_metadata: { 
+              batch_size: batchSize,
+              total_batches: totalBatches,
+              current_batch: batchNumber,
+              progress_percentage: Math.round((processedCount / records.length) * 100)
+            },
             updated_at: new Date().toISOString()
           })
           .eq('id', import_id);
+
+        console.log(`Batch ${batchNumber} completed: ${processedBatch.processed} processed, ${processedBatch.duplicates} duplicates, ${processedBatch.errors} errors`);
+        
+        // Small delay between batches to prevent overwhelming the database
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
+
+      console.log(`Batch processing completed: ${processedCount}/${records.length} records processed successfully`);
 
       // Queue enrichment for companies in background
       EdgeRuntime.waitUntil(queueEnrichment(import_id, supabaseClient));
