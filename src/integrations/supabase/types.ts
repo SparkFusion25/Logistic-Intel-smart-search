@@ -2678,6 +2678,56 @@ export type Database = {
           },
         ]
       }
+      pending_enrichment_records: {
+        Row: {
+          company_hints: string[] | null
+          created_at: string
+          enrichment_status: string
+          error_details: Json | null
+          file_type: string
+          id: string
+          import_id: string | null
+          missing_fields: string[] | null
+          org_id: string
+          processed_at: string | null
+          raw_data: Json
+        }
+        Insert: {
+          company_hints?: string[] | null
+          created_at?: string
+          enrichment_status?: string
+          error_details?: Json | null
+          file_type: string
+          id?: string
+          import_id?: string | null
+          missing_fields?: string[] | null
+          org_id: string
+          processed_at?: string | null
+          raw_data: Json
+        }
+        Update: {
+          company_hints?: string[] | null
+          created_at?: string
+          enrichment_status?: string
+          error_details?: Json | null
+          file_type?: string
+          id?: string
+          import_id?: string | null
+          missing_fields?: string[] | null
+          org_id?: string
+          processed_at?: string | null
+          raw_data?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_enrichment_records_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "bulk_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personas: {
         Row: {
           created_at: string | null
@@ -3713,6 +3763,10 @@ export type Database = {
       }
       is_trial_expired: {
         Args: { p_uid: string }
+        Returns: boolean
+      }
+      is_valid_company_name: {
+        Args: { company_name: string }
         Returns: boolean
       }
       li_norm: {
