@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -264,28 +264,28 @@ export function ComprehensiveDealDrawer({
   if (!dealData) return null;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[95vw] sm:w-[800px] lg:w-[900px] max-w-[95vw] overflow-y-auto p-0">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full lg:max-w-[1200px] lg:h-[90vh] overflow-hidden p-0 flex flex-col">
         {/* Header Section */}
-        <div className="sticky top-0 bg-white border-b z-10 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <DialogHeader className="sticky top-0 bg-white border-b z-10 p-4 lg:p-6 shrink-0">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Avatar className="w-16 h-16">
+              <Avatar className="w-12 h-12 lg:w-16 lg:h-16">
                 <AvatarImage src={dealData.company?.logo} />
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-bold">
                   {dealData.company_name.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <SheetTitle className="text-2xl text-slate-900 mb-1">{dealData.company_name}</SheetTitle>
-                <div className="flex items-center gap-3">
+                <DialogTitle className="text-xl lg:text-2xl text-slate-900 mb-1">{dealData.company_name}</DialogTitle>
+                <div className="flex flex-wrap items-center gap-2 lg:gap-3">
                   <p className="text-sm text-slate-600">{dealData.company?.industry}</p>
                   <Badge variant="outline" className="text-xs">{dealData.stage}</Badge>
                   <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
                     {dealData.source}
                   </Badge>
-                  <span className="text-2xl font-bold text-green-600">${dealData.value_usd?.toLocaleString()}</span>
-                  <span className="text-sm text-slate-500">{dealData.probability}% probability</span>
+                  <span className="text-lg lg:text-2xl font-bold text-green-600">${dealData.value_usd?.toLocaleString()}</span>
+                  <span className="text-xs lg:text-sm text-slate-500">{dealData.probability}% probability</span>
                 </div>
               </div>
             </div>
@@ -300,41 +300,41 @@ export function ComprehensiveDealDrawer({
           </div>
           
           {/* Action Buttons */}
-          <div className="flex gap-3">
-            <Button onClick={handleSendEmail} className="flex-1 sm:flex-none">
-              <Mail className="w-4 h-4 mr-2" />
+          <div className="grid grid-cols-2 lg:flex gap-2 lg:gap-3 mt-4">
+            <Button onClick={handleSendEmail} className="text-xs lg:text-sm">
+              <Mail className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
               Send Email
             </Button>
-            <Button variant="outline" onClick={handleEnrichContact} disabled={isEnriching} className="flex-1 sm:flex-none">
-              <Sparkles className="w-4 h-4 mr-2" />
+            <Button variant="outline" onClick={handleEnrichContact} disabled={isEnriching} className="text-xs lg:text-sm">
+              <Sparkles className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
               {isEnriching ? "Enriching..." : "Enrich"}
             </Button>
-            <Button variant="outline" onClick={handleScheduleMeeting} className="flex-1 sm:flex-none">
-              <Calendar className="w-4 h-4 mr-2" />
+            <Button variant="outline" onClick={handleScheduleMeeting} className="text-xs lg:text-sm">
+              <Calendar className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
               Schedule Call
             </Button>
-            <Button variant="outline" onClick={handleCreateProposal} className="flex-1 sm:flex-none">
-              <FileText className="w-4 h-4 mr-2" />
+            <Button variant="outline" onClick={handleCreateProposal} className="text-xs lg:text-sm">
+              <FileText className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
               Send Proposal
             </Button>
           </div>
-        </div>
+        </DialogHeader>
 
         {/* Content Section */}
-        <div className="p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-6">
-              <TabsTrigger value="overview" className="text-xs lg:text-sm">Overview</TabsTrigger>
-              <TabsTrigger value="contact" className="text-xs lg:text-sm">Contact</TabsTrigger>
-              <TabsTrigger value="shipments" className="text-xs lg:text-sm">Shipments</TabsTrigger>
-              <TabsTrigger value="activities" className="text-xs lg:text-sm">Activities</TabsTrigger>
-              <TabsTrigger value="email" className="text-xs lg:text-sm">Email</TabsTrigger>
-              <TabsTrigger value="ai-assistant" className="text-xs lg:text-sm">AI Assistant</TabsTrigger>
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-4 lg:mb-6 shrink-0">
+              <TabsTrigger value="overview" className="text-xs lg:text-sm px-2 lg:px-4">Overview</TabsTrigger>
+              <TabsTrigger value="contact" className="text-xs lg:text-sm px-2 lg:px-4">Contact</TabsTrigger>
+              <TabsTrigger value="shipments" className="text-xs lg:text-sm px-2 lg:px-4">Shipments</TabsTrigger>
+              <TabsTrigger value="activities" className="text-xs lg:text-sm px-2 lg:px-4">Activities</TabsTrigger>
+              <TabsTrigger value="email" className="text-xs lg:text-sm px-2 lg:px-4">Email</TabsTrigger>
+              <TabsTrigger value="ai-assistant" className="text-xs lg:text-sm px-2 lg:px-4">AI Assistant</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-6 mt-0">
+            <TabsContent value="overview" className="space-y-4 lg:space-y-6 mt-0 flex-1 overflow-y-auto">
               {/* Key Metrics Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 lg:gap-4">
                 <Card className="border-l-4 border-l-green-500">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -798,7 +798,7 @@ export function ComprehensiveDealDrawer({
           </TabsContent>
           </Tabs>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
