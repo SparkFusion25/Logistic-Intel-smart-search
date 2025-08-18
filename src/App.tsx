@@ -19,13 +19,12 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 // Dashboard Pages
 import SearchIntelligencePage from "./pages/dashboard/SearchIntelligencePage";
 import CRMPage from "./pages/dashboard/CRMPage";
-
 import DealsPage from "./pages/dashboard/DealsPage";
 import EmailPage from "./pages/dashboard/EmailPage";
 import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
-import CampaignsPage from "./pages/dashboard/CampaignsPage"
-import CampaignBuilderPage from "./pages/dashboard/CampaignBuilderPage"
-import CampaignTemplatesPage from "./pages/dashboard/CampaignTemplatesPage"
+import CampaignsPage from "./pages/dashboard/CampaignsPage";
+import CampaignBuilderPage from "./pages/dashboard/CampaignBuilderPage";
+import CampaignTemplatesPage from "./pages/dashboard/CampaignTemplatesPage";
 import CampaignAnalyticsPage from "./pages/dashboard/CampaignAnalyticsPage";
 import FollowUpsPage from "./pages/dashboard/FollowUpsPage";
 import WidgetsPage from "./pages/dashboard/WidgetsPage";
@@ -34,6 +33,7 @@ import TariffCalculatorPage from "./pages/dashboard/TariffCalculatorPage";
 import BenchmarkPage from "./pages/dashboard/BenchmarkPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import CompanyProfilePage from "./pages/dashboard/CompanyProfilePage";
+import { AdminDashboard as AdminDashboardPage } from "./pages/dashboard/AdminDashboard";
 import OAuthCallback from "./pages/OAuthCallback";
 
 const queryClient = new QueryClient();
@@ -58,7 +58,7 @@ const App = () => (
             <Route path="/dashboard/search" element={<ProtectedRoute><SearchIntelligencePage /></ProtectedRoute>} />
             <Route path="/dashboard/crm" element={<ProtectedRoute><CRMPage /></ProtectedRoute>} />
             
-            <Route path="/dashboard/deals" element={<ProtectedRoute><DealsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/admin" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
             <Route path="/dashboard/email" element={<ProtectedRoute><EmailPage /></ProtectedRoute>} />
             <Route path="/dashboard/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
             <Route path="/dashboard/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />

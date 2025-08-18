@@ -23,8 +23,6 @@ const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
   { title: "Search", url: "/dashboard/search", icon: Search },
   { title: "CRM", url: "/dashboard/crm", icon: Contact },
-  
-  { title: "Deals", url: "/dashboard/deals", icon: Target },
   { title: "Email", url: "/dashboard/email", icon: Mail },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
   { title: "Campaigns", url: "/dashboard/campaigns", icon: Flag },
@@ -35,7 +33,7 @@ const navigationItems = [
   { title: "Quote Generator", url: "/dashboard/widgets/quote", icon: FileText },
   { title: "Tariff Calculator", url: "/dashboard/widgets/tariff", icon: Calculator },
   { title: "Benchmark", url: "/dashboard/widgets/benchmark", icon: Activity },
-  { title: "Admin", url: "/admin", icon: ShieldCheck },
+  { title: "Admin", url: "/dashboard/admin", icon: ShieldCheck },
 ]
 
 const bottomItems = [

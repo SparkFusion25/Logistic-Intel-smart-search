@@ -203,37 +203,37 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
                 </h1>
                 <p className="text-slate-600 mt-1 text-sm sm:text-base">Manage and filter your sales deals</p>
               </div>
-              {/* Summary Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:flex sm:items-center sm:space-x-4">
-                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
-                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Deals</span>
-                  <div className="text-xl sm:text-2xl font-bold text-slate-800">{filteredDeals.length}</div>
-                </div>
-                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
-                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Value</span>
-                  <div className="text-xl sm:text-2xl font-bold text-green-600">
-                    {formatCurrency(filteredDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0))}
-                  </div>
-                </div>
-                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Building2 className="w-3 h-3 text-blue-500" />
-                    <span className="text-slate-500 font-medium text-xs sm:text-sm">Companies</span>
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold text-blue-600">
-                    {new Set(filteredDeals.map(d => d.company_name).filter(Boolean)).size}
-                  </div>
-                </div>
-                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
-                  <div className="flex items-center gap-1 mb-1">
-                    <User className="w-3 h-3 text-purple-500" />
-                    <span className="text-slate-500 font-medium text-xs sm:text-sm">Contacts</span>
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold text-purple-600">
-                    {new Set(filteredDeals.map(d => d.contact_name).filter(Boolean)).size}
-                  </div>
+            {/* Summary Cards - Mobile Optimized */}
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200 min-w-[140px] flex-1 sm:flex-none">
+                <span className="text-slate-500 font-medium text-xs sm:text-sm">Deals</span>
+                <div className="text-xl sm:text-2xl font-bold text-slate-800">{filteredDeals.length}</div>
+              </div>
+              <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200 min-w-[140px] flex-1 sm:flex-none">
+                <span className="text-slate-500 font-medium text-xs sm:text-sm">Value</span>
+                <div className="text-xl sm:text-2xl font-bold text-green-600">
+                  {formatCurrency(filteredDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0))}
                 </div>
               </div>
+              <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200 min-w-[140px] flex-1 sm:flex-none">
+                <div className="flex items-center gap-1 mb-1">
+                  <Building2 className="w-3 h-3 text-blue-500" />
+                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Companies</span>
+                </div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-600">
+                  {new Set(filteredDeals.map(d => d.company_name).filter(Boolean)).size}
+                </div>
+              </div>
+              <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200 min-w-[140px] flex-1 sm:flex-none">
+                <div className="flex items-center gap-1 mb-1">
+                  <User className="w-3 h-3 text-purple-500" />
+                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Contacts</span>
+                </div>
+                <div className="text-xl sm:text-2xl font-bold text-purple-600">
+                  {new Set(filteredDeals.map(d => d.contact_name).filter(Boolean)).size}
+                </div>
+              </div>
+            </div>
             </div>
             
             {/* Export Button */}
@@ -375,11 +375,11 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
                   <TableHeader>
                     <TableRow className="border-slate-200">
                       <TableHead className="text-slate-700 font-semibold">Deal</TableHead>
-                      <TableHead className="text-slate-700 font-semibold">Company</TableHead>
+                      <TableHead className="text-slate-700 font-semibold hidden sm:table-cell">Company</TableHead>
                       <TableHead className="text-slate-700 font-semibold">Stage</TableHead>
-                      <TableHead className="text-right text-slate-700 font-semibold">Value</TableHead>
-                      <TableHead className="text-slate-700 font-semibold">Close Date</TableHead>
-                      <TableHead className="text-slate-700 font-semibold">Contact</TableHead>
+                      <TableHead className="text-right text-slate-700 font-semibold hidden md:table-cell">Value</TableHead>
+                      <TableHead className="text-slate-700 font-semibold hidden lg:table-cell">Close Date</TableHead>
+                      <TableHead className="text-slate-700 font-semibold hidden lg:table-cell">Contact</TableHead>
                       <TableHead className="text-right text-slate-700 font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
