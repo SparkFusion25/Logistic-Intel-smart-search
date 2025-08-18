@@ -265,9 +265,10 @@ export function ComprehensiveDealDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[95vw] sm:w-[900px] max-w-[900px] overflow-y-auto">
-        <SheetHeader className="pb-6 border-b">
-          <div className="flex items-center justify-between">
+      <SheetContent className="w-[95vw] sm:w-[800px] lg:w-[900px] max-w-[95vw] overflow-y-auto p-0">
+        {/* Header Section */}
+        <div className="sticky top-0 bg-white border-b z-10 p-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <Avatar className="w-16 h-16">
                 <AvatarImage src={dealData.company?.logo} />
@@ -276,94 +277,90 @@ export function ComprehensiveDealDrawer({
                 </AvatarFallback>
               </Avatar>
               <div>
-                <SheetTitle className="text-2xl text-slate-900">{dealData.company_name}</SheetTitle>
-                <div className="flex items-center gap-3 mt-1">
+                <SheetTitle className="text-2xl text-slate-900 mb-1">{dealData.company_name}</SheetTitle>
+                <div className="flex items-center gap-3">
                   <p className="text-sm text-slate-600">{dealData.company?.industry}</p>
                   <Badge variant="outline" className="text-xs">{dealData.stage}</Badge>
                   <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
                     {dealData.source}
                   </Badge>
+                  <span className="text-2xl font-bold text-green-600">${dealData.value_usd?.toLocaleString()}</span>
+                  <span className="text-sm text-slate-500">{dealData.probability}% probability</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-2xl font-bold text-green-600">
-                  ${dealData.value_usd?.toLocaleString()}
-                </p>
-                <p className="text-sm text-slate-500">{dealData.probability}% probability</p>
-              </div>
-              <Button
-                variant={isEditing ? "default" : "outline"}
-                size="sm"
-                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-              >
-                {isEditing ? <Save className="w-4 h-4 mr-1" /> : <Edit3 className="w-4 h-4 mr-1" />}
-                {isEditing ? "Save" : "Edit Deal"}
-              </Button>
-            </div>
+            <Button
+              variant={isEditing ? "default" : "outline"}
+              size="sm"
+              onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+            >
+              {isEditing ? <Save className="w-4 h-4 mr-1" /> : <Edit3 className="w-4 h-4 mr-1" />}
+              {isEditing ? "Save" : "Edit Deal"}
+            </Button>
           </div>
-        </SheetHeader>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <Button onClick={handleSendEmail} className="flex-1 sm:flex-none">
+              <Mail className="w-4 h-4 mr-2" />
+              Send Email
+            </Button>
+            <Button variant="outline" onClick={handleEnrichContact} disabled={isEnriching} className="flex-1 sm:flex-none">
+              <Sparkles className="w-4 h-4 mr-2" />
+              {isEnriching ? "Enriching..." : "Enrich"}
+            </Button>
+            <Button variant="outline" onClick={handleScheduleMeeting} className="flex-1 sm:flex-none">
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule Call
+            </Button>
+            <Button variant="outline" onClick={handleCreateProposal} className="flex-1 sm:flex-none">
+              <FileText className="w-4 h-4 mr-2" />
+              Send Proposal
+            </Button>
+          </div>
+        </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="contact">Contact</TabsTrigger>
-            <TabsTrigger value="shipments">Shipments</TabsTrigger>
-            <TabsTrigger value="activities">Activities</TabsTrigger>
-            <TabsTrigger value="email">Email</TabsTrigger>
-            <TabsTrigger value="ai-assistant">AI Assistant</TabsTrigger>
-          </TabsList>
+        {/* Content Section */}
+        <div className="p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-6">
+              <TabsTrigger value="overview" className="text-xs lg:text-sm">Overview</TabsTrigger>
+              <TabsTrigger value="contact" className="text-xs lg:text-sm">Contact</TabsTrigger>
+              <TabsTrigger value="shipments" className="text-xs lg:text-sm">Shipments</TabsTrigger>
+              <TabsTrigger value="activities" className="text-xs lg:text-sm">Activities</TabsTrigger>
+              <TabsTrigger value="email" className="text-xs lg:text-sm">Email</TabsTrigger>
+              <TabsTrigger value="ai-assistant" className="text-xs lg:text-sm">AI Assistant</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            {/* Quick Actions Bar */}
-            <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-              <Button onClick={handleSendEmail} className="flex-1">
-                <Mail className="w-4 h-4 mr-2" />
-                Send Email
-              </Button>
-              <Button variant="outline" onClick={handleEnrichContact} disabled={isEnriching}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                {isEnriching ? "Enriching..." : "Enrich"}
-              </Button>
-              <Button variant="outline" onClick={handleScheduleMeeting}>
-                <Calendar className="w-4 h-4 mr-2" />
-                Schedule
-              </Button>
-              <Button variant="outline" onClick={handleCreateProposal}>
-                <FileText className="w-4 h-4 mr-2" />
-                Proposal
-              </Button>
-            </div>
-
-            {/* Key Metrics Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="border-l-4 border-l-green-500">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <DollarSign className="w-5 h-5 text-green-600" />
-                    <span className="font-medium text-sm">Deal Value</span>
-                  </div>
-                  {isEditing ? (
-                    <div className="space-y-2">
-                      <Input
-                        type="number"
-                        value={editedData.value_usd || ""}
-                        onChange={(e) => setEditedData({...editedData, value_usd: Number(e.target.value)})}
-                        placeholder="Deal value"
-                        className="text-lg font-bold"
-                      />
-                      <Select value={editedData.currency || "USD"} onValueChange={(value) => setEditedData({...editedData, currency: value})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="GBP">GBP</SelectItem>
-                        </SelectContent>
-                      </Select>
+            <TabsContent value="overview" className="space-y-6 mt-0">
+              {/* Key Metrics Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="border-l-4 border-l-green-500">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <DollarSign className="w-5 h-5 text-green-600" />
+                      <span className="font-medium text-sm">Deal Value</span>
                     </div>
+                    {isEditing ? (
+                      <div className="space-y-2">
+                        <Input
+                          type="number"
+                          value={editedData.value_usd || ""}
+                          onChange={(e) => setEditedData({...editedData, value_usd: Number(e.target.value)})}
+                          placeholder="Deal value"
+                          className="text-lg font-bold"
+                        />
+                        <Select value={editedData.currency || "USD"} onValueChange={(value) => setEditedData({...editedData, currency: value})}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border shadow-lg z-50">
+                            <SelectItem value="USD">USD</SelectItem>
+                            <SelectItem value="EUR">EUR</SelectItem>
+                            <SelectItem value="GBP">GBP</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                   ) : (
                     <div className="text-2xl font-bold text-green-700">
                       ${dealData.value_usd?.toLocaleString()}
@@ -421,26 +418,26 @@ export function ComprehensiveDealDrawer({
               </Card>
             </div>
 
-            {/* Company Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5" />
-                  Company Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  <div>
-                    <Label className="text-sm font-medium text-slate-600">Website</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Globe className="w-4 h-4 text-slate-400" />
-                      <a href={dealData.company?.website} target="_blank" rel="noopener noreferrer" 
-                         className="text-blue-600 hover:underline text-sm">
-                        {dealData.company?.website}
-                      </a>
+              {/* Company Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="w-5 h-5" />
+                    Company Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-slate-600">Website</Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Globe className="w-4 h-4 text-slate-400" />
+                        <a href={dealData.company?.website} target="_blank" rel="noopener noreferrer" 
+                           className="text-blue-600 hover:underline text-sm break-all">
+                          {dealData.company?.website}
+                        </a>
+                      </div>
                     </div>
-                  </div>
                   <div>
                     <Label className="text-sm font-medium text-slate-600">Employees</Label>
                     <div className="flex items-center gap-2 mt-1">
@@ -799,7 +796,8 @@ export function ComprehensiveDealDrawer({
           <TabsContent value="ai-assistant" className="space-y-6">
             <SalesAssistant subjectType="deal" subjectId={dealId} />
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
       </SheetContent>
     </Sheet>
   );
