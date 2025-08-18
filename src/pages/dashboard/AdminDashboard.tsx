@@ -31,6 +31,7 @@ import {
   Image as ImageIcon,
   Save
 } from "lucide-react";
+import { BulkImportManager } from "@/components/admin/BulkImportManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -302,6 +303,9 @@ export function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Bulk Import Manager */}
+            <BulkImportManager />
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* System Alerts */}
               <Card className="border-slate-200 shadow-sm bg-white/70 backdrop-blur-sm">

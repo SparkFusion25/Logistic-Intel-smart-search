@@ -669,6 +669,63 @@ export type Database = {
         }
         Relationships: []
       }
+      bulk_imports: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          duplicate_records: number | null
+          error_details: Json | null
+          error_records: number | null
+          file_path: string | null
+          file_size: number | null
+          file_type: string
+          filename: string
+          id: string
+          org_id: string
+          processed_records: number | null
+          processing_metadata: Json | null
+          status: string
+          total_records: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          duplicate_records?: number | null
+          error_details?: Json | null
+          error_records?: number | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type: string
+          filename: string
+          id?: string
+          org_id: string
+          processed_records?: number | null
+          processing_metadata?: Json | null
+          status?: string
+          total_records?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          duplicate_records?: number | null
+          error_details?: Json | null
+          error_records?: number | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string
+          filename?: string
+          id?: string
+          org_id?: string
+          processed_records?: number | null
+          processing_metadata?: Json | null
+          status?: string
+          total_records?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       campaign_contacts: {
         Row: {
           campaign_id: string
@@ -1073,6 +1130,78 @@ export type Database = {
           org_id?: string
           revenue?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      company_trade_profiles: {
+        Row: {
+          activity_frequency: string | null
+          avg_shipment_value_usd: number | null
+          commodity_categories: string[] | null
+          company_name: string
+          contact_enrichment_status: string | null
+          created_at: string | null
+          enriched_company_data: Json | null
+          first_shipment_date: string | null
+          id: string
+          last_shipment_date: string | null
+          org_id: string
+          top_commodities: string[] | null
+          top_destination_countries: string[] | null
+          top_origin_countries: string[] | null
+          top_ports: string[] | null
+          total_air_shipments: number | null
+          total_ground_shipments: number | null
+          total_ocean_shipments: number | null
+          total_shipments: number | null
+          total_trade_value_usd: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          activity_frequency?: string | null
+          avg_shipment_value_usd?: number | null
+          commodity_categories?: string[] | null
+          company_name: string
+          contact_enrichment_status?: string | null
+          created_at?: string | null
+          enriched_company_data?: Json | null
+          first_shipment_date?: string | null
+          id?: string
+          last_shipment_date?: string | null
+          org_id: string
+          top_commodities?: string[] | null
+          top_destination_countries?: string[] | null
+          top_origin_countries?: string[] | null
+          top_ports?: string[] | null
+          total_air_shipments?: number | null
+          total_ground_shipments?: number | null
+          total_ocean_shipments?: number | null
+          total_shipments?: number | null
+          total_trade_value_usd?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          activity_frequency?: string | null
+          avg_shipment_value_usd?: number | null
+          commodity_categories?: string[] | null
+          company_name?: string
+          contact_enrichment_status?: string | null
+          created_at?: string | null
+          enriched_company_data?: Json | null
+          first_shipment_date?: string | null
+          id?: string
+          last_shipment_date?: string | null
+          org_id?: string
+          top_commodities?: string[] | null
+          top_destination_countries?: string[] | null
+          top_origin_countries?: string[] | null
+          top_ports?: string[] | null
+          total_air_shipments?: number | null
+          total_ground_shipments?: number | null
+          total_ocean_shipments?: number | null
+          total_shipments?: number | null
+          total_trade_value_usd?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1687,6 +1816,59 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      file_processing_queue: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          import_id: string | null
+          max_retries: number | null
+          org_id: string
+          processing_step: string
+          retry_count: number | null
+          scheduled_at: string | null
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          import_id?: string | null
+          max_retries?: number | null
+          org_id: string
+          processing_step: string
+          retry_count?: number | null
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          import_id?: string | null
+          max_retries?: number | null
+          org_id?: string
+          processing_step?: string
+          retry_count?: number | null
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_processing_queue_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "bulk_imports"
             referencedColumns: ["id"]
           },
         ]
@@ -3067,6 +3249,110 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      trade_shipments: {
+        Row: {
+          arrival_date: string | null
+          commodity_code: string | null
+          commodity_description: string | null
+          confidence_score: number | null
+          consignee_name: string | null
+          created_at: string | null
+          destination_city: string | null
+          destination_country: string | null
+          destination_port: string | null
+          destination_state: string | null
+          enriched_data: Json | null
+          enrichment_status: string | null
+          freight_charges: number | null
+          id: string
+          import_id: string | null
+          inferred_company_name: string | null
+          org_id: string
+          origin_city: string | null
+          origin_country: string | null
+          origin_port: string | null
+          origin_state: string | null
+          shipment_date: string | null
+          shipment_reference: string | null
+          shipper_name: string | null
+          transportation_mode: string | null
+          updated_at: string | null
+          value_usd: number | null
+          vessel_name: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          arrival_date?: string | null
+          commodity_code?: string | null
+          commodity_description?: string | null
+          confidence_score?: number | null
+          consignee_name?: string | null
+          created_at?: string | null
+          destination_city?: string | null
+          destination_country?: string | null
+          destination_port?: string | null
+          destination_state?: string | null
+          enriched_data?: Json | null
+          enrichment_status?: string | null
+          freight_charges?: number | null
+          id?: string
+          import_id?: string | null
+          inferred_company_name?: string | null
+          org_id: string
+          origin_city?: string | null
+          origin_country?: string | null
+          origin_port?: string | null
+          origin_state?: string | null
+          shipment_date?: string | null
+          shipment_reference?: string | null
+          shipper_name?: string | null
+          transportation_mode?: string | null
+          updated_at?: string | null
+          value_usd?: number | null
+          vessel_name?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          arrival_date?: string | null
+          commodity_code?: string | null
+          commodity_description?: string | null
+          confidence_score?: number | null
+          consignee_name?: string | null
+          created_at?: string | null
+          destination_city?: string | null
+          destination_country?: string | null
+          destination_port?: string | null
+          destination_state?: string | null
+          enriched_data?: Json | null
+          enrichment_status?: string | null
+          freight_charges?: number | null
+          id?: string
+          import_id?: string | null
+          inferred_company_name?: string | null
+          org_id?: string
+          origin_city?: string | null
+          origin_country?: string | null
+          origin_port?: string | null
+          origin_state?: string | null
+          shipment_date?: string | null
+          shipment_reference?: string | null
+          shipper_name?: string | null
+          transportation_mode?: string | null
+          updated_at?: string | null
+          value_usd?: number | null
+          vessel_name?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_shipments_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "bulk_imports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       unified_shipments: {
         Row: {
