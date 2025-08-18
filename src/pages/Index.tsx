@@ -70,15 +70,15 @@ const Index = () => {
               />
             </div>
             <div className="hidden lg:flex items-center space-x-8">
-              <Link to="/solutions" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Solutions</Link>
-              <Link to="/who-we-serve" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Who We Serve</Link>
-              <Link to="/resources" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Resources</Link>
-              <Link to="/blog" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Blog</Link>
-              <Link to="/company" className="text-text-on-dark/80 hover:text-text-on-dark font-medium">Company</Link>
-              <Link to="/login" className="text-text-on-dark/80 hover:text-text-on-dark hover:bg-surface/10 px-4 py-2 rounded-md transition-colors">
+              <Link to="/solutions" className="text-gray-700 hover:text-gray-900 font-medium">Solutions</Link>
+              <Link to="/who-we-serve" className="text-gray-700 hover:text-gray-900 font-medium">Who We Serve</Link>
+              <Link to="/resources" className="text-gray-700 hover:text-gray-900 font-medium">Resources</Link>
+              <Link to="/blog" className="text-gray-700 hover:text-gray-900 font-medium">Blog</Link>
+              <Link to="/company" className="text-gray-700 hover:text-gray-900 font-medium">Company</Link>
+              <Link to="/login" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-md transition-colors">
                 Login
               </Link>
-              <Link to="/dashboard" className="cta-gradient text-white px-6 py-2 rounded-md hover:scale-105 transition-transform">
+              <Link to="/dashboard" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
                 Get Demo
               </Link>
             </div>
