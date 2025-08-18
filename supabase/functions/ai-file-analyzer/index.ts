@@ -126,16 +126,15 @@ Respond in valid JSON format only:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-2025-08-07',
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert data analyst. Always respond with valid JSON only.' 
+            content: 'You are an expert trade data analyst with deep knowledge of Panjiva, BTS, and Census data sources. Always respond with valid JSON only.' 
           },
           { role: 'user', content: analysisPrompt }
         ],
-        max_tokens: 2000,
-        temperature: 0.3
+        max_completion_tokens: 2000
       }),
     });
 
