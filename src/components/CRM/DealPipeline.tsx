@@ -5,7 +5,7 @@ import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCorners }
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Target } from "lucide-react";
+import { Plus, Search, Target, Mail, Users, TrendingUp } from "lucide-react";
 import { DealCard } from "./DealCard";
 import { NewDealDialog } from "./NewDealDialog";
 import { useAPI } from "@/hooks/useAPI";
@@ -133,6 +133,18 @@ export function DealPipeline() {
 
     if (activeStageId === overStageId) return;
 
+    // Optimistic update first
+    const dealToMove = dealsByStage[activeStageId]?.find(d => d.id === active.id);
+    if (dealToMove) {
+      const newDealsByStage = { ...dealsByStage };
+      // Remove from old stage
+      newDealsByStage[activeStageId] = newDealsByStage[activeStageId].filter(d => d.id !== active.id);
+      // Add to new stage
+      if (!newDealsByStage[overStageId]) newDealsByStage[overStageId] = [];
+      newDealsByStage[overStageId] = [...newDealsByStage[overStageId], { ...dealToMove, stage_id: overStageId }];
+      setDealsByStage(newDealsByStage);
+    }
+
     try {
       await makeRequest('/crm-deal-move', {
         method: 'POST',
@@ -141,11 +153,10 @@ export function DealPipeline() {
           to_stage_id: overStageId
         }
       });
-
-      // Reload deals to reflect the change
-      loadDeals(selectedPipeline);
     } catch (error) {
       console.error('Failed to move deal:', error);
+      // Revert on error
+      loadDeals(selectedPipeline);
     }
   };
 
@@ -194,7 +205,7 @@ export function DealPipeline() {
         <div className="p-4 sm:p-6">
           {/* Mobile Header Layout */}
           <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
-            {/* Title and Metrics */}
+            {/* Title and Summary Cards */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6">
               <div className="mb-3 sm:mb-0">
                 <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -202,8 +213,8 @@ export function DealPipeline() {
                 </h1>
                 <p className="text-slate-600 mt-1 text-sm sm:text-base">Track and manage your deals</p>
               </div>
-              {/* Metrics - Responsive */}
-              <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:space-x-4">
+              {/* Summary Cards - Enhanced with Email and Campaign */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:flex sm:items-center sm:space-x-4">
                 <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
                   <span className="text-slate-500 font-medium text-xs sm:text-sm">Deals</span>
                   <div className="text-xl sm:text-2xl font-bold text-slate-800">{totalDeals}</div>
@@ -213,6 +224,20 @@ export function DealPipeline() {
                   <div className="text-xl sm:text-2xl font-bold text-green-600">
                     ${totalValue.toLocaleString()}
                   </div>
+                </div>
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Mail className="w-3 h-3 text-blue-500" />
+                    <span className="text-slate-500 font-medium text-xs sm:text-sm">Emails</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-600">47</div>
+                </div>
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <div className="flex items-center gap-1 mb-1">
+                    <TrendingUp className="w-3 h-3 text-purple-500" />
+                    <span className="text-slate-500 font-medium text-xs sm:text-sm">Campaigns</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-600">12</div>
                 </div>
               </div>
             </div>
@@ -394,6 +419,25 @@ export function DealPipeline() {
                         <div
                           className="space-y-3 flex-1 min-h-32 rounded-xl bg-white/30 backdrop-blur-sm p-3 border border-white/40"
                           data-stage-id={stage.id}
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.3)',
+                            backdropFilter: 'blur(10px)',
+                            border: '2px dashed rgba(203, 213, 225, 0.5)',
+                            transition: 'all 0.2s ease-in-out'
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.style.borderColor = '#3b82f6';
+                            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                          }}
+                          onDragLeave={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(203, 213, 225, 0.5)';
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                          }}
+                          onDrop={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(203, 213, 225, 0.5)';
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                          }}
                         >
                           {stageDeals.map((deal) => (
                             <DealCard

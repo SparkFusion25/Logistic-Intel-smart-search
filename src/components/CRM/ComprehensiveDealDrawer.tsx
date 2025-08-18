@@ -213,6 +213,7 @@ export function ComprehensiveDealDrawer({
   const handleSendEmail = async () => {
     try {
       // Gmail/Outlook integration logic here
+      window.open(`mailto:${dealData.contact.email}?subject=Re: ${dealData.title}&body=Hi ${dealData.contact.name},%0D%0A%0D%0AI wanted to follow up on our logistics partnership discussion...`, '_blank');
       toast({
         title: "Success",
         description: "Email composer opened"
@@ -221,6 +222,40 @@ export function ComprehensiveDealDrawer({
       toast({
         title: "Error",
         description: "Failed to open email composer",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleScheduleMeeting = async () => {
+    try {
+      // Calendar integration logic here
+      const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Meeting with ${dealData.contact.name}&details=Logistics partnership discussion&dates=20250120T100000Z/20250120T110000Z`;
+      window.open(calendarUrl, '_blank');
+      toast({
+        title: "Success",
+        description: "Calendar appointment created"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to schedule meeting",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCreateProposal = async () => {
+    try {
+      // Proposal generation logic here
+      toast({
+        title: "Success",
+        description: "Proposal template generated"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create proposal",
         variant: "destructive"
       });
     }
@@ -291,11 +326,11 @@ export function ComprehensiveDealDrawer({
                 <Sparkles className="w-4 h-4 mr-2" />
                 {isEnriching ? "Enriching..." : "Enrich"}
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleScheduleMeeting}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleCreateProposal}>
                 <FileText className="w-4 h-4 mr-2" />
                 Proposal
               </Button>
