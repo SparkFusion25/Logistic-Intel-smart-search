@@ -377,11 +377,11 @@ function parseCSV(text: string): TradeRecord[] {
   const lines = text.split('\n').filter(line => line.trim());
   if (lines.length === 0) return [];
 
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  const headers = lines[0].split(',').map(h => h.trim().replace(/\"/g, ''));
   const records: TradeRecord[] = [];
 
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+    const values = lines[i].split(',').map(v => v.trim().replace(/\"/g, ''));
     const record: TradeRecord = {};
 
     headers.forEach((header, index) => {
@@ -437,556 +437,357 @@ function parseXML(text: string): TradeRecord[] {
   return records;
 }
 
-function validateFileStructure(records: TradeRecord[], metadata: any): { isValid: boolean; errors: string[] } {
-  const errors: string[] = [];
+// Enrichment and validation functions
+async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, importId: string): Promise<TradeRecord[]> {
+  console.log(`Starting enrichment for ${records.length} records`);
   
-  // Define field requirements for different file types
-  const fieldRequirements = {
-    air: {
-      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'importer', 'exporter'],
-      locationFields: ['origin_airport', 'dest_airport', 'origin_port', 'destination_port', 'origin_country', 'destination_country'],
-      requiredAny: [
-        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' },
-        { fields: ['origin_airport', 'dest_airport', 'origin_port', 'destination_port'], name: 'location information' }
-      ]
-    },
-    ocean: {
-      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'importer', 'exporter'],
-      locationFields: ['port_of_lading', 'port_of_unlading', 'origin_port', 'destination_port', 'origin_country', 'destination_country'],
-      requiredAny: [
-        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' },
-        { fields: ['port_of_lading', 'port_of_unlading', 'origin_port', 'destination_port'], name: 'port information' }
-      ]
-    },
-    domestic: {
-      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'carrier_name'],
-      locationFields: ['origin_city', 'destination_city', 'origin_state', 'destination_state', 'origin_zip', 'destination_zip'],
-      requiredAny: [
-        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' },
-        { fields: ['origin_city', 'destination_city', 'origin_state', 'destination_state'], name: 'location information' }
-      ]
-    },
-    default: {
-      companyFields: ['shipper_name', 'consignee_name', 'company_name', 'importer', 'exporter'],
-      locationFields: ['origin_country', 'destination_country', 'origin_port', 'destination_port'],
-      requiredAny: [
-        { fields: ['shipper_name', 'consignee_name', 'company_name'], name: 'company information' }
-      ]
-    }
-  };
-
-  // Detect file type based on field presence and metadata
-  let fileType = 'default';
-  const sampleRecord = records[0] || {};
-  const fieldNames = Object.keys(sampleRecord);
+  const enrichedRecords = [];
+  const batchSize = 100;
   
-  if (fieldNames.some(f => ['origin_airport', 'dest_airport', 'carrier'].includes(f)) || 
-      metadata?.filename?.toLowerCase().includes('air')) {
-    fileType = 'air';
-  } else if (fieldNames.some(f => ['port_of_lading', 'port_of_unlading', 'vessel'].includes(f)) ||
-             metadata?.filename?.toLowerCase().includes('ocean')) {
-    fileType = 'ocean';
-  } else if (fieldNames.some(f => ['origin_zip', 'destination_zip'].includes(f)) ||
-             metadata?.filename?.toLowerCase().includes('domestic')) {
-    fileType = 'domestic';
-  }
-
-  const requirements = fieldRequirements[fileType];
-  
-  // Check if at least some records meet the requirements
-  let validRecordCount = 0;
-  
-  for (const record of records.slice(0, 10)) { // Check first 10 records
-    let recordValid = true;
+  for (let i = 0; i < records.length; i += batchSize) {
+    const batch = records.slice(i, i + batchSize);
+    const enrichedBatch = await Promise.all(
+      batch.map(async (record) => {
+        // Enrich company names
+        const enrichedRecord = { ...record };
+        
+        // Try to get a valid company name from available fields
+        const companyFields = [
+          record.unified_company_name,
+          record.shipper_name,
+          record.consignee_name,
+          record.company_name
+        ].filter(Boolean);
+        
+        let validCompanyName = null;
+        for (const field of companyFields) {
+          if (await isValidCompanyName(field, supabaseClient)) {
+            validCompanyName = field;
+            break;
+          }
+        }
+        
+        // If no valid company name found, queue for enrichment and use null
+        if (!validCompanyName && companyFields.length > 0) {
+          // Queue the invalid company for enrichment
+          const invalidCompany = companyFields[0];
+          console.log(`Queueing invalid company for enrichment: ${invalidCompany}`);
+          
+          try {
+            await supabaseClient
+              .from('pending_enrichment_records')
+              .insert({
+                org_id: record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55',
+                company_name: invalidCompany,
+                invalid_company_name: invalidCompany,
+                source_table: 'unified_shipments',
+                original_data: record,
+                status: 'pending'
+              });
+          } catch (error) {
+            console.error('Error queueing company for enrichment:', error);
+          }
+          
+          enrichedRecord.unified_company_name = null; // Will be enriched later
+        } else {
+          enrichedRecord.unified_company_name = validCompanyName;
+        }
+        
+        // Ensure required fields are present
+        enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
+        enrichedRecord.hs_code = record.hs_code || 'UNKNOWN';
+        enrichedRecord.mode = record.mode || 'unknown';
+        
+        return enrichedRecord;
+      })
+    );
     
-    for (const requirement of requirements.requiredAny) {
-      const hasRequiredField = requirement.fields.some(field => 
-        record[field] && record[field].toString().trim().length > 0
-      );
-      
-      if (!hasRequiredField) {
-        recordValid = false;
-        break;
-      }
-    }
+    enrichedRecords.push(...enrichedBatch);
     
-    if (recordValid) {
-      validRecordCount++;
-    }
+    // Update progress
+    const progressPercent = Math.round(((i + batchSize) / records.length) * 100);
+    await supabaseClient
+      .from('bulk_imports')
+      .update({ 
+        processing_metadata: { 
+          phase: 'enriching',
+          progress: progressPercent,
+          current_batch: Math.floor(i / batchSize) + 1,
+          total_batches: Math.ceil(records.length / batchSize)
+        }
+      })
+      .eq('id', importId);
   }
   
-  if (validRecordCount === 0) {
-    const reqDescriptions = requirements.requiredAny.map(req => req.name).join(' and ');
-    errors.push(`No records found with required ${reqDescriptions} for ${fileType} file type`);
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
+  console.log(`Enrichment completed for ${enrichedRecords.length} records`);
+  return enrichedRecords;
 }
 
-function normalizeFieldName(field: string): string | null {
-  const normalized = field.toLowerCase().replace(/[^a-z0-9]/g, '');
+// Helper function to validate company names using database function
+async function isValidCompanyName(companyName: string, supabaseClient: any): Promise<boolean> {
+  if (!companyName || companyName.trim().length === 0) {
+    return false;
+  }
   
-  // Map common field variations to our schema - Enhanced for Panjiva data
-  const fieldMap: Record<string, string> = {
-    // Company names - Panjiva specific
+  try {
+    const { data, error } = await supabaseClient.rpc('is_valid_company_name', {
+      company_name: companyName
+    });
+    
+    if (error) {
+      console.error('Error validating company name:', error);
+      return false;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Exception validating company name:', error);
+    return false;
+  }
+}
+
+function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
+  console.log(`Starting validation for ${records.length} enriched records`);
+  
+  const validRecords = records.filter(record => {
+    // Basic validation requirements
+    if (!record.org_id) return false;
+    if (!record.hs_code || record.hs_code === 'UNKNOWN') return false;
+    if (!record.mode || record.mode === 'unknown') return false;
+    
+    // At least one location field should be present
+    const hasLocation = record.origin_country || record.destination_country || 
+                       record.origin_city || record.destination_city ||
+                       record.port_of_loading || record.port_of_discharge;
+    
+    return hasLocation;
+  });
+  
+  console.log(`Validation completed: ${validRecords.length}/${records.length} records passed`);
+  return validRecords;
+}
+
+// Helper functions
+function normalizeFieldName(field: string): string | null {
+  if (!field) return null;
+  
+  const normalized = field.toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^\\w]/g, '')
+    .trim();
+
+  // Map various field name variations to standardized names
+  const fieldMappings: { [key: string]: string } = {
+    // Company fields
     'shipper': 'shipper_name',
     'shippername': 'shipper_name',
-    'shipperfullname': 'shipper_name',
+    'shipper_company': 'shipper_name',
     'consignee': 'consignee_name',
     'consigneename': 'consignee_name',
-    'consigneefullname': 'consignee_name',
-    'company': 'shipper_name',
-    'companyname': 'shipper_name',
+    'consignee_company': 'consignee_name',
+    'company': 'company_name',
+    'companyname': 'company_name',
     'importer': 'consignee_name',
     'exporter': 'shipper_name',
     
-    // Locations - Panjiva specific
+    // Location fields
+    'origin': 'origin_country',
     'origincountry': 'origin_country',
-    'originstate': 'origin_state', 
-    'origincity': 'origin_city',
-    'originport': 'origin_port',
+    'destination': 'destination_country',
     'destinationcountry': 'destination_country',
-    'destinationstate': 'destination_state',
+    'origincity': 'origin_city',
     'destinationcity': 'destination_city',
-    'destinationport': 'destination_port',
-    'destcountry': 'destination_country',
-    'deststate': 'destination_state',
-    'destcity': 'destination_city',
-    'portofloading': 'origin_port',
-    'portofdischarge': 'destination_port',
-    'portofunlading': 'destination_port',
-    'city': 'destination_city',
-    'state': 'destination_state',
-    'country': 'destination_country',
+    'originstate': 'origin_state',
+    'destinationstate': 'destination_state',
+    'originzip': 'origin_zip',
+    'destinationzip': 'destination_zip',
     
-    // Commodity - Panjiva specific
+    // Port fields
+    'portofloading': 'port_of_loading',
+    'portofunlading': 'port_of_discharge',
+    'portofdischarge': 'port_of_discharge',
+    'loadport': 'port_of_loading',
+    'dischargeport': 'port_of_discharge',
+    'originport': 'port_of_loading',
+    'destinationport': 'port_of_discharge',
+    
+    // Date fields
+    'date': 'shipment_date',
+    'shipmentdate': 'shipment_date',
+    'shippingdate': 'shipment_date',
+    'arrivaldate': 'arrival_date',
+    'departuredate': 'departure_date',
+    
+    // Commodity fields
     'commodity': 'commodity_description',
-    'commoditycode': 'commodity_code',
     'commoditydescription': 'commodity_description',
-    'hscode': 'commodity_code',
-    'sctgcode': 'commodity_code',
     'description': 'commodity_description',
-    'productdescription': 'commodity_description',
+    'goods': 'commodity_description',
     'goodsdescription': 'commodity_description',
+    'hscode': 'hs_code',
+    'commoditycode': 'commodity_code',
     
-    // Transport - Panjiva specific
-    'mode': 'transportation_mode',
-    'transportmode': 'transportation_mode',
-    'transportationmode': 'transportation_mode',
+    // Value and weight fields
+    'value': 'value_usd',
+    'valueusd': 'value_usd',
+    'amount': 'value_usd',
+    'weight': 'weight_kg',
+    'weightkg': 'weight_kg',
+    'quantity': 'quantity',
+    'qty': 'quantity',
+    
+    // Transport fields
+    'mode': 'mode',
+    'transportmode': 'mode',
+    'transportationmode': 'mode',
     'vessel': 'vessel_name',
     'vesselname': 'vessel_name',
-    'carriercode': 'carrier_code',
     'carrier': 'carrier_name',
     'carriername': 'carrier_name',
     
-    // Values - Panjiva specific
-    'weight': 'weight_kg',
-    'weightkg': 'weight_kg',
-    'grossweight': 'weight_kg',
-    'netweight': 'weight_kg',
-    'quantity': 'quantity',
-    'qty': 'quantity',
-    'value': 'value_usd',
-    'valueusd': 'value_usd',
-    'totalvalue': 'value_usd',
-    'customsvalue': 'value_usd',
-    'declaredvalue': 'value_usd',
-    
-    // Dates - Panjiva specific
-    'shipmentdate': 'shipment_date',
-    'arrivaldate': 'arrival_date',
-    'date': 'shipment_date',
-    'departuredate': 'shipment_date',
-    'etd': 'shipment_date',
-    'eta': 'arrival_date',
-    
-    // Panjiva specific fields
-    'billofladingno': 'bol_number',
-    'billofladingnumber': 'bol_number',
-    'bolnumber': 'bol_number',
-    'masterbolnumber': 'bol_number',
-    'consigneeid': 'consignee_id',
-    'shipperid': 'shipper_id',
+    // Container fields
+    'container': 'container_number',
+    'containernumber': 'container_number',
     'containercount': 'container_count',
-    'teu': 'container_count'
+    'containers': 'container_count',
+    
+    // Bill of lading
+    'bol': 'bol_number',
+    'bolnumber': 'bol_number',
+    'billofladingno': 'bol_number'
   };
 
-  return fieldMap[normalized] || null;
+  return fieldMappings[normalized] || normalized;
 }
 
 function parseValue(value: string, fieldName: string): any {
   if (!value || value.trim() === '') return null;
-
+  
+  const trimmed = value.trim();
+  
   // Parse numeric fields
-  if (fieldName.includes('weight') || fieldName.includes('value')) {
-    const numeric = parseFloat(value.replace(/[^0-9.-]/g, ''));
-    return isNaN(numeric) ? null : numeric;
+  if (['weight_kg', 'value_usd', 'quantity', 'container_count'].includes(fieldName)) {
+    const numericValue = parseFloat(trimmed.replace(/[,$]/g, ''));
+    return isNaN(numericValue) ? null : numericValue;
   }
-
-  // Parse dates
-  if (fieldName.includes('date')) {
-    const date = new Date(value);
+  
+  // Parse date fields
+  if (['shipment_date', 'arrival_date', 'departure_date'].includes(fieldName)) {
+    const date = new Date(trimmed);
     return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
   }
-
-  return value.trim();
+  
+  // Clean and return string fields
+  return trimmed;
 }
 
-// **NEW: ENRICHMENT FUNCTIONS**
-async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, importId: string): Promise<TradeRecord[]> {
-  console.log(`Starting enrichment for ${records.length} records`);
-  const enrichedRecords: TradeRecord[] = [];
-  
-  for (let i = 0; i < records.length; i++) {
-    const record = records[i];
-    
-    // Progress tracking
-    if (i % 100 === 0) {
-      console.log(`Enrichment progress: ${i}/${records.length} records processed`);
-      await supabaseClient
-        .from('bulk_imports')
-        .update({
-          processing_metadata: { 
-            enrichment_progress: Math.round((i / records.length) * 100),
-            enrichment_phase: 'enriching_companies'
-          },
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', importId);
-    }
-    
-    // Use existing company name or derive from available fields
-    const candidateCompany = record.unified_company_name || 
-      record.shipper_name || 
-      record.consignee_name || 
-      record.inferred_company_name ||
-      record.company_name;
-
-    // Only set if we have a valid company name, otherwise let triggers handle it
-    let companyName;
-    if (candidateCompany && isValidCompanyName(candidateCompany)) {
-      companyName = candidateCompany;
-    } else {
-      // Set to invalid name to trigger enrichment queue
-      companyName = candidateCompany || null;
-    }
-    
-    // Ensure we have REQUIRED mode
-    let mode = 'ocean'; // Default
-    if (record.transportation_mode) {
-      mode = record.transportation_mode.toLowerCase().includes('air') ? 'air' : 'ocean';
-    }
-    
-    // Create enriched record with GUARANTEED required fields across ALL tables
-    const enrichedRecord: TradeRecord = {
-      ...record,
-      // REQUIRED FIELDS FOR ALL TABLES (Non-nullable columns)
-      shipper_name: record.shipper_name || companyName,
-      consignee_name: record.consignee_name || companyName,
-      transportation_mode: mode, // CRITICAL: mode is NOT NULL in unified_shipments
-      
-      // AIRFREIGHT INSIGHTS REQUIREMENTS (country_origin, country_destination, hs_code, trade_month NOT NULL)
-      country_origin: record.origin_country || record.shipper_country || 'Unknown',
-      country_destination: record.destination_country || record.consignee_country || 'Unknown', 
-      hs_code: record.commodity_code || record.hs_code || '0000000000',
-      trade_month: record.shipment_date || record.arrival_date || new Date().toISOString().split('T')[0],
-      
-      // AIRFREIGHT SHIPMENTS REQUIREMENTS (hs_code NOT NULL)
-      commodity_code: record.commodity_code || record.hs_code || '0000000000',
-      
-      // CENSUS TRADE DATA REQUIREMENTS (commodity, country, state, transport_mode, year, month NOT NULL)
-      commodity: record.commodity_description || record.description || 'Unknown Commodity',
-      country: record.destination_country || record.consignee_country || 'Unknown',
-      state: record.destination_state || record.consignee_state || 'Unknown',
-      transport_mode: mode,
-      year: new Date(record.shipment_date || record.arrival_date || Date.now()).getFullYear(),
-      month: new Date(record.shipment_date || record.arrival_date || Date.now()).getMonth() + 1,
-      
-      // COMPANY FIELDS NORMALIZATION
-      origin_country: record.origin_country || record.shipper_country || 'Unknown',
-      destination_country: record.destination_country || record.consignee_country || 'Unknown',
-      destination_city: record.destination_city || record.destination_country || 'Unknown',
-      destination_state: record.destination_state || record.consignee_state || 'Unknown',
-      
-      // DATE NORMALIZATION (ensure dates are properly formatted)
-      shipment_date: record.shipment_date || record.arrival_date || null,
-      arrival_date: record.arrival_date || record.shipment_date || null
-    };
-    
-    enrichedRecords.push(enrichedRecord);
-  }
-  
-  console.log(`Enrichment completed: ${enrichedRecords.length} records enriched with guaranteed required fields`);
-  return enrichedRecords;
-}
-
-// Company name validation function
-function isValidCompanyName(companyName: string): boolean {
-  if (!companyName || typeof companyName !== 'string') return false;
-  
-  const trimmed = companyName.trim();
-  if (trimmed.length <= 2) return false;
-  
-  // Check for generic/placeholder names
-  const invalidNames = [
-    'unknown', 'unknown company', 'n/a', 'na', 'none', 'null', 
-    'not available', 'tbd', 'pending', 'missing', 'unnamed',
-    'company', 'business', 'corp', 'inc', 'ltd'
-  ];
-  
-  if (invalidNames.includes(trimmed.toLowerCase())) return false;
-  
-  // Must contain at least one letter
-  if (!/[a-zA-Z]/.test(trimmed)) return false;
-  
-  return true;
-}
-
-function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
-  console.log(`Validating ${records.length} enriched records against ALL table requirements`);
-  const validRecords: TradeRecord[] = [];
-  
-  for (const record of records) {
-    // UNIFIED VALIDATION for ALL tables (strictest requirements)
-    const validationChecks = {
-      // unified_shipments CRITICAL requirements (mode and org_id are NOT NULL)
-      hasMode: !!record.transportation_mode,
-      hasCompany: !!(record.shipper_name || record.consignee_name),
-      
-      // airfreight_insights requirements
-      hasOriginCountry: !!record.country_origin,
-      hasDestCountry: !!record.country_destination, 
-      hasHsCode: !!record.hs_code,
-      hasTradeMonth: !!record.trade_month,
-      
-      // airfreight_shipments requirements  
-      hasCommodityCode: !!record.commodity_code,
-      
-      // census_trade_data requirements
-      hasCommodity: !!record.commodity,
-      hasCountry: !!record.country,
-      hasState: !!record.state,
-      hasTransportMode: !!record.transport_mode,
-      hasYear: !!record.year,
-      hasMonth: !!record.month
-    };
-    
-    const allValid = Object.values(validationChecks).every(check => check === true);
-    
-    if (allValid) {
-      validRecords.push(record);
-    } else {
-      const failedChecks = Object.entries(validationChecks)
-        .filter(([key, value]) => !value)
-        .map(([key]) => key);
-      console.warn(`Skipping invalid record. Failed checks: ${failedChecks.join(', ')}`);
-    }
-  }
-  
-  console.log(`Validation completed: ${validRecords.length}/${records.length} records passed ALL table requirements`);
-  return validRecords;
-}
-
-function detectFileTypeAndValidate(records: TradeRecord[]) {
-  const sampleRecord = records[0] || {};
-  const fieldNames = Object.keys(sampleRecord);
-  
-  // Air freight validation
-  const isAirFreight = fieldNames.some(f => 
-    ['origin_airport', 'dest_airport', 'departure_port', 'arrival_port'].includes(f)
-  ) || records.some(r => r.transportation_mode?.toLowerCase().includes('air'));
-  
-  // Ocean freight validation  
-  const isOceanFreight = fieldNames.some(f => 
-    ['port_of_lading', 'port_of_unlading', 'vessel_name', 'bol_number'].includes(f)
-  ) || records.some(r => r.transportation_mode?.toLowerCase().includes('ocean'));
-  
-  // Domestic validation
-  const isDomestic = fieldNames.some(f => 
-    ['origin_zip', 'destination_zip', 'origin_state', 'destination_state'].includes(f)
-  ) || records.some(r => r.transportation_mode?.toLowerCase().includes('truck'));
-  
-  if (isAirFreight) {
-    return {
-      fileType: 'air',
-      validator: (record: TradeRecord) => {
-        const hasCompany = !!(record.shipper_name || record.consignee_name);
-        const hasMode = !!record.transportation_mode;
-        const hasAirLocation = !!(record.origin_airport || record.dest_airport || 
-                                  record.departure_port || record.arrival_port);
-        return hasCompany && hasMode && hasAirLocation;
-      },
-      hasRequiredLocation: (record: TradeRecord) => !!(record.origin_airport || record.dest_airport)
-    };
-  }
-  
-  if (isOceanFreight) {
-    return {
-      fileType: 'ocean',
-      validator: (record: TradeRecord) => {
-        const hasCompany = !!(record.shipper_name || record.consignee_name);
-        const hasMode = !!record.transportation_mode;
-        const hasOceanLocation = !!(record.port_of_lading || record.port_of_unlading || 
-                                    record.origin_port || record.destination_port);
-        return hasCompany && hasMode && hasOceanLocation;
-      },
-      hasRequiredLocation: (record: TradeRecord) => !!(record.port_of_lading || record.port_of_unlading)
-    };
-  }
-  
-  if (isDomestic) {
-    return {
-      fileType: 'domestic',
-      validator: (record: TradeRecord) => {
-        const hasCompany = !!(record.shipper_name || record.consignee_name);
-        const hasMode = !!record.transportation_mode;
-        const hasDomesticLocation = !!(record.origin_city || record.destination_city || 
-                                       record.origin_state || record.destination_state);
-        return hasCompany && hasMode && hasDomesticLocation;
-      },
-      hasRequiredLocation: (record: TradeRecord) => !!(record.origin_city || record.destination_city)
-    };
-  }
-  
-  // Default validation for mixed or unknown file types
-  return {
-    fileType: 'mixed',
-    validator: (record: TradeRecord) => {
-      const hasCompany = !!(record.shipper_name || record.consignee_name);
-      const hasMode = !!record.transportation_mode;
-      return hasCompany && hasMode;
-    },
-    hasRequiredLocation: (record: TradeRecord) => true // Less strict for mixed files
-  };
-}
-
-async function processBatch(
-  records: TradeRecord[], 
-  importId: string, 
-  orgId: string, 
-  supabaseClient: any
-): Promise<{ processed: number; duplicates: number; errors: number }> {
+async function processBatch(records: TradeRecord[], importId: string, userId: string, supabaseClient: any) {
   let processed = 0;
   let duplicates = 0;
   let errors = 0;
 
+  console.log(`Processing batch of ${records.length} records for import ${importId}`);
+
+  // Check for duplicates before inserting
+  const recordsToInsert = [];
+  
   for (const record of records) {
     try {
-      // Infer company name from enriched data - validate using is_valid_company_name
-      let inferredCompany = record.shipper_name || record.consignee_name;
-      
-      // If no valid company name found, create a temporary placeholder
-      if (!inferredCompany) {
-        inferredCompany = `Unknown Company ${Math.random().toString(36).substr(2, 9)}`;
-      }
-      
-      // Calculate confidence score based on available data
-      let confidenceScore = 0;
-      if (record.shipper_name) confidenceScore += 30;
-      if (record.consignee_name) confidenceScore += 30;
-      if (record.origin_country && record.destination_country) confidenceScore += 20;
-      if (record.commodity_code) confidenceScore += 10;
-      if (record.value_usd) confidenceScore += 10;
-
-      // Check for duplicates (basic duplicate detection) - improved logic
-      const { data: existingRecords } = await supabaseClient
+      // Check for existing record based on key fields
+      const { data: existingRecords, error: checkError } = await supabaseClient
         .from('unified_shipments')
         .select('id')
-        .eq('org_id', orgId) // Check within the same org
-        .eq('unified_company_name', inferredCompany)
-        .eq('unified_date', record.shipment_date || record.arrival_date || null)
+        .eq('org_id', record.org_id)
+        .eq('hs_code', record.hs_code)
+        .eq('shipper_name', record.shipper_name || '')
+        .eq('consignee_name', record.consignee_name || '')
+        .eq('shipment_date', record.shipment_date || null)
         .limit(1);
+
+      if (checkError) {
+        console.error('Error checking for duplicates:', checkError);
+        errors++;
+        continue;
+      }
 
       if (existingRecords && existingRecords.length > 0) {
         duplicates++;
         continue;
       }
 
-      // Insert into unified_shipments table with GUARANTEED REQUIRED FIELDS
-      // Note: The trigger will automatically queue invalid company names for enrichment
-      const insertData = {
-        org_id: orgId, // Required for RLS
-        mode: record.transportation_mode === 'air' ? 'air' : 'ocean', // Required field - guaranteed from enrichment
-        unified_company_name: inferredCompany, // Required field - will be validated by trigger
-        unified_destination: record.destination_city || record.destination_country,
-        unified_value: record.value_usd,
-        unified_weight: record.weight_kg,
-        unified_date: record.shipment_date || record.arrival_date,
-        unified_carrier: record.carrier_name,
-        hs_code: record.commodity_code,
-        description: record.commodity_description,
-        commodity_description: record.commodity_description,
-        shipper_name: record.shipper_name,
-        consignee_name: record.consignee_name,
-        origin_country: record.origin_country,
-        destination_country: record.destination_country,
-        destination_city: record.destination_city,
-        destination_state: record.destination_state,
-        port_of_loading: record.origin_port,
-        port_of_discharge: record.destination_port,
-        bol_number: record.bol_number,
-        vessel_name: record.vessel_name,
-        container_count: record.container_count,
-        carrier_name: record.carrier_name,
-        quantity: record.quantity,
-        value_usd: record.value_usd,
-        weight_kg: record.weight_kg,
-        shipment_date: record.shipment_date,
-        arrival_date: record.arrival_date,
-        created_at: new Date().toISOString()
-      };
-
-      console.log(`Inserting validated record for company: ${inferredCompany}`);
-      
-      const { error: insertError } = await supabaseClient
-        .from('unified_shipments')
-        .insert(insertData);
-
-      if (insertError) {
-        console.error(`Insert error for company ${inferredCompany}:`, insertError);
-        console.error('Failed record data:', JSON.stringify(insertData, null, 2));
-        errors++;
-      } else {
-        console.log(`Successfully inserted record for ${inferredCompany}`);
-        processed++;
-      }
+      recordsToInsert.push({
+        ...record,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
 
     } catch (error) {
-      console.error('Processing error for record:', error);
-      console.error('Record data:', JSON.stringify(record, null, 2));
+      console.error('Error processing record:', error);
       errors++;
     }
   }
 
-  console.log(`Batch complete: ${processed} processed, ${duplicates} duplicates, ${errors} errors`);
+  // Insert records in smaller sub-batches
+  const subBatchSize = 100;
+  for (let i = 0; i < recordsToInsert.length; i += subBatchSize) {
+    const subBatch = recordsToInsert.slice(i, i + subBatchSize);
+    
+    try {
+      const { error: insertError } = await supabaseClient
+        .from('unified_shipments')
+        .insert(subBatch);
+
+      if (insertError) {
+        console.error('Error inserting sub-batch:', insertError);
+        errors += subBatch.length;
+      } else {
+        processed += subBatch.length;
+        console.log(`Successfully inserted sub-batch of ${subBatch.length} records`);
+      }
+    } catch (error) {
+      console.error('Exception inserting sub-batch:', error);
+      errors += subBatch.length;
+    }
+  }
+
+  console.log(`Batch processing completed: ${processed} processed, ${duplicates} duplicates, ${errors} errors`);
+  
   return { processed, duplicates, errors };
 }
 
 async function queueEnrichment(importId: string, supabaseClient: any) {
-  console.log(`Queueing enrichment for import ${importId}`);
-  
-  // Get unique companies from this import
-  const { data: companies } = await supabaseClient
-    .from('unified_shipments')
-    .select('unified_company_name')
-    .not('unified_company_name', 'is', null);
+  try {
+    console.log(`Queueing enrichment for import ${importId}`);
+    
+    // Get unique company names from the import
+    const { data: companies, error } = await supabaseClient
+      .from('unified_shipments')
+      .select('unified_company_name')
+      .not('unified_company_name', 'is', null)
+      .neq('unified_company_name', '')
+      .limit(1000);
 
-  const uniqueCompanies = [...new Set(companies?.map(c => c.unified_company_name))];
-
-  // Queue Apollo enrichment for each company
-  for (const companyName of uniqueCompanies) {
-    try {
-      await supabaseClient.functions.invoke('apollo-enrichment', {
-        body: {
-          company_name: companyName,
-          departments: ['sales', 'logistics', 'procurement']
-        }
-      });
-    } catch (error) {
-      console.error(`Failed to queue enrichment for ${companyName}:`, error);
+    if (error) {
+      console.error('Error fetching companies for enrichment:', error);
+      return;
     }
+
+    const uniqueCompanies = [...new Set(companies?.map(c => c.unified_company_name) || [])];
+    console.log(`Found ${uniqueCompanies.length} unique companies to potentially enrich`);
+
+    // Queue companies for enrichment (this would typically be a separate process)
+    for (const companyName of uniqueCompanies.slice(0, 50)) { // Limit to first 50
+      try {
+        await supabaseClient.functions.invoke('contact-enrichment', {
+          body: { company_name: companyName }
+        });
+      } catch (enrichError) {
+        console.error(`Error enriching company ${companyName}:`, enrichError);
+      }
+    }
+
+    console.log('Enrichment queueing completed');
+  } catch (error) {
+    console.error('Error in queueEnrichment:', error);
   }
 }
