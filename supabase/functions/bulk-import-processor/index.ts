@@ -33,6 +33,26 @@ interface TradeRecord {
   [key: string]: any;
 }
 
+interface ContactRecord {
+  company_name?: string;
+  full_name?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  country?: string;
+  city?: string;
+  notes?: string;
+  tags?: string[];
+  source?: string;
+  [key: string]: any;
+}
+
+interface ProcessedData {
+  tradeRecords: TradeRecord[];
+  contactRecords: ContactRecord[];
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -116,18 +136,18 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
       throw new Error(`Failed to download file: ${downloadError.message}`);
     }
 
-    // Parse file based on type
-    let records: TradeRecord[] = [];
+    // Parse file based on type - now supports dual data streams
+    let processedData: ProcessedData = { tradeRecords: [], contactRecords: [] };
 
     try {
       console.log(`Processing file type: ${file_type}`);
       
       if (file_type === 'csv') {
         const fileText = await fileData.text();
-        records = parseCSV(fileText);
+        processedData.tradeRecords = parseCSV(fileText);
       } else if (file_type === 'xml') {
         const fileText = await fileData.text();
-        records = parseXML(fileText);
+        processedData.tradeRecords = parseXML(fileText);
       } else if (file_type === 'xlsx') {
         console.log('Processing XLSX file...');
         const arrayBuffer = await fileData.arrayBuffer();
@@ -138,11 +158,13 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
           throw new Error('File too large. Please upload files smaller than 5MB.');
         }
         
-        records = parseXLSX(arrayBuffer);
-        console.log(`Parsed ${records.length} records from XLSX`);
+        processedData = parseXLSXWithContacts(arrayBuffer);
+        console.log(`Parsed ${processedData.tradeRecords.length} trade records and ${processedData.contactRecords.length} contact records from XLSX`);
       } else {
         throw new Error(`Unsupported file type: ${file_type}`);
       }
+
+      const records = processedData.tradeRecords;
 
       console.log(`Parsed ${records.length} records from ${file_type} file`);
 
@@ -223,20 +245,29 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         })
         .eq('id', import_id);
 
-      // Process validated records in smaller, more manageable batches
+      // **STEP 4: PROCESS CONTACT RECORDS (PARALLEL TO TRADE RECORDS)**
+      let contactProcessedCount = 0;
+      if (processedData.contactRecords.length > 0) {
+        console.log(`Processing ${processedData.contactRecords.length} contact records...`);
+        const linkedContacts = linkContactsToCompanies(processedData.contactRecords, validatedRecords);
+        contactProcessedCount = await processContactBatch(linkedContacts, import_id, userId, supabaseClient);
+        console.log(`Successfully processed ${contactProcessedCount} contact records`);
+      }
+
+      // Process validated trade records in smaller, more manageable batches
       const batchSize = 500;
       let processedCount = 0;
       let duplicateCount = 0;
       let errorCount = 0;
 
-      console.log(`Starting batch processing: ${validatedRecords.length} validated records in batches of ${batchSize}`);
+      console.log(`Starting batch processing: ${validatedRecords.length} validated trade records in batches of ${batchSize}`);
 
       // Process in fixed batches of 500
       for (let i = 0; i < validatedRecords.length; i += batchSize) {
         const batchNumber = Math.floor(i / batchSize) + 1;
         const totalBatches = Math.ceil(validatedRecords.length / batchSize);
         
-        console.log(`Processing batch ${batchNumber}/${totalBatches} (records ${i + 1}-${Math.min(i + batchSize, validatedRecords.length)})`);
+        console.log(`Processing trade batch ${batchNumber}/${totalBatches} (records ${i + 1}-${Math.min(i + batchSize, validatedRecords.length)})`);
         
         const batch = validatedRecords.slice(i, i + batchSize);
         const processedBatch = await processBatch(batch, import_id, userId, supabaseClient);
@@ -259,7 +290,9 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
               progress_percentage: Math.round((processedCount / validatedRecords.length) * 100),
               enriched_records: enrichedRecords.length,
               original_records: records.length,
-              validation_passed: validatedRecords.length
+              validation_passed: validatedRecords.length,
+              contact_records_processed: contactProcessedCount,
+              contact_records_total: processedData.contactRecords.length
             },
             updated_at: new Date().toISOString()
           })
@@ -317,11 +350,11 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
   }
 }
 
-function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
+function parseXLSXWithContacts(arrayBuffer: ArrayBuffer): ProcessedData {
   try {
-    console.log('parseXLSX: Starting XLSX parsing...');
+    console.log('parseXLSXWithContacts: Starting XLSX parsing...');
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-    console.log(`parseXLSX: Found ${workbook.SheetNames.length} sheets`);
+    console.log(`parseXLSXWithContacts: Found ${workbook.SheetNames.length} sheets`);
     
     // Check if this is a multi-tab Panjiva file by looking for specific sheet patterns
     const isPanjivaMultiTab = workbook.SheetNames.length > 1 && 
@@ -330,25 +363,29 @@ function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
        workbook.SheetNames.some(name => name.toLowerCase().includes('shipment')));
     
     if (isPanjivaMultiTab) {
-      console.log('parseXLSX: Detected Panjiva multi-tab file, processing all tabs');
-      return parseMultiTabPanjivaXLSX(workbook);
+      console.log('parseXLSXWithContacts: Detected Panjiva multi-tab file, processing all tabs');
+      return parseMultiTabPanjivaXLSXWithContacts(workbook);
     }
     
     // Default single-tab processing for regular files
     const sheetName = workbook.SheetNames[0]; // Use first sheet
-      console.log(`parseXLSX: Processing single sheet: ${sheetName}`);
-    return parseSingleSheetXLSX(workbook, sheetName);
+    console.log(`parseXLSXWithContacts: Processing single sheet: ${sheetName}`);
+    return {
+      tradeRecords: parseSingleSheetXLSX(workbook, sheetName),
+      contactRecords: []
+    };
   } catch (error) {
-    console.error('parseXLSX: Error parsing XLSX:', error);
+    console.error('parseXLSXWithContacts: Error parsing XLSX:', error);
     throw new Error(`XLSX parsing failed: ${error.message}`);
   }
 }
 
-// Multi-tab Panjiva XLSX processing (optional feature)
-function parseMultiTabPanjivaXLSX(workbook: any): TradeRecord[] {
-  console.log('parseMultiTabPanjivaXLSX: Starting multi-tab processing');
+// Multi-tab Panjiva XLSX processing with contact support
+function parseMultiTabPanjivaXLSXWithContacts(workbook: any): ProcessedData {
+  console.log('parseMultiTabPanjivaXLSXWithContacts: Starting multi-tab processing');
   
-  const allRecords: TradeRecord[] = [];
+  const tradeRecords: TradeRecord[] = [];
+  const contactRecords: ContactRecord[] = [];
   
   // Process each sheet
   for (const sheetName of workbook.SheetNames) {
@@ -359,18 +396,18 @@ function parseMultiTabPanjivaXLSX(workbook: any): TradeRecord[] {
                           sheetName.toLowerCase().includes('company');
     
     if (isContactSheet) {
-      console.log(`Skipping contact sheet for now: ${sheetName}`);
-      // TODO: Process contact sheets in future implementation
-      continue;
+      console.log(`Processing contact sheet: ${sheetName}`);
+      const sheetContacts = parseContactSheet(workbook, sheetName);
+      contactRecords.push(...sheetContacts);
+    } else {
+      // Process as regular shipment data
+      const sheetRecords = parseSingleSheetXLSX(workbook, sheetName);
+      tradeRecords.push(...sheetRecords);
     }
-    
-    // Process as regular shipment data
-    const sheetRecords = parseSingleSheetXLSX(workbook, sheetName);
-    allRecords.push(...sheetRecords);
   }
   
-  console.log(`parseMultiTabPanjivaXLSX: Processed ${allRecords.length} total records from ${workbook.SheetNames.length} sheets`);
-  return allRecords;
+  console.log(`parseMultiTabPanjivaXLSXWithContacts: Processed ${tradeRecords.length} trade records and ${contactRecords.length} contact records from ${workbook.SheetNames.length} sheets`);
+  return { tradeRecords, contactRecords };
 }
 
 // Single sheet XLSX processing (used by both single and multi-tab)
@@ -417,6 +454,54 @@ function parseSingleSheetXLSX(workbook: any, sheetName: string): TradeRecord[] {
   }
 
   console.log(`parseSingleSheetXLSX: Successfully parsed ${records.length} records from ${sheetName}`);
+  return records;
+}
+
+// Contact sheet processing for multi-tab files
+function parseContactSheet(workbook: any, sheetName: string): ContactRecord[] {
+  console.log(`parseContactSheet: Processing contact sheet: ${sheetName}`);
+  const worksheet = workbook.Sheets[sheetName];
+  
+  // Convert to JSON format
+  const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  console.log(`parseContactSheet: Converted to JSON, ${jsonData.length} rows`);
+
+  if (jsonData.length === 0) {
+    console.log('parseContactSheet: No data found in worksheet');
+    return [];
+  }
+
+  // First row should be headers
+  const headers = jsonData[0] as string[];
+  console.log(`parseContactSheet: Headers found: ${headers.length} columns`);
+  console.log(`parseContactSheet: Sample headers: ${headers.slice(0, 5).join(', ')}`);
+
+  const records: ContactRecord[] = [];
+
+  // Process each row (skip header)
+  console.log(`parseContactSheet: Processing ${jsonData.length - 1} contact rows`);
+
+  for (let i = 1; i < jsonData.length; i++) {
+    const row = jsonData[i] as any[];
+    const record: ContactRecord = { source: 'panjiva_multitab' };
+
+    headers.forEach((header, index) => {
+      const value = row[index];
+      if (value !== undefined && value !== null && value !== '') {
+        const normalizedHeader = normalizeContactFieldName(header);
+        if (normalizedHeader) {
+          record[normalizedHeader] = parseContactValue(String(value), normalizedHeader);
+        }
+      }
+    });
+
+    // Ensure we have at least company name
+    if (record.company_name && record.company_name.toString().trim().length > 0) {
+      records.push(record);
+    }
+  }
+
+  console.log(`parseContactSheet: Successfully parsed ${records.length} contact records from ${sheetName}`);
   return records;
 }
 
@@ -800,6 +885,222 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
   console.log(`Batch processing completed: ${processed} processed, ${duplicates} duplicates, ${errors} errors`);
   
   return { processed, duplicates, errors };
+}
+
+// Contact field normalization for contact sheets
+function normalizeContactFieldName(field: string): string | null {
+  if (!field) return null;
+  
+  const normalized = field.toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^\\w]/g, '')
+    .trim();
+
+  // Map contact field variations to standardized names
+  const fieldMappings: { [key: string]: string } = {
+    // Company fields
+    'company': 'company_name',
+    'companyname': 'company_name',
+    'organization': 'company_name',
+    'firm': 'company_name',
+    'business': 'company_name',
+    
+    // Contact name fields
+    'name': 'full_name',
+    'fullname': 'full_name',
+    'contactname': 'full_name',
+    'personname': 'full_name',
+    'firstname': 'full_name', // Will combine if needed
+    'lastname': 'full_name',  // Will combine if needed
+    
+    // Title fields
+    'title': 'title',
+    'jobtitle': 'title',
+    'position': 'title',
+    'role': 'title',
+    'designation': 'title',
+    
+    // Contact fields
+    'email': 'email',
+    'emailaddress': 'email',
+    'mail': 'email',
+    'phone': 'phone',
+    'phonenumber': 'phone',
+    'telephone': 'phone',
+    'mobile': 'phone',
+    'linkedin': 'linkedin',
+    'linkedinurl': 'linkedin',
+    'linkedinprofile': 'linkedin',
+    
+    // Location fields
+    'country': 'country',
+    'city': 'city',
+    'location': 'city',
+    'address': 'city',
+    
+    // Additional fields
+    'notes': 'notes',
+    'note': 'notes',
+    'comments': 'notes',
+    'tags': 'tags',
+    'tag': 'tags'
+  };
+
+  return fieldMappings[normalized] || normalized;
+}
+
+// Contact value parsing
+function parseContactValue(value: string, fieldName: string): any {
+  if (!value || value.trim() === '') return null;
+  
+  const trimmed = value.trim();
+  
+  // Parse tags as array
+  if (fieldName === 'tags') {
+    return trimmed.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+  }
+  
+  // Clean email fields
+  if (fieldName === 'email') {
+    const email = trimmed.toLowerCase();
+    return email.includes('@') ? email : null;
+  }
+  
+  // Clean LinkedIn URLs
+  if (fieldName === 'linkedin') {
+    if (trimmed.includes('linkedin.com') || trimmed.startsWith('http')) {
+      return trimmed;
+    }
+    return null;
+  }
+  
+  // Clean phone numbers
+  if (fieldName === 'phone') {
+    const cleaned = trimmed.replace(/[^\d+\-\(\)\s]/g, '');
+    return cleaned.length > 5 ? cleaned : null;
+  }
+  
+  // Return cleaned string for other fields
+  return trimmed;
+}
+
+// Link contacts to companies using fuzzy matching
+function linkContactsToCompanies(contactRecords: ContactRecord[], tradeRecords: TradeRecord[]): ContactRecord[] {
+  console.log(`Linking ${contactRecords.length} contacts to companies from ${tradeRecords.length} trade records`);
+  
+  // Create a set of standardized company names from trade records
+  const tradeCompanies = new Set<string>();
+  tradeRecords.forEach(record => {
+    if (record.unified_company_name) {
+      tradeCompanies.add(standardizeCompanyName(record.unified_company_name));
+    }
+    if (record.shipper_name) {
+      tradeCompanies.add(standardizeCompanyName(record.shipper_name));
+    }
+    if (record.consignee_name) {
+      tradeCompanies.add(standardizeCompanyName(record.consignee_name));
+    }
+  });
+
+  const linkedContacts: ContactRecord[] = [];
+  let matchedCount = 0;
+  let unmatchedCount = 0;
+
+  contactRecords.forEach(contact => {
+    if (!contact.company_name) {
+      unmatchedCount++;
+      return;
+    }
+
+    const standardizedContactCompany = standardizeCompanyName(contact.company_name);
+    
+    // Direct match
+    if (tradeCompanies.has(standardizedContactCompany)) {
+      linkedContacts.push(contact);
+      matchedCount++;
+      return;
+    }
+
+    // Fuzzy matching - check if any trade company contains the contact company or vice versa
+    let fuzzyMatch = false;
+    for (const tradeCompany of tradeCompanies) {
+      if (tradeCompany.length > 5 && standardizedContactCompany.length > 5) {
+        if (tradeCompany.includes(standardizedContactCompany) || 
+            standardizedContactCompany.includes(tradeCompany)) {
+          linkedContacts.push(contact);
+          matchedCount++;
+          fuzzyMatch = true;
+          break;
+        }
+      }
+    }
+
+    if (!fuzzyMatch) {
+      unmatchedCount++;
+    }
+  });
+
+  console.log(`Contact linking completed: ${matchedCount} matched, ${unmatchedCount} unmatched`);
+  return linkedContacts;
+}
+
+// Standardize company names for matching
+function standardizeCompanyName(name: string): string {
+  if (!name) return '';
+  
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/[^\w\s&.-]/g, '')
+    .replace(/\b(inc|llc|ltd|corp|corporation|company|co|sa|gmbh|bv)\b/g, '')
+    .trim();
+}
+
+// Process contact batch insertion
+async function processContactBatch(contactRecords: ContactRecord[], importId: string, userId: string, supabaseClient: any): Promise<number> {
+  console.log(`Processing ${contactRecords.length} contact records for CRM insertion`);
+  
+  let processedCount = 0;
+  const batchSize = 100;
+
+  for (let i = 0; i < contactRecords.length; i += batchSize) {
+    const batch = contactRecords.slice(i, i + batchSize);
+    
+    for (const contact of batch) {
+      try {
+        // Use the upsert_crm_contact function to handle duplicates
+        const { data: contactId, error } = await supabaseClient.rpc('upsert_crm_contact', {
+          p_org_id: userId, // User ID serves as org_id
+          p_company_name: contact.company_name || 'Unknown Company',
+          p_full_name: contact.full_name || null,
+          p_title: contact.title || null,
+          p_email: contact.email || null,
+          p_phone: contact.phone || null,
+          p_linkedin: contact.linkedin || null,
+          p_country: contact.country || null,
+          p_city: contact.city || null,
+          p_source: contact.source || 'panjiva_multitab',
+          p_tags: contact.tags || [],
+          p_notes: contact.notes || `Imported from multi-tab file during import ${importId}`
+        });
+
+        if (error) {
+          console.error('Error inserting contact:', error);
+        } else {
+          processedCount++;
+        }
+
+      } catch (error) {
+        console.error('Exception inserting contact:', error);
+      }
+    }
+
+    // Small delay between batches
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+
+  console.log(`Contact batch processing completed: ${processedCount}/${contactRecords.length} contacts processed`);
+  return processedCount;
 }
 
 async function queueEnrichment(importId: string, supabaseClient: any) {
