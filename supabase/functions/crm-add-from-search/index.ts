@@ -69,7 +69,7 @@ serve(async (req) => {
       .select('id, name')
       .eq('name', pipeline_name || 'Search Intelligence')
       .eq('org_id', user.id)
-      .single()
+      .maybeSingle()
 
     console.log('🔧 Edge Function: Pipeline lookup result:', { existingPipeline, pipelineLookupError })
 
@@ -208,6 +208,7 @@ serve(async (req) => {
     }
 
     // Create or update CRM contact
+    console.log('🔧 Edge Function: Creating contact data for org_id:', user.id)
     const contactData = {
       org_id: user.id,
       company_name: company.name,
@@ -219,17 +220,16 @@ serve(async (req) => {
       headquarters_location: company.location || null,
       source: source || 'search',
       status: 'prospect',
-      notes: `Added from ${source || 'search'} on ${new Date().toLocaleDateString()}`,
-      created_at: new Date().toISOString()
+      notes: `Added from ${source || 'search'} on ${new Date().toLocaleDateString()}`
     }
 
-    // Check if contact already exists
+    // Check if contact already exists (using maybeSingle to avoid errors)
     const { data: existingContact } = await supabaseClient
       .from('crm_contacts')
       .select('id')
       .eq('company_name', company.name)
       .eq('org_id', user.id)
-      .single()
+      .maybeSingle()
 
     let contact_id
     if (existingContact) {
@@ -241,16 +241,19 @@ serve(async (req) => {
         .eq('id', contact_id)
     } else {
       // Create new contact
+      console.log('🔧 Edge Function: Inserting new contact:', contactData)
       const { data: newContact, error: contactError } = await supabaseClient
         .from('crm_contacts')
         .insert(contactData)
         .select('id')
         .single()
 
+      console.log('🔧 Edge Function: Contact creation result:', { newContact, contactError })
+
       if (contactError) {
-        console.error('Contact creation error:', contactError)
+        console.error('🔧 Edge Function: Contact creation error details:', contactError)
         return new Response(
-          JSON.stringify({ success: false, error: 'Failed to create contact' }),
+          JSON.stringify({ success: false, error: 'Failed to create contact', details: contactError.message }),
           { 
             status: 500, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
