@@ -28,6 +28,7 @@ export function DroppableStage({ stageId, deals, className }: DroppableStageProp
     data: {
       type: 'stage',
       stageId: stageId,
+      accepts: ['deal'], // Explicitly accept deal types
     },
   });
 
