@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Building2, Mail, Phone, MapPin, ExternalLink, Plus, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useAPI } from "@/hooks/useAPI"
 import { ComprehensiveDealDrawer } from "@/components/CRM/ComprehensiveDealDrawer"
@@ -93,8 +94,15 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
   }
 
   return (
-    <Card className="bg-card border-border hover:shadow-md transition-shadow w-72 xl:w-80 min-h-20 sm:min-h-24 cursor-pointer" onClick={() => setShowDetailsDrawer(true)}>
-      <CardContent className="p-6">
+    <Card 
+      className={cn(
+        "cursor-pointer rounded-lg p-2 sm:p-2.5 bg-white border border-slate-200 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
+        "hover:border-blue-300 hover:-translate-y-0.5 group touch-manipulation",
+        "min-h-20 sm:min-h-24 w-72 xl:w-80"
+      )}
+      onClick={() => setShowDetailsDrawer(true)}
+    >
+      <CardContent className="p-0">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12">
             <AvatarImage src={company.logo} />
