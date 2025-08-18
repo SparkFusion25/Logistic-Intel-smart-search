@@ -47,6 +47,8 @@ serve(async (req) => {
     const dealId = String(body?.deal_id ?? body?.id ?? body?.dealId ?? "");
     const stageId = String(body?.stage_id ?? "");
 
+    console.log('Moving deal:', { dealId, stageId, orgId });
+
     if (!dealId || !stageId) {
       return new Response(JSON.stringify({ success: false, error: 'Missing deal_id or stage_id' }), {
         status: 400,
@@ -54,28 +56,31 @@ serve(async (req) => {
       });
     }
 
-    const { data: deal } = await supabase
+    // Get the deal and verify ownership
+    const { data: deal, error: dealError } = await supabase
       .from("deals")
       .select("id, org_id, pipeline_id, stage_id")
       .eq("id", dealId)
       .eq("org_id", orgId)
       .single();
     
-    if (!deal) {
-      return new Response(JSON.stringify({ success: false, error: 'Deal not found' }), {
+    if (dealError || !deal) {
+      console.error('Deal not found:', dealError);
+      return new Response(JSON.stringify({ success: false, error: 'Deal not found or access denied' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { data: stage } = await supabase
+    // Get the target stage and verify it exists in the same pipeline
+    const { data: stage, error: stageError } = await supabase
       .from("pipeline_stages")
       .select("id, pipeline_id")
       .eq("id", stageId)
-      .eq("org_id", orgId)
       .single();
     
-    if (!stage) {
+    if (stageError || !stage) {
+      console.error('Stage not found:', stageError);
       return new Response(JSON.stringify({ success: false, error: 'Stage not found' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -84,26 +89,37 @@ serve(async (req) => {
 
     // Ensure target stage is within the same pipeline as the deal
     if (stage.pipeline_id !== deal.pipeline_id) {
-      return new Response(JSON.stringify({ success: false, error: 'Stage pipeline mismatch' }), {
+      console.error('Pipeline mismatch:', { stagePipeline: stage.pipeline_id, dealPipeline: deal.pipeline_id });
+      return new Response(JSON.stringify({ success: false, error: 'Stage must be in the same pipeline as the deal' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { error: updErr } = await supabase
+    // Update the deal's stage
+    const { error: updateError } = await supabase
       .from("deals")
-      .update({ stage_id: stage.id })
-      .eq("id", deal.id)
+      .update({ 
+        stage_id: stageId,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", dealId)
       .eq("org_id", orgId);
 
-    if (updErr) {
-      return new Response(JSON.stringify({ success: false, error: updErr.message }), {
+    if (updateError) {
+      console.error('Update failed:', updateError);
+      return new Response(JSON.stringify({ success: false, error: updateError.message }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    console.log('Deal moved successfully:', { dealId, fromStage: deal.stage_id, toStage: stageId });
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      data: { dealId, fromStage: deal.stage_id, toStage: stageId }
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
