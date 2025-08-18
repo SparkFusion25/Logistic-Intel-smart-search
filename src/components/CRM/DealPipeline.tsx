@@ -6,7 +6,7 @@ import {
   DragStartEvent, 
   DragEndEvent, 
   DragOverlay, 
-  closestCorners,
+  pointerWithin,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -357,7 +357,7 @@ export function DealPipeline() {
       <div className="flex-1 overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50/30">
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={pointerWithin}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
         >
