@@ -116,6 +116,24 @@ serve(async (req) => {
 
     console.log('Deal moved successfully:', { dealId, fromStage: deal.stage_id, toStage: stageId });
 
+    // Log the activity for deal history tracking
+    try {
+      await supabase
+        .from("activities")
+        .insert({
+          org_id: orgId,
+          deal_id: dealId,
+          type: "stage_change",
+          subject: "Deal stage changed",
+          body: `Deal moved from stage ${deal.stage_id} to stage ${stageId}`,
+          created_by: orgId,
+          created_at: new Date().toISOString()
+        });
+    } catch (activityError) {
+      // Don't fail the main operation if activity logging fails
+      console.warn('Failed to log activity:', activityError);
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       data: { dealId, fromStage: deal.stage_id, toStage: stageId }

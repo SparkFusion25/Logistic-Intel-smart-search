@@ -109,8 +109,136 @@ export const useCRMAPI = () => {
     }
   }, [])
 
+  const getPipelines = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error: pipelineError } = await supabase.functions.invoke('crm-pipelines', {
+        body: {}
+      })
+
+      if (pipelineError) throw pipelineError
+
+      return data
+    } catch (err: any) {
+      setError(err.message || 'Failed to load pipelines')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const createPipeline = useCallback(async (name: string) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error: createError } = await supabase.functions.invoke('crm-pipelines', {
+        body: { name },
+        method: 'POST'
+      })
+
+      if (createError) throw createError
+
+      return data
+    } catch (err: any) {
+      setError(err.message || 'Failed to create pipeline')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const getStages = useCallback(async (pipelineId: string) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error: stageError } = await supabase.functions.invoke('crm-stages', {
+        body: { pipeline_id: pipelineId }
+      })
+
+      if (stageError) throw stageError
+
+      return data
+    } catch (err: any) {
+      setError(err.message || 'Failed to load stages')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const createStage = useCallback(async (pipelineId: string, name: string, stageOrder?: number) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error: createError } = await supabase.functions.invoke('crm-stages', {
+        body: { pipeline_id: pipelineId, name, stage_order: stageOrder },
+        method: 'POST'
+      })
+
+      if (createError) throw createError
+
+      return data
+    } catch (err: any) {
+      setError(err.message || 'Failed to create stage')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const moveDeal = useCallback(async (dealId: string, stageId: string) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error: moveError } = await supabase.functions.invoke('crm-deal-move', {
+        body: { deal_id: dealId, stage_id: stageId }
+      })
+
+      if (moveError) throw moveError
+
+      return data
+    } catch (err: any) {
+      setError(err.message || 'Failed to move deal')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const getPipelineAnalytics = useCallback(async (pipelineId: string, range = '30') => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error: analyticsError } = await supabase.functions.invoke('crm-pipeline-analytics', {
+        body: { pipeline_id: pipelineId, range }
+      })
+
+      if (analyticsError) throw analyticsError
+
+      return data
+    } catch (err: any) {
+      setError(err.message || 'Failed to load analytics')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   return {
     addContact,
+    getPipelines,
+    createPipeline,
+    getStages,
+    createStage,
+    moveDeal,
+    getPipelineAnalytics,
     loading,
     error
   }
