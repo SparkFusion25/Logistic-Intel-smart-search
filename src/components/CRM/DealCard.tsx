@@ -77,13 +77,22 @@ export function DealCard({ deal, stageId }: DealCardProps) {
           isDragging && "opacity-50 shadow-lg rotate-2 scale-105"
         )}
       >
-        {/* Drag Handle - Separate from click area */}
+        {/* Drag Handle - Visible and more prominent */}
         <div 
           {...listeners}
-          className="absolute top-1 right-1 w-6 h-6 bg-slate-100 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing flex items-center justify-center z-10"
+          className="absolute top-1 right-1 w-8 h-8 bg-slate-200 rounded-lg opacity-70 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing flex items-center justify-center z-10 hover:bg-slate-300"
+          title="Drag to move deal"
         >
-          <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-          <div className="w-1 h-1 bg-slate-400 rounded-full ml-0.5"></div>
+          <div className="flex flex-col space-y-0.5">
+            <div className="flex space-x-0.5">
+              <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
+              <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
+            </div>
+            <div className="flex space-x-0.5">
+              <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
+              <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
+            </div>
+          </div>
         </div>
         
         {/* Clickable Content Area */}

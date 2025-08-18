@@ -1,10 +1,21 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCorners, useDroppable } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { 
+  DndContext, 
+  DragStartEvent, 
+  DragEndEvent, 
+  DragOverlay, 
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import { Plus, Search, Target, Mail, Users, TrendingUp } from "lucide-react";
 import { DealCard } from "./DealCard";
 import { DroppableStage } from "./DroppableStage";
@@ -53,6 +64,19 @@ export function DealPipeline() {
   const [selectedStageId, setSelectedStageId] = useState<string>("");
 
   const { makeRequest } = useAPI();
+  const { toast } = useToast();
+
+  // Enhanced sensors for better drag detection
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3, // 3px movement required to start drag
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Load pipelines on mount
   useEffect(() => {
@@ -127,7 +151,12 @@ export function DealPipeline() {
     const { active, over } = event;
     setDraggedDeal(null);
 
-    console.log('🔧 Drag End:', { activeId: active.id, overId: over?.id, overData: over?.data?.current });
+    console.log('🔧 Drag End:', { 
+      activeId: active.id, 
+      overId: over?.id, 
+      overData: over?.data?.current,
+      activeData: active.data.current
+    });
 
     if (!over) {
       console.log('🔧 No drop target');
@@ -144,33 +173,46 @@ export function DealPipeline() {
       return;
     }
 
+    if (!activeStageId || !overStageId) {
+      console.log('🔧 Missing stage IDs');
+      return;
+    }
+
     // Optimistic update first
     const dealToMove = dealsByStage[activeStageId]?.find(d => d.id === active.id);
     if (dealToMove) {
-      console.log('🔧 Moving deal:', dealToMove.title);
+      console.log('🔧 Moving deal:', dealToMove.title, 'from', activeStageId, 'to', overStageId);
       const newDealsByStage = { ...dealsByStage };
+      
       // Remove from old stage
       newDealsByStage[activeStageId] = newDealsByStage[activeStageId].filter(d => d.id !== active.id);
+      
       // Add to new stage
       if (!newDealsByStage[overStageId]) newDealsByStage[overStageId] = [];
       newDealsByStage[overStageId] = [...newDealsByStage[overStageId], { ...dealToMove, stage_id: overStageId }];
+      
       setDealsByStage(newDealsByStage);
-    }
 
-    try {
-      console.log('🔧 Making API call to move deal');
-      await makeRequest('/crm-deal-move', {
-        method: 'POST',
-        body: {
-          deal_id: active.id,
-          stage_id: overStageId
-        }
-      });
-      console.log('🔧 Deal moved successfully');
-    } catch (error) {
-      console.error('🔧 Failed to move deal:', error);
-      // Revert on error
-      loadDeals(selectedPipeline);
+      try {
+        console.log('🔧 Making API call to move deal');
+        const response = await makeRequest('/crm-deal-move', {
+          method: 'POST',
+          body: {
+            deal_id: active.id,
+            stage_id: overStageId
+          }
+        });
+        console.log('🔧 Deal moved successfully:', response);
+      } catch (error) {
+        console.error('🔧 Failed to move deal:', error);
+        // Revert on error
+        toast({
+          title: "Error",
+          description: "Failed to move deal. Please try again.",
+          variant: "destructive"
+        });
+        loadDeals(selectedPipeline);
+      }
     }
   };
 
@@ -285,9 +327,10 @@ export function DealPipeline() {
       {/* Responsive Pipeline Board */}
       <div className="flex-1 overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50/30">
         <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
-          collisionDetection={closestCorners}
         >
           {/* Mobile/Tablet: Vertical Stack | Desktop: Horizontal Scroll */}
           <div className="h-full">
