@@ -45,6 +45,7 @@ import { OpportunityMeter } from "./OpportunityMeter";
 import { LeadScoreChip } from "./LeadScoreChip";
 import { ContactFields } from "./ContactFields";
 import { EmailModal } from "./EmailModal";
+import { ContactIdentifier } from "./ContactIdentifier";
 import { useToast } from "@/hooks/use-toast";
 
 interface ComprehensiveDealDrawerProps {

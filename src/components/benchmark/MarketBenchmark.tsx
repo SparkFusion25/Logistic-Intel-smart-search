@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { TrendingUp, DollarSign, Calendar, Globe } from 'lucide-react'
+import { TrendingUp, DollarSign, Calendar, Globe, Sparkles, Brain, Target, Lightbulb } from 'lucide-react'
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
@@ -22,6 +22,110 @@ interface BenchmarkData {
     p75: number
   }
   metadata: any
+}
+
+// AI Insights Component
+function AIMarketInsights({ benchmarkData }: { benchmarkData: BenchmarkData }) {
+  const [insights, setInsights] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const generateInsights = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-market-insights', {
+        body: { benchmarkData }
+      });
+
+      if (error) throw error;
+      setInsights(data);
+      toast({
+        title: "AI Analysis Complete",
+        description: "Market insights generated successfully"
+      });
+    } catch (error) {
+      console.error('AI insights error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to generate AI insights",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+      <CardHeader className="relative">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Brain className="w-6 h-6 text-primary" />
+            AI Market Insights
+          </div>
+          <Button 
+            onClick={generateInsights} 
+            disabled={loading}
+            size="sm"
+            className="bg-gradient-to-r from-primary to-primary-variant"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            {loading ? 'Analyzing...' : 'Generate Insights'}
+          </Button>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="relative">
+        {!insights && !loading && (
+          <div className="text-center py-8 text-muted-foreground">
+            <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>Click "Generate Insights" to get AI-powered market analysis</p>
+          </div>
+        )}
+        
+        {insights && (
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card className="bg-muted/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="w-5 h-5 text-success" />
+                    <span className="font-semibold">Key Opportunity</span>
+                  </div>
+                  <p className="text-sm">{insights.opportunity}</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-muted/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span className="font-semibold">Trend Analysis</span>
+                  </div>
+                  <p className="text-sm">{insights.trend}</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4" />
+                Strategic Recommendations
+              </h4>
+              <ul className="space-y-2">
+                {insights.recommendations?.map((rec: string, idx: number) => (
+                  <li key={idx} className="text-sm flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 shrink-0" />
+                    {rec}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function MarketBenchmark() {
@@ -231,6 +335,9 @@ export default function MarketBenchmark() {
               </div>
             </CardContent>
           </Card>
+
+          {/* AI Insights */}
+          <AIMarketInsights benchmarkData={data} />
 
           {/* Metadata */}
           <Card className="bg-gradient-to-br from-muted/50 to-muted/20 border-border/50">
