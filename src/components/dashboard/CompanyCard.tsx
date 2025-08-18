@@ -102,7 +102,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
       )}
       onClick={() => setShowDetailsDrawer(true)}
     >
-      <CardContent className="p-0">
+      <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12">
             <AvatarImage src={company.logo} />

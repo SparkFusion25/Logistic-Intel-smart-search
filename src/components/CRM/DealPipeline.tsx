@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCorners } from "@dnd-kit/core";
+import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCorners, useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Target, Mail, Users, TrendingUp } from "lucide-react";
 import { DealCard } from "./DealCard";
+import { DroppableStage } from "./DroppableStage";
 import { NewDealDialog } from "./NewDealDialog";
 import { useAPI } from "@/hooks/useAPI";
 
@@ -327,31 +328,11 @@ export function DealPipeline() {
                     </div>
 
                     {/* Mobile Deals Grid */}
-                    <SortableContext
-                      id={stage.id}
-                      items={stageDeals.map(d => d.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                        <div 
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-lg bg-white/30 backdrop-blur-sm p-2 border border-white/40 min-h-24"
-                          data-stage-id={stage.id}
-                        >
-                        {stageDeals.map((deal) => (
-                          <DealCard
-                            key={deal.id}
-                            deal={deal}
-                            stageId={stage.id}
-                          />
-                        ))}
-                          {stageDeals.length === 0 && (
-                            <div className="col-span-full flex flex-col items-center justify-center py-6 text-slate-400">
-                              <Target className="h-6 w-6 mb-1 opacity-50" />
-                              <p className="text-xs">No deals yet</p>
-                            <p className="text-xs text-center">Tap to add deals</p>
-                          </div>
-                        )}
-                      </div>
-                    </SortableContext>
+                    <DroppableStage
+                      stageId={stage.id}
+                      deals={stageDeals}
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+                    />
                   </div>
                 );
               })}
@@ -411,50 +392,10 @@ export function DealPipeline() {
                       </div>
 
                       {/* Desktop Deals Container */}
-                      <SortableContext
-                        id={stage.id}
-                        items={stageDeals.map(d => d.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <div
-                          className="space-y-3 flex-1 min-h-32 rounded-xl bg-white/30 backdrop-blur-sm p-3 border border-white/40"
-                          data-stage-id={stage.id}
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.3)',
-                            backdropFilter: 'blur(10px)',
-                            border: '2px dashed rgba(203, 213, 225, 0.5)',
-                            transition: 'all 0.2s ease-in-out'
-                          }}
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            e.currentTarget.style.borderColor = '#3b82f6';
-                            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                          }}
-                          onDragLeave={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(203, 213, 225, 0.5)';
-                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-                          }}
-                          onDrop={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(203, 213, 225, 0.5)';
-                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-                          }}
-                        >
-                          {stageDeals.map((deal) => (
-                            <DealCard
-                              key={deal.id}
-                              deal={deal}
-                              stageId={stage.id}
-                            />
-                          ))}
-                          {stageDeals.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
-                              <Target className="h-8 w-8 mb-2 opacity-50" />
-                              <p className="text-sm">No deals yet</p>
-                              <p className="text-xs">Drag deals here or add new ones</p>
-                            </div>
-                          )}
-                        </div>
-                      </SortableContext>
+                      <DroppableStage
+                        stageId={stage.id}
+                        deals={stageDeals}
+                      />
                     </div>
                   );
                 })}
