@@ -20,7 +20,29 @@ export function GmailConnection({ onConnectionChange }: GmailConnectionProps) {
 
   useEffect(() => {
     checkConnectionStatus();
-  }, []);
+    
+    // Listen for OAuth success messages from popup
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'GMAIL_OAUTH_SUCCESS') {
+        setIsConnected(true);
+        setUserEmail(event.data.email);
+        onConnectionChange?.(true);
+        toast({
+          title: "Gmail Connected!",
+          description: `Successfully connected ${event.data.email}`,
+        });
+      } else if (event.data.type === 'GMAIL_OAUTH_ERROR') {
+        toast({
+          title: "Connection Failed",
+          description: event.data.error || "Failed to connect Gmail account",
+          variant: "destructive",
+        });
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onConnectionChange, toast]);
 
   const checkConnectionStatus = async () => {
     try {
