@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain, RotateCcw } from 'lucide-react';
+import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain, RotateCcw, TestTube } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useDropzone } from 'react-dropzone';
@@ -206,6 +206,29 @@ export const BulkImportManager = () => {
     return Math.round((item.processed_records / item.total_records) * 100);
   };
 
+  const testImportInsert = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('test-import-insert');
+
+      if (error) throw error;
+
+      toast({
+        title: "Import Test Results",
+        description: `${data.summary.successful}/${data.summary.totalTests} tests passed. Check console for details.`,
+        variant: data.summary.failed > 0 ? "destructive" : "default",
+      });
+
+      console.log('Import test results:', data.summary);
+    } catch (error) {
+      console.error('Test error:', error);
+      toast({
+        title: "Test Failed",
+        description: error instanceof Error ? error.message : "Failed to run import tests",
+        variant: "destructive",
+      });
+    }
+  };
+
   const resetStuckImport = async (importId: string) => {
     try {
       const { error } = await supabase.functions.invoke('reset-stuck-import', {
@@ -246,6 +269,17 @@ export const BulkImportManager = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 flex justify-end">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={testImportInsert}
+              className="flex items-center gap-2"
+            >
+              <TestTube className="h-4 w-4" />
+              Test Import Schema
+            </Button>
+          </div>
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
