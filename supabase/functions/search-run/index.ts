@@ -48,45 +48,61 @@ serve(async (req) => {
     let results = [];
 
     if (tab === 'companies') {
-      // Mock company search results based on Phase 11 spec
-      results = [
-        {
-          company_id: '1',
-          name: 'Samsung Electronics Co Ltd',
-          location: 'Seoul, KR',
-          industry: 'Consumer Electronics',
-          shipment_count: 12847,
-          last_shipment_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          trade_volume_usd: 2400000000,
-          confidence: 98,
-          trend: 'up',
-          logo_url: null
-        },
-        {
-          company_id: '2',
-          name: 'Apple Inc',
-          location: 'Cupertino, CA, US',
-          industry: 'Technology Hardware',
-          shipment_count: 9234,
-          last_shipment_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          trade_volume_usd: 1800000000,
-          confidence: 96,
-          trend: 'up',
-          logo_url: null
-        },
-        {
-          company_id: '3',
-          name: 'Tesla Inc',
-          location: 'Austin, TX, US',
-          industry: 'Automotive',
-          shipment_count: 6891,
-          last_shipment_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-          trade_volume_usd: 1200000000,
-          confidence: 94,
-          trend: 'up',
-          logo_url: null
-        }
-      ];
+      // Query real data from unified_shipments table
+      const { data: shipmentData, error: shipmentError } = await supabase
+        .from('unified_shipments')
+        .select(`
+          inferred_company_name,
+          shipper_country,
+          consignee_country,
+          shipment_date,
+          value_usd,
+          transport_mode
+        `)
+        .not('inferred_company_name', 'is', null)
+        .order('shipment_date', { ascending: false })
+        .limit(1000);
+
+      if (shipmentError) {
+        console.error('Error fetching shipment data:', shipmentError);
+        // Fall back to empty results on error
+        results = [];
+      } else {
+        // Group by company and aggregate data
+        const companyMap = new Map();
+        
+        shipmentData?.forEach(shipment => {
+          const companyName = shipment.inferred_company_name;
+          if (!companyMap.has(companyName)) {
+            companyMap.set(companyName, {
+              company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+              name: companyName,
+              location: shipment.shipper_country || shipment.consignee_country || 'Unknown',
+              industry: 'Trade & Logistics',
+              shipment_count: 0,
+              last_shipment_at: shipment.shipment_date,
+              trade_volume_usd: 0,
+              confidence: 90,
+              trend: 'up',
+              logo_url: null
+            });
+          }
+          
+          const company = companyMap.get(companyName);
+          company.shipment_count += 1;
+          company.trade_volume_usd += shipment.value_usd || 0;
+          
+          // Update last shipment date if newer
+          if (shipment.shipment_date > company.last_shipment_at) {
+            company.last_shipment_at = shipment.shipment_date;
+          }
+        });
+
+        // Convert to array and sort by trade volume
+        results = Array.from(companyMap.values())
+          .sort((a, b) => b.trade_volume_usd - a.trade_volume_usd)
+          .slice(0, 50); // Limit to top 50 companies
+      }
 
       // Apply simple filtering
       if (filters.origin_country) {
@@ -105,23 +121,44 @@ serve(async (req) => {
       }
 
     } else if (tab === 'shipments') {
-      // Mock shipment results
-      results = [
-        {
-          id: 1,
-          company: 'Apple Inc',
-          mode: 'air',
-          origin: 'Shanghai, CN',
-          destination: 'Los Angeles, US',
-          value: '$2,400,000',
-          weight: '24,500 kg',
-          confidence: 95,
-          date: '2025-08-15',
-          hs_code: '8471.60',
-          carrier: 'FedEx Express',
-          description: 'Computer parts and accessories'
-        }
-      ];
+      // Query real shipment data
+      const { data: shipmentData, error: shipmentError } = await supabase
+        .from('unified_shipments')
+        .select(`
+          id,
+          inferred_company_name,
+          transport_mode,
+          shipper_country,
+          consignee_country,
+          value_usd,
+          weight_kg,
+          shipment_date,
+          hs_code,
+          carrier_name,
+          commodity_description
+        `)
+        .order('shipment_date', { ascending: false })
+        .limit(100);
+
+      if (shipmentError) {
+        console.error('Error fetching shipments:', shipmentError);
+        results = [];
+      } else {
+        results = shipmentData?.map(shipment => ({
+          id: shipment.id,
+          company: shipment.inferred_company_name || 'Unknown Company',
+          mode: shipment.transport_mode || 'unknown',
+          origin: shipment.shipper_country || 'Unknown',
+          destination: shipment.consignee_country || 'Unknown',
+          value: shipment.value_usd ? `$${shipment.value_usd.toLocaleString()}` : 'N/A',
+          weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : 'N/A',
+          confidence: 90,
+          date: shipment.shipment_date || '2025-01-01',
+          hs_code: shipment.hs_code || 'N/A',
+          carrier: shipment.carrier_name || 'Unknown Carrier',
+          description: shipment.commodity_description || 'Trade goods'
+        })) || [];
+      }
 
     } else if (tab === 'routes') {
       // Mock route results

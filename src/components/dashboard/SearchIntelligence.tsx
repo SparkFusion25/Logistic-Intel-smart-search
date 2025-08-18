@@ -24,6 +24,8 @@ export function SearchIntelligence() {
   const [selectedCompany, setSelectedCompany] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [watchlist, setWatchlist] = useState(new Set())
+  const [searchResults, setSearchResults] = useState({ total: 0, items: [] })
+  const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
     mode: "all",
     range: "90d",
@@ -134,7 +136,7 @@ export function SearchIntelligence() {
     }
   ]
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
       toast({
         title: "Search Required",
@@ -144,11 +146,39 @@ export function SearchIntelligence() {
       return
     }
     
+    setLoading(true)
     setHasSearched(true)
-    toast({
-      title: "Search Started",
-      description: `Searching for "${searchQuery}"...`
-    })
+    
+    try {
+      const response = await makeRequest('/search-run', {
+        method: 'POST',
+        body: {
+          q: searchQuery,
+          tab: activeTab,
+          filters: filters,
+          pagination: { limit: 20, offset: 0 },
+          sort: { field: 'trade_volume', dir: 'desc' }
+        }
+      })
+      
+      if (response) {
+        setSearchResults(response)
+        toast({
+          title: "Search Complete",
+          description: `Found ${response.total} results for "${searchQuery}"`
+        })
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+      toast({
+        title: "Search Failed",
+        description: "There was an error performing the search. Please try again.",
+        variant: "destructive"
+      })
+      setSearchResults({ total: 0, items: [] })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSaveSearch = () => {
@@ -445,12 +475,22 @@ export function SearchIntelligence() {
           </div>
           
           <p className="text-sm text-gray-600">
-            Found {companyResults.length} results for "{searchQuery}"
+            {loading ? "Searching..." : `Found ${searchResults.total} results for "${searchQuery}"`}
           </p>
         </div>
 
         <TabsContent value="companies" className="space-y-4">
-          {companyResults.map((company) => (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Searching trade data...</p>
+            </div>
+          ) : searchResults.items.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No companies found for your search.</p>
+            </div>
+          ) : (
+            searchResults.items.map((company) => (
             <div key={company.company_id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
                 <div className="flex items-start space-x-3 sm:space-x-4 flex-1">
@@ -543,11 +583,22 @@ export function SearchIntelligence() {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="shipments" className="space-y-4">
-          {shipmentResults.map((shipment) => (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Searching shipments...</p>
+            </div>
+          ) : searchResults.items.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No shipments found for your search.</p>
+            </div>
+          ) : (
+            searchResults.items.map((shipment) => (
             <div key={shipment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-start space-x-4">
                 <div className="flex items-center space-x-2">
@@ -600,7 +651,8 @@ export function SearchIntelligence() {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="routes" className="space-y-4">
