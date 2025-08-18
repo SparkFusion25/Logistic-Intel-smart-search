@@ -418,10 +418,6 @@ function parseSingleSheetXLSX(workbook: any, sheetName: string): TradeRecord[] {
 
   console.log(`parseSingleSheetXLSX: Successfully parsed ${records.length} records from ${sheetName}`);
   return records;
-  } catch (error) {
-    console.error('parseXLSX: Error parsing XLSX:', error);
-    throw new Error(`XLSX parsing failed: ${error.message}`);
-  }
 }
 
 function parseCSV(text: string): TradeRecord[] {
