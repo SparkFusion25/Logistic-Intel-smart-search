@@ -40,22 +40,38 @@ serve(async (req) => {
 
     if (req.method === 'GET') {
       const url = new URL(req.url);
-      const pipelineId = url.searchParams.get("pipelineId");
-      const stageId = url.searchParams.get("stageId");
-      const q = url.searchParams.get("q");
-      const limit = Number(url.searchParams.get("limit") ?? 50);
-      const offset = Number(url.searchParams.get("offset") ?? 0);
+      const pipelineId = url.searchParams.get("pipeline_id");
+      const stageId = url.searchParams.get("stage_id");
+      const search = url.searchParams.get("search");
+      const page = Number(url.searchParams.get("page") ?? 1);
+      const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 50); // Max 50 deals per page
+      const offset = (page - 1) * limit;
 
       let query = supabase
         .from("deals")
-        .select("id, title, company_name, value_usd, currency, expected_close_date, status, stage_id, contact_id, created_at, updated_at, crm_contacts(full_name, email, company_name)")
+        .select(`
+          id, 
+          title, 
+          company_name, 
+          value_usd, 
+          currency, 
+          expected_close_date, 
+          status, 
+          stage_id, 
+          contact_id, 
+          created_at, 
+          updated_at,
+          crm_contacts(full_name, email, company_name)
+        `, { count: 'exact' })
         .eq("org_id", orgId)
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
 
       if (pipelineId) query = query.eq("pipeline_id", pipelineId);
       if (stageId) query = query.eq("stage_id", stageId);
-      if (q) query = query.ilike("title", `%${q}%`);
+      if (search) {
+        query = query.or(`title.ilike.%${search}%,company_name.ilike.%${search}%`);
+      }
 
       const { data, error, count } = await query;
       if (error) {
@@ -66,7 +82,22 @@ serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ success: true, data: data ?? [], total: count ?? data?.length ?? 0 }), {
+      // Transform data to include contact_name from the joined data
+      const transformedData = (data || []).map(deal => ({
+        ...deal,
+        contact_name: deal.crm_contacts?.full_name || null,
+        crm_contacts: undefined // Remove the nested object
+      }));
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        data: transformedData,
+        total_count: count || 0,
+        current_page: page,
+        total_pages: Math.ceil((count || 0) / limit),
+        has_next: offset + limit < (count || 0),
+        has_prev: page > 1
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

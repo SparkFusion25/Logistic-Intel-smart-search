@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Eye, Edit2, Trash2, Search, Filter, MoreHorizontal, DollarSign, Calendar, User, Building2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
@@ -58,6 +59,11 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
   const [loading, setLoading] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 50;
 
   const { makeRequest } = useAPI();
   const { toast } = useToast();
@@ -83,11 +89,18 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
     try {
       const response = await makeRequest("crm-deals", {
         method: "GET",
-        params: { pipeline_id: pipeline }
+        params: { 
+          pipeline_id: pipeline,
+          page: currentPage,
+          limit: itemsPerPage,
+          search: searchQuery,
+          stage_id: selectedStage !== "all" ? selectedStage : undefined
+        }
       });
       
       if (response?.success && response?.data) {
         setDeals(response.data);
+        setTotalCount(response.total_count || response.data.length);
       }
     } catch (error) {
       console.error("Failed to load deals:", error);
@@ -133,30 +146,15 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
 
   useEffect(() => {
     if (selectedPipeline) {
+      setCurrentPage(1); // Reset to first page when pipeline changes
       loadDeals(selectedPipeline);
     }
-  }, [selectedPipeline]);
+  }, [selectedPipeline, currentPage, searchQuery, selectedStage]);
 
+  // Apply filters locally (since we're using server-side pagination)
   useEffect(() => {
-    let filtered = deals;
-
-    // Filter by stage
-    if (selectedStage !== "all") {
-      filtered = filtered.filter(deal => deal.stage_id === selectedStage);
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(deal =>
-        deal.title?.toLowerCase().includes(query) ||
-        deal.company_name?.toLowerCase().includes(query) ||
-        deal.contact_name?.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredDeals(filtered);
-  }, [deals, selectedStage, searchQuery]);
+    setFilteredDeals(deals);
+  }, [deals]);
 
   const currentPipeline = pipelines.find(p => p.id === selectedPipeline);
   const stages = currentPipeline?.stages || [];
@@ -313,15 +311,51 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
               </div>
             </div>
 
-            {/* Results Summary */}
-            <div className="flex items-center gap-4 text-sm text-slate-600 pt-2 border-t border-slate-200">
-              <span>
-                Showing {filteredDeals.length} of {deals.length} deals
-              </span>
-              <span>•</span>
-              <span>
-                Total Value: {formatCurrency(filteredDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0))}
-              </span>
+            {/* Results Summary with Pagination Info */}
+            <div className="flex items-center justify-between text-sm text-slate-600 pt-2 border-t border-slate-200">
+              <div className="flex items-center gap-4">
+                <span>
+                  Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalCount)} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} deals
+                </span>
+                <span>•</span>
+                <span>
+                  Total Value: {formatCurrency(filteredDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0))}
+                </span>
+              </div>
+              
+              {/* Pagination Controls */}
+              {Math.ceil(totalCount / itemsPerPage) > 1 && (
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    {[...Array(Math.min(5, Math.ceil(totalCount / itemsPerPage)))].map((_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <PaginationLink 
+                            onClick={() => setCurrentPage(pageNum)}
+                            isActive={currentPage === pageNum}
+                            className="cursor-pointer"
+                          >
+                            {pageNum}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(prev => Math.min(Math.ceil(totalCount / itemsPerPage), prev + 1))}
+                        className={currentPage >= Math.ceil(totalCount / itemsPerPage) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
             </div>
           </CardContent>
         </Card>
