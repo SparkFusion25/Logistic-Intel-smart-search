@@ -187,71 +187,79 @@ export function DealPipeline() {
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-blue-50/50">
-      {/* Header */}
-      <div className="border-b bg-white/70 backdrop-blur-sm p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Sales Pipeline
-              </h1>
-              <p className="text-slate-600 mt-1">Track and manage your deals through the sales process</p>
-            </div>
-            <div className="flex items-center space-x-6 text-sm">
-              <div className="bg-white rounded-xl px-4 py-2 shadow-sm border border-slate-200">
-                <span className="text-slate-500 font-medium">Total Deals</span>
-                <div className="text-2xl font-bold text-slate-800">{totalDeals}</div>
+      {/* Responsive Header */}
+      <div className="border-b bg-white/70 backdrop-blur-sm shadow-sm">
+        <div className="p-4 sm:p-6">
+          {/* Mobile Header Layout */}
+          <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
+            {/* Title and Metrics */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+              <div className="mb-3 sm:mb-0">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Sales Pipeline
+                </h1>
+                <p className="text-slate-600 mt-1 text-sm sm:text-base">Track and manage your deals</p>
               </div>
-              <div className="bg-white rounded-xl px-4 py-2 shadow-sm border border-slate-200">
-                <span className="text-slate-500 font-medium">Pipeline Value</span>
-                <div className="text-2xl font-bold text-green-600">${totalValue.toLocaleString()}</div>
+              {/* Metrics - Responsive */}
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:space-x-4">
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Deals</span>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-800">{totalDeals}</div>
+                </div>
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Value</span>
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">
+                    ${totalValue.toLocaleString()}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search deals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-72 pl-10 bg-white border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
+            
+            {/* Search and Actions */}
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search deals..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full sm:w-64 lg:w-72 pl-10 bg-white border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  setSelectedStageId(sortedStages[0]?.id || "");
+                  setNewDealOpen(true);
+                }}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/30 w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Deal
+              </Button>
             </div>
-            <Button
-              onClick={() => {
-                setSelectedStageId(sortedStages[0]?.id || "");
-                setNewDealOpen(true);
-              }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/30"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Deal
-            </Button>
           </div>
         </div>
       </div>
 
-      {/* Pipeline Board */}
+      {/* Responsive Pipeline Board */}
       <div className="flex-1 overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50/30">
         <DndContext
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
           collisionDetection={closestCorners}
         >
-          <div className="h-full overflow-x-auto p-6">
-            <div className="flex gap-6 min-w-fit h-full">
+          {/* Mobile/Tablet: Vertical Stack | Desktop: Horizontal Scroll */}
+          <div className="h-full">
+            {/* Mobile/Tablet Layout */}
+            <div className="block lg:hidden h-full overflow-y-auto p-4 space-y-6">
               {sortedStages.map((stage, index) => {
                 const stageColors = getStageColors(stage.name, index);
                 const stageDeals = dealsByStage[stage.id] || [];
                 const stageValue = stageDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0);
                 
                 return (
-                  <div
-                    key={stage.id}
-                    className="w-80 flex-shrink-0 flex flex-col h-full"
-                  >
-                    {/* Stage Header */}
+                  <div key={stage.id} className="w-full">
+                    {/* Mobile Stage Header */}
                     <div 
                       className="mb-4 rounded-2xl p-4 shadow-lg border-l-4"
                       style={{
@@ -291,14 +299,14 @@ export function DealPipeline() {
                       </div>
                     </div>
 
-                    {/* Deals Container */}
+                    {/* Mobile Deals Grid */}
                     <SortableContext
                       id={stage.id}
                       items={stageDeals.map(d => d.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      <div
-                        className="space-y-3 flex-1 min-h-32 rounded-xl bg-white/30 backdrop-blur-sm p-3 border border-white/40"
+                      <div 
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-xl bg-white/30 backdrop-blur-sm p-3 border border-white/40 min-h-32"
                         data-stage-id={stage.id}
                       >
                         {stageDeals.map((deal) => (
@@ -309,10 +317,10 @@ export function DealPipeline() {
                           />
                         ))}
                         {stageDeals.length === 0 && (
-                          <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+                          <div className="col-span-full flex flex-col items-center justify-center py-8 text-slate-400">
                             <Target className="h-8 w-8 mb-2 opacity-50" />
                             <p className="text-sm">No deals yet</p>
-                            <p className="text-xs">Drag deals here or add new ones</p>
+                            <p className="text-xs text-center">Tap to add new deals</p>
                           </div>
                         )}
                       </div>
@@ -320,6 +328,91 @@ export function DealPipeline() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden lg:block h-full overflow-x-auto p-6">
+              <div className="flex gap-6 min-w-fit h-full">
+                {sortedStages.map((stage, index) => {
+                  const stageColors = getStageColors(stage.name, index);
+                  const stageDeals = dealsByStage[stage.id] || [];
+                  const stageValue = stageDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0);
+                  
+                  return (
+                    <div
+                      key={stage.id}
+                      className="w-80 xl:w-96 flex-shrink-0 flex flex-col h-full"
+                    >
+                      {/* Desktop Stage Header */}
+                      <div 
+                        className="mb-4 rounded-2xl p-4 shadow-lg border-l-4"
+                        style={{
+                          background: `linear-gradient(135deg, ${stageColors.bg}, ${stageColors.bgLight})`,
+                          borderLeftColor: stageColors.border
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: stageColors.border }}
+                            />
+                            <h3 className="font-semibold text-slate-800 text-lg">{stage.name}</h3>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedStageId(stage.id);
+                              setNewDealOpen(true);
+                            }}
+                            className="h-8 w-8 p-0 hover:bg-white/50 rounded-lg"
+                          >
+                            <Plus className="h-4 w-4 text-slate-600" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="bg-white/60 rounded-lg px-3 py-1">
+                            <span className="text-slate-600 font-medium">{stageDeals.length} deals</span>
+                          </div>
+                          <div className="bg-white/60 rounded-lg px-3 py-1">
+                            <span className="font-semibold text-slate-700">
+                              ${stageValue.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Desktop Deals Container */}
+                      <SortableContext
+                        id={stage.id}
+                        items={stageDeals.map(d => d.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div
+                          className="space-y-3 flex-1 min-h-32 rounded-xl bg-white/30 backdrop-blur-sm p-3 border border-white/40"
+                          data-stage-id={stage.id}
+                        >
+                          {stageDeals.map((deal) => (
+                            <DealCard
+                              key={deal.id}
+                              deal={deal}
+                              stageId={stage.id}
+                            />
+                          ))}
+                          {stageDeals.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+                              <Target className="h-8 w-8 mb-2 opacity-50" />
+                              <p className="text-sm">No deals yet</p>
+                              <p className="text-xs">Drag deals here or add new ones</p>
+                            </div>
+                          )}
+                        </div>
+                      </SortableContext>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -348,7 +441,7 @@ export function DealPipeline() {
     </div>
   );
 
-  // Helper function to get stage colors
+  // Helper function to get stage colors - keeping exact same functionality
   function getStageColors(stageName: string, index: number) {
     const colorMap: Record<string, any> = {
       'Prospect Identified': { 
