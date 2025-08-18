@@ -45,6 +45,7 @@ const Dashboard = () => {
     }
     return "there";
   };
+
   const overviewMetrics = [
     {
       title: "Total Companies",
@@ -52,7 +53,7 @@ const Dashboard = () => {
       change: "+12.5%",
       changeType: "increase" as const,
       icon: Building2,
-      color: "from-blue-400 to-blue-500",
+      color: "from-blue-500 to-indigo-600",
       trend: "up" as const
     },
     {
@@ -61,7 +62,7 @@ const Dashboard = () => {
       change: "+8.2%",
       changeType: "increase" as const,
       icon: Search,
-      color: "from-emerald-400 to-emerald-500",
+      color: "from-cyan-500 to-blue-600",
       trend: "up" as const
     },
     {
@@ -70,7 +71,7 @@ const Dashboard = () => {
       change: "+15.7%",
       changeType: "increase" as const,
       icon: Users,
-      color: "from-purple-400 to-purple-500",
+      color: "from-indigo-500 to-purple-600",
       trend: "up" as const
     },
     {
@@ -79,7 +80,7 @@ const Dashboard = () => {
       change: "+3.1%",
       changeType: "increase" as const,
       icon: TrendingUp,
-      color: "from-orange-400 to-orange-500",
+      color: "from-blue-600 to-cyan-600",
       trend: "up" as const
     }
   ];
@@ -143,49 +144,52 @@ const Dashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <AppSidebar />
         <SidebarInset className="flex-1">
           <TopBar />
           <main className="flex-1 p-4 sm:p-6">
             <div className="max-w-7xl mx-auto space-y-6">
-              {/* Header */}
+              {/* Enhanced Header with Gradient */}
               <div className="mb-8">
-                <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8" style={{ background: 'var(--sidebar-background)' }}>
-                  {/* Background patterns */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"></div>
-                  <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full -translate-x-48 -translate-y-48 blur-3xl"></div>
-                  <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-48 translate-y-48 blur-3xl"></div>
+                <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 shadow-2xl">
+                  {/* Enhanced background patterns */}
+                  <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-indigo-500/5 to-purple-600/10"></div>
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-cyan-400/10 rounded-full -translate-x-48 -translate-y-48 blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full translate-x-48 translate-y-48 blur-3xl"></div>
+                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-400/5 rounded-full -translate-x-32 -translate-y-32 blur-2xl"></div>
+                  </div>
                   
                   <div className="relative z-10">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div className="mb-6 sm:mb-0">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                            <User className="w-6 h-6 text-white" />
+                        <div className="flex items-center space-x-4 mb-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                            <User className="w-8 h-8 text-white" />
                           </div>
                           <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-white">
+                            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                               {greeting}, {getDisplayName()}! 👋
                             </h1>
-                            <p className="text-white/80 mt-1">Ready to discover new trade opportunities?</p>
+                            <p className="text-blue-100 text-lg">Ready to discover new trade opportunities?</p>
                           </div>
                         </div>
-                        <p className="text-white/70 text-sm sm:text-base max-w-2xl">
+                        <p className="text-blue-200 text-base sm:text-lg max-w-2xl leading-relaxed">
                           Your trade intelligence dashboard is ready. Here's what's happening with your searches and contacts.
                         </p>
                       </div>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                         <Button 
                           variant="outline" 
-                          className="flex items-center justify-center px-4 py-2 bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+                          className="flex items-center justify-center px-6 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105"
                         >
-                          <Download className="w-4 h-4 mr-2" />
+                          <Download className="w-5 h-5 mr-2" />
                           Export Data
                         </Button>
                         <Link to="/dashboard/search">
-                          <Button className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-white text-primary hover:bg-white/90">
-                            <Plus className="w-4 h-4 mr-2" />
+                          <Button className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:scale-105 transition-all duration-200">
+                            <Plus className="w-5 h-5 mr-2" />
                             New Search
                           </Button>
                         </Link>
@@ -195,211 +199,177 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Key Metrics */}
+              {/* Enhanced Key Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {overviewMetrics.map((metric, index) => (
-                  <StatCard
+                  <div
                     key={index}
-                    title={metric.title}
-                    value={metric.value}
-                    change={metric.change}
-                    changeType={metric.changeType}
-                    icon={metric.icon}
-                    color={metric.color}
-                    trend={metric.trend}
-                  />
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-100/50 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300 hover:scale-105 group"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200`}>
+                        <metric.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                        metric.changeType === 'increase' 
+                          ? 'bg-emerald-50 text-emerald-700' 
+                          : 'bg-red-50 text-red-700'
+                      }`}>
+                        <span>↗</span>
+                        <span>{metric.change}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-3xl font-bold text-slate-900">{metric.value}</p>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">{metric.title}</p>
+                    </div>
+                  </div>
                 ))}
               </div>
 
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                {/* Recent Searches */}
-                <div className="lg:col-span-2 bg-card rounded-xl shadow-sm border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-300">
-                  <div className="p-4 sm:p-6 border-b border-border">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* Enhanced Recent Searches */}
+                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
+                  <div className="p-6 border-b border-blue-100/50">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                      <h2 className="text-lg sm:text-xl font-bold text-foreground">Recent Searches</h2>
-                     <div className="flex items-center space-x-2">
-                       <button className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent transition-colors">
-                         <RefreshCw className="w-4 h-4" />
-                       </button>
-                       <Link to="/dashboard/search" className="text-primary hover:text-primary/80 font-semibold text-sm">
-                         View All
-                       </Link>
-                     </div>
-                   </div>
-                 </div>
-                 <div className="p-4 sm:p-6">
-                   <div className="space-y-3">
-                     {recentSearches.map((search) => (
-                       <div key={search.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 cursor-pointer group">
-                         <div className="flex items-center space-x-3 sm:space-x-4 mb-2 sm:mb-0">
-                           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary/20 to-primary/30 rounded-lg flex items-center justify-center group-hover:from-primary/30 group-hover:to-primary/40 transition-colors">
-                             <Search className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                           </div>
-                           <div className="min-w-0 flex-1">
-                             <p className="font-medium text-foreground text-sm sm:text-base truncate">{search.query}</p>
-                             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-0">
-                               <span className="flex items-center">
-                                 <Globe className="w-3 h-3 mr-1 flex-shrink-0" />
-                                 <span className="truncate">{search.location}</span>
-                               </span>
-                               <span className="hidden sm:inline">{search.results.toLocaleString()} results</span>
-                             </div>
-                           </div>
-                         </div>
-                         <div className="text-left sm:text-right flex sm:flex-col justify-between sm:justify-center space-x-2 sm:space-x-0">
-                           <span className="text-xs text-muted-foreground">{search.time}</span>
-                           <p className="text-xs sm:text-sm text-emerald-600 font-medium">Completed</p>
-                           <span className="sm:hidden text-xs text-muted-foreground">{search.results.toLocaleString()} results</span>
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-               </div>
-
-                {/* Quick Actions */}
-                <div className="bg-card rounded-xl shadow-sm border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-300">
-                  <div className="p-4 sm:p-6 border-b border-border">
-                    <h2 className="text-lg sm:text-xl font-bold text-foreground">Quick Actions</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Common workflow shortcuts</p>
+                      <h2 className="text-xl font-bold text-slate-900">Recent Searches</h2>
+                      <div className="flex items-center space-x-3">
+                        <button className="p-2 text-slate-500 hover:text-blue-600 rounded-xl hover:bg-blue-50 transition-colors">
+                          <RefreshCw className="w-4 h-4" />
+                        </button>
+                        <Link to="/dashboard/search" className="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+                          View All
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                 <div className="p-4 sm:p-6">
-                   <div className="space-y-2 sm:space-y-3">
-                     <Link 
-                       to="/dashboard/search" 
-                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
-                     >
-                       <div className="flex items-center space-x-3">
-                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                           <Search className="w-4 h-4 text-primary" />
-                         </div>
-                         <span className="font-medium text-foreground text-sm sm:text-base">New Search</span>
-                       </div>
-                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                     </Link>
-                     
-                     <Link 
-                       to="/dashboard/crm" 
-                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
-                     >
-                       <div className="flex items-center space-x-3">
-                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                           <Users className="w-4 h-4 text-primary" />
-                         </div>
-                         <span className="font-medium text-foreground text-sm sm:text-base">Add Contact</span>
-                       </div>
-                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                     </Link>
-                     
-                     <Link 
-                       to="/dashboard/analytics" 
-                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
-                     >
-                       <div className="flex items-center space-x-3">
-                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                           <BarChart3 className="w-4 h-4 text-primary" />
-                         </div>
-                         <span className="font-medium text-foreground text-sm sm:text-base">View Analytics</span>
-                       </div>
-                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                     </Link>
-                     
-                     <Link 
-                       to="/dashboard/settings" 
-                       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 group"
-                     >
-                       <div className="flex items-center space-x-3">
-                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                           <Zap className="w-4 h-4 text-primary" />
-                         </div>
-                         <span className="font-medium text-foreground text-sm sm:text-base">Settings</span>
-                       </div>
-                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                     </Link>
-                   </div>
-                 </div>
-               </div>
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      {recentSearches.map((search) => (
+                        <div key={search.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl border border-blue-100/50 hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-200 cursor-pointer group">
+                          <div className="flex items-center space-x-4 mb-3 sm:mb-0">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                              <Search className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-slate-900 truncate">{search.query}</p>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-slate-500 space-y-1 sm:space-y-0">
+                                <span className="flex items-center">
+                                  <Globe className="w-3 h-3 mr-1" />
+                                  {search.location}
+                                </span>
+                                <span>{search.results.toLocaleString()} results</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <span className="text-xs text-slate-500">{search.time}</span>
+                            <p className="text-sm text-emerald-600 font-semibold">Completed</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enhanced Quick Actions */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
+                  <div className="p-6 border-b border-blue-100/50">
+                    <h2 className="text-xl font-bold text-slate-900">Quick Actions</h2>
+                    <p className="text-sm text-slate-600 mt-1">Common workflow shortcuts</p>
+                  </div>
+                  <div className="p-6">
+                    <div className="space-y-3">
+                      {[
+                        { to: "/dashboard/search", icon: Search, title: "New Search" },
+                        { to: "/dashboard/crm", icon: Users, title: "Add Contact" },
+                        { to: "/dashboard/analytics", icon: BarChart3, title: "View Analytics" },
+                        { to: "/dashboard/settings", icon: Zap, title: "Settings" }
+                      ].map((action, index) => (
+                        <Link 
+                          key={index}
+                          to={action.to} 
+                          className="flex items-center justify-between p-3 rounded-xl border border-blue-100/50 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 transition-all duration-200 group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                              <action.icon className="w-4 h-4 text-white" />
+                            </div>
+                            <span className="font-medium text-slate-900">{action.title}</span>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Top Companies */}
-              <div className="bg-card rounded-xl shadow-sm border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-300">
-                <div className="p-4 sm:p-6 border-b border-border">
+              {/* Enhanced Top Companies */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
+                <div className="p-6 border-b border-blue-100/50">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                    <h2 className="text-lg sm:text-xl font-bold text-foreground">Top Discovered Companies</h2>
+                    <h2 className="text-xl font-bold text-slate-900">Top Discovered Companies</h2>
                     <div className="flex items-center space-x-3">
-                      <Button variant="outline" size="sm" className="p-2">
+                      <Button variant="outline" size="sm" className="p-2 border-blue-200 hover:bg-blue-50">
                         <Filter className="w-4 h-4" />
                       </Button>
-                      <Link to="/dashboard/search" className="text-primary hover:text-primary/80 font-semibold text-sm">
+                      <Link to="/dashboard/search" className="text-blue-600 hover:text-blue-700 font-semibold text-sm">
                         View All Results
                       </Link>
                     </div>
-                 </div>
-               </div>
-               <div className="p-4 sm:p-6">
-                 <div className="space-y-3 sm:space-y-4">
-                   {topCompanies.map((company, index) => (
-                     <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 hover:shadow-md transition-all duration-200 cursor-pointer group space-y-3 sm:space-y-0">
-                       <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
-                         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl flex items-center justify-center group-hover:from-primary/20 group-hover:to-primary/30 transition-colors flex-shrink-0">
-                           <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                         </div>
-                         <div className="min-w-0 flex-1">
-                           <h3 className="font-bold text-foreground group-hover:text-primary transition-colors text-sm sm:text-base truncate">
-                             {company.name}
-                           </h3>
-                           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-0">
-                             <span className="flex items-center">
-                               <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
-                               <span className="truncate">{company.location}</span>
-                             </span>
-                             <span className="hidden sm:inline">{company.industry}</span>
-                           </div>
-                           <div className="sm:hidden text-xs text-muted-foreground mt-1">
-                             {company.industry}
-                           </div>
-                         </div>
-                       </div>
-                       <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-6 w-full sm:w-auto">
-                         <div className="text-left sm:text-right">
-                           <p className="font-bold text-foreground text-sm sm:text-base">{company.volume}</p>
-                           <p className="text-xs text-muted-foreground">Trade Volume</p>
-                         </div>
-                         <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
-                           company.status === 'Hot Lead' ? 'bg-destructive/10 text-destructive' :
-                           company.status === 'Prospect' ? 'bg-warning/10 text-warning' :
-                           'bg-success/10 text-success'
-                         }`}>
-                           {company.status}
-                         </span>
-                         <div className="hidden sm:flex items-center space-x-2">
-                           <button className="p-2 text-muted-foreground hover:text-warning hover:bg-warning/10 rounded-lg transition-colors">
-                             <Star className="w-4 h-4" />
-                           </button>
-                           <button className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                             <Eye className="w-4 h-4" />
-                           </button>
-                           <button className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                             <ExternalLink className="w-4 h-4" />
-                           </button>
-                         </div>
-                         <div className="flex sm:hidden items-center space-x-1">
-                           <button className="p-1.5 text-muted-foreground hover:text-warning hover:bg-warning/10 rounded-lg transition-colors">
-                             <Star className="w-3.5 h-3.5" />
-                           </button>
-                           <button className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                             <Eye className="w-3.5 h-3.5" />
-                           </button>
-                           <button className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                             <ExternalLink className="w-3.5 h-3.5" />
-                           </button>
-                         </div>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {topCompanies.map((company, index) => (
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl border border-blue-100/50 hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-200 cursor-pointer group">
+                        <div className="flex items-center space-x-4 min-w-0 flex-1 mb-3 sm:mb-0">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                            <Building2 className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors truncate">
+                              {company.name}
+                            </h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-slate-500">
+                              <span className="flex items-center">
+                                <MapPin className="w-3 h-3 mr-1" />
+                                {company.location}
+                              </span>
+                              <span>{company.industry}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between sm:justify-end space-x-6 w-full sm:w-auto">
+                          <div className="text-left sm:text-right">
+                            <p className="font-bold text-slate-900">{company.volume}</p>
+                            <p className="text-xs text-slate-500">Trade Volume</p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            company.status === 'Hot Lead' ? 'bg-red-100 text-red-700' :
+                            company.status === 'Prospect' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {company.status}
+                          </span>
+                          <div className="flex items-center space-x-2">
+                            <button className="p-2 text-slate-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors">
+                              <Star className="w-4 h-4" />
+                            </button>
+                            <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </main>
         </SidebarInset>
