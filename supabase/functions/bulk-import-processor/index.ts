@@ -849,8 +849,13 @@ async function processBatch(
 
   for (const record of records) {
     try {
-      // Infer company name from enriched data (guaranteed to exist)
-      const inferredCompany = record.shipper_name || record.consignee_name || 'Unknown Company';
+      // Infer company name from enriched data - validate using is_valid_company_name
+      let inferredCompany = record.shipper_name || record.consignee_name;
+      
+      // If no valid company name found, create a temporary placeholder
+      if (!inferredCompany) {
+        inferredCompany = `Unknown Company ${Math.random().toString(36).substr(2, 9)}`;
+      }
       
       // Calculate confidence score based on available data
       let confidenceScore = 0;
@@ -875,10 +880,11 @@ async function processBatch(
       }
 
       // Insert into unified_shipments table with GUARANTEED REQUIRED FIELDS
+      // Note: The trigger will automatically queue invalid company names for enrichment
       const insertData = {
         org_id: orgId, // Required for RLS
         mode: record.transportation_mode === 'air' ? 'air' : 'ocean', // Required field - guaranteed from enrichment
-        unified_company_name: inferredCompany, // Required field - guaranteed from enrichment
+        unified_company_name: inferredCompany, // Required field - will be validated by trigger
         unified_destination: record.destination_city || record.destination_country,
         unified_value: record.value_usd,
         unified_weight: record.weight_kg,

@@ -2680,53 +2680,39 @@ export type Database = {
       }
       pending_enrichment_records: {
         Row: {
-          company_hints: string[] | null
+          attempts: number
+          company_name: string
           created_at: string
-          enrichment_status: string
-          error_details: Json | null
-          file_type: string
           id: string
-          import_id: string | null
-          missing_fields: string[] | null
+          last_attempt_at: string | null
           org_id: string
-          processed_at: string | null
-          raw_data: Json
+          original_data: Json
+          status: string
+          updated_at: string
         }
         Insert: {
-          company_hints?: string[] | null
+          attempts?: number
+          company_name: string
           created_at?: string
-          enrichment_status?: string
-          error_details?: Json | null
-          file_type: string
           id?: string
-          import_id?: string | null
-          missing_fields?: string[] | null
+          last_attempt_at?: string | null
           org_id: string
-          processed_at?: string | null
-          raw_data: Json
+          original_data?: Json
+          status?: string
+          updated_at?: string
         }
         Update: {
-          company_hints?: string[] | null
+          attempts?: number
+          company_name?: string
           created_at?: string
-          enrichment_status?: string
-          error_details?: Json | null
-          file_type?: string
           id?: string
-          import_id?: string | null
-          missing_fields?: string[] | null
+          last_attempt_at?: string | null
           org_id?: string
-          processed_at?: string | null
-          raw_data?: Json
+          original_data?: Json
+          status?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "pending_enrichment_records_import_id_fkey"
-            columns: ["import_id"]
-            isOneToOne: false
-            referencedRelation: "bulk_imports"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       personas: {
         Row: {
