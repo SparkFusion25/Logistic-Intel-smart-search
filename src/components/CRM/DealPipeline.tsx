@@ -3,22 +3,19 @@
 import { useState, useEffect, useMemo } from "react";
 import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCorners } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter, MoreHorizontal, Target, Users, Calendar } from "lucide-react";
+import { Plus, Search, Target } from "lucide-react";
 import { DealCard } from "./DealCard";
 import { NewDealDialog } from "./NewDealDialog";
 import { useAPI } from "@/hooks/useAPI";
-import { cn } from "@/lib/utils";
 
 interface Stage {
   id: string;
   name: string;
   deals_count: number;
   deals_value: number;
-  sort_order: number;
+  stage_order: number;
 }
 
 interface Pipeline {
@@ -53,8 +50,6 @@ export function DealPipeline() {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
   const [newDealOpen, setNewDealOpen] = useState(false);
   const [selectedStageId, setSelectedStageId] = useState<string>("");
-  const [newPipelineName, setNewPipelineName] = useState("");
-  const [isCreatingPipeline, setIsCreatingPipeline] = useState(false);
 
   const { makeRequest } = useAPI();
 
@@ -81,7 +76,7 @@ export function DealPipeline() {
 
       if (response?.pipelines?.length > 0) {
         setPipelines(response.pipelines);
-        // Find Default pipeline or use first one
+        // Always use Default pipeline
         const defaultPipeline = response.pipelines.find((p: Pipeline) => p.name === 'Default') || response.pipelines[0];
         setSelectedPipeline(defaultPipeline.id);
       }
@@ -94,7 +89,6 @@ export function DealPipeline() {
 
   const loadDeals = async (pipelineId: string) => {
     try {
-      setLoading(true);
       const response = await makeRequest('/crm-deals', {
         method: 'GET',
         params: { pipeline_id: pipelineId, search: searchQuery }
@@ -113,8 +107,6 @@ export function DealPipeline() {
       }
     } catch (error) {
       console.error('Failed to load deals:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -152,30 +144,6 @@ export function DealPipeline() {
     }
   };
 
-  const createPipeline = async () => {
-    if (!newPipelineName.trim()) return;
-    
-    try {
-      setIsCreatingPipeline(true);
-      const response = await makeRequest('/crm-create-pipeline', {
-        method: 'POST',
-        body: { name: newPipelineName }
-      });
-
-      if (response?.success) {
-        // Reload pipelines to include the new one
-        await loadPipelines();
-        setNewPipelineName("");
-      } else {
-        console.error('Failed to create pipeline:', response?.error);
-      }
-    } catch (error) {
-      console.error('Error creating pipeline:', error);
-    } finally {
-      setIsCreatingPipeline(false);
-    }
-  };
-
   const currentPipeline = useMemo(() => 
     pipelines.find(p => p.id === selectedPipeline),
     [pipelines, selectedPipeline]
@@ -191,103 +159,59 @@ export function DealPipeline() {
     return Object.values(dealsByStage).flat().length;
   }, [dealsByStage]);
 
-  if (loading && pipelines.length === 0) {
+  // Simplified loading state
+  if (loading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary mx-auto mb-4" />
-          <p className="text-text-muted">Loading pipeline...</p>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (!currentPipeline) {
+  // Simplified pipeline not found state
+  if (!currentPipeline?.stages?.length) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto">
-          <Target className="h-12 w-12 text-text-muted mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-text-main mb-2">No Pipeline Found</h3>
-          <p className="text-text-muted mb-4">Create your first sales pipeline to get started.</p>
-          
-          <div className="space-y-3">
-            <Input
-              placeholder="Enter pipeline name"
-              value={newPipelineName}
-              onChange={(e) => setNewPipelineName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && createPipeline()}
-            />
-            <Button 
-              onClick={createPipeline}
-              disabled={!newPipelineName.trim() || isCreatingPipeline}
-              className="w-full"
-            >
-              {isCreatingPipeline ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Pipeline
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <p className="text-muted-foreground">Setting up your sales pipeline...</p>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
       </div>
     );
   }
+
+  const sortedStages = [...currentPipeline.stages].sort((a, b) => a.stage_order - b.stage_order);
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="border-b border-line bg-surface-primary p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-text-main">{currentPipeline.name}</h1>
-            <div className="flex items-center gap-4 mt-2 text-sm text-text-muted">
-              <div className="flex items-center gap-1">
-                <Target className="h-4 w-4" />
-                {totalDeals} deals
-              </div>
-              <div className="flex items-center gap-1">
-                <span>$</span>
-                {totalValue.toLocaleString()}
-              </div>
+      {/* Simplified header without pipeline selection */}
+      <div className="border-b bg-card/50 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold">Sales Pipeline</h1>
+            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+              <span>{totalDeals} deals</span>
+              <span>${totalValue.toLocaleString()}</span>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="hidden sm:flex"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button 
-              onClick={() => setNewDealOpen(true)}
-              size="sm"
-              className="bg-brand-primary hover:bg-brand-primary/90"
+          <div className="flex items-center space-x-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search deals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-64 pl-8"
+              />
+            </div>
+            <Button
+              onClick={() => {
+                setSelectedStageId(sortedStages[0]?.id || "");
+                setNewDealOpen(true);
+              }}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Deal
+              New Deal
             </Button>
           </div>
-        </div>
-
-        {/* Search */}
-        <div className="mt-4 relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-muted" />
-          <Input
-            placeholder="Search deals..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
         </div>
       </div>
 
@@ -299,60 +223,58 @@ export function DealPipeline() {
           collisionDetection={closestCorners}
         >
           <div className="h-full overflow-x-auto">
-            <div className="flex gap-4 p-4 sm:p-6 min-w-fit">
-              {currentPipeline.stages
-                .sort((a, b) => a.sort_order - b.sort_order)
-                .map((stage) => (
-                  <div
-                    key={stage.id}
-                    className="w-72 sm:w-80 flex-shrink-0"
-                  >
-                    {/* Stage Header */}
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium text-text-main">{stage.name}</h3>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedStageId(stage.id);
-                            setNewDealOpen(true);
-                          }}
-                          className="h-6 w-6 p-0"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-text-muted">
-                        <span>{dealsByStage[stage.id]?.length || 0} deals</span>
-                        <span>
-                          ${(dealsByStage[stage.id]?.reduce((sum, deal) => 
-                            sum + (deal.value_usd || 0), 0) || 0).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Deals */}
-                    <SortableContext
-                      id={stage.id}
-                      items={dealsByStage[stage.id]?.map(d => d.id) || []}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div
-                        className="space-y-3 min-h-32"
-                        data-stage-id={stage.id}
+            <div className="flex gap-4 p-4 min-w-fit">
+              {sortedStages.map((stage) => (
+                <div
+                  key={stage.id}
+                  className="w-72 flex-shrink-0"
+                >
+                  {/* Stage Header */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">{stage.name}</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedStageId(stage.id);
+                          setNewDealOpen(true);
+                        }}
+                        className="h-6 w-6 p-0"
                       >
-                        {dealsByStage[stage.id]?.map((deal) => (
-                          <DealCard
-                            key={deal.id}
-                            deal={deal}
-                            stageId={stage.id}
-                          />
-                        )) || null}
-                      </div>
-                    </SortableContext>
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{dealsByStage[stage.id]?.length || 0} deals</span>
+                      <span>
+                        ${(dealsByStage[stage.id]?.reduce((sum, deal) => 
+                          sum + (deal.value_usd || 0), 0) || 0).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                ))}
+
+                  {/* Deals */}
+                  <SortableContext
+                    id={stage.id}
+                    items={dealsByStage[stage.id]?.map(d => d.id) || []}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div
+                      className="space-y-3 min-h-32"
+                      data-stage-id={stage.id}
+                    >
+                      {dealsByStage[stage.id]?.map((deal) => (
+                        <DealCard
+                          key={deal.id}
+                          deal={deal}
+                          stageId={stage.id}
+                        />
+                      )) || null}
+                    </div>
+                  </SortableContext>
+                </div>
+              ))}
             </div>
           </div>
 
