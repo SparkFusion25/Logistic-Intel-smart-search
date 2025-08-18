@@ -99,10 +99,10 @@ export function DealPipeline() {
         params: { pipeline_id: pipelineId, search: searchQuery }
       });
 
-      if (response?.deals) {
+      if (response?.data) {
         // Group deals by stage
         const grouped: DealsByStage = {};
-        response.deals.forEach((deal: Deal) => {
+        response.data.forEach((deal: Deal) => {
           if (!grouped[deal.stage_id]) {
             grouped[deal.stage_id] = [];
           }
