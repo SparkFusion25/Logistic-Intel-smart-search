@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import * as XLSX from 'https://esm.sh/xlsx@0.18.5';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,17 +85,18 @@ serve(async (req) => {
 
     // Parse file based on type
     let records: TradeRecord[] = [];
-    const fileText = await fileData.text();
 
     try {
       if (file_type === 'csv') {
+        const fileText = await fileData.text();
         records = parseCSV(fileText);
       } else if (file_type === 'xml') {
+        const fileText = await fileData.text();
         records = parseXML(fileText);
       } else if (file_type === 'xlsx') {
-        // For XLSX, we'll need to handle binary data differently
-        // For now, return error for XLSX processing
-        throw new Error('XLSX processing not yet implemented');
+        // Parse XLSX using binary data
+        const arrayBuffer = await fileData.arrayBuffer();
+        records = parseXLSX(arrayBuffer);
       } else {
         throw new Error(`Unsupported file type: ${file_type}`);
       }
@@ -190,6 +192,43 @@ serve(async (req) => {
     });
   }
 });
+
+function parseXLSX(arrayBuffer: ArrayBuffer): TradeRecord[] {
+  const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+  const sheetName = workbook.SheetNames[0]; // Use first sheet
+  const worksheet = workbook.Sheets[sheetName];
+  
+  // Convert to JSON format
+  const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  
+  if (jsonData.length === 0) return [];
+  
+  // First row should be headers
+  const headers = jsonData[0] as string[];
+  const records: TradeRecord[] = [];
+  
+  // Process each row (skip header)
+  for (let i = 1; i < jsonData.length; i++) {
+    const row = jsonData[i] as any[];
+    const record: TradeRecord = {};
+    
+    headers.forEach((header, index) => {
+      const value = row[index];
+      if (value !== undefined && value !== null && value !== '') {
+        const normalizedHeader = normalizeFieldName(header);
+        if (normalizedHeader) {
+          record[normalizedHeader] = parseValue(String(value), normalizedHeader);
+        }
+      }
+    });
+    
+    if (Object.keys(record).length > 0) {
+      records.push(record);
+    }
+  }
+  
+  return records;
+}
 
 function parseCSV(text: string): TradeRecord[] {
   const lines = text.split('\n').filter(line => line.trim());
