@@ -192,235 +192,316 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Deals List View</h1>
-          <p className="text-gray-600">Manage and filter your sales deals</p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            Export
-          </Button>
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-blue-50/50">
+      {/* Header with Pipeline Styling */}
+      <div className="border-b bg-white/70 backdrop-blur-sm shadow-sm">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
+            {/* Title and Summary Cards */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6">
+              <div className="mb-3 sm:mb-0">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Deals List View
+                </h1>
+                <p className="text-slate-600 mt-1 text-sm sm:text-base">Manage and filter your sales deals</p>
+              </div>
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:flex sm:items-center sm:space-x-4">
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Deals</span>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-800">{filteredDeals.length}</div>
+                </div>
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <span className="text-slate-500 font-medium text-xs sm:text-sm">Value</span>
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">
+                    {formatCurrency(filteredDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0))}
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Building2 className="w-3 h-3 text-blue-500" />
+                    <span className="text-slate-500 font-medium text-xs sm:text-sm">Companies</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-600">
+                    {new Set(filteredDeals.map(d => d.company_name).filter(Boolean)).size}
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl px-3 py-2 sm:px-4 shadow-sm border border-slate-200">
+                  <div className="flex items-center gap-1 mb-1">
+                    <User className="w-3 h-3 text-purple-500" />
+                    <span className="text-slate-500 font-medium text-xs sm:text-sm">Contacts</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-600">
+                    {new Set(filteredDeals.map(d => d.contact_name).filter(Boolean)).size}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Export Button */}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-white hover:bg-slate-50 border-slate-200 rounded-xl shadow-sm"
+              >
+                Export
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Pipeline Filter */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Pipeline</label>
-              <Select value={selectedPipeline} onValueChange={setSelectedPipeline}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select pipeline" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pipelines.map((pipeline) => (
-                    <SelectItem key={pipeline.id} value={pipeline.id}>
-                      {pipeline.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Filters with Pipeline Styling */}
+      <div className="px-4 sm:px-6 pb-4">
+        <Card className="border-slate-200 shadow-sm bg-white/70 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg flex items-center gap-2 text-slate-800">
+              <Filter className="h-5 w-5 text-blue-600" />
+              Filters
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Pipeline Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Pipeline</label>
+                <Select value={selectedPipeline} onValueChange={setSelectedPipeline}>
+                  <SelectTrigger className="bg-white border-slate-200 rounded-xl shadow-sm">
+                    <SelectValue placeholder="Select pipeline" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pipelines.map((pipeline) => (
+                      <SelectItem key={pipeline.id} value={pipeline.id}>
+                        {pipeline.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Stage Filter */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Stage</label>
-              <Select value={selectedStage} onValueChange={setSelectedStage}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All stages" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Stages</SelectItem>
-                  {stages.map((stage) => (
-                    <SelectItem key={stage.id} value={stage.id}>
-                      {stage.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Stage Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Stage</label>
+                <Select value={selectedStage} onValueChange={setSelectedStage}>
+                  <SelectTrigger className="bg-white border-slate-200 rounded-xl shadow-sm">
+                    <SelectValue placeholder="All stages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Stages</SelectItem>
+                    {stages.map((stage) => (
+                      <SelectItem key={stage.id} value={stage.id}>
+                        {stage.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Search */}
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium">Search</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search deals, companies, contacts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+              {/* Search */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-slate-700">Search</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search deals, companies, contacts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-white border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Results Summary */}
-          <div className="flex items-center gap-4 text-sm text-gray-600 pt-2 border-t">
-            <span>
-              Showing {filteredDeals.length} of {deals.length} deals
-            </span>
-            <span>•</span>
-            <span>
-              Total Value: {formatCurrency(filteredDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0))}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Deals Table */}
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            {/* Results Summary */}
+            <div className="flex items-center gap-4 text-sm text-slate-600 pt-2 border-t border-slate-200">
+              <span>
+                Showing {filteredDeals.length} of {deals.length} deals
+              </span>
+              <span>•</span>
+              <span>
+                Total Value: {formatCurrency(filteredDeals.reduce((sum, deal) => sum + (deal.value_usd || 0), 0))}
+              </span>
             </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Deal</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead className="text-right">Value</TableHead>
-                  <TableHead>Close Date</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredDeals.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                      {searchQuery || selectedStage !== "all" 
-                        ? "No deals match your filters" 
-                        : "No deals found"}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredDeals.map((deal) => {
-                    const stageInfo = getStageInfo(deal.stage_id);
-                    return (
-                      <TableRow key={deal.id} className="hover:bg-gray-50">
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="font-medium">{deal.title}</div>
-                            <div className="text-xs text-gray-500">
-                              Created {formatDate(deal.created_at)}
-                            </div>
-                          </div>
-                        </TableCell>
-                        
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4 text-gray-400" />
-                            <span>{deal.company_name || '-'}</span>
-                          </div>
-                        </TableCell>
-                        
-                        <TableCell>
-                          {stageInfo && (
-                            <Badge className={getStageColor(stageInfo.name)}>
-                              {stageInfo.name}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <DollarSign className="h-4 w-4 text-gray-400" />
-                            {formatCurrency(deal.value_usd)}
-                          </div>
-                        </TableCell>
-                        
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-gray-400" />
-                            {formatDate(deal.expected_close_date)}
-                          </div>
-                        </TableCell>
-                        
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span>{deal.contact_name || '-'}</span>
-                          </div>
-                        </TableCell>
-                        
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedDeal(deal);
-                                  setDrawerOpen(true);
-                                }}
-                                className="cursor-pointer"
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="cursor-pointer">
-                                <Edit2 className="h-4 w-4 mr-2" />
-                                Edit Deal
-                              </DropdownMenuItem>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <DropdownMenuItem 
-                                    className="cursor-pointer text-red-600"
-                                    onSelect={(e) => e.preventDefault()}
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete Deal
-                                  </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Deal</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete "{deal.title}"? This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => deleteDeal(deal.id)}
-                                      className="bg-red-600 hover:bg-red-700"
-                                    >
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Deals Table with Pipeline Styling */}
+      <div className="px-4 sm:px-6 flex-1 overflow-hidden">
+        <Card className="h-full border-slate-200 shadow-sm bg-white/70 backdrop-blur-sm">
+          <CardContent className="p-0 h-full">
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="h-full overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-slate-200">
+                      <TableHead className="text-slate-700 font-semibold">Deal</TableHead>
+                      <TableHead className="text-slate-700 font-semibold">Company</TableHead>
+                      <TableHead className="text-slate-700 font-semibold">Stage</TableHead>
+                      <TableHead className="text-right text-slate-700 font-semibold">Value</TableHead>
+                      <TableHead className="text-slate-700 font-semibold">Close Date</TableHead>
+                      <TableHead className="text-slate-700 font-semibold">Contact</TableHead>
+                      <TableHead className="text-right text-slate-700 font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDeals.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                          {searchQuery || selectedStage !== "all" 
+                            ? "No deals match your filters" 
+                            : "No deals found"}
                         </TableCell>
                       </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                    ) : (
+                      filteredDeals.map((deal) => {
+                        const stageInfo = getStageInfo(deal.stage_id);
+                        return (
+                          <TableRow 
+                            key={deal.id} 
+                            className="hover:bg-blue-50/50 transition-colors border-slate-200 cursor-pointer group"
+                            onClick={() => {
+                              setSelectedDeal(deal);
+                              setDrawerOpen(true);
+                            }}
+                          >
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium text-slate-800 group-hover:text-blue-700 transition-colors">
+                                  {deal.title}
+                                </div>
+                                <div className="text-xs text-slate-500">
+                                  Created {formatDate(deal.created_at)}
+                                </div>
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                                  <Building2 className="h-3 w-3 text-white" />
+                                </div>
+                                <span className="text-slate-700 font-medium">{deal.company_name || '-'}</span>
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell>
+                              {stageInfo && (
+                                <Badge className={getStageColor(stageInfo.name)} variant="secondary">
+                                  {stageInfo.name}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md p-2">
+                                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                                  <DollarSign className="h-2 w-2 text-white" />
+                                </div>
+                                <span className="text-green-700 font-bold text-sm">
+                                  {formatCurrency(deal.value_usd)}
+                                </span>
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-orange-500" />
+                                <span className="text-slate-600 font-medium">{formatDate(deal.expected_close_date)}</span>
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                  <User className="h-3 w-3 text-white" />
+                                </div>
+                                <span className="text-slate-700">{deal.contact_name || '-'}</span>
+                              </div>
+                            </TableCell>
+                            
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-200"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedDeal(deal);
+                                      setDrawerOpen(true);
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Details
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    className="cursor-pointer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Edit2 className="h-4 w-4 mr-2" />
+                                    Edit Deal
+                                  </DropdownMenuItem>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <DropdownMenuItem 
+                                        className="cursor-pointer text-red-600 hover:text-red-700"
+                                        onSelect={(e) => e.preventDefault()}
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete Deal
+                                      </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete Deal</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Are you sure you want to delete "{deal.title}"? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteDeal(deal.id);
+                                          }}
+                                          className="bg-red-600 hover:bg-red-700"
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Deal Details Drawer */}
       {selectedDeal && (
