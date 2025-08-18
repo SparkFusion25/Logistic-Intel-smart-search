@@ -101,3 +101,12 @@ verify_jwt = true
 
 [functions.calendar-integration]
 verify_jwt = true
+
+[functions.affiliate-link-tracking]
+verify_jwt = false
+
+[functions.affiliate-payout-processing]
+verify_jwt = true
+
+[functions.affiliate-admin-approval]
+verify_jwt = true

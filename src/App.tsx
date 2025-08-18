@@ -34,6 +34,7 @@ import BenchmarkPage from "./pages/dashboard/BenchmarkPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import CompanyProfilePage from "./pages/dashboard/CompanyProfilePage";
 import { AdminDashboard as AdminDashboardPage } from "./pages/dashboard/AdminDashboard";
+import AffiliatePortal from "./pages/AffiliatePortal";
 import OAuthCallback from "./pages/OAuthCallback";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/dashboard/widgets/benchmark" element={<ProtectedRoute><BenchmarkPage /></ProtectedRoute>} />
             <Route path="/dashboard/company/:companyId" element={<ProtectedRoute><CompanyProfilePage /></ProtectedRoute>} />
             <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/affiliate-portal" element={<ProtectedRoute><AffiliatePortal /></ProtectedRoute>} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
