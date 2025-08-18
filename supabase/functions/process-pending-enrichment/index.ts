@@ -6,6 +6,184 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// AI-enhanced company matching function
+async function findCompanyUsingAI(supabaseClient: any, record: any, originalData: any) {
+  try {
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      console.log('OpenAI API key not found, skipping AI matching');
+      return null;
+    }
+
+    // Get contextual data for intelligent matching
+    const contextualData = await getContextualData(supabaseClient, originalData);
+    
+    // Prepare AI prompt with multiple data points
+    const prompt = `
+You are an AI expert in logistics and trade data analysis. Your task is to match an unknown/invalid company name with a valid company name from our database using multiple contextual clues.
+
+UNKNOWN COMPANY: "${record.invalid_company_name}"
+
+CONTEXTUAL DATA:
+- HS Code: ${originalData.hs_code || 'N/A'}
+- Commodity: ${originalData.commodity_description || originalData.goods_description || 'N/A'}
+- Mode: ${originalData.mode || 'N/A'}
+- Value USD: ${originalData.value_usd || 'N/A'}
+- Port/Location: ${originalData.port_of_lading || originalData.departure_port || 'N/A'} to ${originalData.port_of_unlading || originalData.destination_port || 'N/A'}
+- Date: ${originalData.shipment_date || originalData.arrival_date || 'N/A'}
+- Shipper Info: ${originalData.shipper_name || 'N/A'}
+- Consignee Info: ${originalData.consignee_name || originalData.consignee_city || 'N/A'}
+
+CANDIDATE COMPANIES FROM DATABASE:
+${contextualData.candidates.map((c: any, i: number) => `${i+1}. ${c.company_name} (Ships: ${c.commodity_match ? c.commodity_description : 'Various'}, Ports: ${c.common_ports || 'Various'}, Frequency: ${c.shipment_count})`).join('\n')}
+
+ANALYSIS REQUIREMENTS:
+1. Consider geographic proximity (same ports, cities, regions)
+2. Analyze commodity/HS code patterns and specializations
+3. Evaluate shipment frequency and volume patterns
+4. Look for naming similarities (abbreviations, subsidiaries, misspellings)
+5. Consider business relationships (importers vs exporters)
+6. Factor in timing patterns and trade routes
+
+IMPORTANCE SCORING:
+- High importance: Large trade volumes, frequent shipments, strategic commodities
+- Medium importance: Regular trade patterns, regional significance
+- Low importance: Infrequent or small-scale operations
+
+Return ONLY the exact company name from the candidates list that best matches, or "NO_MATCH" if no strong match exists. Do not return explanations or multiple options.
+
+RESPONSE:`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-2025-04-14',
+        messages: [
+          { role: 'system', content: 'You are an expert in trade data analysis and company matching. Provide precise, single-word company name matches only.' },
+          { role: 'user', content: prompt }
+        ],
+        max_completion_tokens: 100,
+        temperature: 0.1
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('OpenAI API error:', response.status, response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+    const aiMatch = data.choices[0]?.message?.content?.trim();
+    
+    if (aiMatch && aiMatch !== 'NO_MATCH' && contextualData.candidates.some((c: any) => c.company_name === aiMatch)) {
+      console.log(`AI found contextual match: ${aiMatch}`);
+      return aiMatch;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error in AI matching:', error);
+    return null;
+  }
+}
+
+// Get contextual data for AI analysis
+async function getContextualData(supabaseClient: any, originalData: any) {
+  const candidates = [];
+  
+  try {
+    // Strategy 1: Find companies with similar commodities/HS codes
+    if (originalData.hs_code) {
+      const { data: commodityMatches } = await supabaseClient
+        .from('unified_shipments')
+        .select('unified_company_name, hs_code, commodity_description, value_usd, port_of_lading, port_of_unlading')
+        .eq('hs_code', originalData.hs_code)
+        .not('unified_company_name', 'is', null)
+        .order('value_usd', { ascending: false })
+        .limit(10);
+
+      if (commodityMatches) {
+        candidates.push(...commodityMatches.map((m: any) => ({
+          company_name: m.unified_company_name,
+          commodity_match: true,
+          commodity_description: m.commodity_description,
+          match_reason: 'HS_CODE'
+        })));
+      }
+    }
+
+    // Strategy 2: Find companies with similar routes/ports
+    if (originalData.port_of_lading && originalData.port_of_unlading) {
+      const { data: routeMatches } = await supabaseClient
+        .from('unified_shipments')
+        .select('unified_company_name, port_of_lading, port_of_unlading, mode, value_usd')
+        .eq('port_of_lading', originalData.port_of_lading)
+        .eq('port_of_unlading', originalData.port_of_unlading)
+        .not('unified_company_name', 'is', null)
+        .order('value_usd', { ascending: false })
+        .limit(10);
+
+      if (routeMatches) {
+        candidates.push(...routeMatches.map((m: any) => ({
+          company_name: m.unified_company_name,
+          route_match: true,
+          common_ports: `${m.port_of_lading} → ${m.port_of_unlading}`,
+          match_reason: 'ROUTE'
+        })));
+      }
+    }
+
+    // Strategy 3: Find companies by geographic proximity
+    if (originalData.consignee_city || originalData.shipper_country) {
+      const { data: geoMatches } = await supabaseClient
+        .from('unified_shipments')
+        .select('unified_company_name, consignee_city, shipper_country, value_usd')
+        .or(`consignee_city.ilike.%${originalData.consignee_city}%,shipper_country.ilike.%${originalData.shipper_country}%`)
+        .not('unified_company_name', 'is', null)
+        .order('value_usd', { ascending: false })
+        .limit(10);
+
+      if (geoMatches) {
+        candidates.push(...geoMatches.map((m: any) => ({
+          company_name: m.unified_company_name,
+          geographic_match: true,
+          location: `${m.consignee_city || ''} ${m.shipper_country || ''}`.trim(),
+          match_reason: 'GEOGRAPHY'
+        })));
+      }
+    }
+
+    // Strategy 4: Aggregate company importance scores
+    const companyStats = new Map();
+    candidates.forEach(c => {
+      const existing = companyStats.get(c.company_name) || { 
+        company_name: c.company_name, 
+        shipment_count: 0, 
+        match_reasons: new Set(),
+        total_value: 0 
+      };
+      existing.shipment_count++;
+      existing.match_reasons.add(c.match_reason);
+      if (c.value_usd) existing.total_value += parseFloat(c.value_usd) || 0;
+      companyStats.set(c.company_name, existing);
+    });
+
+    // Return unique candidates with importance scoring
+    const uniqueCandidates = Array.from(companyStats.values())
+      .sort((a, b) => (b.shipment_count * b.total_value) - (a.shipment_count * a.total_value))
+      .slice(0, 15);
+
+    return { candidates: uniqueCandidates };
+  } catch (error) {
+    console.error('Error getting contextual data:', error);
+    return { candidates: [] };
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -53,8 +231,9 @@ serve(async (req) => {
       try {
         console.log(`Processing record ${record.id} with company: "${record.invalid_company_name}"`);
 
-        // Try to find a valid company name match using various strategies
+        // Try to find a valid company name match using AI-enhanced strategies
         let validCompanyName = null;
+        const originalData = record.original_data || {};
 
         // Strategy 1: Exact match in unified_shipments with cleaned name
         const cleanedName = record.invalid_company_name?.trim().toLowerCase();
@@ -72,7 +251,12 @@ serve(async (req) => {
           }
         }
 
-        // Strategy 2: Fuzzy match using similarity if no exact match
+        // Strategy 2: AI-enhanced contextual matching
+        if (!validCompanyName) {
+          validCompanyName = await findCompanyUsingAI(supabaseClient, record, originalData);
+        }
+
+        // Strategy 3: Fuzzy match using similarity as fallback
         if (!validCompanyName && cleanedName && cleanedName.length > 3) {
           const { data: similarMatches } = await supabaseClient
             .from('unified_shipments')
