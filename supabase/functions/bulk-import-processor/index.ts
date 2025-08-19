@@ -1111,59 +1111,72 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
       // Primary approach: Use BOL number (check both possible field names) + date
       const bolNumber = record.bol_number || record.bill_of_lading_number;
       if (bolNumber && bolNumber.trim() !== '') {
-        duplicateQuery = duplicateQuery
-          .or(`bol_number.eq.${bolNumber.trim()},bill_of_lading_number.eq.${bolNumber.trim()}`)
-          .eq('arrival_date', record.arrival_date || record.unified_date || null);
+        // Check for duplicates in either BOL field
+        const { data: bolDuplicates, error: bolError } = await supabaseClient
+          .from('unified_shipments')
+          .select('id')
+          .or(`bol_number.eq."${bolNumber.trim()}",bill_of_lading_number.eq."${bolNumber.trim()}"`)
+          .eq('arrival_date', record.arrival_date || record.unified_date || null)
+          .limit(1);
+          
+        if (bolError) {
+          console.error('Error checking BOL duplicates:', bolError);
+          errors++;
+          continue;
+        }
+        
+        if (bolDuplicates && bolDuplicates.length > 0) {
+          duplicates++;
+          continue;
+        }
       } else {
         // Fallback: Use vessel + date + transport method for unique shipment identification
         const vessel = record.vessel || record.vessel_name || record.carrier_name;
         const shipmentDate = record.arrival_date || record.unified_date || record.shipment_date;
         
         if (vessel && shipmentDate) {
-          duplicateQuery = duplicateQuery
+          const { data: vesselDuplicates, error: vesselError } = await supabaseClient
+            .from('unified_shipments')
+            .select('id')
             .eq('vessel', record.vessel || null)
             .eq('transport_method', record.transport_method || null)
             .eq('arrival_date', record.arrival_date || null)
             .eq('port_of_lading', record.port_of_lading || null)
-            .eq('port_of_unlading', record.port_of_unlading || null);
-        } else {
-          // Skip duplicate check if we don't have sufficient shipment identifiers
-          duplicateQuery = null;
+            .eq('port_of_unlading', record.port_of_unlading || null)
+            .limit(1);
+            
+          if (vesselError) {
+            console.error('Error checking vessel duplicates:', vesselError);
+            errors++;
+            continue;
+          }
+          
+          if (vesselDuplicates && vesselDuplicates.length > 0) {
+            duplicates++;
+            continue;
+          }
         }
+        // If no vessel info, proceed with insert (no duplicate check possible)
       }
 
-      const { data: existingRecords, error: checkError } = duplicateQuery ? 
-        await duplicateQuery.limit(1) : { data: null, error: null };
-
-      if (checkError) {
-        console.error('Error checking for duplicates:', checkError);
-        errors++;
-        continue;
-      }
-
-      if (existingRecords && existingRecords.length > 0) {
-        duplicates++;
-        continue;
-      }
-
-        // **ONLY**: Fix date string "null" to actual null and add timestamps + org_id
-        // Map BOL to both possible field names for comprehensive coverage
-        const bolValue = record.bol_number || record.bill_of_lading_number;
-        const cleanRecord = {
-          ...record,
-          // Ensure org_id is properly set for CSV/XLSX files
-          org_id: record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55',
-          // Map your Excel "Bill of Lading Number" to both database fields
-          bol_number: bolValue,
-          bill_of_lading_number: bolValue,
-          // Fix date fields only
-          shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
-          arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
-          departure_date: record.departure_date === 'null' || record.departure_date === '' ? null : record.departure_date,
-          // Timestamps only
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+      // **ONLY**: Fix date string "null" to actual null and add timestamps + org_id
+      // Map BOL to both possible field names for comprehensive coverage
+      const bolValue = record.bol_number || record.bill_of_lading_number;
+      const cleanRecord = {
+        ...record,
+        // Ensure org_id is properly set for CSV/XLSX files
+        org_id: record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55',
+        // Map your Excel "Bill of Lading Number" to both database fields
+        bol_number: bolValue,
+        bill_of_lading_number: bolValue,
+        // Fix date fields only
+        shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
+        arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
+        departure_date: record.departure_date === 'null' || record.departure_date === '' ? null : record.departure_date,
+        // Timestamps only
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
       recordsToInsert.push(cleanRecord);
 
