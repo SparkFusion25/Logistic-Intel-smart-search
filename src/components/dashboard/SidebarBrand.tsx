@@ -12,7 +12,20 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       {!collapsed && (
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-            <img src="https://zupuxlrtixhfnbuhxhum.supabase.co/storage/v1/object/public/branding/logo-icon.png" alt="Logistic Intel" className="w-6 h-6" />
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 100 100" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6"
+            >
+              <circle cx="50" cy="50" r="45" fill="#2B7DE9"/>
+              <path 
+                d="M25 70 L25 45 L40 45 L40 55 L35 55 L35 70 Z M45 35 L70 25 L75 35 L55 42 L75 65 L70 75 L45 55 L45 35 Z" 
+                fill="white"
+              />
+            </svg>
           </div>
           <div>
             <h1 className="text-white font-bold text-lg">Intelligence</h1>
@@ -23,7 +36,20 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       
       {collapsed && (
         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg mx-auto">
-          <img src="https://zupuxlrtixhfnbuhxhum.supabase.co/storage/v1/object/public/branding/logo-icon.png" alt="Logistic Intel" className="w-6 h-6" />
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 100 100" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+          >
+            <circle cx="50" cy="50" r="45" fill="#2B7DE9"/>
+            <path 
+              d="M25 70 L25 45 L40 45 L40 55 L35 55 L35 70 Z M45 35 L70 25 L75 35 L55 42 L75 65 L70 75 L45 55 L45 35 Z" 
+              fill="white"
+            />
+          </svg>
         </div>
       )}
 
