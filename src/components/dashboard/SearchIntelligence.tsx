@@ -44,11 +44,7 @@ export function SearchIntelligence() {
     "South Korea", "Netherlands", "France", "Italy", "Canada"
   ]
 
-  const savedSearches = [
-    { name: "Electronics Importers", count: 1247, updated: "2 hours ago" },
-    { name: "US → China Trade", count: 892, updated: "1 day ago" },
-    { name: "High Volume Shippers", count: 453, updated: "3 days ago" }
-  ]
+  // All data now comes from real API - no hardcoded searches
 
   // Remove hardcoded mock data - use real search results from API
 
@@ -611,21 +607,11 @@ export function SearchIntelligence() {
         </TabsContent>
       </Tabs>
 
-      {/* Saved Searches Sidebar */}
+      {/* Saved Searches - Coming Soon */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h4 className="text-sm font-bold text-gray-900 mb-3">Saved Searches</h4>
-        <div className="space-y-2">
-          {savedSearches.map((search, index) => (
-            <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-200">
-              <div>
-                <p className="text-sm font-medium text-gray-900">{search.name}</p>
-                <p className="text-xs text-gray-500">{search.count} results • {search.updated}</p>
-              </div>
-              <Button variant="ghost" size="sm">
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
+        <div className="text-center py-4">
+          <p className="text-sm text-gray-600">Save your search queries to access them quickly later.</p>
         </div>
       </div>
 
