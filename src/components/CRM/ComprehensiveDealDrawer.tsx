@@ -274,25 +274,25 @@ export function ComprehensiveDealDrawer({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full lg:max-w-[1200px] lg:h-[90vh] overflow-hidden p-0 flex flex-col">
         {/* Header Section */}
-        <DialogHeader className="sticky top-0 bg-card border-b border-border/50 z-10 p-4 lg:p-6 shrink-0">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <DialogHeader className="sticky top-0 bg-card border-b border-border/50 z-10 p-4 shrink-0">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Avatar className="w-12 h-12 lg:w-16 lg:h-16">
+              <Avatar className="w-12 h-12">
                 <AvatarImage src={dealData.company?.logo} />
-                <AvatarFallback className="bg-gradient-to-br from-primary to-primary-variant text-white text-lg font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white text-sm font-bold">
                   {dealData.company_name.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <DialogTitle className="text-xl lg:text-2xl text-foreground mb-1">{dealData.company_name}</DialogTitle>
-                <div className="flex flex-wrap items-center gap-2 lg:gap-3">
-                  <p className="text-sm text-muted-foreground">{dealData.company?.industry}</p>
+                <DialogTitle className="text-lg text-foreground mb-1">{dealData.company_name}</DialogTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-xs text-muted-foreground">{dealData.company?.industry}</p>
                   <Badge variant="outline" className="text-xs">{dealData.stage}</Badge>
                   <Badge variant="secondary" className="text-xs">
                     {dealData.source}
                   </Badge>
-                  <span className="text-lg lg:text-2xl font-bold text-success">${dealData.value_usd?.toLocaleString()}</span>
-                  <span className="text-xs lg:text-sm text-muted-foreground">{dealData.probability}% probability</span>
+                  <span className="text-lg font-bold text-success">${dealData.value_usd?.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground">{dealData.probability}% probability</span>
                 </div>
               </div>
             </div>

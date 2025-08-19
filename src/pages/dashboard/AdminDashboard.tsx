@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/dashboard/AppSidebar";
-import { TopBar } from "@/components/ui/TopBar";
+import { AppShell } from "@/components/ui/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +30,8 @@ import {
   Globe,
   Type,
   Image as ImageIcon,
-  Save
+  Save,
+  RefreshCw
 } from "lucide-react";
 import { BulkImportManager } from "@/components/admin/BulkImportManager";
 import { supabase } from "@/integrations/supabase/client";
@@ -232,69 +231,51 @@ export function AdminDashboard() {
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-canvas">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
-          <TopBar />
-          <main className="flex-1 p-4 sm:p-6">
-            <div className="space-y-6">
-              {/* Fixed Header Section */}
-              <div className="sticky top-0 z-20 -mt-4 -mx-4 sm:-mx-6">
-                <div className="p-4 sm:p-6" style={{ background: 'var(--sidebar-background)' }}>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                        Admin Dashboard
-                      </h1>
-                      <p className="text-white/80 text-sm sm:text-base">
-                        Manage users, affiliates, and system operations
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3 mt-3 sm:mt-0">
-                      <Select defaultValue="7d">
-                        <SelectTrigger className="w-28 bg-white/10 border-white/20 text-white text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="7d">Last 7 days</SelectItem>
-                          <SelectItem value="30d">Last 30 days</SelectItem>
-                          <SelectItem value="90d">Last 90 days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="secondary" size="sm" className="bg-white/20 text-white border-white/20 hover:bg-white/30 text-xs">
-                        Refresh
-                      </Button>
-                    </div>
-                  </div>
+    <AppShell>
+      {/* Header Section - Compact User-Style Hero */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-xl p-4 backdrop-blur-sm">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
+              <p className="text-muted-foreground text-sm">Monitor system performance and platform health</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <select className="px-3 py-2 border border-border rounded-lg bg-background text-sm">
+                <option>Last 30 days</option>
+                <option>Last 7 days</option>
+                <option>Last 24 hours</option>
+              </select>
+              <Button size="sm" variant="outline" className="gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </div>
+          </div>
+        </div>
+      {/* System Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {systemStats.map((stat) => (
+          <Card key={stat.name} className="p-4 hover:shadow-lg transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">{stat.name}</p>
+                <p className="text-2xl font-bold mt-2">{stat.value}</p>
+                <div className="flex items-center mt-2 text-sm">
+                  <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                  <span className="text-green-600">{stat.change}</span>
+                  <span className="text-muted-foreground ml-1">vs last month</span>
                 </div>
               </div>
-
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {systemStats.map((stat) => {
-                  const Icon = stat.icon;
-                  return (
-                    <Card key={stat.name} className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground">{stat.name}</p>
-                            <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                          </div>
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <Icon className="h-4 w-4 text-primary" />
-                          </div>
-                        </div>
-                        <div className="mt-3 flex items-center">
-                          <span className="text-xs font-medium text-success">{stat.change}</span>
-                          <span className="text-xs text-muted-foreground ml-1">from last month</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+              <div className="p-3 rounded-xl bg-primary/10">
+                <stat.icon className="w-6 h-6 text-primary" />
               </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+        {/* Main Content Tabs */}
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
@@ -814,9 +795,6 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
             </div>
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    </AppShell>
   );
 }

@@ -14,7 +14,7 @@ export const AppShell = ({ children }: AppShellProps) => {
         <AppSidebar />
         <SidebarInset className="flex-1">
           <TopBar />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[var(--container-max)] mx-auto w-full">
+          <main className="flex-1 p-4 sm:p-6 max-w-[var(--container-max)] mx-auto w-full">
             {children}
           </main>
         </SidebarInset>

@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Plus, Download, Search, Users, Mail, TrendingUp, Building2, 
   MapPin, Globe, Calendar, ArrowRight, Star, Eye, ExternalLink,
@@ -209,48 +210,40 @@ const Dashboard = () => {
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                 {/* Recent Searches */}
-                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
-                  <div className="p-4 border-b border-gray-200">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                      <h2 className="text-lg sm:text-xl font-bold text-slate-900">Recent Searches</h2>
-                      <div className="flex items-center space-x-2 sm:space-x-3">
-                        <button className="p-2 text-slate-500 hover:text-blue-600 rounded-lg sm:rounded-xl hover:bg-blue-50 transition-colors">
-                          <RefreshCw className="w-4 h-4" />
-                        </button>
-                        <Link to="/dashboard/search" className="text-blue-600 hover:text-blue-700 font-semibold text-sm">
-                          View All
-                        </Link>
+                <div className="lg:col-span-2">
+                  <Card className="h-full">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">Recent Searches</CardTitle>
+                        <Button variant="outline" size="sm">View All</Button>
                       </div>
-                    </div>
-                  </div>
-                  <div className="p-4 sm:p-6">
-                    <div className="space-y-3 sm:space-y-4">
+                    </CardHeader>
+                    <CardContent className="space-y-3">
                       {recentSearches.map((search) => (
-                        <div key={search.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl border border-blue-100/50 hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-200 cursor-pointer group">
-                          <div className="flex items-center space-x-3 sm:space-x-4 mb-2 sm:mb-0">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200 flex-shrink-0">
-                              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <div key={search.id} className="flex items-center justify-between p-3 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
+                              <Search className="w-4 h-4 text-primary" />
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium sm:font-semibold text-slate-900 text-sm sm:text-base truncate">{search.query}</p>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-slate-500 space-y-1 sm:space-y-0">
-                                <span className="flex items-center">
-                                  <Globe className="w-3 h-3 mr-1 flex-shrink-0" />
-                                  <span className="truncate">{search.location}</span>
-                                </span>
-                                <span className="hidden sm:inline">{search.results.toLocaleString()} results</span>
+                            <div>
+                              <p className="font-medium text-sm">{search.query}</p>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span>{search.results.toLocaleString()} results</span>
+                                <span>•</span>
+                                <span>{search.location}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="text-left sm:text-right flex sm:flex-col justify-between sm:justify-center space-x-2 sm:space-x-0">
-                            <span className="text-xs text-slate-500">{search.time}</span>
-                            <p className="text-xs sm:text-sm text-emerald-600 font-medium sm:font-semibold">Completed</p>
-                            <span className="sm:hidden text-xs text-slate-500">{search.results.toLocaleString()} results</span>
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">{search.time}</p>
+                            <Button variant="ghost" size="sm" className="mt-1">
+                              <MoreHorizontal className="w-3 h-3" />
+                            </Button>
                           </div>
                         </div>
                       ))}
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Quick Actions */}
