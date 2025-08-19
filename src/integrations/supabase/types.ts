@@ -462,6 +462,8 @@ export type Database = {
           arrival_date: string | null
           bill_of_lading_number: string | null
           bol_number: string | null
+          carrier_code: string | null
+          carrier_name: string | null
           commodity_description: string | null
           consignee: string | null
           consignee_address: string | null
@@ -482,21 +484,36 @@ export type Database = {
           consignee_zip: string | null
           container_count: number | null
           container_marks: string | null
+          container_number: string | null
+          container_type_descriptions: string | null
+          container_types: string | null
           created_at: string | null
           departure_date: string | null
           description: string | null
           destination_port: string | null
+          forwarder_name: string | null
+          forwarder_scac_code: string | null
           freight_amount: number | null
           goods_description: string | null
           goods_shipped: string | null
+          house_bol_number: string | null
           hs_code: string
           id: string
+          importer_id: string | null
+          importer_name: string | null
+          is_lcl: boolean | null
+          master_bol_number: string | null
           matching_fields: string | null
+          notify_party: string | null
           number_of_containers: number | null
           port_of_lading: string | null
           port_of_lading_country: string | null
+          port_of_lading_id: string | null
+          port_of_lading_name: string | null
           port_of_lading_region: string | null
           port_of_unlading: string | null
+          port_of_unlading_id: string | null
+          port_of_unlading_name: string | null
           port_of_unlading_region: string | null
           quantity: number | null
           raw_xml_filename: string | null
@@ -527,6 +544,7 @@ export type Database = {
           vessel_imo: string | null
           vessel_name: string | null
           vessel_voyage_id: string | null
+          voyage_number: string | null
           weight_kg: number | null
           weight_original_format: string | null
           weight_t: number | null
@@ -535,6 +553,8 @@ export type Database = {
           arrival_date?: string | null
           bill_of_lading_number?: string | null
           bol_number?: string | null
+          carrier_code?: string | null
+          carrier_name?: string | null
           commodity_description?: string | null
           consignee?: string | null
           consignee_address?: string | null
@@ -555,21 +575,36 @@ export type Database = {
           consignee_zip?: string | null
           container_count?: number | null
           container_marks?: string | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
           created_at?: string | null
           departure_date?: string | null
           description?: string | null
           destination_port?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
           freight_amount?: number | null
           goods_description?: string | null
           goods_shipped?: string | null
+          house_bol_number?: string | null
           hs_code: string
           id?: string
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
+          master_bol_number?: string | null
           matching_fields?: string | null
+          notify_party?: string | null
           number_of_containers?: number | null
           port_of_lading?: string | null
           port_of_lading_country?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
           port_of_lading_region?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
           port_of_unlading_region?: string | null
           quantity?: number | null
           raw_xml_filename?: string | null
@@ -600,6 +635,7 @@ export type Database = {
           vessel_imo?: string | null
           vessel_name?: string | null
           vessel_voyage_id?: string | null
+          voyage_number?: string | null
           weight_kg?: number | null
           weight_original_format?: string | null
           weight_t?: number | null
@@ -608,6 +644,8 @@ export type Database = {
           arrival_date?: string | null
           bill_of_lading_number?: string | null
           bol_number?: string | null
+          carrier_code?: string | null
+          carrier_name?: string | null
           commodity_description?: string | null
           consignee?: string | null
           consignee_address?: string | null
@@ -628,21 +666,36 @@ export type Database = {
           consignee_zip?: string | null
           container_count?: number | null
           container_marks?: string | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
           created_at?: string | null
           departure_date?: string | null
           description?: string | null
           destination_port?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
           freight_amount?: number | null
           goods_description?: string | null
           goods_shipped?: string | null
+          house_bol_number?: string | null
           hs_code?: string
           id?: string
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
+          master_bol_number?: string | null
           matching_fields?: string | null
+          notify_party?: string | null
           number_of_containers?: number | null
           port_of_lading?: string | null
           port_of_lading_country?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
           port_of_lading_region?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
           port_of_unlading_region?: string | null
           quantity?: number | null
           raw_xml_filename?: string | null
@@ -673,6 +726,7 @@ export type Database = {
           vessel_imo?: string | null
           vessel_name?: string | null
           vessel_voyage_id?: string | null
+          voyage_number?: string | null
           weight_kg?: number | null
           weight_original_format?: string | null
           weight_t?: number | null
@@ -2567,6 +2621,8 @@ export type Database = {
         Row: {
           arrival_date: string | null
           bol_number: string | null
+          carrier_code: string | null
+          carrier_name: string | null
           commodity_description: string | null
           company_name: string | null
           consignee_city: string | null
@@ -2575,18 +2631,33 @@ export type Database = {
           consignee_state: string | null
           consignee_zip: string | null
           container_count: number | null
+          container_number: string | null
+          container_type_descriptions: string | null
+          container_types: string | null
           created_at: string | null
           departure_date: string | null
           destination_city: string | null
           destination_country: string | null
           destination_port: string | null
+          forwarder_name: string | null
+          forwarder_scac_code: string | null
           freight_amount: number | null
           goods_description: string | null
+          house_bol_number: string | null
           hs_code: string | null
           id: string
+          importer_id: string | null
+          importer_name: string | null
+          is_lcl: boolean | null
+          master_bol_number: string | null
+          notify_party: string | null
           origin_country: string | null
           port_of_lading: string | null
+          port_of_lading_id: string | null
+          port_of_lading_name: string | null
           port_of_unlading: string | null
+          port_of_unlading_id: string | null
+          port_of_unlading_name: string | null
           quantity: number | null
           raw_xml_filename: string | null
           shipment_date: string | null
@@ -2598,11 +2669,14 @@ export type Database = {
           unit_of_measure: string | null
           value_usd: number | null
           vessel_name: string | null
+          voyage_number: string | null
           weight_kg: number | null
         }
         Insert: {
           arrival_date?: string | null
           bol_number?: string | null
+          carrier_code?: string | null
+          carrier_name?: string | null
           commodity_description?: string | null
           company_name?: string | null
           consignee_city?: string | null
@@ -2611,18 +2685,33 @@ export type Database = {
           consignee_state?: string | null
           consignee_zip?: string | null
           container_count?: number | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
           created_at?: string | null
           departure_date?: string | null
           destination_city?: string | null
           destination_country?: string | null
           destination_port?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
           freight_amount?: number | null
           goods_description?: string | null
+          house_bol_number?: string | null
           hs_code?: string | null
           id?: string
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
+          master_bol_number?: string | null
+          notify_party?: string | null
           origin_country?: string | null
           port_of_lading?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
           quantity?: number | null
           raw_xml_filename?: string | null
           shipment_date?: string | null
@@ -2634,11 +2723,14 @@ export type Database = {
           unit_of_measure?: string | null
           value_usd?: number | null
           vessel_name?: string | null
+          voyage_number?: string | null
           weight_kg?: number | null
         }
         Update: {
           arrival_date?: string | null
           bol_number?: string | null
+          carrier_code?: string | null
+          carrier_name?: string | null
           commodity_description?: string | null
           company_name?: string | null
           consignee_city?: string | null
@@ -2647,18 +2739,33 @@ export type Database = {
           consignee_state?: string | null
           consignee_zip?: string | null
           container_count?: number | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
           created_at?: string | null
           departure_date?: string | null
           destination_city?: string | null
           destination_country?: string | null
           destination_port?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
           freight_amount?: number | null
           goods_description?: string | null
+          house_bol_number?: string | null
           hs_code?: string | null
           id?: string
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
+          master_bol_number?: string | null
+          notify_party?: string | null
           origin_country?: string | null
           port_of_lading?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
           quantity?: number | null
           raw_xml_filename?: string | null
           shipment_date?: string | null
@@ -2670,6 +2777,7 @@ export type Database = {
           unit_of_measure?: string | null
           value_usd?: number | null
           vessel_name?: string | null
+          voyage_number?: string | null
           weight_kg?: number | null
         }
         Relationships: []
@@ -3570,6 +3678,7 @@ export type Database = {
           arrival_date: string | null
           bill_of_lading_number: string | null
           bol_number: string | null
+          carrier_code: string | null
           carrier_name: string | null
           commodity_description: string | null
           consignee: string | null
@@ -3588,29 +3697,44 @@ export type Database = {
           consignee_website_1: string | null
           container_count: number | null
           container_marks: string | null
+          container_number: string | null
+          container_type_descriptions: string | null
+          container_types: string | null
           created_at: string | null
           departure_date: string | null
           description: string | null
           destination_city: string | null
           destination_country: string | null
           destination_state: string | null
+          forwarder_name: string | null
+          forwarder_scac_code: string | null
           goods_shipped: string | null
           gross_weight_kg: number | null
+          house_bol_number: string | null
           hs_code: string | null
           hs_description: string | null
           id: string
+          importer_id: string | null
+          importer_name: string | null
+          is_lcl: boolean | null
           is_likely_air_shipper: boolean | null
+          master_bol_number: string | null
           matching_fields: string | null
           mode: string | null
+          notify_party: string | null
           number_of_containers: number | null
           org_id: string | null
           origin_country: string | null
           port_of_discharge: string | null
           port_of_lading: string | null
           port_of_lading_country: string | null
+          port_of_lading_id: string | null
+          port_of_lading_name: string | null
           port_of_lading_region: string | null
           port_of_loading: string | null
           port_of_unlading: string | null
+          port_of_unlading_id: string | null
+          port_of_unlading_name: string | null
           port_of_unlading_region: string | null
           quantity: number | null
           shipment_date: string | null
@@ -3647,6 +3771,7 @@ export type Database = {
           vessel_imo: string | null
           vessel_name: string | null
           vessel_voyage_id: string | null
+          voyage_number: string | null
           w: string | null
           weight_kg: number | null
           weight_original_format: string | null
@@ -3657,6 +3782,7 @@ export type Database = {
           arrival_date?: string | null
           bill_of_lading_number?: string | null
           bol_number?: string | null
+          carrier_code?: string | null
           carrier_name?: string | null
           commodity_description?: string | null
           consignee?: string | null
@@ -3675,29 +3801,44 @@ export type Database = {
           consignee_website_1?: string | null
           container_count?: number | null
           container_marks?: string | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
           created_at?: string | null
           departure_date?: string | null
           description?: string | null
           destination_city?: string | null
           destination_country?: string | null
           destination_state?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
           goods_shipped?: string | null
           gross_weight_kg?: number | null
+          house_bol_number?: string | null
           hs_code?: string | null
           hs_description?: string | null
           id?: string
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
           is_likely_air_shipper?: boolean | null
+          master_bol_number?: string | null
           matching_fields?: string | null
           mode?: string | null
+          notify_party?: string | null
           number_of_containers?: number | null
           org_id?: string | null
           origin_country?: string | null
           port_of_discharge?: string | null
           port_of_lading?: string | null
           port_of_lading_country?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
           port_of_lading_region?: string | null
           port_of_loading?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
           port_of_unlading_region?: string | null
           quantity?: number | null
           shipment_date?: string | null
@@ -3734,6 +3875,7 @@ export type Database = {
           vessel_imo?: string | null
           vessel_name?: string | null
           vessel_voyage_id?: string | null
+          voyage_number?: string | null
           w?: string | null
           weight_kg?: number | null
           weight_original_format?: string | null
@@ -3744,6 +3886,7 @@ export type Database = {
           arrival_date?: string | null
           bill_of_lading_number?: string | null
           bol_number?: string | null
+          carrier_code?: string | null
           carrier_name?: string | null
           commodity_description?: string | null
           consignee?: string | null
@@ -3762,29 +3905,44 @@ export type Database = {
           consignee_website_1?: string | null
           container_count?: number | null
           container_marks?: string | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
           created_at?: string | null
           departure_date?: string | null
           description?: string | null
           destination_city?: string | null
           destination_country?: string | null
           destination_state?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
           goods_shipped?: string | null
           gross_weight_kg?: number | null
+          house_bol_number?: string | null
           hs_code?: string | null
           hs_description?: string | null
           id?: string
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
           is_likely_air_shipper?: boolean | null
+          master_bol_number?: string | null
           matching_fields?: string | null
           mode?: string | null
+          notify_party?: string | null
           number_of_containers?: number | null
           org_id?: string | null
           origin_country?: string | null
           port_of_discharge?: string | null
           port_of_lading?: string | null
           port_of_lading_country?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
           port_of_lading_region?: string | null
           port_of_loading?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
           port_of_unlading_region?: string | null
           quantity?: number | null
           shipment_date?: string | null
@@ -3821,6 +3979,7 @@ export type Database = {
           vessel_imo?: string | null
           vessel_name?: string | null
           vessel_voyage_id?: string | null
+          voyage_number?: string | null
           w?: string | null
           weight_kg?: number | null
           weight_original_format?: string | null

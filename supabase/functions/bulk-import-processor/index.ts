@@ -30,6 +30,28 @@ interface TradeRecord {
   value_usd?: number;
   shipment_date?: string;
   arrival_date?: string;
+  // Revenue Vessel fields
+  importer_id?: string;
+  importer_name?: string;
+  consignee_address?: string;
+  shipper_address?: string;
+  carrier_code?: string;
+  carrier_name?: string;
+  forwarder_scac_code?: string;
+  forwarder_name?: string;
+  notify_party?: string;
+  container_number?: string;
+  port_of_unlading_id?: string;
+  port_of_unlading_name?: string;
+  master_bol_number?: string;
+  house_bol_number?: string;
+  port_of_lading_id?: string;
+  port_of_lading_name?: string;
+  container_types?: string;
+  container_type_descriptions?: string;
+  is_lcl?: boolean;
+  vessel_name?: string;
+  voyage_number?: string;
   [key: string]: any;
 }
 

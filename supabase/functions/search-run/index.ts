@@ -151,6 +151,55 @@ serve(async (req) => {
       if (filters?.dest_country) {
         query_unified = query_unified.ilike('destination_country', `%${filters.dest_country}%`);
       }
+      if (filters?.origin_zip) {
+        query_unified = query_unified.ilike('origin_zip', `%${filters.origin_zip}%`);
+      }
+      if (filters?.dest_zip) {
+        query_unified = query_unified.ilike('destination_zip', `%${filters.dest_zip}%`);
+      }
+      if (filters?.hs_codes) {
+        query_unified = query_unified.ilike('hs_code', `%${filters.hs_codes}%`);
+      }
+      if (filters?.commodity) {
+        query_unified = query_unified.ilike('commodity_description', `%${filters.commodity}%`);
+      }
+      // Revenue Vessel filters
+      if (filters?.importer_name) {
+        query_unified = query_unified.ilike('importer_name', `%${filters.importer_name}%`);
+      }
+      if (filters?.carrier_name) {
+        query_unified = query_unified.ilike('carrier_name', `%${filters.carrier_name}%`);
+      }
+      if (filters?.forwarder_name) {
+        query_unified = query_unified.ilike('forwarder_name', `%${filters.forwarder_name}%`);
+      }
+      if (filters?.notify_party) {
+        query_unified = query_unified.ilike('notify_party', `%${filters.notify_party}%`);
+      }
+      if (filters?.container_number) {
+        query_unified = query_unified.ilike('container_number', `%${filters.container_number}%`);
+      }
+      if (filters?.master_bol_number) {
+        query_unified = query_unified.ilike('master_bol_number', `%${filters.master_bol_number}%`);
+      }
+      if (filters?.house_bol_number) {
+        query_unified = query_unified.ilike('house_bol_number', `%${filters.house_bol_number}%`);
+      }
+      if (filters?.vessel_name) {
+        query_unified = query_unified.ilike('vessel_name', `%${filters.vessel_name}%`);
+      }
+      if (filters?.voyage_number) {
+        query_unified = query_unified.ilike('voyage_number', `%${filters.voyage_number}%`);
+      }
+      if (filters?.container_types) {
+        query_unified = query_unified.ilike('container_types', `%${filters.container_types}%`);
+      }
+      if (filters?.is_lcl && filters.is_lcl !== '') {
+        query_unified = query_unified.eq('is_lcl', filters.is_lcl === 'true');
+      }
+      if (filters?.dest_country) {
+        query_unified = query_unified.ilike('destination_country', `%${filters.dest_country}%`);
+      }
       if (origin_zip) {
         query_unified = query_unified.ilike('origin_zip', `%${origin_zip}%`);
       }

@@ -18,6 +18,8 @@ import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete"
 import { useCommodityAutocomplete } from "@/hooks/useCommodityAutocomplete"
 import { CompanyCard } from "./CompanyCard"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
+import { AdvancedFilters } from "../search/AdvancedFilters"
+import { RevenueVesselResults } from "../search/RevenueVesselResults"
 
 export function SearchIntelligence() {
   const navigate = useNavigate()
@@ -40,7 +42,19 @@ export function SearchIntelligence() {
     commodity: "",
     entity: "all",
     min_shipments: "",
-    min_confidence: ""
+    min_confidence: "",
+    // Revenue Vessel filters
+    importer_name: "",
+    carrier_name: "",
+    forwarder_name: "",
+    notify_party: "",
+    container_number: "",
+    master_bol_number: "",
+    house_bol_number: "",
+    vessel_name: "",
+    voyage_number: "",
+    container_types: "",
+    is_lcl: ""
   })
   const { toast } = useToast()
   const { makeRequest } = useAPI()
@@ -298,85 +312,12 @@ export function SearchIntelligence() {
           </Button>
         </div>
         
-        {/* Advanced Filters - Mobile Optimized */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          <Select value={filters.mode} onValueChange={(value) => setFilters(prev => ({ ...prev, mode: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Mode" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Modes</SelectItem>
-              <SelectItem value="air">Air</SelectItem>
-              <SelectItem value="ocean">Ocean</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={filters.range} onValueChange={(value) => setFilters(prev => ({ ...prev, range: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Date Range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="12m">Last 12 months</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Autocomplete
-            value={filters.origin_country}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, origin_country: value }))}
-            options={searchLocations(filters.origin_country)}
-            placeholder="Origin Country/City"
-            searchPlaceholder="Search locations..."
-            className="w-full"
-          />
-          
-          <Input
-            placeholder="Origin ZIP"
-            value={filters.origin_zip}
-            onChange={(e) => setFilters(prev => ({ ...prev, origin_zip: e.target.value }))}
-          />
-          
-          <Autocomplete
-            value={filters.dest_country}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, dest_country: value }))}
-            options={searchLocations(filters.dest_country)}
-            placeholder="Destination Country/City"
-            searchPlaceholder="Search locations..."
-            className="w-full"
-          />
-          
-          <Input
-            placeholder="Destination ZIP"
-            value={filters.dest_zip}
-            onChange={(e) => setFilters(prev => ({ ...prev, dest_zip: e.target.value }))}
-          />
-          
-          <Input
-            placeholder="HS Codes"
-            value={filters.hs_codes}
-            onChange={(e) => setFilters(prev => ({ ...prev, hs_codes: e.target.value }))}
-          />
-          
-          <Autocomplete
-            value={filters.commodity}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, commodity: value }))}
-            options={searchCommodities(filters.commodity)}
-            placeholder="Commodity"
-            searchPlaceholder="Search commodities..."
-            className="w-full"
-          />
-          
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 col-span-1 sm:col-span-2 lg:col-span-4">
-            <Button onClick={handleSaveSearch} variant="outline" size="sm" className="w-full sm:w-auto">
-              Save
-            </Button>
-            <Button onClick={handleExport} variant="outline" size="sm" className="w-full sm:w-auto">
-              <Download className="w-4 h-4 mr-1" />
-              Export
-            </Button>
-          </div>
-        </div>
+        {/* Advanced Filters */}
+        <AdvancedFilters 
+          filters={filters}
+          onFiltersChange={setFilters}
+          onApplyFilters={handleSearch}
+        />
       </div>
 
       {/* Tabs */}
@@ -520,71 +461,7 @@ export function SearchIntelligence() {
         </TabsContent>
 
         <TabsContent value="shipments" className="space-y-4">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Searching shipments...</p>
-            </div>
-          ) : searchResults.items.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">No shipments found for your search.</p>
-            </div>
-          ) : (
-            searchResults.items.map((shipment) => (
-            <div key={shipment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-start space-x-4">
-                <div className="flex items-center space-x-2">
-                  {shipment.mode === 'air' ? (
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Plane className="w-4 h-4 text-primary" />
-                    </div>
-                  ) : (
-                    <div className="p-2 bg-accent/10 rounded-lg">
-                      <Ship className="w-4 h-4 text-accent" />
-                    </div>
-                  )}
-                  <Badge variant={shipment.mode === 'air' ? 'default' : 'secondary'} className="text-xs">
-                    {shipment.mode.toUpperCase()}
-                  </Badge>
-                </div>
-                
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg mb-2">{shipment.company}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
-                    <div className="flex items-center">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {shipment.origin} → {shipment.destination}
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {shipment.date}
-                    </div>
-                    <div className="flex items-center">
-                      <Package className="w-3 h-3 mr-1" />
-                      HS {shipment.hs_code}
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">{shipment.description}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="font-semibold text-lg">{shipment.value}</div>
-                      <div className="text-sm text-gray-500">{shipment.weight}</div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-emerald-500 rounded-full h-2"
-                          style={{ width: `${shipment.confidence}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-medium">{shipment.confidence}%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            ))
-          )}
+          <RevenueVesselResults results={searchResults.items} loading={loading} />
         </TabsContent>
 
         <TabsContent value="routes" className="space-y-4">
