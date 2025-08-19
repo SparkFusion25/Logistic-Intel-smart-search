@@ -1050,10 +1050,13 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
   for (const record of records) {
     try {
       // Check for existing record based on key fields
+      // For CSV/XLSX, use the default org_id since it may not be set properly
+      const orgId = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
+      
       const { data: existingRecords, error: checkError } = await supabaseClient
         .from('unified_shipments')
         .select('id')
-        .eq('org_id', record.org_id)
+        .eq('org_id', orgId)
         .eq('hs_code', record.hs_code)
         .eq('shipper_name', record.shipper_name || '')
         .eq('consignee_name', record.consignee_name || '')
@@ -1071,9 +1074,11 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         continue;
       }
 
-        // **ONLY**: Fix date string "null" to actual null and add timestamps
+        // **ONLY**: Fix date string "null" to actual null and add timestamps + org_id
         const cleanRecord = {
           ...record,
+          // Ensure org_id is properly set for CSV/XLSX files
+          org_id: record.org_id || orgId,
           // Fix date fields only
           shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
           arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
