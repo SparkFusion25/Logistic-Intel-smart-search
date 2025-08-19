@@ -3647,6 +3647,7 @@ export type Database = {
           vessel_imo: string | null
           vessel_name: string | null
           vessel_voyage_id: string | null
+          w: string | null
           weight_kg: number | null
           weight_original_format: string | null
           weight_t: number | null
@@ -3733,6 +3734,7 @@ export type Database = {
           vessel_imo?: string | null
           vessel_name?: string | null
           vessel_voyage_id?: string | null
+          w?: string | null
           weight_kg?: number | null
           weight_original_format?: string | null
           weight_t?: number | null
@@ -3819,6 +3821,7 @@ export type Database = {
           vessel_imo?: string | null
           vessel_name?: string | null
           vessel_voyage_id?: string | null
+          w?: string | null
           weight_kg?: number | null
           weight_original_format?: string | null
           weight_t?: number | null
