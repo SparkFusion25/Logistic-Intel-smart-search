@@ -21,7 +21,7 @@ import { SidebarBrand } from "./SidebarBrand"
 
 const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Search", url: "/dashboard", icon: Search, searchParam: true },
+  { title: "Search", url: "/dashboard?search=true", icon: Search },
   { title: "CRM", url: "/dashboard/crm", icon: Contact },
   { title: "Email", url: "/dashboard/email", icon: Mail },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
@@ -68,75 +68,48 @@ export function AppSidebar() {
           <SidebarGroupContent className="px-2">
             <SidebarMenu>
               {navigationItems.map((item) => {
-                const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + "/")
+                // For search item, check if we're on /dashboard?search=true
+                const isSearchItem = item.title === "Search"
                 const searchParams = new URLSearchParams(location.search)
-                const isSearchActive = item.searchParam && searchParams.get('search') === 'true'
-                const finalIsActive = isActive && (item.searchParam ? isSearchActive : !searchParams.has('search'))
-                
-                const handleClick = () => {
-                  if (item.searchParam) {
-                    navigate(`${item.url}?search=true`)
-                  }
-                }
+                const isActive = isSearchItem 
+                  ? location.pathname === "/dashboard" && searchParams.get('search') === 'true'
+                  : location.pathname === item.url || location.pathname.startsWith(item.url + "/")
                 
                 return (
                   <SidebarMenuItem key={item.title}>
                      <SidebarMenuButton 
-                       asChild={!item.searchParam}
+                       asChild
                        tooltip={collapsed ? item.title : undefined}
                        className={`
                          relative overflow-hidden transition-all duration-300 mx-2 my-1 rounded-xl cursor-pointer
-                         ${finalIsActive 
+                         ${isActive 
                            ? 'bg-white/5 border border-white/10 shadow-lg' 
                            : 'text-white/85'
                          }
                        `}
-                       onClick={item.searchParam ? handleClick : undefined}
                      >
-                       {item.searchParam ? (
-                         <div className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
-                           <div className={`
-                             w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
-                             ${finalIsActive 
-                               ? 'bg-gradient-to-br from-white/15 to-white/5' 
-                               : 'bg-white/10'
-                             }
-                           `}>
-                             <item.icon className="w-4 h-4 text-white" />
-                           </div>
-                           {!collapsed && (
-                             <span className={`
-                               font-medium truncate text-[15px] leading-5 transition-all duration-300
-                               ${finalIsActive ? 'text-white' : 'text-white/90'}
-                             `}>
-                               {item.title}
-                             </span>
-                           )}
+                       <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
+                         {/* Enhanced Icon Container */}
+                         <div className={`
+                           w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
+                           ${isActive 
+                             ? 'bg-gradient-to-br from-white/15 to-white/5' 
+                             : 'bg-white/10'
+                           }
+                         `}>
+                           <item.icon className="w-4 h-4 text-white" />
                          </div>
-                       ) : (
-                         <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
-                           {/* Enhanced Icon Container */}
-                           <div className={`
-                             w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
-                             ${finalIsActive 
-                               ? 'bg-gradient-to-br from-white/15 to-white/5' 
-                               : 'bg-white/10'
-                             }
+                        
+                         {/* Enhanced Text - Only show when not collapsed */}
+                         {!collapsed && (
+                           <span className={`
+                             font-medium truncate text-[15px] leading-5 transition-all duration-300
+                             ${isActive ? 'text-white' : 'text-white/90'}
                            `}>
-                             <item.icon className="w-4 h-4 text-white" />
-                           </div>
-                          
-                           {/* Enhanced Text - Only show when not collapsed */}
-                           {!collapsed && (
-                             <span className={`
-                               font-medium truncate text-[15px] leading-5 transition-all duration-300
-                               ${finalIsActive ? 'text-white' : 'text-white/90'}
-                             `}>
-                               {item.title}
-                             </span>
-                           )}
-                         </NavLink>
-                       )}
+                             {item.title}
+                           </span>
+                         )}
+                       </NavLink>
                       </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
