@@ -12,10 +12,12 @@ import { StatCard } from "@/components/shared";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchIntelligence } from "@/components/dashboard/SearchIntelligence";
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [greeting, setGreeting] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     // Get current user
@@ -180,12 +182,13 @@ const Dashboard = () => {
                           <Download className="w-4 h-4 mr-2" />
                           Export Data
                         </Button>
-                        <Link to="/dashboard/search">
-                          <Button className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg transition-all duration-200">
-                            <Plus className="w-4 h-4 mr-2" />
-                            New Search
-                          </Button>
-                        </Link>
+                        <Button 
+                          onClick={() => setShowSearch(!showSearch)}
+                          className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg transition-all duration-200"
+                        >
+                          <Search className="w-4 h-4 mr-2" />
+                          {showSearch ? 'Hide Search' : 'Search Companies'}
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -255,29 +258,67 @@ const Dashboard = () => {
                   <div className="p-4 sm:p-6">
                     <div className="space-y-2 sm:space-y-3">
                       {[
-                        { to: "/dashboard/search", icon: Search, title: "New Search" },
+                        { to: "#", icon: Search, title: "Search Companies", onClick: () => setShowSearch(!showSearch) },
                         { to: "/dashboard/crm", icon: Users, title: "Add Contact" },
                         { to: "/dashboard/analytics", icon: BarChart3, title: "View Analytics" },
                         { to: "/dashboard/settings", icon: Zap, title: "Settings" }
-                      ].map((action, index) => (
-                        <Link 
-                          key={index}
-                          to={action.to} 
-                          className="flex items-center justify-between p-3 rounded-lg sm:rounded-xl border border-blue-100/50 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 transition-all duration-200 group"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                              <action.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                      ].map((action, index) => {
+                        if (action.onClick) {
+                          return (
+                            <button
+                              key={index}
+                              onClick={action.onClick}
+                              type="button"
+                              className="flex items-center justify-between p-3 rounded-lg sm:rounded-xl border border-blue-100/50 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 transition-all duration-200 group w-full text-left"
+                            >
+                              <div className="flex items-center space-x-3">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                  <action.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                                </div>
+                                <span className="font-medium text-slate-900 text-sm sm:text-base">{action.title}</span>
+                              </div>
+                              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                            </button>
+                          );
+                        }
+                        
+                        return (
+                          <Link 
+                            key={index}
+                            to={action.to} 
+                            className="flex items-center justify-between p-3 rounded-lg sm:rounded-xl border border-blue-100/50 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 transition-all duration-200 group"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                <action.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                              </div>
+                              <span className="font-medium text-slate-900 text-sm sm:text-base">{action.title}</span>
                             </div>
-                            <span className="font-medium text-slate-900 text-sm sm:text-base">{action.title}</span>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                        </Link>
-                      ))}
+                            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Search Interface */}
+              {showSearch && (
+                <div className="mb-6">
+                  <Card className="shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Search className="w-5 h-5" />
+                        Trade Intelligence Search
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <SearchIntelligence />
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
 
               {/* Top Companies */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
@@ -288,8 +329,8 @@ const Dashboard = () => {
                       <Button variant="outline" size="sm" className="p-2 border-blue-200 hover:bg-blue-50">
                         <Filter className="w-4 h-4" />
                       </Button>
-                      <Link to="/dashboard/search" className="text-blue-600 hover:text-blue-700 font-semibold text-sm">
-                        View All Results
+                      <Link to="/dashboard" className="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+                        Search More
                       </Link>
                     </div>
                   </div>

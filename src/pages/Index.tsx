@@ -8,7 +8,7 @@ import { ResourcesHighlight } from "@/components/landing/ResourcesHighlight";
 import { PlatformShowcase } from "@/components/landing/PlatformShowcase";
 
 import { HeroSection } from "@/components/landing/HeroSection";
-import { SearchDemo } from "@/components/landing/SearchDemo";
+
 import { PricingSection } from "@/components/landing/PricingSection";
 import { HeroContactChip } from "@/components/marketing/HeroContactChip";
 import { ArrowRight, Search, Users, TrendingUp, Menu, X } from "lucide-react";

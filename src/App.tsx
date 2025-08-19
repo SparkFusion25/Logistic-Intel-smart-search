@@ -17,7 +17,7 @@ import LoginPage from "./pages/LoginPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Dashboard Pages
-import SearchIntelligencePage from "./pages/dashboard/SearchIntelligencePage";
+
 import CRMPage from "./pages/dashboard/CRMPage";
 import DealsPage from "./pages/dashboard/DealsPage";
 import EmailPage from "./pages/dashboard/EmailPage";
@@ -67,7 +67,7 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard/search" element={<ProtectedRoute><SearchIntelligencePage /></ProtectedRoute>} />
+            
             <Route path="/dashboard/crm" element={<ProtectedRoute><CRMPage /></ProtectedRoute>} />
             
             <Route path="/dashboard/admin" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />

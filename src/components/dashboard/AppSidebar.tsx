@@ -21,7 +21,7 @@ import { SidebarBrand } from "./SidebarBrand"
 
 const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Search", url: "/dashboard/search", icon: Search },
+  
   { title: "CRM", url: "/dashboard/crm", icon: Contact },
   { title: "Email", url: "/dashboard/email", icon: Mail },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
