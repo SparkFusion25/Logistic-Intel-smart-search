@@ -1128,7 +1128,7 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         const { data: bolDuplicates, error: bolError } = await supabaseClient
           .from('unified_shipments')
           .select('id')
-          .or(`bol_number.eq."${bolNumber.trim()}",bill_of_lading_number.eq."${bolNumber.trim()}"`)
+          .or(`bol_number.eq.${bolNumber.trim()},bill_of_lading_number.eq.${bolNumber.trim()}`)
           .eq('arrival_date', record.arrival_date || record.unified_date || null)
           .limit(1);
           
