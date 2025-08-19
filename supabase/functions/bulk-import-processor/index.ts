@@ -1049,19 +1049,35 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
   
   for (const record of records) {
     try {
-      // Check for existing record based on key fields
-      // For CSV/XLSX, use the default org_id since it may not be set properly
-      const orgId = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
-      
-      const { data: existingRecords, error: checkError } = await supabaseClient
+      // Check for existing record based on unique shipment logistics identifiers
+      // Focus on actual shipment details, not business entities that repeat
+      let duplicateQuery = supabaseClient
         .from('unified_shipments')
-        .select('id')
-        .eq('org_id', orgId)
-        .eq('hs_code', record.hs_code)
-        .eq('shipper_name', record.shipper_name || '')
-        .eq('consignee_name', record.consignee_name || '')
-        .eq('shipment_date', record.shipment_date || null)
-        .limit(1);
+        .select('id');
+
+      // Primary approach: Use BOL number + shipment date if available
+      if (record.bol_number && record.bol_number.trim() !== '') {
+        duplicateQuery = duplicateQuery
+          .eq('bol_number', record.bol_number.trim())
+          .eq('shipment_date', record.shipment_date || null);
+      } else {
+        // Fallback: Use vessel/carrier + date + ports for unique shipment identification
+        const vessel = record.vessel_name || record.carrier_name;
+        if (vessel && record.shipment_date) {
+          duplicateQuery = duplicateQuery
+            .eq('vessel_name', record.vessel_name || null)
+            .eq('carrier_name', record.carrier_name || null)
+            .eq('shipment_date', record.shipment_date || null)
+            .eq('port_of_loading', record.port_of_loading || null)
+            .eq('port_of_discharge', record.port_of_discharge || null);
+        } else {
+          // Skip duplicate check if we don't have sufficient shipment identifiers
+          duplicateQuery = null;
+        }
+      }
+
+      const { data: existingRecords, error: checkError } = duplicateQuery ? 
+        await duplicateQuery.limit(1) : { data: null, error: null };
 
       if (checkError) {
         console.error('Error checking for duplicates:', checkError);
@@ -1078,7 +1094,7 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         const cleanRecord = {
           ...record,
           // Ensure org_id is properly set for CSV/XLSX files
-          org_id: record.org_id || orgId,
+          org_id: record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55',
           // Fix date fields only
           shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
           arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
