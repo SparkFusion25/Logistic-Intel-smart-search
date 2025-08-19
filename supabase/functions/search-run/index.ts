@@ -105,30 +105,34 @@ serve(async (req) => {
         const companyMap = new Map();
         
         shipmentData?.forEach(shipment => {
-          const companyName = shipment.unified_company_name;
-          if (!companyMap.has(companyName)) {
-            companyMap.set(companyName, {
-              company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-              name: companyName,
-              location: null,
-              industry: null,
-              shipment_count: 0,
-              last_shipment_at: shipment.unified_date,
-              trade_volume_usd: 0,
-              confidence: null,
-              trend: null,
-              logo_url: null
-            });
-          }
+          // Use shipper_name or consignee_name as company identifier
+          const companies = [shipment.shipper_name, shipment.consignee_name].filter(Boolean);
           
-          const company = companyMap.get(companyName);
-          company.shipment_count += 1;
-          company.trade_volume_usd += shipment.unified_value || 0;
-          
-          // Update last shipment date if newer
-          if (shipment.unified_date > company.last_shipment_at) {
-            company.last_shipment_at = shipment.unified_date;
-          }
+          companies.forEach(companyName => {
+            if (!companyMap.has(companyName)) {
+              companyMap.set(companyName, {
+                company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                name: companyName,
+                location: null,
+                industry: null,
+                shipment_count: 0,
+                last_shipment_at: shipment.unified_date,
+                trade_volume_usd: 0,
+                confidence: null,
+                trend: null,
+                logo_url: null
+              });
+            }
+            
+            const company = companyMap.get(companyName);
+            company.shipment_count += 1;
+            company.trade_volume_usd += shipment.unified_value;
+            
+            // Update last shipment date if newer
+            if (shipment.unified_date > company.last_shipment_at) {
+              company.last_shipment_at = shipment.unified_date;
+            }
+          });
         });
 
         // Convert to array and sort by trade volume
