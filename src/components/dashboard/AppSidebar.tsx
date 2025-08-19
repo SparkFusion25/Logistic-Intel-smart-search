@@ -52,7 +52,7 @@ export function AppSidebar() {
       side="left"
       variant="sidebar" 
       collapsible="icon"
-      className={`border-r-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}
+      className={`border-r-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 shadow-2xl ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}
     >
       <SidebarHeader className="p-0">
         <SidebarBrand collapsed={collapsed} />
@@ -60,7 +60,7 @@ export function AppSidebar() {
 
       <SidebarContent className="bg-transparent">
         <SidebarGroup>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="px-2">
             <SidebarMenu>
               {navigationItems.map((item) => {
                 const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + "/")
@@ -69,13 +69,40 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       asChild
                       tooltip={collapsed ? item.title : undefined}
-                      className={`hover:bg-white/5 text-white/85 hover:text-white transition-all mx-2 my-1 rounded-xl group ${isActive ? 'bg-white/10' : ''}`}
+                      className={`
+                        relative overflow-hidden transition-all duration-300 mx-2 my-1 rounded-xl group
+                        ${isActive 
+                          ? 'bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20' 
+                          : 'hover:bg-white/10 text-white/85 hover:text-white'
+                        }
+                      `}
                     >
-                      <NavLink to={item.url} className="flex items-center gap-3 px-3 py-2">
-                        <div className={`w-5 h-5 shrink-0 rounded-md transition-colors flex items-center justify-center ${isActive ? 'bg-[#2D9CDB]' : 'bg-white/10 group-hover:bg-[#2D9CDB]'}`}>
-                          <item.icon className="w-3 h-3 text-white" />
+                      <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
+                        {/* Enhanced Icon Container */}
+                        <div className={`
+                          w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
+                          ${isActive 
+                            ? 'bg-gradient-to-br from-primary via-primary-foreground to-primary shadow-lg scale-110' 
+                            : 'bg-white/10 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:via-primary-foreground group-hover:to-primary group-hover:scale-105'
+                          }
+                        `}>
+                          <item.icon className="w-4 h-4 text-white" />
                         </div>
-                        {!collapsed && <span className="text-white font-medium truncate text-[15px] leading-5">{item.title}</span>}
+                        
+                        {/* Enhanced Text - Only show when not collapsed */}
+                        {!collapsed && (
+                          <span className={`
+                            font-medium truncate text-[15px] leading-5 transition-all duration-300
+                            ${isActive ? 'text-white font-semibold' : 'text-white/90 group-hover:text-white'}
+                          `}>
+                            {item.title}
+                          </span>
+                        )}
+                        
+                        {/* Active Indicator */}
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-primary-foreground rounded-r-full shadow-lg"></div>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -88,38 +115,67 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 border-t border-white/10 bg-transparent">
         <SidebarMenu>
-          {bottomItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton 
-                asChild
-                tooltip={collapsed ? item.title : undefined}
-                className="hover:bg-white/5 text-white/85 hover:text-white transition-all mx-2 my-1 rounded-xl group"
-              >
-                <NavLink to={item.url} className="flex items-center gap-3 px-3 py-2">
-                  <div className="w-5 h-5 shrink-0 rounded-md bg-white/10 transition-colors group-hover:bg-[#2D9CDB] flex items-center justify-center">
-                    <item.icon className="w-3 h-3 text-white" />
-                  </div>
-                  {!collapsed && <span className="text-white font-medium truncate text-[15px] leading-5">{item.title}</span>}
-                </NavLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {bottomItems.map((item) => {
+            const isActive = location.pathname === item.url
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton 
+                  asChild
+                  tooltip={collapsed ? item.title : undefined}
+                  className={`
+                    transition-all duration-300 mx-2 my-1 rounded-xl group
+                    ${isActive 
+                      ? 'bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20' 
+                      : 'hover:bg-white/10 text-white/85 hover:text-white'
+                    }
+                  `}
+                >
+                  <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-2 ${collapsed ? 'justify-center' : ''}`}>
+                    <div className={`
+                      w-8 h-8 shrink-0 rounded-lg transition-all duration-300 group-hover:scale-105 flex items-center justify-center
+                      ${isActive 
+                        ? 'bg-gradient-to-br from-primary via-primary-foreground to-primary shadow-lg' 
+                        : 'bg-white/10 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:via-primary-foreground group-hover:to-primary'
+                      }
+                    `}>
+                      <item.icon className="w-4 h-4 text-white" />
+                    </div>
+                    {!collapsed && (
+                      <span className={`text-white/90 font-medium truncate text-[15px] leading-5 group-hover:text-white transition-colors duration-300 ${isActive ? 'text-white font-semibold' : ''}`}>
+                        {item.title}
+                      </span>
+                    )}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
         
-        {!collapsed && (
-          <div className="mt-4 p-3 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
+        {/* Enhanced User Profile - Responsive to collapse state */}
+        <div className={`mt-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 ${collapsed ? 'px-2' : ''}`}>
+          {!collapsed ? (
+            // Full Profile View
             <div className="flex items-center gap-3">
-              <Avatar className="w-8 h-8 ring-2 ring-white/30">
+              <Avatar className="w-10 h-10 ring-2 ring-white/30 shadow-lg">
                 <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="bg-white/20 text-white font-semibold">JD</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-primary via-primary-foreground to-primary text-white font-bold text-sm">JD</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">John Doe</p>
-                <p className="text-xs text-white/60 truncate">john@company.com</p>
+                <p className="text-sm font-semibold text-white truncate">John Doe</p>
+                <p className="text-xs text-white/70 truncate">john@company.com</p>
               </div>
             </div>
-          </div>
-        )}
+          ) : (
+            // Collapsed Profile View - Avatar Only
+            <div className="flex justify-center">
+              <Avatar className="w-8 h-8 ring-2 ring-white/30 shadow-lg">
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback className="bg-gradient-to-br from-primary via-primary-foreground to-primary text-white font-bold text-xs">JD</AvatarFallback>
+              </Avatar>
+            </div>
+          )}
+        </div>
       </SidebarFooter>
     </Sidebar>
   )
