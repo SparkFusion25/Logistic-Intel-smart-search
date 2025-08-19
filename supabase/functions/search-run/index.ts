@@ -111,12 +111,12 @@ serve(async (req) => {
               company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
               name: companyName,
               location: shipment.origin_country || shipment.destination_country || null,
-              industry: 'Trade & Logistics',
+              industry: null,
               shipment_count: 0,
               last_shipment_at: shipment.unified_date,
               trade_volume_usd: 0,
-              confidence: 90,
-              trend: 'up',
+              confidence: null,
+              trend: null,
               logo_url: null
             });
           }
@@ -177,13 +177,13 @@ serve(async (req) => {
            mode: shipment.mode,
            origin: shipment.origin_country,
            destination: shipment.destination_country,
-          value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : 'N/A',
-          weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : 'N/A',
-          confidence: 90,
-          date: shipment.unified_date || '2025-01-01',
-          hs_code: shipment.hs_code || 'N/A',
-          carrier: shipment.carrier_name || 'Unknown Carrier',
-          description: shipment.commodity_description || 'Trade goods'
+          value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : null,
+          weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
+          confidence: null,
+          date: shipment.unified_date,
+          hs_code: shipment.hs_code,
+          carrier: shipment.carrier_name,
+          description: shipment.commodity_description
         })) || [];
       }
 
