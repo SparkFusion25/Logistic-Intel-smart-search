@@ -59,8 +59,8 @@ export function SearchIntelligence() {
     house_bol_number: "",
     vessel_name: "",
     voyage_number: "",
-    container_types: "",
-    is_lcl: ""
+    container_types: "all",
+    is_lcl: "all"
   })
   const { toast } = useToast()
   const { makeRequest } = useAPI()

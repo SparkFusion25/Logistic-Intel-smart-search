@@ -95,8 +95,8 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
       house_bol_number: "",
       vessel_name: "",
       voyage_number: "",
-      container_types: "",
-      is_lcl: ""
+      container_types: "all",
+      is_lcl: "all"
     })
   }
 
@@ -237,7 +237,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
                     <SelectValue placeholder="Select container type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="20GP">20ft GP</SelectItem>
                     <SelectItem value="40GP">40ft GP</SelectItem>
                     <SelectItem value="40HQ">40ft HQ</SelectItem>
@@ -254,7 +254,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
                     <SelectValue placeholder="Select shipment type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="false">FCL</SelectItem>
                     <SelectItem value="true">LCL</SelectItem>
                   </SelectContent>
