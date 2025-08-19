@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plane } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface SidebarBrandProps {
@@ -12,7 +12,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       {!collapsed && (
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-            <Plane className="w-6 h-6 text-primary" />
+            <img 
+              src="https://lqbzztypqnxnmnhfkszi.supabase.co/storage/v1/object/public/branding/logo-icon-white.png" 
+              alt="Logistic Intel" 
+              className="w-6 h-6" 
+            />
           </div>
           <div>
             <h1 className="text-white font-bold text-lg">Intelligence</h1>
@@ -23,7 +27,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       
       {collapsed && (
         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg mx-auto">
-          <Plane className="w-6 h-6 text-primary" />
+          <img 
+            src="https://lqbzztypqnxnmnhfkszi.supabase.co/storage/v1/object/public/branding/logo-icon-white.png" 
+            alt="Logistic Intel" 
+            className="w-6 h-6" 
+          />
         </div>
       )}
 
