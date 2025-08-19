@@ -3601,7 +3601,7 @@ export type Database = {
           id: string
           is_likely_air_shipper: boolean | null
           matching_fields: string | null
-          mode: string
+          mode: string | null
           number_of_containers: number | null
           org_id: string | null
           origin_country: string | null
@@ -3688,7 +3688,7 @@ export type Database = {
           id?: string
           is_likely_air_shipper?: boolean | null
           matching_fields?: string | null
-          mode: string
+          mode?: string | null
           number_of_containers?: number | null
           org_id?: string | null
           origin_country?: string | null
@@ -3775,7 +3775,7 @@ export type Database = {
           id?: string
           is_likely_air_shipper?: boolean | null
           matching_fields?: string | null
-          mode?: string
+          mode?: string | null
           number_of_containers?: number | null
           org_id?: string | null
           origin_country?: string | null
