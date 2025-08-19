@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Search, Contact, Mail, BarChart3, Flag, LineChart, 
-  Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle, BookOpen, Target 
+  Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle, BookOpen, Target, ChevronLeft, ChevronRight 
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import {
@@ -43,7 +43,7 @@ const bottomItems = [
 ]
 
 export function AppSidebar() {
-  const { state } = useSidebar()
+  const { state, toggleSidebar } = useSidebar()
   const collapsed = state === "collapsed"
   const location = useLocation()
 
@@ -52,10 +52,14 @@ export function AppSidebar() {
       side="left"
       variant="sidebar" 
       collapsible="icon"
-      className={`border-r-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 shadow-2xl ${collapsed ? 'w-[72px]' : 'w-[280px]'}`}
+      className="border-r-0 shadow-2xl transition-all duration-300"
+      style={{
+        background: 'linear-gradient(180deg, #0f172a 0%, #1e3a8a 40%, #312e81 100%)',
+        width: collapsed ? '72px' : '280px'
+      }}
     >
-      <SidebarHeader className="p-0">
-        <SidebarBrand collapsed={collapsed} />
+      <SidebarHeader className="p-0 border-b border-white/10">
+        <SidebarBrand collapsed={collapsed} toggleSidebar={toggleSidebar} />
       </SidebarHeader>
 
       <SidebarContent className="bg-transparent">
