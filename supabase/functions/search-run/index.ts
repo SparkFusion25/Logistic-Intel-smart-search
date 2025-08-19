@@ -110,7 +110,7 @@ serve(async (req) => {
             companyMap.set(companyName, {
               company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
               name: companyName,
-              location: shipment.origin_country || shipment.destination_country || null,
+              location: null,
               industry: null,
               shipment_count: 0,
               last_shipment_at: shipment.unified_date,
@@ -188,39 +188,12 @@ serve(async (req) => {
       }
 
     } else if (tab === 'routes') {
-      // Mock route results
-      results = [
-        {
-          route: 'China → United States',
-          volume: '$125.8B',
-          count: 45720,
-          share: '38%'
-        },
-        {
-          route: 'Germany → United States', 
-          volume: '$89.2B',
-          count: 28150,
-          share: '27%'
-        }
-      ];
+      // No default route results
+      results = [];
 
     } else if (tab === 'contacts') {
-      // Mock contact results (plan-gated)
-      results = [
-        {
-          id: 1,
-          company_name: 'Apple Inc',
-          full_name: 'Sarah Chen',
-          title: 'VP of Procurement',
-          email: null, // Gated for pro/enterprise
-          phone: null, // Gated for pro/enterprise
-          linkedin: 'https://linkedin.com/in/sarah-chen',
-          country: 'US',
-          city: 'Cupertino',
-          last_verified_at: new Date().toISOString(),
-          confidence: 95
-        }
-      ];
+      // No default contact results
+      results = [];
     }
 
     // Apply pagination
