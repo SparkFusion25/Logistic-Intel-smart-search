@@ -1123,6 +1123,11 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
 
       // Primary approach: Use BOL number (check both possible field names) + date
       const bolNumber = record.bol_number || record.bill_of_lading_number;
+      
+      // **TEMPORARY DEBUG**: Skip duplicate checking to isolate the issue
+      console.log(`DEBUG: Processing record with BOL: ${bolNumber}, skipping duplicate check for now`);
+      
+      /*
       if (bolNumber && bolNumber.trim() !== '') {
         // Check for duplicates in either BOL field
         const { data: bolDuplicates, error: bolError } = await supabaseClient
@@ -1171,6 +1176,7 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         }
         // If no vessel info, proceed with insert (no duplicate check possible)
       }
+      */
 
       // **ONLY**: Fix date string "null" to actual null and add timestamps + org_id
       // Map BOL to both possible field names for comprehensive coverage
