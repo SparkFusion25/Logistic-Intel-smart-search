@@ -1094,11 +1094,18 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
       }
 
       // **CRITICAL FIX**: Ensure date fields are properly null instead of string "null"
+      // AND ensure required fields have default values for database insertion
       const cleanRecord = {
         ...record,
+        // Fix date fields
         shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
         arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
         departure_date: record.departure_date === 'null' || record.departure_date === '' ? null : record.departure_date,
+        
+        // **CRITICAL**: Ensure required fields are not null (database constraint)
+        mode: record.mode || 'ocean', // Default to 'ocean' if mode is missing or null
+        
+        // Timestamps
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -1123,6 +1130,20 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
 
       if (insertError) {
         console.error('Error inserting sub-batch:', insertError);
+        console.error('Failed records sample:', JSON.stringify(subBatch[0], null, 2));
+        
+        // Update bulk import with specific error details
+        await supabaseClient
+          .from('bulk_imports')
+          .update({
+            error_details: {
+              database_error: insertError.message,
+              error_code: insertError.code,
+              failed_batch_sample: subBatch[0]
+            }
+          })
+          .eq('id', importId);
+          
         errors += subBatch.length;
       } else {
         processed += subBatch.length;
@@ -1130,6 +1151,19 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
       }
     } catch (error) {
       console.error('Exception inserting sub-batch:', error);
+      console.error('Exception details:', error.message);
+      
+      // Update bulk import with exception details
+      await supabaseClient
+        .from('bulk_imports')
+        .update({
+          error_details: {
+            exception_error: error.message,
+            failed_batch_sample: subBatch[0]
+          }
+        })
+        .eq('id', importId);
+        
       errors += subBatch.length;
     }
   }
