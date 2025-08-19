@@ -4,8 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Autocomplete } from "@/components/ui/autocomplete";
 import { useToast } from "@/hooks/use-toast";
 import { useAPI } from "@/hooks/useAPI";
+import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete";
+import { useCommodityAutocomplete } from "@/hooks/useCommodityAutocomplete";
 import { 
   Search, 
   Filter, 
@@ -27,8 +30,11 @@ export const SearchPanel = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [filters, setFilters] = useState({
     origin_country: "",
+    origin_zip: "",
     destination_country: "",
+    destination_zip: "",
     hs_code: "",
+    commodity: "",
     date_from: "",
     date_to: "",
     min_value: "",
@@ -37,21 +43,19 @@ export const SearchPanel = () => {
 
   const { toast } = useToast();
   const { makeRequest } = useAPI();
-
-  const countries = [
-    "United States", "China", "Germany", "Japan", "United Kingdom", 
-    "South Korea", "Netherlands", "France", "Italy", "Canada"
-  ];
+  const { searchLocations, loading: locationsLoading } = useLocationAutocomplete();
+  const { searchCommodities, loading: commoditiesLoading } = useCommodityAutocomplete();
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      toast({
-        title: "Search Required",
-        description: "Please enter a search query",
-        variant: "destructive"
-      });
-      return;
-    }
+    // Allow empty searches to show all data
+    // if (!searchQuery.trim()) {
+    //   toast({
+    //     title: "Search Required", 
+    //     description: "Please enter a search query",
+    //     variant: "destructive"
+    //   });
+    //   return;
+    // }
     
     setLoading(true);
     setHasSearched(true);
@@ -71,13 +75,13 @@ export const SearchPanel = () => {
         }
       });
       
-      if (response) {
-        setSearchResults(response);
-        toast({
-          title: "Search Complete",
-          description: `Found ${response.total} shipments for "${searchQuery}"`
-        });
-      }
+        if (response) {
+          setSearchResults(response);
+          toast({
+            title: "Search Complete",
+            description: searchQuery ? `Found ${response.total} shipments for "${searchQuery}"` : `Found ${response.total} shipments`
+          });
+        }
     } catch (error) {
       console.error('Search error:', error);
       toast({
@@ -134,10 +138,56 @@ export const SearchPanel = () => {
             />
           </div>
           
-          <Button onClick={handleSearch} size="lg" className="w-full">
-            <Search className="w-5 h-5 mr-2" />
-            Search Shipment Data
-          </Button>
+            <Button onClick={handleSearch} size="lg" className="w-full">
+              <Search className="w-5 h-5 mr-2" />
+              Search Global Trade Data
+            </Button>
+            
+            {/* Advanced Filters for Initial Search */}
+            <div className="mt-6 space-y-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">Advanced Filters:</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Autocomplete
+                  value={filters.origin_country}
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, origin_country: value }))}
+                  options={searchLocations(filters.origin_country)}
+                  placeholder="Origin"
+                  searchPlaceholder="Search locations..."
+                  className="w-full"
+                />
+                <Autocomplete
+                  value={filters.destination_country}
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, destination_country: value }))}
+                  options={searchLocations(filters.destination_country)}
+                  placeholder="Destination"
+                  searchPlaceholder="Search locations..."
+                  className="w-full"
+                />
+                <Input
+                  placeholder="Origin ZIP"
+                  value={filters.origin_zip}
+                  onChange={(e) => setFilters(prev => ({ ...prev, origin_zip: e.target.value }))}
+                />
+                <Input
+                  placeholder="Destination ZIP"
+                  value={filters.destination_zip}
+                  onChange={(e) => setFilters(prev => ({ ...prev, destination_zip: e.target.value }))}
+                />
+                <Input
+                  placeholder="HS Code"
+                  value={filters.hs_code}
+                  onChange={(e) => setFilters(prev => ({ ...prev, hs_code: e.target.value }))}
+                />
+                <Autocomplete
+                  value={filters.commodity}
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, commodity: value }))}
+                  options={searchCommodities(filters.commodity)}
+                  placeholder="Commodity"
+                  searchPlaceholder="Search commodities..."
+                  className="w-full"
+                />
+              </div>
+            </div>
         </div>
       </div>
     );

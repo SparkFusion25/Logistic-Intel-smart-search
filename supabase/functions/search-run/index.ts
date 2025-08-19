@@ -28,6 +28,14 @@ serve(async (req) => {
       sort
     } = body;
 
+    // Extract new filter fields
+    const {
+      origin_zip,
+      dest_zip,
+      destination_zip,
+      commodity
+    } = filters || {};
+
     console.log('Search request received:', { q, tab, filters });
 
     // Log the search
@@ -136,6 +144,26 @@ serve(async (req) => {
         query_unified = query_unified.eq('mode', filters.mode);
       }
 
+      // Apply additional filters
+      if (filters?.origin_country) {
+        query_unified = query_unified.ilike('origin_country', `%${filters.origin_country}%`);
+      }
+      if (filters?.dest_country) {
+        query_unified = query_unified.ilike('destination_country', `%${filters.dest_country}%`);
+      }
+      if (origin_zip) {
+        query_unified = query_unified.ilike('origin_zip', `%${origin_zip}%`);
+      }
+      if (dest_zip || destination_zip) {
+        query_unified = query_unified.ilike('destination_zip', `%${dest_zip || destination_zip}%`);
+      }
+      if (filters?.hs_codes) {
+        query_unified = query_unified.ilike('hs_code', `%${filters.hs_codes}%`);
+      }
+      if (commodity) {
+        query_unified = query_unified.ilike('commodity_description', `%${commodity}%`);
+      }
+
       const { data: unifiedData } = await query_unified.order('unified_date', { ascending: false }).limit(200);
 
       // 2. Query ocean_shipments
@@ -163,6 +191,26 @@ serve(async (req) => {
 
       if (searchTerm) {
         query_ocean = query_ocean.or(`company_name.ilike.%${searchTerm}%,shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,destination_zip.ilike.%${searchTerm}%,port_of_lading.ilike.%${searchTerm}%,port_of_unlading.ilike.%${searchTerm}%,vessel_name.ilike.%${searchTerm}%`);
+      }
+
+      // Apply additional filters to ocean
+      if (filters?.origin_country) {
+        query_ocean = query_ocean.ilike('origin_country', `%${filters.origin_country}%`);
+      }
+      if (filters?.dest_country) {
+        query_ocean = query_ocean.ilike('destination_country', `%${filters.dest_country}%`);
+      }
+      if (origin_zip) {
+        query_ocean = query_ocean.ilike('origin_zip', `%${origin_zip}%`);
+      }
+      if (dest_zip || destination_zip) {
+        query_ocean = query_ocean.ilike('destination_zip', `%${dest_zip || destination_zip}%`);
+      }
+      if (filters?.hs_codes) {
+        query_ocean = query_ocean.ilike('hs_code', `%${filters.hs_codes}%`);
+      }
+      if (commodity) {
+        query_ocean = query_ocean.ilike('commodity_description', `%${commodity}%`);
       }
 
       if (!filters?.mode || filters.mode === 'all' || filters.mode === 'ocean') {
@@ -196,6 +244,26 @@ serve(async (req) => {
         query_air = query_air.or(`shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,shipper_country.ilike.%${searchTerm}%,consignee_country.ilike.%${searchTerm}%,consignee_city.ilike.%${searchTerm}%,consignee_state.ilike.%${searchTerm}%,consignee_zip.ilike.%${searchTerm}%,port_of_lading.ilike.%${searchTerm}%,port_of_unlading.ilike.%${searchTerm}%,carrier_name.ilike.%${searchTerm}%`);
       }
 
+      // Apply additional filters to air
+      if (filters?.origin_country) {
+        query_air = query_air.ilike('shipper_country', `%${filters.origin_country}%`);
+      }
+      if (filters?.dest_country) {
+        query_air = query_air.ilike('consignee_country', `%${filters.dest_country}%`);
+      }
+      if (origin_zip) {
+        query_air = query_air.ilike('shipper_zip', `%${origin_zip}%`);
+      }
+      if (dest_zip || destination_zip) {
+        query_air = query_air.ilike('consignee_zip', `%${dest_zip || destination_zip}%`);
+      }
+      if (filters?.hs_codes) {
+        query_air = query_air.ilike('hs_code', `%${filters.hs_codes}%`);
+      }
+      if (commodity) {
+        query_air = query_air.ilike('commodity_description', `%${commodity}%`);
+      }
+
       if (!filters?.mode || filters.mode === 'all' || filters.mode === 'air') {
         const { data: airData } = await query_air.order('departure_date', { ascending: false }).limit(200);
         results_air = airData || [];
@@ -227,6 +295,26 @@ serve(async (req) => {
 
       if (searchTerm) {
         query_trade = query_trade.or(`inferred_company_name.ilike.%${searchTerm}%,shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,destination_zip.ilike.%${searchTerm}%,port_of_loading.ilike.%${searchTerm}%,port_of_discharge.ilike.%${searchTerm}%,vessel_name.ilike.%${searchTerm}%`);
+      }
+
+      // Apply additional filters to trade
+      if (filters?.origin_country) {
+        query_trade = query_trade.ilike('origin_country', `%${filters.origin_country}%`);
+      }
+      if (filters?.dest_country) {
+        query_trade = query_trade.ilike('destination_country', `%${filters.dest_country}%`);
+      }
+      if (origin_zip) {
+        query_trade = query_trade.ilike('origin_zip', `%${origin_zip}%`);
+      }
+      if (dest_zip || destination_zip) {
+        query_trade = query_trade.ilike('destination_zip', `%${dest_zip || destination_zip}%`);
+      }
+      if (filters?.hs_codes) {
+        query_trade = query_trade.ilike('hs_code', `%${filters.hs_codes}%`);
+      }
+      if (commodity) {
+        query_trade = query_trade.ilike('commodity_description', `%${commodity}%`);
       }
 
       if (filters?.mode && filters.mode !== 'all') {

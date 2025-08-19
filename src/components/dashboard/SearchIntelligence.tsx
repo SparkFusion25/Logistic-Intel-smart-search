@@ -11,8 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Autocomplete } from "@/components/ui/autocomplete"
 import { useToast } from "@/hooks/use-toast"
 import { useAPI } from "@/hooks/useAPI"
+import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete"
+import { useCommodityAutocomplete } from "@/hooks/useCommodityAutocomplete"
 import { CompanyCard } from "./CompanyCard"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
 
@@ -30,33 +33,34 @@ export function SearchIntelligence() {
     mode: "all",
     range: "90d",
     origin_country: "",
+    origin_zip: "",
     dest_country: "",
+    dest_zip: "",
     hs_codes: "",
+    commodity: "",
     entity: "all",
     min_shipments: "",
     min_confidence: ""
   })
   const { toast } = useToast()
   const { makeRequest } = useAPI()
-  
-  const countries = [
-    "United States", "China", "Germany", "Japan", "United Kingdom", 
-    "South Korea", "Netherlands", "France", "Italy", "Canada"
-  ]
+  const { searchLocations, loading: locationsLoading } = useLocationAutocomplete()
+  const { searchCommodities, loading: commoditiesLoading } = useCommodityAutocomplete()
 
   // All data now comes from real API - no hardcoded searches
 
   // Remove hardcoded mock data - use real search results from API
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      toast({
-        title: "Search Required",
-        description: "Please enter a search query",
-        variant: "destructive"
-      })
-      return
-    }
+    // Allow empty searches to show all data
+    // if (!searchQuery.trim()) {
+    //   toast({
+    //     title: "Search Required", 
+    //     description: "Please enter a search query",
+    //     variant: "destructive"
+    //   })
+    //   return
+    // }
     
     setLoading(true)
     setHasSearched(true)
@@ -295,7 +299,7 @@ export function SearchIntelligence() {
         </div>
         
         {/* Advanced Filters - Mobile Optimized */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           <Select value={filters.mode} onValueChange={(value) => setFilters(prev => ({ ...prev, mode: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Mode" />
@@ -318,36 +322,52 @@ export function SearchIntelligence() {
             </SelectContent>
           </Select>
           
-          <Select value={filters.origin_country} onValueChange={(value) => setFilters(prev => ({ ...prev, origin_country: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Origin" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map(country => (
-                <SelectItem key={country} value={country}>{country}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Autocomplete
+            value={filters.origin_country}
+            onValueChange={(value) => setFilters(prev => ({ ...prev, origin_country: value }))}
+            options={searchLocations(filters.origin_country)}
+            placeholder="Origin Country/City"
+            searchPlaceholder="Search locations..."
+            className="w-full"
+          />
           
-          <Select value={filters.dest_country} onValueChange={(value) => setFilters(prev => ({ ...prev, dest_country: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Destination" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map(country => (
-                <SelectItem key={country} value={country}>{country}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            placeholder="Origin ZIP"
+            value={filters.origin_zip}
+            onChange={(e) => setFilters(prev => ({ ...prev, origin_zip: e.target.value }))}
+          />
+          
+          <Autocomplete
+            value={filters.dest_country}
+            onValueChange={(value) => setFilters(prev => ({ ...prev, dest_country: value }))}
+            options={searchLocations(filters.dest_country)}
+            placeholder="Destination Country/City"
+            searchPlaceholder="Search locations..."
+            className="w-full"
+          />
+          
+          <Input
+            placeholder="Destination ZIP"
+            value={filters.dest_zip}
+            onChange={(e) => setFilters(prev => ({ ...prev, dest_zip: e.target.value }))}
+          />
           
           <Input
             placeholder="HS Codes"
             value={filters.hs_codes}
             onChange={(e) => setFilters(prev => ({ ...prev, hs_codes: e.target.value }))}
-            className="col-span-1 sm:col-span-2 lg:col-span-1"
           />
           
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 col-span-1 sm:col-span-2 lg:col-span-1">
+          <Autocomplete
+            value={filters.commodity}
+            onValueChange={(value) => setFilters(prev => ({ ...prev, commodity: value }))}
+            options={searchCommodities(filters.commodity)}
+            placeholder="Commodity"
+            searchPlaceholder="Search commodities..."
+            className="w-full"
+          />
+          
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 col-span-1 sm:col-span-2 lg:col-span-4">
             <Button onClick={handleSaveSearch} variant="outline" size="sm" className="w-full sm:w-auto">
               Save
             </Button>
@@ -387,7 +407,7 @@ export function SearchIntelligence() {
           </div>
           
           <p className="text-sm text-gray-600">
-            {loading ? "Searching..." : `Found ${searchResults.total} results for "${searchQuery}"`}
+            {loading ? "Searching..." : searchQuery ? `Found ${searchResults.total} results for "${searchQuery}"` : `Found ${searchResults.total} results`}
           </p>
         </div>
 
