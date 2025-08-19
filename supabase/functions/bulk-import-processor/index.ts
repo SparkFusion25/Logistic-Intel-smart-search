@@ -1108,21 +1108,24 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         .from('unified_shipments')
         .select('id');
 
-      // Primary approach: Use BOL number + shipment date if available
+      // Primary approach: Use BOL number + date if available
       if (record.bol_number && record.bol_number.trim() !== '') {
         duplicateQuery = duplicateQuery
           .eq('bol_number', record.bol_number.trim())
-          .eq('shipment_date', record.shipment_date || null);
+          .eq('arrival_date', record.arrival_date || record.unified_date || null);
       } else {
-        // Fallback: Use vessel/carrier + date + ports for unique shipment identification
-        const vessel = record.vessel_name || record.carrier_name;
-        if (vessel && record.shipment_date) {
+        // Fallback: Use vessel + date + transport method for unique shipment identification
+        const vessel = record.vessel || record.vessel_name || record.carrier_name;
+        const shipmentDate = record.arrival_date || record.unified_date || record.shipment_date;
+        
+        if (vessel && shipmentDate) {
           duplicateQuery = duplicateQuery
-            .eq('vessel_name', record.vessel_name || null)
-            .eq('carrier_name', record.carrier_name || null)
-            .eq('shipment_date', record.shipment_date || null)
-            .eq('port_of_loading', record.port_of_loading || null)
-            .eq('port_of_discharge', record.port_of_discharge || null);
+            .eq('vessel', record.vessel || null)
+            .eq('transport_method', record.transport_method || null)
+            .eq('arrival_date', record.arrival_date || null)
+            .eq('unified_date', record.unified_date || null)
+            .eq('port_of_lading', record.port_of_lading || null)
+            .eq('port_of_unlading', record.port_of_unlading || null);
         } else {
           // Skip duplicate check if we don't have sufficient shipment identifiers
           duplicateQuery = null;
