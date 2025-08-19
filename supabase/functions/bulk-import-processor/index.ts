@@ -1036,8 +1036,13 @@ function parseValue(value: string, fieldName: string): any {
   
   // Parse date fields with enhanced null handling
   if (['shipment_date', 'arrival_date', 'departure_date'].includes(fieldName)) {
-    // Additional safety check for string "null" in date fields
-    if (trimmed === 'null' || trimmed === 'NULL' || trimmed === '') return null;
+    // **CRITICAL FIX**: Handle various null representations that cause "invalid input syntax for type date"
+    if (trimmed === 'null' || trimmed === 'NULL' || trimmed === '' || 
+        trimmed === 'undefined' || trimmed === 'nil' || 
+        trimmed.toLowerCase() === 'null' || trimmed.toLowerCase() === 'n/a') {
+      console.log(`Date parsing: Converting "${trimmed}" to SQL NULL for field: ${fieldName}`);
+      return null;
+    }
     
     const date = new Date(trimmed);
     if (isNaN(date.getTime())) {
@@ -1088,11 +1093,17 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         continue;
       }
 
-      recordsToInsert.push({
+      // **CRITICAL FIX**: Ensure date fields are properly null instead of string "null"
+      const cleanRecord = {
         ...record,
+        shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
+        arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
+        departure_date: record.departure_date === 'null' || record.departure_date === '' ? null : record.departure_date,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      });
+      };
+
+      recordsToInsert.push(cleanRecord);
 
     } catch (error) {
       console.error('Error processing record:', error);
