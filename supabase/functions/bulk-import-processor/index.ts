@@ -1108,10 +1108,11 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         .from('unified_shipments')
         .select('id');
 
-      // Primary approach: Use BOL number + date if available
-      if (record.bol_number && record.bol_number.trim() !== '') {
+      // Primary approach: Use BOL number (check both possible field names) + date
+      const bolNumber = record.bol_number || record.bill_of_lading_number;
+      if (bolNumber && bolNumber.trim() !== '') {
         duplicateQuery = duplicateQuery
-          .eq('bol_number', record.bol_number.trim())
+          .or(`bol_number.eq.${bolNumber.trim()},bill_of_lading_number.eq.${bolNumber.trim()}`)
           .eq('arrival_date', record.arrival_date || record.unified_date || null);
       } else {
         // Fallback: Use vessel + date + transport method for unique shipment identification
@@ -1123,7 +1124,6 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
             .eq('vessel', record.vessel || null)
             .eq('transport_method', record.transport_method || null)
             .eq('arrival_date', record.arrival_date || null)
-            .eq('unified_date', record.unified_date || null)
             .eq('port_of_lading', record.port_of_lading || null)
             .eq('port_of_unlading', record.port_of_unlading || null);
         } else {
@@ -1147,10 +1147,15 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
       }
 
         // **ONLY**: Fix date string "null" to actual null and add timestamps + org_id
+        // Map BOL to both possible field names for comprehensive coverage
+        const bolValue = record.bol_number || record.bill_of_lading_number;
         const cleanRecord = {
           ...record,
           // Ensure org_id is properly set for CSV/XLSX files
           org_id: record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55',
+          // Map your Excel "Bill of Lading Number" to both database fields
+          bol_number: bolValue,
+          bill_of_lading_number: bolValue,
           // Fix date fields only
           shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
           arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
