@@ -1080,6 +1080,14 @@ function parseValue(value: string, fieldName: string): any {
       console.log(`Date parsing: Invalid date "${trimmed}" for field: ${fieldName}, returning null`);
       return null;
     }
+    
+    // **CRITICAL FIX**: Validate date is within reasonable range to prevent PostgreSQL errors
+    const year = date.getFullYear();
+    if (year < 1900 || year > 2100) {
+      console.log(`Date parsing: Date "${trimmed}" has invalid year ${year}, returning null`);
+      return null;
+    }
+    
     return date.toISOString().split('T')[0];
   }
   
