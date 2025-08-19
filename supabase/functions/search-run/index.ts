@@ -199,8 +199,8 @@ serve(async (req) => {
     // Apply pagination only if pagination parameters are provided
     const total = results.length;
     const paginatedResults = pagination ? results.slice(
-      pagination.offset || 0, 
-      (pagination.offset || 0) + (pagination.limit || results.length)
+      pagination.offset, 
+      pagination.offset + pagination.limit
     ) : results;
 
     console.log(`Search completed: ${total} results found`);
