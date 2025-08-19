@@ -21,7 +21,7 @@ import { SidebarBrand } from "./SidebarBrand"
 
 const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Search", url: "/dashboard?search=true", icon: Search },
+  { title: "Search", url: "/dashboard/search", icon: Search },
   { title: "CRM", url: "/dashboard/crm", icon: Contact },
   { title: "Email", url: "/dashboard/email", icon: Mail },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
@@ -68,12 +68,7 @@ export function AppSidebar() {
           <SidebarGroupContent className="px-2">
             <SidebarMenu>
               {navigationItems.map((item) => {
-                // For search item, check if we're on /dashboard?search=true
-                const isSearchItem = item.title === "Search"
-                const searchParams = new URLSearchParams(location.search)
-                const isActive = isSearchItem 
-                  ? location.pathname === "/dashboard" && searchParams.get('search') === 'true'
-                  : location.pathname === item.url || location.pathname.startsWith(item.url + "/")
+                const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + "/")
                 
                 return (
                   <SidebarMenuItem key={item.title}>

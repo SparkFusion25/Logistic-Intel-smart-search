@@ -31,6 +31,7 @@ import WidgetsPage from "./pages/dashboard/WidgetsPage";
 import QuoteGeneratorPage from "./pages/dashboard/QuoteGeneratorPage";
 import TariffCalculatorPage from "./pages/dashboard/TariffCalculatorPage";
 import BenchmarkPage from "./pages/dashboard/BenchmarkPage";
+import SearchPage from "./pages/dashboard/SearchPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import CompanyProfilePage from "./pages/dashboard/CompanyProfilePage";
 import { AdminDashboard as AdminDashboardPage } from "./pages/dashboard/AdminDashboard";
@@ -67,6 +68,7 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
             
             <Route path="/dashboard/crm" element={<ProtectedRoute><CRMPage /></ProtectedRoute>} />
             
