@@ -178,58 +178,33 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         })
         .eq('id', import_id);
 
-      // **CRITICAL: AI ENRICHMENT BEFORE DATABASE OPERATIONS**
-      console.log('Starting AI enrichment phase...');
-      await supabaseClient
-        .from('bulk_imports')
-        .update({ status: 'enriching', updated_at: new Date().toISOString() })
-        .eq('id', import_id);
+      // **STEP 2: PROCESS RECORDS BASED ON FILE TYPE - NO GLOBAL AI ENRICHMENT**
 
-      // Get sample data for AI analysis (first 10 rows for better analysis)
-      const sampleData = records.slice(0, Math.min(10, records.length));
-      
-      try {
-        const aiAnalysisResponse = await supabaseClient.functions.invoke('ai-file-analyzer', {
-          body: {
-            import_id,
-            file_sample: sampleData,
-            file_type,
-            filename: file_path.split('/').pop(),
-            full_record_count: records.length
-          }
-        });
-        
-        if (aiAnalysisResponse.error) {
-          console.error('AI analysis failed:', aiAnalysisResponse.error);
-          throw new Error(`AI analysis failed: ${aiAnalysisResponse.error.message}`);
-        } else {
-          console.log('AI analysis completed successfully');
-        }
-      } catch (aiError) {
-        console.error('AI analysis error:', aiError);
-        throw new Error(`AI enrichment required but failed: ${aiError.message}`);
-      }
-
-      // **STEP 2: PROCESS RECORDS BASED ON FILE TYPE**
       let finalRecords;
       
       if (file_type === 'xml') {
-        // XML files: Full enrichment and strict validation
-        console.log('XML file: Enriching all records with company data...');
-        const enrichedRecords = await enrichAllRecords(records, supabaseClient, import_id, file_type);
+        // XML files: Call dedicated XML AI enrichment function
+        console.log('XML file: Calling XML AI enrichment function...');
+        const xmlEnrichmentResponse = await supabaseClient.functions.invoke('xml-ai-enrichment', {
+          body: {
+            import_id,
+            records,
+            filename: file_path.split('/').pop()
+          }
+        });
         
-        if (enrichedRecords.length === 0) {
+        if (xmlEnrichmentResponse.error) {
+          console.error('XML enrichment failed:', xmlEnrichmentResponse.error);
+          throw new Error(`XML enrichment failed: ${xmlEnrichmentResponse.error.message}`);
+        }
+        
+        finalRecords = xmlEnrichmentResponse.data.enriched_records;
+        
+        if (finalRecords.length === 0) {
           throw new Error('No records could be enriched with valid company data');
         }
 
-        console.log(`Successfully enriched ${enrichedRecords.length}/${records.length} records`);
-
-        // Strict validation for XML
-        finalRecords = validateEnrichedRecordsByFileType(enrichedRecords, file_type);
-        
-        if (finalRecords.length === 0) {
-          throw new Error('No records passed validation after enrichment');
-        }
+        console.log(`XML enrichment completed: ${finalRecords.length}/${records.length} records processed`);
       } else {
         // CSV/XLSX files: NO enrichment, NO validation (except duplicates later)
         console.log(`${file_type.toUpperCase()} file: Processing without enrichment or validation...`);
@@ -297,10 +272,10 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
               batch_size: batchSize,
               total_batches: totalBatches,
               current_batch: batchNumber,
-              progress_percentage: Math.round((processedCount / validatedRecords.length) * 100),
-              enriched_records: enrichedRecords.length,
+              progress_percentage: Math.round((processedCount / finalRecords.length) * 100),
+              enriched_records: finalRecords.length,
               original_records: records.length,
-              validation_passed: validatedRecords.length,
+              validation_passed: finalRecords.length,
               contact_records_processed: contactProcessedCount,
               contact_records_total: processedData.contactRecords.length
             },
@@ -314,7 +289,7 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      console.log(`Batch processing completed: ${processedCount}/${validatedRecords.length} records processed successfully`);
+      console.log(`Batch processing completed: ${processedCount}/${finalRecords.length} records processed successfully`);
 
       // Final status update
       await supabaseClient
