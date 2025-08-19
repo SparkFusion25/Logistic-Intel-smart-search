@@ -52,15 +52,17 @@ serve(async (req) => {
       const { data: shipmentData, error: shipmentError } = await supabase
         .from('unified_shipments')
         .select(`
-          inferred_company_name,
-          shipper_country,
-          consignee_country,
-          shipment_date,
-          value_usd,
-          transport_mode
+          unified_company_name,
+          shipper_name,
+          consignee_name,
+          origin_country,
+          destination_country,
+          unified_date,
+          unified_value,
+          mode
         `)
-        .not('inferred_company_name', 'is', null)
-        .order('shipment_date', { ascending: false })
+        .not('unified_company_name', 'is', null)
+        .order('unified_date', { ascending: false })
         .limit(1000);
 
       if (shipmentError) {
@@ -72,15 +74,15 @@ serve(async (req) => {
         const companyMap = new Map();
         
         shipmentData?.forEach(shipment => {
-          const companyName = shipment.inferred_company_name;
+          const companyName = shipment.unified_company_name;
           if (!companyMap.has(companyName)) {
             companyMap.set(companyName, {
               company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
               name: companyName,
-              location: shipment.shipper_country || shipment.consignee_country || 'Unknown',
+              location: shipment.origin_country || shipment.destination_country || 'Unknown',
               industry: 'Trade & Logistics',
               shipment_count: 0,
-              last_shipment_at: shipment.shipment_date,
+              last_shipment_at: shipment.unified_date,
               trade_volume_usd: 0,
               confidence: 90,
               trend: 'up',
@@ -90,11 +92,11 @@ serve(async (req) => {
           
           const company = companyMap.get(companyName);
           company.shipment_count += 1;
-          company.trade_volume_usd += shipment.value_usd || 0;
+          company.trade_volume_usd += shipment.unified_value || 0;
           
           // Update last shipment date if newer
-          if (shipment.shipment_date > company.last_shipment_at) {
-            company.last_shipment_at = shipment.shipment_date;
+          if (shipment.unified_date > company.last_shipment_at) {
+            company.last_shipment_at = shipment.unified_date;
           }
         });
 
@@ -126,18 +128,18 @@ serve(async (req) => {
         .from('unified_shipments')
         .select(`
           id,
-          inferred_company_name,
-          transport_mode,
-          shipper_country,
-          consignee_country,
-          value_usd,
+          unified_company_name,
+          mode,
+          origin_country,
+          destination_country,
+          unified_value,
           weight_kg,
-          shipment_date,
+          unified_date,
           hs_code,
           carrier_name,
           commodity_description
         `)
-        .order('shipment_date', { ascending: false })
+        .order('unified_date', { ascending: false })
         .limit(100);
 
       if (shipmentError) {
@@ -146,14 +148,14 @@ serve(async (req) => {
       } else {
         results = shipmentData?.map(shipment => ({
           id: shipment.id,
-          company: shipment.inferred_company_name || 'Unknown Company',
-          mode: shipment.transport_mode || 'unknown',
-          origin: shipment.shipper_country || 'Unknown',
-          destination: shipment.consignee_country || 'Unknown',
-          value: shipment.value_usd ? `$${shipment.value_usd.toLocaleString()}` : 'N/A',
+          company: shipment.unified_company_name || 'Unknown Company',
+          mode: shipment.mode || 'unknown',
+          origin: shipment.origin_country || 'Unknown',
+          destination: shipment.destination_country || 'Unknown',
+          value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : 'N/A',
           weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : 'N/A',
           confidence: 90,
-          date: shipment.shipment_date || '2025-01-01',
+          date: shipment.unified_date || '2025-01-01',
           hs_code: shipment.hs_code || 'N/A',
           carrier: shipment.carrier_name || 'Unknown Carrier',
           description: shipment.commodity_description || 'Trade goods'
