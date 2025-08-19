@@ -110,7 +110,7 @@ serve(async (req) => {
             companyMap.set(companyName, {
               company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
               name: companyName,
-              location: shipment.origin_country || shipment.destination_country || 'Unknown',
+              location: shipment.origin_country || shipment.destination_country || null,
               industry: 'Trade & Logistics',
               shipment_count: 0,
               last_shipment_at: shipment.unified_date,
@@ -137,13 +137,7 @@ serve(async (req) => {
           .slice(0, 50); // Limit to top 50 companies
       }
 
-      // Apply simple filtering
-      if (filters.origin_country) {
-        results = results.filter(r => r.location.includes(filters.origin_country));
-      }
-      if (filters.entity && filters.entity !== 'all') {
-        // Mock entity filtering
-      }
+      // **REMOVED**: No default filtering applied
 
       // Apply sorting
       if (sort.field === 'trade_volume') {
@@ -179,10 +173,10 @@ serve(async (req) => {
       } else {
         results = shipmentData?.map(shipment => ({
           id: shipment.id,
-          company: shipment.unified_company_name || 'Unknown Company',
-          mode: shipment.mode || 'unknown',
-          origin: shipment.origin_country || 'Unknown',
-          destination: shipment.destination_country || 'Unknown',
+           company: shipment.unified_company_name,
+           mode: shipment.mode,
+           origin: shipment.origin_country,
+           destination: shipment.destination_country,
           value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : 'N/A',
           weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : 'N/A',
           confidence: 90,
