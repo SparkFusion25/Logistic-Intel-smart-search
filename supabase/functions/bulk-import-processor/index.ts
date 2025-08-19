@@ -1105,6 +1105,11 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
 
   console.log(`Processing batch of ${records.length} records for import ${importId}`);
 
+  // **DEBUG**: Log sample record structure
+  if (records.length > 0) {
+    console.log('Sample record structure:', JSON.stringify(records[0], null, 2));
+  }
+
   // Check for duplicates before inserting
   const recordsToInsert = [];
   
@@ -1187,12 +1192,16 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
       };
 
       recordsToInsert.push(cleanRecord);
+      console.log(`Record added to insert queue: BOL=${bolValue}, Arrival=${cleanRecord.arrival_date}`);
 
     } catch (error) {
       console.error('Error processing record:', error);
+      console.error('Problematic record:', JSON.stringify(record, null, 2));
       errors++;
     }
   }
+
+  console.log(`Records to insert: ${recordsToInsert.length}, Duplicates: ${duplicates}, Errors: ${errors}`);
 
   // Insert records in smaller sub-batches
   const subBatchSize = 100;
