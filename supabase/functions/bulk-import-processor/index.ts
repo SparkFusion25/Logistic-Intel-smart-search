@@ -1216,6 +1216,12 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
       if (insertError) {
         console.error('Error inserting sub-batch:', insertError);
         console.error('Failed records sample:', JSON.stringify(subBatch[0], null, 2));
+        console.error('Auth role:', supabaseClient.auth.user?.role || 'unknown');
+        console.error('RLS Policy Error Details:', {
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details
+        });
         
         // Update bulk import with specific error details
         await supabaseClient
