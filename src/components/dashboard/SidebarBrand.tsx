@@ -22,7 +22,8 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
         setLogoSrc(transparentUrl);
       } catch (error) {
         console.error("Error processing logo:", error);
-        // Keep original logo as fallback
+        // Use original logo with CSS to make background transparent
+        setLogoSrc("/lovable-uploads/c7c31567-c6a2-4d98-b45d-7aed7e035657.png");
       }
     };
 
@@ -33,11 +34,12 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
     <div className="flex items-center justify-between p-6">
       {!collapsed && (
         <div className="flex items-center space-x-3">
-          <div className="w-24 h-24 flex items-center justify-center rounded-lg">
+          <div className="w-10 h-10 flex items-center justify-center rounded-lg">
             <img 
               src={logoSrc}
               alt="Logo"
-              className="w-18 h-18 object-contain"
+              className="w-8 h-8 object-contain mix-blend-multiply dark:mix-blend-normal"
+              style={{ filter: 'drop-shadow(0 0 0 transparent)' }}
             />
           </div>
           <div>
@@ -47,11 +49,12 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       )}
       
       {collapsed && (
-        <div className="w-24 h-24 flex items-center justify-center mx-auto rounded-lg">
+        <div className="w-10 h-10 flex items-center justify-center mx-auto rounded-lg">
           <img 
             src={logoSrc}
             alt="Logo"
-            className="w-18 h-18 object-contain"
+            className="w-8 h-8 object-contain mix-blend-multiply dark:mix-blend-normal"
+            style={{ filter: 'drop-shadow(0 0 0 transparent)' }}
           />
         </div>
       )}
