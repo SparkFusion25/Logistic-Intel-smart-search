@@ -3776,6 +3776,10 @@ export type Database = {
         Args: { company_name: string }
         Returns: boolean
       }
+      is_valid_company_name_excel: {
+        Args: { company_name: string }
+        Returns: boolean
+      }
       li_norm: {
         Args: { t: string }
         Returns: string

@@ -40,100 +40,155 @@ serve(async (req) => {
 
     console.log(`Testing insert for user: ${user.id}`);
 
-    // Test 5 different record insertions to verify the structure
+    // Enhanced test records with file-type-specific validation scenarios
     const testRecords = [
       {
-        testName: 'Basic Ocean Record',
+        testName: 'Excel Scenario 1: String "null" from XLSX parsing',
         record: {
           org_id: user.id,
           mode: 'ocean',
-          unified_company_name: 'Test Ocean Shipper 1',
+          unified_company_name: 'null', // String "null" from Excel - CRITICAL TEST
+          hs_code: 'null', // String "null" from Excel
+          unified_destination: 'null',
+          unified_value: 'null', // String "null" numeric
+          unified_weight: 'null', // String "null" numeric
+          unified_date: 'null', // String "null" date
+          origin_country: 'null',
+          destination_country: 'USA',
+          shipment_date: 'null'
+        }
+      },
+      {
+        testName: 'Excel Scenario 2: Mixed sparse data with empty strings',
+        record: {
+          org_id: user.id,
+          mode: '',  // Empty string from Excel
+          unified_company_name: 'ABC Corp', 
+          hs_code: '', // Empty string from Excel
+          unified_destination: 'Los Angeles',
+          unified_value: null, // Actual null
+          unified_weight: '', // Empty string
+          unified_date: null,
+          origin_country: 'China',
+          destination_country: '',
+          shipment_date: null
+        }
+      },
+      {
+        testName: 'Excel Scenario 3: Edge case company names for relaxed validation',
+        record: {
+          org_id: user.id,
+          mode: 'air',
+          unified_company_name: 'Co', // Very short - should pass Excel validation
+          hs_code: '123456',
+          unified_destination: 'New York',
+          origin_country: 'USA',
+          destination_country: 'UK'
+        }
+      },
+      {
+        testName: 'Excel Scenario 4: Company with numbers (common in Excel)',
+        record: {
+          org_id: user.id,
+          mode: 'ocean',
+          unified_company_name: 'Company 123', // Should pass Excel validation
+          hs_code: '654321',
+          unified_destination: 'Miami',
+          origin_country: 'Germany',
+          destination_country: 'USA'
+        }
+      },
+      {
+        testName: 'XML Scenario 1: Valid structured data for strict validation',
+        record: {
+          org_id: user.id,
+          mode: 'ocean',
+          unified_company_name: 'Global Freight Solutions LLC',
           unified_destination: 'Los Angeles, CA',
           unified_value: 50000,
-          unified_weight: 15000,
+          unified_weight: 2500,
           unified_date: '2024-01-15',
-          shipper_name: 'Test Ocean Shipper 1',
-          consignee_name: 'Test Ocean Consignee 1',
+          unified_carrier: 'Evergreen Line',
+          hs_code: '870323',
+          description: 'Automotive parts',
+          commodity_description: 'Car engine components',
+          shipper_name: 'Global Freight Solutions LLC',
+          consignee_name: 'Auto Import Corp',
           origin_country: 'China',
           destination_country: 'United States',
           destination_city: 'Los Angeles',
           destination_state: 'CA',
-          hs_code: '8471.30.0100',
-          description: 'Computer equipment'
+          port_of_loading: 'Shanghai',
+          port_of_discharge: 'Port of Los Angeles',
+          shipment_date: '2024-01-15',
+          arrival_date: '2024-01-25'
         }
       },
       {
-        testName: 'Basic Air Record',
+        testName: 'CSV Scenario 1: Medium validation - missing mode but has hs_code',
         record: {
           org_id: user.id,
-          mode: 'air',
-          unified_company_name: 'Test Air Shipper 1',
-          unified_destination: 'New York, NY',
-          unified_value: 25000,
-          unified_weight: 500,
-          unified_date: '2024-01-16',
-          shipper_name: 'Test Air Shipper 1',
-          consignee_name: 'Test Air Consignee 1',
-          origin_country: 'Germany',
-          destination_country: 'United States',
-          destination_city: 'New York',
-          destination_state: 'NY',
-          hs_code: '9018.90.8000',
-          description: 'Medical devices'
+          mode: null, // Missing mode
+          unified_company_name: 'Trade International Inc',
+          hs_code: '841899', // Has hs_code - should pass CSV validation
+          unified_destination: 'Seattle',
+          origin_country: 'Japan',
+          destination_country: 'USA'
         }
       },
       {
-        testName: 'Minimal Required Fields Only',
+        testName: 'CSV Scenario 2: Medium validation - missing hs_code but has mode',
         record: {
           org_id: user.id,
-          mode: 'ocean'
+          mode: 'air', // Has mode
+          unified_company_name: 'Air Cargo Solutions',
+          hs_code: null, // Missing hs_code - should pass CSV validation
+          unified_destination: 'Chicago',
+          origin_country: 'Canada',
+          destination_country: 'USA'
         }
       },
       {
-        testName: 'Record with Nulls',
+        testName: 'All File Types: Complete null handling test',
         record: {
           org_id: user.id,
-          mode: 'air',
-          unified_company_name: 'Test Company with Nulls',
+          mode: null,
+          unified_company_name: null,
+          hs_code: null,
           unified_destination: null,
           unified_value: null,
           unified_weight: null,
           unified_date: null,
           shipper_name: null,
-          consignee_name: null
+          consignee_name: null,
+          origin_country: null,
+          destination_country: null
         }
       },
       {
-        testName: 'Full Data Record',
+        testName: 'Date Parsing: Invalid dates that should become null',
         record: {
           org_id: user.id,
           mode: 'ocean',
-          unified_company_name: 'Full Data Test Company',
-          unified_destination: 'Miami, FL',
-          unified_value: 75000,
-          unified_weight: 25000,
-          unified_date: '2024-01-17',
-          unified_carrier: 'Maersk Line',
-          hs_code: '6109.10.0010',
-          description: 'Cotton t-shirts',
-          commodity_description: 'Cotton t-shirts',
-          shipper_name: 'Full Data Shipper',
-          consignee_name: 'Full Data Consignee',
-          origin_country: 'Vietnam',
-          destination_country: 'United States',
-          destination_city: 'Miami',
-          destination_state: 'FL',
-          port_of_loading: 'Ho Chi Minh City',
-          port_of_discharge: 'Port of Miami',
-          bol_number: 'MAEU123456789',
-          vessel_name: 'Maersk Alabama',
-          container_count: 2,
-          carrier_name: 'Maersk Line',
-          quantity: 1000,
-          value_usd: 75000,
-          weight_kg: 25000,
-          shipment_date: '2024-01-15',
-          arrival_date: '2024-01-17'
+          unified_company_name: 'Date Test Company',
+          hs_code: '123456',
+          unified_date: 'invalid-date', // Should become null
+          shipment_date: '2024-13-45', // Invalid date - should become null
+          arrival_date: 'null' // String "null" - should become null
+        }
+      },
+      {
+        testName: 'Numeric Parsing: Various numeric edge cases',
+        record: {
+          org_id: user.id,
+          mode: 'air',
+          unified_company_name: 'Numeric Test Co',
+          hs_code: '987654',
+          unified_value: '$50,000', // With currency symbol and comma
+          unified_weight: 'null', // String "null" - should become null
+          quantity: '1,500', // With comma
+          value_usd: 'invalid-number', // Should become null
+          weight_kg: '' // Empty string - should become null
         }
       }
     ];
