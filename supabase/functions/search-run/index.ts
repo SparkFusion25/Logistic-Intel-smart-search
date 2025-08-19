@@ -22,10 +22,10 @@ serve(async (req) => {
     const body = await req.json();
     const { 
       q, 
-      tab = 'companies', 
-      filters = {}, 
-      pagination = { limit: 20, offset: 0 }, 
-      sort = { field: 'shipment_count', dir: 'desc' }
+      tab,
+      filters,
+      pagination,
+      sort
     } = body;
 
     console.log('Search request received:', { q, tab, filters });
