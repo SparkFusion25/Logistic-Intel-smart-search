@@ -48,8 +48,8 @@ serve(async (req) => {
     let results = [];
 
     if (tab === 'companies') {
-      // Query real data from unified_shipments table
-      const { data: shipmentData, error: shipmentError } = await supabase
+      // Query real data from unified_shipments table with search filtering
+      let query = supabase
         .from('unified_shipments')
         .select(`
           unified_company_name,
@@ -59,9 +59,29 @@ serve(async (req) => {
           destination_country,
           unified_date,
           unified_value,
-          mode
-        `)
-        .not('unified_company_name', 'is', null)
+          mode,
+          bol_number,
+          bill_of_lading_number
+        `);
+
+      // **CRITICAL FIX**: Apply search filter if query provided
+      if (q && q.trim() !== '') {
+        const searchTerm = q.trim();
+        console.log(`Applying search filter for: ${searchTerm}`);
+        
+        query = query.or(`
+          unified_company_name.ilike.%${searchTerm}%,
+          shipper_name.ilike.%${searchTerm}%,
+          consignee_name.ilike.%${searchTerm}%,
+          bol_number.ilike.%${searchTerm}%,
+          bill_of_lading_number.ilike.%${searchTerm}%
+        `);
+      } else {
+        // If no search term, filter out null company names
+        query = query.not('unified_company_name', 'is', null);
+      }
+
+      const { data: shipmentData, error: shipmentError } = await query
         .order('unified_date', { ascending: false })
         .limit(1000);
 
