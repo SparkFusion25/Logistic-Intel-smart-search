@@ -33,11 +33,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
     <div className="flex items-center justify-between p-6">
       {!collapsed && (
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 flex items-center justify-center rounded-lg">
+          <div className="w-24 h-24 flex items-center justify-center rounded-lg">
             <img 
               src={logoSrc}
               alt="Logo"
-              className="w-6 h-6 object-contain"
+              className="w-18 h-18 object-contain"
             />
           </div>
           <div>
@@ -47,11 +47,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       )}
       
       {collapsed && (
-        <div className="w-8 h-8 flex items-center justify-center mx-auto rounded-lg">
+        <div className="w-24 h-24 flex items-center justify-center mx-auto rounded-lg">
           <img 
             src={logoSrc}
             alt="Logo"
-            className="w-6 h-6 object-contain"
+            className="w-18 h-18 object-contain"
           />
         </div>
       )}
