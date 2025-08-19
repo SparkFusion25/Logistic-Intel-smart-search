@@ -20,10 +20,12 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
               xmlns="http://www.w3.org/2000/svg"
               className="w-6 h-6"
             >
-              <circle cx="50" cy="50" r="45" fill="#2B7DE9"/>
+              <circle cx="50" cy="50" r="40" fill="#4F8EF7"/>
               <path 
-                d="M25 70 L25 45 L40 45 L40 55 L35 55 L35 70 Z M45 35 L70 25 L75 35 L55 42 L75 65 L70 75 L45 55 L45 35 Z" 
-                fill="white"
+                d="M35 40 L65 50 L35 60 L40 50 Z M40 50 L55 50" 
+                fill="white" 
+                stroke="white" 
+                strokeWidth="2"
               />
             </svg>
           </div>
@@ -44,10 +46,12 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
             xmlns="http://www.w3.org/2000/svg"
             className="w-6 h-6"
           >
-            <circle cx="50" cy="50" r="45" fill="#2B7DE9"/>
+            <circle cx="50" cy="50" r="40" fill="#4F8EF7"/>
             <path 
-              d="M25 70 L25 45 L40 45 L40 55 L35 55 L35 70 Z M45 35 L70 25 L75 35 L55 42 L75 65 L70 75 L45 55 L45 35 Z" 
-              fill="white"
+              d="M35 40 L65 50 L35 60 L40 50 Z M40 50 L55 50" 
+              fill="white" 
+              stroke="white" 
+              strokeWidth="2"
             />
           </svg>
         </div>
