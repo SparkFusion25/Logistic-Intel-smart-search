@@ -57,11 +57,17 @@ serve(async (req) => {
           consignee_name,
           origin_country,
           destination_country,
+          destination_city,
+          destination_state,
           unified_date,
           unified_value,
           mode,
           bol_number,
-          bill_of_lading_number
+          bill_of_lading_number,
+          consignee_city,
+          consignee_state_region,
+          shipper_city,
+          shipper_state_region
         `);
 
       // **CRITICAL FIX**: Apply search filter if query provided
@@ -74,7 +80,15 @@ serve(async (req) => {
           shipper_name.ilike.%${searchTerm}%,
           consignee_name.ilike.%${searchTerm}%,
           bol_number.ilike.%${searchTerm}%,
-          bill_of_lading_number.ilike.%${searchTerm}%
+          bill_of_lading_number.ilike.%${searchTerm}%,
+          origin_country.ilike.%${searchTerm}%,
+          destination_country.ilike.%${searchTerm}%,
+          destination_city.ilike.%${searchTerm}%,
+          destination_state.ilike.%${searchTerm}%,
+          consignee_city.ilike.%${searchTerm}%,
+          consignee_state_region.ilike.%${searchTerm}%,
+          shipper_city.ilike.%${searchTerm}%,
+          shipper_state_region.ilike.%${searchTerm}%
         `);
       } else {
         // If no search term, filter out null company names
