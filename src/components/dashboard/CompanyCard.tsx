@@ -18,14 +18,32 @@ interface CompanyCardProps {
       title?: string
       email?: string
       phone?: string
+      linkedin?: string
+      company_website?: string
     }
     location?: string
     status?: 'Hot Lead' | 'Prospect' | 'Customer' | 'Cold'
     industry?: string
     revenue?: string
+    employees?: string
     shipments?: number
     trade_volume_usd?: number
     company_id?: string
+    // Additional fields from Excel mapping
+    consignee_industry?: string
+    shipper_industry?: string
+    consignee_revenue?: string
+    shipper_revenue?: string
+    consignee_employees?: string
+    shipper_employees?: string
+    consignee_email_1?: string
+    consignee_phone_1?: string
+    shipper_email_1?: string
+    shipper_phone_1?: string
+    consignee_website_1?: string
+    last_shipment_at?: string
+    confidence?: number
+    trend?: string
   }
   source?: string
   onAddedToCRM?: () => void
@@ -125,11 +143,13 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
             </div>
             
             <div className="space-y-2">
-              {company.contact && (
+              {(company.contact || company.consignee_email_1 || company.shipper_email_1) && (
                 <>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="font-medium text-card-foreground">{company.contact.name || 'Contact Available'}</span>
-                    {company.contact.title && (
+                    <span className="font-medium text-card-foreground">
+                      {company.contact?.name || 'Contact Available'}
+                    </span>
+                    {company.contact?.title && (
                       <>
                         <span className="text-muted-foreground">•</span>
                         <span className="text-muted-foreground">{company.contact.title}</span>
@@ -138,16 +158,16 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
                   </div>
                   
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    {company.contact.email && (
+                    {(company.contact?.email || company.consignee_email_1 || company.shipper_email_1) && (
                       <div className="flex items-center gap-1">
                         <Mail className="w-4 h-4" />
-                        {company.contact.email}
+                        {company.contact?.email || company.consignee_email_1 || company.shipper_email_1}
                       </div>
                     )}
-                    {company.contact.phone && (
+                    {(company.contact?.phone || company.consignee_phone_1 || company.shipper_phone_1) && (
                       <div className="flex items-center gap-1">
                         <Phone className="w-4 h-4" />
-                        {company.contact.phone}
+                        {company.contact?.phone || company.consignee_phone_1 || company.shipper_phone_1}
                       </div>
                     )}
                   </div>
@@ -161,10 +181,21 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
                 </div>
               )}
               
-              {company.revenue && (
+              {(company.revenue || company.consignee_revenue || company.shipper_revenue) && (
                 <div className="text-sm">
                   <span className="text-muted-foreground">Revenue: </span>
-                  <span className="font-medium text-card-foreground">{company.revenue}</span>
+                  <span className="font-medium text-card-foreground">
+                    {company.revenue || company.consignee_revenue || company.shipper_revenue}
+                  </span>
+                </div>
+              )}
+
+              {(company.employees || company.consignee_employees || company.shipper_employees) && (
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Employees: </span>
+                  <span className="font-medium text-card-foreground">
+                    {company.employees || company.consignee_employees || company.shipper_employees}
+                  </span>
                 </div>
               )}
 

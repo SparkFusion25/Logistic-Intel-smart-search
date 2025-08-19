@@ -907,16 +907,70 @@ function normalizeFieldName(field: string): string | null {
     .replace(/[^\\w]/g, '')
     .trim();
 
-  // Map various field name variations to standardized names
+  // Comprehensive mappings for your Excel column headers
   const fieldMappings: { [key: string]: string } = {
-    // Company fields
+    // Basic company/shipper/consignee mappings
+    'billofladingnumber': 'bol_number',
+    'arrivaldate': 'arrival_date', 
+    'matchingfields': 'matching_fields',
+    'consignee': 'consignee_name',
+    'consigneeaddress': 'consignee_address',
+    'consigneecity': 'consignee_city',
+    'consigneestateregion': 'consignee_state_region',
+    'consigneepostalcode': 'consignee_postal_code',
+    'consigneefulladdress': 'consignee_full_address',
+    'consigneeemail1': 'consignee_email_1',
+    'consigneephone1': 'consignee_phone_1',
+    'consigneewebsite1': 'consignee_website_1',
+    'consigneeindustry': 'consignee_industry',
+    'consigneerevenue': 'consignee_revenue',
+    'consigneeemployees': 'consignee_employees',
+    'consigneetraderoles': 'consignee_trade_roles',
     'shipper': 'shipper_name',
+    'shipperaddress': 'shipper_address',
+    'shippercity': 'shipper_city',
+    'shipperstateregion': 'shipper_state_region',
+    'shipperpostalcode': 'shipper_postal_code',
+    'shipperfulladdress': 'shipper_full_address',
+    'shipperemail1': 'shipper_email_1',
+    'shipperphone1': 'shipper_phone_1',
+    'shipperindustry': 'shipper_industry',
+    'shipperrevenue': 'shipper_revenue',
+    'shipperemployees': 'shipper_employees',
+    'shippertraderoles': 'shipper_trade_roles',
+    'shipmentorigin': 'shipment_origin',
+    'shipmentdestination': 'shipment_destination',
+    'shipmentdestinationregion': 'shipment_destination_region',
+    'portofunlading': 'port_of_unlading',
+    'portofunladingregion': 'port_of_unlading_region',
+    'portoflading': 'port_of_lading',
+    'portofladingregion': 'port_of_lading_region',
+    'portofladingcountry': 'port_of_lading_country',
+    'transportmethod': 'transport_method',
+    'vessel': 'vessel',
+    'vesselvoyageid': 'vessel_voyage_id',
+    'vesselimo': 'vessel_imo',
+    'quantity': 'quantity',
+    'weightkg': 'weight_kg',
+    'weightt': 'weight_t',
+    'weightoriginalformat': 'weight_original_format',
+    'numberofcontainers': 'number_of_containers',
+    'goodsshipped': 'goods_shipped',
+    'containermarks': 'container_marks',
+    'company': 'company_name',
+    'contacttype': 'contact_type',
+    'contactname': 'contact_name',
+    'position': 'title',
+    'email': 'email',
+    'phone': 'phone',
+    'profileurl': 'linkedin',
+    'companyurl': 'company_website',
+    
+    // Legacy mappings
     'shippername': 'shipper_name',
     'shipper_company': 'shipper_name',
-    'consignee': 'consignee_name',
     'consigneename': 'consignee_name',
     'consignee_company': 'consignee_name',
-    'company': 'company_name',
     'companyname': 'company_name',
     'importer': 'consignee_name',
     'exporter': 'shipper_name',
@@ -1176,7 +1230,7 @@ function normalizeContactFieldName(field: string): string | null {
     .replace(/[^\\w]/g, '')
     .trim();
 
-  // Map contact field variations to standardized names
+  // Contact-specific field mappings for your Excel headers
   const fieldMappings: { [key: string]: string } = {
     // Company fields
     'company': 'company_name',
@@ -1186,17 +1240,20 @@ function normalizeContactFieldName(field: string): string | null {
     'business': 'company_name',
     
     // Contact name fields
+    'contactname': 'full_name',
     'name': 'full_name',
     'fullname': 'full_name',
-    'contactname': 'full_name',
     'personname': 'full_name',
-    'firstname': 'full_name', // Will combine if needed
-    'lastname': 'full_name',  // Will combine if needed
+    'firstname': 'full_name',
+    'lastname': 'full_name',
+    
+    // Contact type mapping
+    'contacttype': 'contact_type',
     
     // Title fields
+    'position': 'title',
     'title': 'title',
     'jobtitle': 'title',
-    'position': 'title',
     'role': 'title',
     'designation': 'title',
     
@@ -1208,9 +1265,15 @@ function normalizeContactFieldName(field: string): string | null {
     'phonenumber': 'phone',
     'telephone': 'phone',
     'mobile': 'phone',
+    
+    // URL mappings
+    'profileurl': 'linkedin',
     'linkedin': 'linkedin',
     'linkedinurl': 'linkedin',
     'linkedinprofile': 'linkedin',
+    'companyurl': 'company_website',
+    'website': 'company_website',
+    'companywebsite': 'company_website',
     
     // Location fields
     'country': 'country',
