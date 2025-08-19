@@ -12,11 +12,15 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       {!collapsed && (
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg backdrop-blur-sm">
-            <img 
-              src="/lovable-uploads/eb2815fc-aefa-4b9f-8e44-e6165942adbd.png" 
-              alt="Intelligence Logo" 
-              className="w-6 h-6 object-contain"
-            />
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="white"
+              className="w-4 h-4"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
           </div>
           <div>
             <h1 className="text-white font-bold text-lg">Intelligence</h1>
@@ -27,11 +31,15 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       
       {collapsed && (
         <div className="w-8 h-8 flex items-center justify-center mx-auto bg-white/10 rounded-lg backdrop-blur-sm">
-          <img 
-            src="/lovable-uploads/eb2815fc-aefa-4b9f-8e44-e6165942adbd.png" 
-            alt="Intelligence Logo" 
-            className="w-6 h-6 object-contain"
-          />
+          <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="white"
+            className="w-4 h-4"
+          >
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
         </div>
       )}
 
