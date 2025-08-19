@@ -1,7 +1,7 @@
 // src/components/search/SearchPanel.tsx
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search as SearchIcon, Filter, X, Loader2 } from "lucide-react";
+import { Search as SearchIcon, Filter, X, Loader2, Copy, ExternalLink } from "lucide-react";
 
 type Mode = "all" | "ocean" | "air";
 
@@ -35,6 +35,7 @@ type Filters = {
   carrier?: string | null;
 };
 
+/** UI bits */
 const Chip: React.FC<{
   active?: boolean;
   onClick?: () => void;
@@ -64,6 +65,116 @@ const Input: React.FC<
   </label>
 );
 
+/** Self‑contained Shipment Card (no external imports needed) */
+const ShipmentCard: React.FC<{
+  row: Row;
+  onAddToCrm?: (row: Row) => void;
+  onViewContacts?: (row: Row) => void;
+  onExport?: (row: Row) => void;
+  compact?: boolean;
+  loading?: boolean;
+}> = ({ row, onAddToCrm, onViewContacts, onExport, compact, loading }) => {
+  const title =
+    row.unified_company_name || row.vessel_name || row.unified_carrier || "Shipment";
+  const lane =
+    (row.origin_country || "—") +
+    " → " +
+    (row.destination_city || row.destination_country || "—");
+  const modeBadge = row.mode ? (row.mode === "air" ? "✈ AIR" : "🚢 OCEAN") : "—";
+
+  return (
+    <article data-card className={`p-4 ${compact ? "py-3" : ""}`} aria-busy={!!loading}>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-xs md:text-sm text-ink-300">
+            {modeBadge} • {row.unified_date || "—"}
+          </div>
+          <div className="text-base md:text-lg font-semibold leading-tight">{title}</div>
+          <div className="text-sm text-ink-300">{lane}</div>
+        </div>
+
+        {/* Right stats */}
+        <div className="text-right text-sm">
+          {row.value_usd ? <div>${Number(row.value_usd).toLocaleString()}</div> : null}
+          {row.gross_weight_kg ? (
+            <div>{Number(row.gross_weight_kg).toLocaleString()} kg</div>
+          ) : null}
+          {row.container_count ? <div>{row.container_count} cntrs</div> : null}
+        </div>
+      </div>
+
+      {/* Meta */}
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        {row.hs_code ? (
+          <div className="inline-flex items-center gap-1">
+            <span className="text-ink-300">HS</span>
+            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+              {row.hs_code}
+            </code>
+          </div>
+        ) : null}
+        {row.bol_number ? (
+          <div className="inline-flex items-center gap-1">
+            <span className="text-ink-300">B/L</span>
+            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+              {row.bol_number}
+            </code>
+            <button
+              aria-label="Copy B/L number"
+              onClick={() => navigator.clipboard?.writeText(row.bol_number || "")}
+              className="p-1 rounded hover:bg-white/5"
+              title="Copy"
+            >
+              <Copy size={14} />
+            </button>
+          </div>
+        ) : null}
+        {row.vessel_name ? (
+          <div className="inline-flex items-center gap-1">
+            <span className="text-ink-300">Vessel</span>
+            <span>{row.vessel_name}</span>
+          </div>
+        ) : null}
+        {row.unified_carrier ? (
+          <div className="inline-flex items-center gap-1">
+            <span className="text-ink-300">Carrier</span>
+            <span>{row.unified_carrier}</span>
+          </div>
+        ) : null}
+      </div>
+
+      {row.description ? (
+        <p className="mt-2 text-sm text-ink-300 line-clamp-2">{row.description}</p>
+      ) : null}
+
+      {/* CTAs */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          onClick={() => onAddToCrm?.(row)}
+          className="px-3 py-2 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10"
+        >
+          {loading ? <Loader2 className="animate-spin inline-block mr-2 h-4 w-4" /> : null}
+          Add to CRM
+        </button>
+        <button
+          onClick={() => onViewContacts?.(row)}
+          className="px-3 py-2 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10"
+        >
+          View Contacts
+        </button>
+        <button
+          onClick={() => onExport?.(row)}
+          className="px-3 py-2 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10 inline-flex items-center gap-2"
+        >
+          Export <ExternalLink size={14} />
+        </button>
+      </div>
+    </article>
+  );
+};
+
+/** Main Search Panel */
 export default function SearchPanel() {
   const [mode, setMode] = useState<Mode>("all");
   const [q, setQ] = useState("");
@@ -77,7 +188,10 @@ export default function SearchPanel() {
 
   const [limit] = useState(25);
   const [offset, setOffset] = useState(0);
-  const hasMore = useMemo(() => offset + rows.length < total, [offset, rows, total]);
+  const hasMore = useMemo(
+    () => offset + rows.length < total,
+    [offset, rows.length, total]
+  );
   const abortRef = useRef<AbortController | null>(null);
 
   const runSearch = useCallback(
@@ -87,26 +201,35 @@ export default function SearchPanel() {
       if (abortRef.current) abortRef.current.abort();
       const ac = new AbortController();
       abortRef.current = ac;
+
       try {
-        const { data, error } = await supabase.rpc("search_unified", {
-          p_q: q.trim() ? q.trim() : null,
-          p_mode: mode,
-          p_date_from: filters.date_from ?? null,
-          p_date_to: filters.date_to ?? null,
-          p_hs_code: filters.hs_code ?? null,
-          p_origin_country: filters.origin_country ?? null,
-          p_destination_country: filters.destination_country ?? null,
-          p_destination_city: filters.destination_city ?? null,
-          p_carrier: filters.carrier ?? null,
-          p_limit: limit,
-          p_offset: reset ? 0 : offset + rows.length,
-        }, { signal: ac.signal as any });
+        // Call your Postgres function: public.search_unified
+        const { data, error } = await supabase.rpc(
+          "search_unified",
+          {
+            p_q: q.trim() ? q.trim() : null,
+            p_mode: mode,
+            p_date_from: filters.date_from ?? null,
+            p_date_to: filters.date_to ?? null,
+            p_hs_code: filters.hs_code ?? null,
+            p_origin_country: filters.origin_country ?? null,
+            p_destination_country: filters.destination_country ?? null,
+            p_destination_city: filters.destination_city ?? null,
+            p_carrier: filters.carrier ?? null,
+            p_limit: limit,
+            p_offset: reset ? 0 : offset + rows.length,
+          },
+          { signal: ac.signal as any }
+        );
 
         if (error) throw error;
+
         const list = (data || []) as Row[];
         const next = reset ? list : [...rows, ...list];
         setRows(next);
-        setTotal(list.length ? Number(list[0].total_count ?? next.length) : reset ? 0 : total);
+        setTotal(
+          list.length ? Number(list[0].total_count ?? next.length) : reset ? 0 : total
+        );
         if (reset) setOffset(0);
       } catch (e: any) {
         if (e?.name !== "AbortError") {
@@ -131,7 +254,7 @@ export default function SearchPanel() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Top input + mode chips (mobile-first) */}
+      {/* Sticky top bar */}
       <div className="sticky top-0 z-10 bg-ink-900/70 backdrop-blur border-b border-white/10">
         <div className="p-3 space-y-3">
           <div className="flex gap-2">
@@ -151,6 +274,8 @@ export default function SearchPanel() {
                 Search
               </button>
             </div>
+
+            {/* Mobile filters button */}
             <button
               className="md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-xl2 border border-white/10 bg-white/5"
               onClick={() => setOpenFilters(true)}
@@ -159,6 +284,7 @@ export default function SearchPanel() {
             </button>
           </div>
 
+          {/* Mode chips */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar">
             {(["all", "ocean", "air"] as Mode[]).map((m) => (
               <Chip key={m} active={mode === m} onClick={() => setMode(m)}>
@@ -169,8 +295,9 @@ export default function SearchPanel() {
         </div>
       </div>
 
-      {/* Desktop filter rail */}
+      {/* Content */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-3">
+        {/* Desktop filter rail */}
         <aside className="hidden md:block md:col-span-3 lg:col-span-3" aria-label="Filters">
           <div data-card className="p-4 space-y-3">
             <div className="text-sm font-semibold mb-1">Filters</div>
@@ -184,19 +311,25 @@ export default function SearchPanel() {
               label="Origin Country"
               placeholder="e.g., China"
               value={filters.origin_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, origin_country: e.target.value || null })}
+              onChange={(e) =>
+                setFilters({ ...filters, origin_country: e.target.value || null })
+              }
             />
             <Input
               label="Destination Country"
               placeholder="e.g., United States"
               value={filters.destination_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_country: e.target.value || null })}
+              onChange={(e) =>
+                setFilters({ ...filters, destination_country: e.target.value || null })
+              }
             />
             <Input
               label="Destination City"
               placeholder="e.g., Los Angeles"
               value={filters.destination_city ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_city: e.target.value || null })}
+              onChange={(e) =>
+                setFilters({ ...filters, destination_city: e.target.value || null })
+              }
             />
             <Input
               label="Carrier"
@@ -209,13 +342,17 @@ export default function SearchPanel() {
                 label="From"
                 type="date"
                 value={filters.date_from ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_from: e.target.value || null })}
+                onChange={(e) =>
+                  setFilters({ ...filters, date_from: e.target.value || null })
+                }
               />
               <Input
                 label="To"
                 type="date"
                 value={filters.date_to ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_to: e.target.value || null })}
+                onChange={(e) =>
+                  setFilters({ ...filters, date_to: e.target.value || null })
+                }
               />
             </div>
             <button
@@ -243,51 +380,20 @@ export default function SearchPanel() {
             <div data-card className="p-6 text-ink-300">
               <div className="font-semibold text-white mb-1">Try a sample search</div>
               <div className="text-sm">
-                Examples: <em>“Samsung United States 90d”</em>, <em>“8471 ocean China→US”</em>, <em>“AA air ORD”</em>
+                Examples: <em>“Samsung United States 90d”</em>, <em>“8471 ocean China→US”</em>,{" "}
+                <em>“AA air ORD”</em>
               </div>
             </div>
           ) : (
             <div className="space-y-3">
               {rows.map((r) => (
-                <article key={r.id} data-card className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm text-ink-300">
-                        {r.mode?.toUpperCase() || "—"} • {r.unified_date || "—"}
-                      </div>
-                      <div className="text-lg font-semibold">
-                        {r.unified_company_name || r.vessel_name || r.unified_carrier || "Shipment"}
-                      </div>
-                      <div className="text-sm text-ink-300">
-                        {r.origin_country || "—"} → {r.destination_city || r.destination_country || "—"}
-                      </div>
-                    </div>
-                    <div className="text-right text-sm">
-                      {r.value_usd ? <div>${Number(r.value_usd).toLocaleString()}</div> : null}
-                      {r.gross_weight_kg ? <div>{Number(r.gross_weight_kg).toLocaleString()} kg</div> : null}
-                      {r.container_count ? <div>{r.container_count} cntrs</div> : null}
-                    </div>
-                  </div>
-
-                  <div className="mt-2 text-sm">
-                    {r.hs_code ? <span className="mr-3">HS: {r.hs_code}</span> : null}
-                    {r.bol_number ? <span className="mr-3">B/L: {r.bol_number}</span> : null}
-                    {r.vessel_name ? <span className="mr-3">Vessel: {r.vessel_name}</span> : null}
-                    {r.unified_carrier ? <span>Carrier: {r.unified_carrier}</span> : null}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button className="px-3 py-1.5 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10">
-                      Add to CRM
-                    </button>
-                    <button className="px-3 py-1.5 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10">
-                      View Contacts
-                    </button>
-                    <button className="px-3 py-1.5 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10">
-                      Export
-                    </button>
-                  </div>
-                </article>
+                <ShipmentCard
+                  key={r.id}
+                  row={r}
+                  onAddToCrm={(row) => console.log("Add to CRM", row)}
+                  onViewContacts={(row) => console.log("View Contacts", row)}
+                  onExport={(row) => console.log("Export", row)}
+                />
               ))}
 
               {hasMore && (
@@ -307,7 +413,7 @@ export default function SearchPanel() {
         </section>
       </div>
 
-      {/* Mobile filter drawer */}
+      {/* Mobile filter drawer (self-contained) */}
       {openFilters && (
         <div className="fixed inset-0 z-30 md:hidden">
           <div
@@ -335,19 +441,25 @@ export default function SearchPanel() {
               label="Origin Country"
               placeholder="e.g., China"
               value={filters.origin_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, origin_country: e.target.value || null })}
+              onChange={(e) =>
+                setFilters({ ...filters, origin_country: e.target.value || null })
+              }
             />
             <Input
               label="Destination Country"
               placeholder="e.g., United States"
               value={filters.destination_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_country: e.target.value || null })}
+              onChange={(e) =>
+                setFilters({ ...filters, destination_country: e.target.value || null })
+              }
             />
             <Input
               label="Destination City"
               placeholder="e.g., Los Angeles"
               value={filters.destination_city ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_city: e.target.value || null })}
+              onChange={(e) =>
+                setFilters({ ...filters, destination_city: e.target.value || null })
+              }
             />
             <Input
               label="Carrier"
@@ -360,13 +472,17 @@ export default function SearchPanel() {
                 label="From"
                 type="date"
                 value={filters.date_from ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_from: e.target.value || null })}
+                onChange={(e) =>
+                  setFilters({ ...filters, date_from: e.target.value || null })
+                }
               />
               <Input
                 label="To"
                 type="date"
                 value={filters.date_to ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_to: e.target.value || null })}
+                onChange={(e) =>
+                  setFilters({ ...filters, date_to: e.target.value || null })
+                }
               />
             </div>
 
