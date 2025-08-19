@@ -227,11 +227,11 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         throw new Error('No records passed validation after enrichment');
       }
 
-      // Update status to processing_batches
+      // Update status to processing
       await supabaseClient
         .from('bulk_imports')
         .update({ 
-          status: 'processing_batches',
+          status: 'processing',
           total_records: validatedRecords.length, // Update with validated count
           processing_metadata: { 
             batch_size: 500,
