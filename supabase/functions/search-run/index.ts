@@ -67,11 +67,7 @@ serve(async (req) => {
         const searchTerm = q.trim();
         console.log(`Applying search filter for: ${searchTerm}`);
         
-        query = query.or(`
-          company_name.ilike.%${searchTerm}%,
-          industry.ilike.%${searchTerm}%,
-          country.ilike.%${searchTerm}%
-        `);
+        query = query.or(`company_name.ilike.%${searchTerm}%,industry.ilike.%${searchTerm}%,country.ilike.%${searchTerm}%`);
       }
 
       const { data: companyData, error: companyError } = await query
