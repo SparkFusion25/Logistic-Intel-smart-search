@@ -1198,16 +1198,21 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
       };
 
       recordsToInsert.push(cleanRecord);
-      console.log(`Record added to insert queue: BOL=${bolValue}, Arrival=${cleanRecord.arrival_date}`);
+      console.log(`✅ Record ${recordsToInsert.length} added to insert queue: BOL=${bolValue}, Arrival=${cleanRecord.arrival_date}`);
 
     } catch (error) {
-      console.error('Error processing record:', error);
+      console.error('❌ Error processing record:', error);
       console.error('Problematic record:', JSON.stringify(record, null, 2));
       errors++;
     }
   }
 
-  console.log(`Records to insert: ${recordsToInsert.length}, Duplicates: ${duplicates}, Errors: ${errors}`);
+  console.log(`📊 BATCH SUMMARY: Records to insert: ${recordsToInsert.length}, Duplicates: ${duplicates}, Errors: ${errors}`);
+  
+  if (recordsToInsert.length === 0) {
+    console.error('🚨 CRITICAL: No records to insert! All records were rejected.');
+    return { processed: 0, duplicates, errors };
+  }
 
   // Insert records in smaller sub-batches
   const subBatchSize = 100;
