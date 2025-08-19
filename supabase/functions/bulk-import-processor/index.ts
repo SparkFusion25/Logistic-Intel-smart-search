@@ -812,10 +812,8 @@ function validateXLSXRecords(records: TradeRecord[]): TradeRecord[] {
   for (const record of records) {
     const failures = [];
     
-    // MINIMAL VALIDATION for Excel files - only require org_id
-    if (!record.org_id) {
-      failures.push('missing org_id');
-    }
+    // NO VALIDATION for Excel files - accept everything
+    // Completely permissive upload
     
     // Accept ALL records with org_id - even completely sparse data
     // This handles Excel files with lots of empty cells
@@ -898,10 +896,8 @@ function validateCSVRecords(records: TradeRecord[]): TradeRecord[] {
   for (const record of records) {
     const failures = [];
     
-    // MINIMAL VALIDATION for CSV files - only require org_id (same as XLSX)
-    if (!record.org_id) {
-      failures.push('missing org_id');
-    }
+    // NO VALIDATION for CSV files - accept everything  
+    // Completely permissive upload (same as XLSX)
     
     // Accept ALL records with org_id - even completely sparse data
     // This handles CSV files with lots of empty cells (from Panjiva)
