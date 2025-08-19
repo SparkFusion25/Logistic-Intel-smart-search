@@ -95,8 +95,17 @@ serve(async (req) => {
       }
 
     } else if (tab === 'shipments') {
-      // Query unified_shipments with comprehensive search across all sources
-      let query = supabase
+      // Query ALL shipment tables for comprehensive search
+      let results_unified = [];
+      let results_ocean = [];
+      let results_air = [];
+      let results_trade = [];
+
+      const searchTerm = q && q.trim() !== '' ? q.trim() : null;
+      console.log(`Applying comprehensive search across all shipment tables for: ${searchTerm || 'ALL DATA'}`);
+
+      // 1. Query unified_shipments
+      let query_unified = supabase
         .from('unified_shipments')
         .select(`
           id,
@@ -119,50 +128,206 @@ serve(async (req) => {
           consignee_name
         `);
 
-      // Apply comprehensive search - supports empty queries to show all data
-      if (q && q.trim() !== '') {
-        const searchTerm = q.trim();
-        console.log(`Applying comprehensive shipments search for: ${searchTerm}`);
-        
-        // Search across all shipment fields including origin, destination, commodity, HS codes, zip codes
-        query = query.or(`unified_company_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,destination_zip.ilike.%${searchTerm}%,port_of_loading.ilike.%${searchTerm}%,port_of_discharge.ilike.%${searchTerm}%,carrier_name.ilike.%${searchTerm}%,shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%`);
+      if (searchTerm) {
+        query_unified = query_unified.or(`unified_company_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,destination_zip.ilike.%${searchTerm}%,port_of_loading.ilike.%${searchTerm}%,port_of_discharge.ilike.%${searchTerm}%,carrier_name.ilike.%${searchTerm}%,shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%`);
       }
 
-      // Apply mode filter if specified (ocean/air)
       if (filters?.mode && filters.mode !== 'all') {
-        query = query.eq('mode', filters.mode);
+        query_unified = query_unified.eq('mode', filters.mode);
       }
 
-      const { data: shipmentData, error: shipmentError } = await query
-        .order('unified_date', { ascending: false })
-        .limit(500);
+      const { data: unifiedData } = await query_unified.order('unified_date', { ascending: false }).limit(200);
 
-      if (shipmentError) {
-        console.error('Error fetching shipments:', shipmentError);
-        results = [];
-      } else {
-        results = shipmentData?.map(shipment => ({
-          id: shipment.id,
-          company: shipment.unified_company_name,
-          mode: shipment.mode,
-          origin: shipment.origin_country,
-          destination: shipment.destination_country,
-          destination_city: shipment.destination_city,
-          destination_state: shipment.destination_state,
-          destination_zip: shipment.destination_zip,
-          port_of_loading: shipment.port_of_loading,
-          port_of_discharge: shipment.port_of_discharge,
-          value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : null,
-          weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
-          confidence: null,
-          date: shipment.unified_date,
-          hs_code: shipment.hs_code,
-          carrier: shipment.carrier_name,
-          description: shipment.commodity_description,
-          shipper: shipment.shipper_name,
-          consignee: shipment.consignee_name
-        })) || [];
+      // 2. Query ocean_shipments
+      let query_ocean = supabase
+        .from('ocean_shipments')
+        .select(`
+          id,
+          company_name,
+          shipper_name,
+          consignee_name,
+          origin_country,
+          destination_country,
+          destination_city,
+          destination_state,
+          destination_zip,
+          port_of_lading,
+          port_of_unlading,
+          value_usd,
+          weight_kg,
+          shipment_date,
+          hs_code,
+          vessel_name,
+          commodity_description
+        `);
+
+      if (searchTerm) {
+        query_ocean = query_ocean.or(`company_name.ilike.%${searchTerm}%,shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,destination_zip.ilike.%${searchTerm}%,port_of_lading.ilike.%${searchTerm}%,port_of_unlading.ilike.%${searchTerm}%,vessel_name.ilike.%${searchTerm}%`);
       }
+
+      if (!filters?.mode || filters.mode === 'all' || filters.mode === 'ocean') {
+        const { data: oceanData } = await query_ocean.order('shipment_date', { ascending: false }).limit(200);
+        results_ocean = oceanData || [];
+      }
+
+      // 3. Query airfreight_shipments
+      let query_air = supabase
+        .from('airfreight_shipments')
+        .select(`
+          id,
+          shipper_name,
+          consignee_name,
+          shipper_country,
+          consignee_country,
+          consignee_city,
+          consignee_state,
+          consignee_zip,
+          port_of_lading,
+          port_of_unlading,
+          value_usd,
+          weight_kg,
+          departure_date,
+          hs_code,
+          carrier_name,
+          commodity_description
+        `);
+
+      if (searchTerm) {
+        query_air = query_air.or(`shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,shipper_country.ilike.%${searchTerm}%,consignee_country.ilike.%${searchTerm}%,consignee_city.ilike.%${searchTerm}%,consignee_state.ilike.%${searchTerm}%,consignee_zip.ilike.%${searchTerm}%,port_of_lading.ilike.%${searchTerm}%,port_of_unlading.ilike.%${searchTerm}%,carrier_name.ilike.%${searchTerm}%`);
+      }
+
+      if (!filters?.mode || filters.mode === 'all' || filters.mode === 'air') {
+        const { data: airData } = await query_air.order('departure_date', { ascending: false }).limit(200);
+        results_air = airData || [];
+      }
+
+      // 4. Query trade_shipments
+      let query_trade = supabase
+        .from('trade_shipments')
+        .select(`
+          id,
+          inferred_company_name,
+          shipper_name,
+          consignee_name,
+          origin_country,
+          destination_country,
+          destination_city,
+          destination_state,
+          destination_zip,
+          port_of_loading,
+          port_of_discharge,
+          value_usd,
+          weight_kg,
+          shipment_date,
+          hs_code,
+          vessel_name,
+          commodity_description,
+          shipment_type
+        `);
+
+      if (searchTerm) {
+        query_trade = query_trade.or(`inferred_company_name.ilike.%${searchTerm}%,shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,destination_zip.ilike.%${searchTerm}%,port_of_loading.ilike.%${searchTerm}%,port_of_discharge.ilike.%${searchTerm}%,vessel_name.ilike.%${searchTerm}%`);
+      }
+
+      if (filters?.mode && filters.mode !== 'all') {
+        query_trade = query_trade.eq('shipment_type', filters.mode);
+      }
+
+      const { data: tradeData } = await query_trade.order('shipment_date', { ascending: false }).limit(200);
+      results_trade = tradeData || [];
+
+      // Combine and normalize all results
+      results_unified = (unifiedData || []).map(shipment => ({
+        id: `unified_${shipment.id}`,
+        company: shipment.unified_company_name,
+        mode: shipment.mode,
+        origin: shipment.origin_country,
+        destination: shipment.destination_country,
+        destination_city: shipment.destination_city,
+        destination_state: shipment.destination_state,
+        destination_zip: shipment.destination_zip,
+        port_of_loading: shipment.port_of_loading,
+        port_of_discharge: shipment.port_of_discharge,
+        value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : null,
+        weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
+        date: shipment.unified_date,
+        hs_code: shipment.hs_code,
+        carrier: shipment.carrier_name,
+        description: shipment.commodity_description,
+        shipper: shipment.shipper_name,
+        consignee: shipment.consignee_name,
+        source: 'unified'
+      }));
+
+      const ocean_results = results_ocean.map(shipment => ({
+        id: `ocean_${shipment.id}`,
+        company: shipment.company_name,
+        mode: 'ocean',
+        origin: shipment.origin_country,
+        destination: shipment.destination_country,
+        destination_city: shipment.destination_city,
+        destination_state: shipment.destination_state,
+        destination_zip: shipment.destination_zip,
+        port_of_loading: shipment.port_of_lading,
+        port_of_discharge: shipment.port_of_unlading,
+        value: shipment.value_usd ? `$${shipment.value_usd.toLocaleString()}` : null,
+        weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
+        date: shipment.shipment_date,
+        hs_code: shipment.hs_code,
+        carrier: shipment.vessel_name,
+        description: shipment.commodity_description,
+        shipper: shipment.shipper_name,
+        consignee: shipment.consignee_name,
+        source: 'ocean'
+      }));
+
+      const air_results = results_air.map(shipment => ({
+        id: `air_${shipment.id}`,
+        company: shipment.consignee_name || shipment.shipper_name,
+        mode: 'air',
+        origin: shipment.shipper_country,
+        destination: shipment.consignee_country,
+        destination_city: shipment.consignee_city,
+        destination_state: shipment.consignee_state,
+        destination_zip: shipment.consignee_zip,
+        port_of_loading: shipment.port_of_lading,
+        port_of_discharge: shipment.port_of_unlading,
+        value: shipment.value_usd ? `$${shipment.value_usd.toLocaleString()}` : null,
+        weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
+        date: shipment.departure_date,
+        hs_code: shipment.hs_code,
+        carrier: shipment.carrier_name,
+        description: shipment.commodity_description,
+        shipper: shipment.shipper_name,
+        consignee: shipment.consignee_name,
+        source: 'air'
+      }));
+
+      const trade_results = results_trade.map(shipment => ({
+        id: `trade_${shipment.id}`,
+        company: shipment.inferred_company_name,
+        mode: shipment.shipment_type || 'ocean',
+        origin: shipment.origin_country,
+        destination: shipment.destination_country,
+        destination_city: shipment.destination_city,
+        destination_state: shipment.destination_state,
+        destination_zip: shipment.destination_zip,
+        port_of_loading: shipment.port_of_loading,
+        port_of_discharge: shipment.port_of_discharge,
+        value: shipment.value_usd ? `$${shipment.value_usd.toLocaleString()}` : null,
+        weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
+        date: shipment.shipment_date,
+        hs_code: shipment.hs_code,
+        carrier: shipment.vessel_name,
+        description: shipment.commodity_description,
+        shipper: shipment.shipper_name,
+        consignee: shipment.consignee_name,
+        source: 'trade'
+      }));
+
+      // Combine all results and sort by date
+      results = [...results_unified, ...ocean_results, ...air_results, ...trade_results]
+        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
 
     } else if (tab === 'routes') {
       // Query route data from unified_shipments with comprehensive search
