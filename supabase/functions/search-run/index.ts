@@ -139,8 +139,8 @@ serve(async (req) => {
 
       // **REMOVED**: No default filtering applied
 
-      // Apply sorting
-      if (sort.field === 'trade_volume') {
+      // Apply sorting only if sort parameters are provided
+      if (sort?.field === 'trade_volume') {
         results.sort((a, b) => sort.dir === 'desc' ? 
           b.trade_volume_usd - a.trade_volume_usd : 
           a.trade_volume_usd - b.trade_volume_usd
@@ -196,12 +196,12 @@ serve(async (req) => {
       results = [];
     }
 
-    // Apply pagination
+    // Apply pagination only if pagination parameters are provided
     const total = results.length;
-    const paginatedResults = results.slice(
-      pagination.offset, 
-      pagination.offset + pagination.limit
-    );
+    const paginatedResults = pagination ? results.slice(
+      pagination.offset || 0, 
+      (pagination.offset || 0) + (pagination.limit || results.length)
+    ) : results;
 
     console.log(`Search completed: ${total} results found`);
 
