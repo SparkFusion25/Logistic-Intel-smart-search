@@ -460,102 +460,222 @@ export type Database = {
       airfreight_shipments: {
         Row: {
           arrival_date: string | null
+          bill_of_lading_number: string | null
           bol_number: string | null
           commodity_description: string | null
+          consignee: string | null
+          consignee_address: string | null
           consignee_city: string | null
           consignee_country: string | null
+          consignee_email_1: string | null
+          consignee_employees: string | null
+          consignee_full_address: string | null
+          consignee_industry: string | null
           consignee_name: string | null
+          consignee_phone_1: string | null
+          consignee_postal_code: string | null
+          consignee_revenue: string | null
           consignee_state: string | null
+          consignee_state_region: string | null
+          consignee_trade_roles: string | null
+          consignee_website_1: string | null
           consignee_zip: string | null
           container_count: number | null
+          container_marks: string | null
           created_at: string | null
           departure_date: string | null
           description: string | null
           destination_port: string | null
           freight_amount: number | null
           goods_description: string | null
+          goods_shipped: string | null
           hs_code: string
           id: string
+          matching_fields: string | null
+          number_of_containers: number | null
           port_of_lading: string | null
+          port_of_lading_country: string | null
+          port_of_lading_region: string | null
           port_of_unlading: string | null
+          port_of_unlading_region: string | null
           quantity: number | null
           raw_xml_filename: string | null
           shipment_date: string | null
+          shipment_destination: string | null
+          shipment_destination_region: string | null
           shipment_id: string | null
+          shipment_origin: string | null
           shipment_type: string | null
+          shipper: string | null
+          shipper_address: string | null
+          shipper_city: string | null
           shipper_country: string | null
+          shipper_email_1: string | null
+          shipper_employees: string | null
+          shipper_full_address: string | null
+          shipper_industry: string | null
           shipper_name: string | null
+          shipper_phone_1: string | null
+          shipper_postal_code: string | null
+          shipper_revenue: string | null
+          shipper_state_region: string | null
+          shipper_trade_roles: string | null
           transport_method: string | null
           unit_of_measure: string | null
           value_usd: number | null
+          vessel: string | null
+          vessel_imo: string | null
           vessel_name: string | null
+          vessel_voyage_id: string | null
           weight_kg: number | null
+          weight_original_format: string | null
+          weight_t: number | null
         }
         Insert: {
           arrival_date?: string | null
+          bill_of_lading_number?: string | null
           bol_number?: string | null
           commodity_description?: string | null
+          consignee?: string | null
+          consignee_address?: string | null
           consignee_city?: string | null
           consignee_country?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_full_address?: string | null
+          consignee_industry?: string | null
           consignee_name?: string | null
+          consignee_phone_1?: string | null
+          consignee_postal_code?: string | null
+          consignee_revenue?: string | null
           consignee_state?: string | null
+          consignee_state_region?: string | null
+          consignee_trade_roles?: string | null
+          consignee_website_1?: string | null
           consignee_zip?: string | null
           container_count?: number | null
+          container_marks?: string | null
           created_at?: string | null
           departure_date?: string | null
           description?: string | null
           destination_port?: string | null
           freight_amount?: number | null
           goods_description?: string | null
+          goods_shipped?: string | null
           hs_code: string
           id?: string
+          matching_fields?: string | null
+          number_of_containers?: number | null
           port_of_lading?: string | null
+          port_of_lading_country?: string | null
+          port_of_lading_region?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_region?: string | null
           quantity?: number | null
           raw_xml_filename?: string | null
           shipment_date?: string | null
+          shipment_destination?: string | null
+          shipment_destination_region?: string | null
           shipment_id?: string | null
+          shipment_origin?: string | null
           shipment_type?: string | null
+          shipper?: string | null
+          shipper_address?: string | null
+          shipper_city?: string | null
           shipper_country?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_full_address?: string | null
+          shipper_industry?: string | null
           shipper_name?: string | null
+          shipper_phone_1?: string | null
+          shipper_postal_code?: string | null
+          shipper_revenue?: string | null
+          shipper_state_region?: string | null
+          shipper_trade_roles?: string | null
           transport_method?: string | null
           unit_of_measure?: string | null
           value_usd?: number | null
+          vessel?: string | null
+          vessel_imo?: string | null
           vessel_name?: string | null
+          vessel_voyage_id?: string | null
           weight_kg?: number | null
+          weight_original_format?: string | null
+          weight_t?: number | null
         }
         Update: {
           arrival_date?: string | null
+          bill_of_lading_number?: string | null
           bol_number?: string | null
           commodity_description?: string | null
+          consignee?: string | null
+          consignee_address?: string | null
           consignee_city?: string | null
           consignee_country?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_full_address?: string | null
+          consignee_industry?: string | null
           consignee_name?: string | null
+          consignee_phone_1?: string | null
+          consignee_postal_code?: string | null
+          consignee_revenue?: string | null
           consignee_state?: string | null
+          consignee_state_region?: string | null
+          consignee_trade_roles?: string | null
+          consignee_website_1?: string | null
           consignee_zip?: string | null
           container_count?: number | null
+          container_marks?: string | null
           created_at?: string | null
           departure_date?: string | null
           description?: string | null
           destination_port?: string | null
           freight_amount?: number | null
           goods_description?: string | null
+          goods_shipped?: string | null
           hs_code?: string
           id?: string
+          matching_fields?: string | null
+          number_of_containers?: number | null
           port_of_lading?: string | null
+          port_of_lading_country?: string | null
+          port_of_lading_region?: string | null
           port_of_unlading?: string | null
+          port_of_unlading_region?: string | null
           quantity?: number | null
           raw_xml_filename?: string | null
           shipment_date?: string | null
+          shipment_destination?: string | null
+          shipment_destination_region?: string | null
           shipment_id?: string | null
+          shipment_origin?: string | null
           shipment_type?: string | null
+          shipper?: string | null
+          shipper_address?: string | null
+          shipper_city?: string | null
           shipper_country?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_full_address?: string | null
+          shipper_industry?: string | null
           shipper_name?: string | null
+          shipper_phone_1?: string | null
+          shipper_postal_code?: string | null
+          shipper_revenue?: string | null
+          shipper_state_region?: string | null
+          shipper_trade_roles?: string | null
           transport_method?: string | null
           unit_of_measure?: string | null
           value_usd?: number | null
+          vessel?: string | null
+          vessel_imo?: string | null
           vessel_name?: string | null
+          vessel_voyage_id?: string | null
           weight_kg?: number | null
+          weight_original_format?: string | null
+          weight_t?: number | null
         }
         Relationships: []
       }
@@ -1293,6 +1413,12 @@ export type Database = {
           company_id: string | null
           company_name: string | null
           company_website: string | null
+          consignee_email_1: string | null
+          consignee_employees: string | null
+          consignee_industry: string | null
+          consignee_phone_1: string | null
+          consignee_revenue: string | null
+          consignee_website_1: string | null
           contact_name: string | null
           country: string | null
           created_at: string | null
@@ -1313,6 +1439,11 @@ export type Database = {
           panjiva_id: string | null
           phone: string | null
           revenue_range: string | null
+          shipper_email_1: string | null
+          shipper_employees: string | null
+          shipper_industry: string | null
+          shipper_phone_1: string | null
+          shipper_revenue: string | null
           source: string | null
           status: string | null
           tags: Json | null
@@ -1325,6 +1456,12 @@ export type Database = {
           company_id?: string | null
           company_name?: string | null
           company_website?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_industry?: string | null
+          consignee_phone_1?: string | null
+          consignee_revenue?: string | null
+          consignee_website_1?: string | null
           contact_name?: string | null
           country?: string | null
           created_at?: string | null
@@ -1345,6 +1482,11 @@ export type Database = {
           panjiva_id?: string | null
           phone?: string | null
           revenue_range?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_industry?: string | null
+          shipper_phone_1?: string | null
+          shipper_revenue?: string | null
           source?: string | null
           status?: string | null
           tags?: Json | null
@@ -1357,6 +1499,12 @@ export type Database = {
           company_id?: string | null
           company_name?: string | null
           company_website?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_industry?: string | null
+          consignee_phone_1?: string | null
+          consignee_revenue?: string | null
+          consignee_website_1?: string | null
           contact_name?: string | null
           country?: string | null
           created_at?: string | null
@@ -1377,6 +1525,11 @@ export type Database = {
           panjiva_id?: string | null
           phone?: string | null
           revenue_range?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_industry?: string | null
+          shipper_phone_1?: string | null
+          shipper_revenue?: string | null
           source?: string | null
           status?: string | null
           tags?: Json | null
@@ -3415,31 +3568,71 @@ export type Database = {
         Row: {
           air_confidence_score: number | null
           arrival_date: string | null
+          bill_of_lading_number: string | null
           bol_number: string | null
           carrier_name: string | null
           commodity_description: string | null
+          consignee: string | null
+          consignee_address: string | null
+          consignee_city: string | null
+          consignee_email_1: string | null
+          consignee_employees: string | null
+          consignee_full_address: string | null
+          consignee_industry: string | null
           consignee_name: string | null
+          consignee_phone_1: string | null
+          consignee_postal_code: string | null
+          consignee_revenue: string | null
+          consignee_state_region: string | null
+          consignee_trade_roles: string | null
+          consignee_website_1: string | null
           container_count: number | null
+          container_marks: string | null
           created_at: string | null
+          departure_date: string | null
           description: string | null
           destination_city: string | null
           destination_country: string | null
           destination_state: string | null
+          goods_shipped: string | null
           gross_weight_kg: number | null
           hs_code: string | null
           hs_description: string | null
           id: string
           is_likely_air_shipper: boolean | null
+          matching_fields: string | null
           mode: string
+          number_of_containers: number | null
           org_id: string | null
           origin_country: string | null
           port_of_discharge: string | null
+          port_of_lading: string | null
+          port_of_lading_country: string | null
+          port_of_lading_region: string | null
           port_of_loading: string | null
+          port_of_unlading: string | null
+          port_of_unlading_region: string | null
           quantity: number | null
           shipment_date: string | null
+          shipment_destination: string | null
+          shipment_destination_region: string | null
           shipment_mode: string | null
+          shipment_origin: string | null
           shipment_type: string | null
+          shipper: string | null
+          shipper_address: string | null
+          shipper_city: string | null
+          shipper_email_1: string | null
+          shipper_employees: string | null
+          shipper_full_address: string | null
+          shipper_industry: string | null
           shipper_name: string | null
+          shipper_phone_1: string | null
+          shipper_postal_code: string | null
+          shipper_revenue: string | null
+          shipper_state_region: string | null
+          shipper_trade_roles: string | null
+          transport_method: string | null
           transport_mode: string | null
           unified_carrier: string | null
           unified_company_name: string | null
@@ -3449,37 +3642,82 @@ export type Database = {
           unified_value: number | null
           unified_weight: number | null
           value_usd: number | null
+          vessel: string | null
+          vessel_imo: string | null
           vessel_name: string | null
+          vessel_voyage_id: string | null
           weight_kg: number | null
+          weight_original_format: string | null
+          weight_t: number | null
         }
         Insert: {
           air_confidence_score?: number | null
           arrival_date?: string | null
+          bill_of_lading_number?: string | null
           bol_number?: string | null
           carrier_name?: string | null
           commodity_description?: string | null
+          consignee?: string | null
+          consignee_address?: string | null
+          consignee_city?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_full_address?: string | null
+          consignee_industry?: string | null
           consignee_name?: string | null
+          consignee_phone_1?: string | null
+          consignee_postal_code?: string | null
+          consignee_revenue?: string | null
+          consignee_state_region?: string | null
+          consignee_trade_roles?: string | null
+          consignee_website_1?: string | null
           container_count?: number | null
+          container_marks?: string | null
           created_at?: string | null
+          departure_date?: string | null
           description?: string | null
           destination_city?: string | null
           destination_country?: string | null
           destination_state?: string | null
+          goods_shipped?: string | null
           gross_weight_kg?: number | null
           hs_code?: string | null
           hs_description?: string | null
           id?: string
           is_likely_air_shipper?: boolean | null
+          matching_fields?: string | null
           mode: string
+          number_of_containers?: number | null
           org_id?: string | null
           origin_country?: string | null
           port_of_discharge?: string | null
+          port_of_lading?: string | null
+          port_of_lading_country?: string | null
+          port_of_lading_region?: string | null
           port_of_loading?: string | null
+          port_of_unlading?: string | null
+          port_of_unlading_region?: string | null
           quantity?: number | null
           shipment_date?: string | null
+          shipment_destination?: string | null
+          shipment_destination_region?: string | null
           shipment_mode?: string | null
+          shipment_origin?: string | null
           shipment_type?: string | null
+          shipper?: string | null
+          shipper_address?: string | null
+          shipper_city?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_full_address?: string | null
+          shipper_industry?: string | null
           shipper_name?: string | null
+          shipper_phone_1?: string | null
+          shipper_postal_code?: string | null
+          shipper_revenue?: string | null
+          shipper_state_region?: string | null
+          shipper_trade_roles?: string | null
+          transport_method?: string | null
           transport_mode?: string | null
           unified_carrier?: string | null
           unified_company_name?: string | null
@@ -3489,37 +3727,82 @@ export type Database = {
           unified_value?: number | null
           unified_weight?: number | null
           value_usd?: number | null
+          vessel?: string | null
+          vessel_imo?: string | null
           vessel_name?: string | null
+          vessel_voyage_id?: string | null
           weight_kg?: number | null
+          weight_original_format?: string | null
+          weight_t?: number | null
         }
         Update: {
           air_confidence_score?: number | null
           arrival_date?: string | null
+          bill_of_lading_number?: string | null
           bol_number?: string | null
           carrier_name?: string | null
           commodity_description?: string | null
+          consignee?: string | null
+          consignee_address?: string | null
+          consignee_city?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_full_address?: string | null
+          consignee_industry?: string | null
           consignee_name?: string | null
+          consignee_phone_1?: string | null
+          consignee_postal_code?: string | null
+          consignee_revenue?: string | null
+          consignee_state_region?: string | null
+          consignee_trade_roles?: string | null
+          consignee_website_1?: string | null
           container_count?: number | null
+          container_marks?: string | null
           created_at?: string | null
+          departure_date?: string | null
           description?: string | null
           destination_city?: string | null
           destination_country?: string | null
           destination_state?: string | null
+          goods_shipped?: string | null
           gross_weight_kg?: number | null
           hs_code?: string | null
           hs_description?: string | null
           id?: string
           is_likely_air_shipper?: boolean | null
+          matching_fields?: string | null
           mode?: string
+          number_of_containers?: number | null
           org_id?: string | null
           origin_country?: string | null
           port_of_discharge?: string | null
+          port_of_lading?: string | null
+          port_of_lading_country?: string | null
+          port_of_lading_region?: string | null
           port_of_loading?: string | null
+          port_of_unlading?: string | null
+          port_of_unlading_region?: string | null
           quantity?: number | null
           shipment_date?: string | null
+          shipment_destination?: string | null
+          shipment_destination_region?: string | null
           shipment_mode?: string | null
+          shipment_origin?: string | null
           shipment_type?: string | null
+          shipper?: string | null
+          shipper_address?: string | null
+          shipper_city?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_full_address?: string | null
+          shipper_industry?: string | null
           shipper_name?: string | null
+          shipper_phone_1?: string | null
+          shipper_postal_code?: string | null
+          shipper_revenue?: string | null
+          shipper_state_region?: string | null
+          shipper_trade_roles?: string | null
+          transport_method?: string | null
           transport_mode?: string | null
           unified_carrier?: string | null
           unified_company_name?: string | null
@@ -3529,8 +3812,13 @@ export type Database = {
           unified_value?: number | null
           unified_weight?: number | null
           value_usd?: number | null
+          vessel?: string | null
+          vessel_imo?: string | null
           vessel_name?: string | null
+          vessel_voyage_id?: string | null
           weight_kg?: number | null
+          weight_original_format?: string | null
+          weight_t?: number | null
         }
         Relationships: []
       }
