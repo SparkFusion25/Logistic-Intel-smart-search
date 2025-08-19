@@ -903,7 +903,6 @@ function normalizeFieldName(field: string): string | null {
   if (!field) return null;
   
   const normalized = field.toLowerCase()
-    .replace(/\s+/g, '_')
     .replace(/[^\w]/g, '')
     .trim();
 
