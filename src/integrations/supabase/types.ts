@@ -3641,6 +3641,7 @@ export type Database = {
           unified_id: string | null
           unified_value: number | null
           unified_weight: number | null
+          updated_at: string | null
           value_usd: number | null
           vessel: string | null
           vessel_imo: string | null
@@ -3726,6 +3727,7 @@ export type Database = {
           unified_id?: string | null
           unified_value?: number | null
           unified_weight?: number | null
+          updated_at?: string | null
           value_usd?: number | null
           vessel?: string | null
           vessel_imo?: string | null
@@ -3811,6 +3813,7 @@ export type Database = {
           unified_id?: string | null
           unified_value?: number | null
           unified_weight?: number | null
+          updated_at?: string | null
           value_usd?: number | null
           vessel?: string | null
           vessel_imo?: string | null
