@@ -2,6 +2,7 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Search as SearchIcon, Filter, X, Loader2, Copy, ExternalLink } from "lucide-react";
+import AdvancedFilters, { type Filters as FiltersType } from "@/components/search/AdvancedFilters";
 
 type Mode = "all" | "ocean" | "air";
 
@@ -25,16 +26,6 @@ type Row = {
   total_count: number | null;
 };
 
-type Filters = {
-  date_from?: string | null;
-  date_to?: string | null;
-  hs_code?: string | null;
-  origin_country?: string | null;
-  destination_country?: string | null;
-  destination_city?: string | null;
-  carrier?: string | null;
-};
-
 /** Small UI bits */
 const Chip: React.FC<{ active?: boolean; onClick?: () => void; children: React.ReactNode }> = ({
   active,
@@ -49,19 +40,6 @@ const Chip: React.FC<{ active?: boolean; onClick?: () => void; children: React.R
   >
     {children}
   </button>
-);
-
-const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label?: string }> = ({
-  label,
-  ...props
-}) => (
-  <label className="block space-y-1">
-    {label ? <span className="text-xs text-ink-300">{label}</span> : null}
-    <input
-      {...props}
-      className={`w-full px-3 py-2 rounded-xl2 bg-white/5 text-white placeholder:text-ink-300 outline-none border border-white/10 focus:border-brand-400 ${props.className || ""}`}
-    />
-  </label>
 );
 
 /** Self‑contained Shipment Card (no external imports) */
@@ -165,7 +143,7 @@ const ShipmentCard: React.FC<{
 export default function SearchPanel() {
   const [mode, setMode] = useState<Mode>("all");
   const [q, setQ] = useState("");
-  const [filters, setFilters] = useState<Filters>({});
+  const [filters, setFilters] = useState<FiltersType>({});
   const [openFilters, setOpenFilters] = useState(false);
 
   const [rows, setRows] = useState<Row[]>([]);
@@ -189,7 +167,7 @@ export default function SearchPanel() {
       try {
         // Call your Postgres function: public.search_unified
         const { data, error } = await supabase.rpc(
-          "search_run" as any,
+          "search_unified",
           {
             p_q: q.trim() ? q.trim() : null,
             p_mode: mode,
@@ -202,7 +180,8 @@ export default function SearchPanel() {
             p_carrier: filters.carrier ?? null,
             p_limit: limit,
             p_offset: reset ? 0 : offset + rows.length,
-          }
+          },
+          { signal: ac.signal as any }
         );
 
         if (error) throw error;
@@ -278,57 +257,11 @@ export default function SearchPanel() {
 
       {/* Content */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-3">
-        {/* Desktop filter rail */}
+        {/* Desktop filter rail — now using AdvancedFilters */}
         <aside className="hidden md:block md:col-span-3 lg:col-span-3" aria-label="Filters">
-          <div data-card className="p-4 space-y-3">
-            <div className="text-sm font-semibold mb-1">Filters</div>
-            <Input
-              label="HS Code"
-              placeholder="e.g., 8471..."
-              value={filters.hs_code ?? ""}
-              onChange={(e) => setFilters({ ...filters, hs_code: e.target.value || null })}
-            />
-            <Input
-              label="Origin Country"
-              placeholder="e.g., China"
-              value={filters.origin_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, origin_country: e.target.value || null })}
-            />
-            <Input
-              label="Destination Country"
-              placeholder="e.g., United States"
-              value={filters.destination_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_country: e.target.value || null })}
-            />
-            <Input
-              label="Destination City"
-              placeholder="e.g., Los Angeles"
-              value={filters.destination_city ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_city: e.target.value || null })}
-            />
-            <Input
-              label="Carrier"
-              placeholder="e.g., Maersk / AA"
-              value={filters.carrier ?? ""}
-              onChange={(e) => setFilters({ ...filters, carrier: e.target.value || null })}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                label="From"
-                type="date"
-                value={filters.date_from ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_from: e.target.value || null })}
-              />
-              <Input
-                label="To"
-                type="date"
-                value={filters.date_to ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_to: e.target.value || null })}
-              />
-            </div>
-            <button className="w-full mt-2 px-3 py-2 rounded-xl2 bg-brand-500 hover:bg-brand-400" onClick={onApplyFilters}>
-              Apply Filters
-            </button>
+          <div data-card className="p-4">
+            <div className="text-sm font-semibold mb-3">Filters</div>
+            <AdvancedFilters value={filters} onChange={setFilters} onApply={onApplyFilters} />
           </div>
         </aside>
 
@@ -378,7 +311,7 @@ export default function SearchPanel() {
         </section>
       </div>
 
-      {/* Mobile filter drawer */}
+      {/* Mobile filter drawer — uses AdvancedFilters with dense layout */}
       {openFilters && (
         <div className="fixed inset-0 z-30 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpenFilters(false)} />
@@ -390,57 +323,7 @@ export default function SearchPanel() {
               </button>
             </div>
 
-            <Input
-              label="HS Code"
-              placeholder="e.g., 8471"
-              value={filters.hs_code ?? ""}
-              onChange={(e) => setFilters({ ...filters, hs_code: e.target.value || null })}
-            />
-            <Input
-              label="Origin Country"
-              placeholder="e.g., China"
-              value={filters.origin_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, origin_country: e.target.value || null })}
-            />
-            <Input
-              label="Destination Country"
-              placeholder="e.g., United States"
-              value={filters.destination_country ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_country: e.target.value || null })}
-            />
-            <Input
-              label="Destination City"
-              placeholder="e.g., Los Angeles"
-              value={filters.destination_city ?? ""}
-              onChange={(e) => setFilters({ ...filters, destination_city: e.target.value || null })}
-            />
-            <Input
-              label="Carrier"
-              placeholder="e.g., Maersk / AA"
-              value={filters.carrier ?? ""}
-              onChange={(e) => setFilters({ ...filters, carrier: e.target.value || null })}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                label="From"
-                type="date"
-                value={filters.date_from ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_from: e.target.value || null })}
-              />
-              <Input
-                label="To"
-                type="date"
-                value={filters.date_to ?? ""}
-                onChange={(e) => setFilters({ ...filters, date_to: e.target.value || null })}
-              />
-            </div>
-
-            <button
-              className="w-full mt-1 px-3 py-2 rounded-xl2 bg-brand-500 hover:bg-brand-400 inline-flex items-center justify-center gap-2"
-              onClick={onApplyFilters}
-            >
-              <Filter size={16} /> Apply
-            </button>
+            <AdvancedFilters value={filters} onChange={setFilters} onApply={onApplyFilters} dense />
           </div>
         </div>
       )}
