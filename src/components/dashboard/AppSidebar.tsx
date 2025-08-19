@@ -73,23 +73,38 @@ export function AppSidebar() {
                      <SidebarMenuButton 
                        asChild
                        tooltip={collapsed ? item.title : undefined}
-                       className="relative overflow-hidden transition-all duration-300 mx-2 my-1 rounded-xl text-white/85"
-                    >
-                      <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
-                        {/* Enhanced Icon Container */}
-                         <div className="w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center bg-white/10">
+                       className={`
+                         relative overflow-hidden transition-all duration-300 mx-2 my-1 rounded-xl
+                         ${isActive 
+                           ? 'bg-white/5 border border-white/10 shadow-lg' 
+                           : 'text-white/85'
+                         }
+                       `}
+                     >
+                       <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
+                         {/* Enhanced Icon Container */}
+                         <div className={`
+                           w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
+                           ${isActive 
+                             ? 'bg-gradient-to-br from-white/15 to-white/5' 
+                             : 'bg-white/10'
+                           }
+                         `}>
                            <item.icon className="w-4 h-4 text-white" />
                          </div>
                         
-                        {/* Enhanced Text - Only show when not collapsed */}
-                        {!collapsed && (
-                           <span className="font-medium truncate text-[15px] leading-5 transition-all duration-300 text-white/90">
+                         {/* Enhanced Text - Only show when not collapsed */}
+                         {!collapsed && (
+                           <span className={`
+                             font-medium truncate text-[15px] leading-5 transition-all duration-300
+                             ${isActive ? 'text-white' : 'text-white/90'}
+                           `}>
                              {item.title}
                            </span>
-                        )}
-                        
-                      </NavLink>
-                    </SidebarMenuButton>
+                         )}
+                         
+                       </NavLink>
+                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
               })}
@@ -107,19 +122,31 @@ export function AppSidebar() {
                  <SidebarMenuButton 
                    asChild
                    tooltip={collapsed ? item.title : undefined}
-                   className="transition-all duration-300 mx-2 my-1 rounded-xl text-white/85"
-                >
-                  <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-2 ${collapsed ? 'justify-center' : ''}`}>
-                     <div className="w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center bg-white/10">
+                   className={`
+                     transition-all duration-300 mx-2 my-1 rounded-xl
+                     ${isActive 
+                       ? 'bg-white/5 border border-white/10 shadow-lg' 
+                       : 'text-white/85'
+                     }
+                   `}
+                 >
+                   <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-2 ${collapsed ? 'justify-center' : ''}`}>
+                     <div className={`
+                       w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
+                       ${isActive 
+                         ? 'bg-gradient-to-br from-white/15 to-white/5' 
+                         : 'bg-white/10'
+                       }
+                     `}>
                        <item.icon className="w-4 h-4 text-white" />
                      </div>
                     {!collapsed && (
-                       <span className="text-white/90 font-medium truncate text-[15px] leading-5 transition-colors duration-300">
+                       <span className={`text-white/90 font-medium truncate text-[15px] leading-5 transition-colors duration-300 ${isActive ? 'text-white' : ''}`}>
                          {item.title}
                        </span>
                     )}
-                  </NavLink>
-                </SidebarMenuButton>
+                   </NavLink>
+                 </SidebarMenuButton>
               </SidebarMenuItem>
             )
           })}

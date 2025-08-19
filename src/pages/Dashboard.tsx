@@ -150,46 +150,38 @@ const Dashboard = () => {
           <TopBar />
           <main className="flex-1 p-4 sm:p-6">
             <div className="max-w-7xl mx-auto space-y-6">
-              {/* Enhanced Header with Gradient */}
-              <div className="mb-8">
-                <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 shadow-2xl">
-                  {/* Enhanced background patterns */}
-                  <div className="absolute inset-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-indigo-500/5 to-purple-600/10"></div>
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-cyan-400/10 rounded-full -translate-x-48 -translate-y-48 blur-3xl"></div>
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full translate-x-48 translate-y-48 blur-3xl"></div>
-                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-400/5 rounded-full -translate-x-32 -translate-y-32 blur-2xl"></div>
-                  </div>
-                  
+              {/* Compact Header */}
+              <div className="mb-6">
+                <div className="relative overflow-hidden rounded-lg p-6 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 shadow-lg">
                   <div className="relative z-10">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <div className="mb-6 sm:mb-0">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-lg">
-                            <User className="w-8 h-8 text-white" />
+                      <div className="mb-4 sm:mb-0">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center backdrop-blur-sm shadow-lg">
+                            <User className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white">
                               {greeting}, {getDisplayName()}! 👋
                             </h1>
-                            <p className="text-blue-100 text-lg">Ready to discover new trade opportunities?</p>
+                            <p className="text-blue-100 text-sm">Ready to discover new trade opportunities?</p>
                           </div>
                         </div>
-                        <p className="text-blue-200 text-base sm:text-lg max-w-2xl leading-relaxed">
+                        <p className="text-blue-200 text-sm sm:text-base max-w-2xl leading-relaxed">
                           Your trade intelligence dashboard is ready. Here's what's happening with your searches and contacts.
                         </p>
                       </div>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                         <Button 
                           variant="outline" 
-                          className="flex items-center justify-center px-6 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                          className="flex items-center justify-center px-4 py-2 bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-200"
                         >
-                          <Download className="w-5 h-5 mr-2" />
+                          <Download className="w-4 h-4 mr-2" />
                           Export Data
                         </Button>
                         <Link to="/dashboard/search">
-                          <Button className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:scale-105 transition-all duration-200">
-                            <Plus className="w-5 h-5 mr-2" />
+                          <Button className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg transition-all duration-200">
+                            <Plus className="w-4 h-4 mr-2" />
                             New Search
                           </Button>
                         </Link>
@@ -199,8 +191,8 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Enhanced Key Metrics - Mobile Optimized */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+              {/* Compact Key Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {overviewMetrics.map((metric, index) => (
                   <StatCard
                     key={index}
@@ -215,10 +207,10 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-                {/* Enhanced Recent Searches - Mobile Optimized */}
-                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
-                  <div className="p-4 sm:p-6 border-b border-blue-100/50">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                {/* Recent Searches */}
+                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+                  <div className="p-4 border-b border-gray-200">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                       <h2 className="text-lg sm:text-xl font-bold text-slate-900">Recent Searches</h2>
                       <div className="flex items-center space-x-2 sm:space-x-3">
@@ -261,9 +253,9 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Enhanced Quick Actions - Mobile Optimized */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
-                  <div className="p-4 sm:p-6 border-b border-blue-100/50">
+                {/* Quick Actions */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+                  <div className="p-4 border-b border-gray-200">
                     <h2 className="text-lg sm:text-xl font-bold text-slate-900">Quick Actions</h2>
                     <p className="text-sm text-slate-600 mt-1">Common workflow shortcuts</p>
                   </div>
@@ -294,9 +286,9 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Enhanced Top Companies */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 hover:shadow-xl transition-all duration-300">
-                <div className="p-6 border-b border-blue-100/50">
+              {/* Top Companies */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+                <div className="p-4 border-b border-gray-200">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                     <h2 className="text-xl font-bold text-slate-900">Top Discovered Companies</h2>
                     <div className="flex items-center space-x-3">
