@@ -198,13 +198,15 @@ serve(async (req) => {
 
     console.log('Starting pending enrichment processing...');
 
-    // Get pending records (limit to prevent timeout)
+    // Get pending records with flexible criteria (limit to prevent timeout)
     const { data: pendingRecords, error: fetchError } = await supabaseClient
       .from('pending_enrichment_records')
       .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: true })
       .limit(100);
+      
+    console.log(`Processing ${pendingRecords?.length || 0} pending enrichment records with flexible validation`);
 
     if (fetchError) {
       console.error('Error fetching pending records:', fetchError);
@@ -235,9 +237,9 @@ serve(async (req) => {
         let validCompanyName = null;
         const originalData = record.original_data || {};
 
-        // Strategy 1: Exact match in unified_shipments with cleaned name
+        // Strategy 1: Very flexible exact match with minimal requirements
         const cleanedName = record.company_name?.trim().toLowerCase();
-        if (cleanedName && cleanedName.length > 2) {
+        if (cleanedName && cleanedName.length > 0) { // Accept even single character names
           const { data: exactMatch } = await supabaseClient
             .from('unified_shipments')
             .select('unified_company_name')
@@ -256,8 +258,8 @@ serve(async (req) => {
           validCompanyName = await findCompanyUsingAI(supabaseClient, record, originalData);
         }
 
-        // Strategy 3: Fuzzy match using similarity as fallback
-        if (!validCompanyName && cleanedName && cleanedName.length > 3) {
+        // Strategy 3: Very flexible fuzzy match - accept shorter names
+        if (!validCompanyName && cleanedName && cleanedName.length > 1) { // Reduced from 3 to 1
           const { data: similarMatches } = await supabaseClient
             .from('unified_shipments')
             .select('unified_company_name')

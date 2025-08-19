@@ -625,10 +625,12 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
           enrichedRecord.unified_company_name = validCompanyName;
         }
         
-        // Ensure required fields are present
+        // Flexible field handling - accept sparse data
         enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
-        enrichedRecord.hs_code = record.hs_code || 'UNKNOWN';
-        enrichedRecord.mode = record.mode || 'unknown';
+        enrichedRecord.hs_code = record.hs_code || 'PENDING_ENRICHMENT';
+        enrichedRecord.mode = record.mode || 'PENDING_ENRICHMENT';
+        
+        console.log(`Enriched record: company=${enrichedRecord.unified_company_name || 'PENDING'}, hs_code=${enrichedRecord.hs_code}, mode=${enrichedRecord.mode}`);
         
         return enrichedRecord;
       })
@@ -679,7 +681,7 @@ async function isValidCompanyName(companyName: string, supabaseClient: any): Pro
 }
 
 function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
-  console.log(`Starting validation for ${records.length} enriched records`);
+  console.log(`Starting validation for ${records.length} enriched records - Using flexible validation`);
   
   const validRecords = [];
   const failedRecords = [];
@@ -687,17 +689,14 @@ function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
   for (const record of records) {
     const failures = [];
     
-    // Basic validation requirements
-    if (!record.org_id) failures.push('missing org_id');
-    if (!record.hs_code) failures.push('missing hs_code');
-    if (!record.mode) failures.push('missing mode');
+    // VERY FLEXIBLE VALIDATION - Only require org_id (system field)
+    if (!record.org_id) {
+      failures.push('missing org_id');
+    }
     
-    // At least one location field should be present
-    const hasLocation = record.origin_country || record.destination_country || 
-                       record.origin_city || record.destination_city ||
-                       record.port_of_loading || record.port_of_discharge;
-    
-    if (!hasLocation) failures.push('no location fields');
+    // Accept ALL records with org_id - let sparse data through
+    // hs_code, mode, and location fields are now optional
+    // This supports Panjiva's sparse data format
     
     if (failures.length === 0) {
       validRecords.push(record);
@@ -713,7 +712,8 @@ function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
     }
   }
   
-  console.log(`Validation completed: ${validRecords.length}/${records.length} records passed`);
+  console.log(`Flexible validation completed: ${validRecords.length}/${records.length} records passed`);
+  console.log(`Accepted records with sparse data - focusing on import volume over completeness`);
   
   if (failedRecords.length > 0) {
     console.log('Sample validation failures:', JSON.stringify(failedRecords.slice(0, 3), null, 2));
