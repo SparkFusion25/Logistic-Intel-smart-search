@@ -20,6 +20,7 @@ import { CompanyCard } from "./CompanyCard"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
 import { AdvancedFilters } from "../search/AdvancedFilters"
 import { RevenueVesselResults } from "../search/RevenueVesselResults"
+import { ExportButton } from "../search/ExportButton"
 
 export function SearchIntelligence() {
   const navigate = useNavigate()
@@ -124,10 +125,8 @@ export function SearchIntelligence() {
   }
 
   const handleExport = () => {
-    toast({
-      title: "Export Started", 
-      description: "Your search results are being exported..."
-    })
+    // Export functionality is now handled by ExportButton component
+    return
   }
 
   const handleAddToCRM = async (company: any) => {
@@ -466,6 +465,26 @@ export function SearchIntelligence() {
         </TabsContent>
 
         <TabsContent value="shipments" className="space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
+            <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+              <p className="text-sm text-muted-foreground">
+                <strong>{searchResults.total.toLocaleString()}</strong> results found
+                {searchQuery && (
+                  <span> for "<strong>{searchQuery}</strong>"</span>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button onClick={handleSaveSearch} variant="outline" size="sm">
+                Save Search
+              </Button>
+              <ExportButton 
+                data={searchResults.items} 
+                searchQuery={searchQuery}
+                filters={filters}
+              />
+            </div>
+          </div>
           <RevenueVesselResults results={searchResults.items} loading={loading} />
         </TabsContent>
 

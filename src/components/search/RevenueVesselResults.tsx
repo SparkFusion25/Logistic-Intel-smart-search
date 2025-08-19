@@ -36,7 +36,7 @@ export function RevenueVesselResults({ results, loading }: RevenueVesselResultsP
   return (
     <div className="space-y-4">
       {results.map((shipment, index) => (
-        <Card key={index} className="p-4 hover:shadow-md transition-shadow">
+        <Card key={`${shipment.id || index}`} className="p-4 hover:shadow-md transition-shadow bg-card border border-border">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               {shipment.mode === 'ocean' ? (
@@ -49,53 +49,63 @@ export function RevenueVesselResults({ results, loading }: RevenueVesselResultsP
               <Badge variant={shipment.mode === 'ocean' ? 'default' : shipment.mode === 'air' ? 'secondary' : 'outline'}>
                 {shipment.mode?.toUpperCase() || 'UNKNOWN'}
               </Badge>
+              {shipment.is_lcl && (
+                <Badge variant="outline" className="text-xs">
+                  LCL
+                </Badge>
+              )}
             </div>
-            <div className="text-right text-sm text-gray-500">
+            <div className="text-right text-sm text-muted-foreground">
               <Calendar className="h-4 w-4 inline mr-1" />
-              {shipment.arrival_date || shipment.shipment_date || 'No date'}
+              {shipment.arrival_date || shipment.shipment_date || shipment.unified_date || 'No date'}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             {/* Company Information */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-1">
+              <h4 className="font-medium text-foreground mb-1 flex items-center gap-1">
                 <Building2 className="h-4 w-4" />
                 Company
               </h4>
-              <p className="text-sm text-gray-600">{shipment.company_name || shipment.unified_company_name || 'Unknown'}</p>
+              <p className="text-sm text-muted-foreground">
+                {shipment.company_name || shipment.unified_company_name || shipment.shipper_name || shipment.consignee_name || 'Unknown'}
+              </p>
               {shipment.importer_name && (
-                <p className="text-xs text-gray-500">Importer: {shipment.importer_name}</p>
+                <p className="text-xs text-muted-foreground">Importer: {shipment.importer_name}</p>
               )}
             </div>
 
             {/* Route Information */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-1">
+              <h4 className="font-medium text-foreground mb-1 flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
                 Route
               </h4>
-              <p className="text-sm text-gray-600">
-                {shipment.origin_country || shipment.port_of_lading || 'Unknown Origin'}
+              <p className="text-sm text-muted-foreground">
+                {shipment.origin_country || shipment.port_of_lading || shipment.port_of_lading_name || 'Unknown Origin'}
                 {' → '}
-                {shipment.destination_country || shipment.port_of_unlading || 'Unknown Destination'}
+                {shipment.destination_country || shipment.port_of_unlading || shipment.port_of_unlading_name || 'Unknown Destination'}
               </p>
               {shipment.destination_city && (
-                <p className="text-xs text-gray-500">{shipment.destination_city}</p>
+                <p className="text-xs text-muted-foreground">{shipment.destination_city}</p>
               )}
             </div>
 
             {/* Carrier Information */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-1 flex items-center gap-1">
+              <h4 className="font-medium text-foreground mb-1 flex items-center gap-1">
                 <User className="h-4 w-4" />
                 Carrier
               </h4>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 {shipment.carrier_name || 'Unknown Carrier'}
               </p>
               {shipment.vessel_name && (
-                <p className="text-xs text-gray-500">Vessel: {shipment.vessel_name}</p>
+                <p className="text-xs text-muted-foreground">Vessel: {shipment.vessel_name}</p>
+              )}
+              {shipment.voyage_number && (
+                <p className="text-xs text-muted-foreground">Voyage: {shipment.voyage_number}</p>
               )}
             </div>
           </div>
@@ -104,46 +114,74 @@ export function RevenueVesselResults({ results, loading }: RevenueVesselResultsP
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4 text-sm">
             {shipment.hs_code && (
               <div>
-                <span className="font-medium">HS Code:</span>
-                <p className="text-gray-600">{shipment.hs_code}</p>
+                <span className="font-medium text-foreground">HS Code:</span>
+                <p className="text-muted-foreground">{shipment.hs_code}</p>
               </div>
             )}
             {shipment.commodity_description && (
               <div>
-                <span className="font-medium">Commodity:</span>
-                <p className="text-gray-600 truncate" title={shipment.commodity_description}>
+                <span className="font-medium text-foreground">Commodity:</span>
+                <p className="text-muted-foreground truncate" title={shipment.commodity_description}>
                   {shipment.commodity_description}
                 </p>
               </div>
             )}
             {shipment.container_types && (
               <div>
-                <span className="font-medium">Container:</span>
-                <p className="text-gray-600">{shipment.container_types}</p>
+                <span className="font-medium text-foreground">Container:</span>
+                <p className="text-muted-foreground">{shipment.container_types}</p>
               </div>
             )}
-            {shipment.value_usd && (
+            {(shipment.value_usd || shipment.unified_value) && (
               <div>
-                <span className="font-medium">Value:</span>
-                <p className="text-gray-600">${shipment.value_usd.toLocaleString()}</p>
+                <span className="font-medium text-foreground">Value:</span>
+                <p className="text-muted-foreground">
+                  ${(shipment.value_usd || shipment.unified_value)?.toLocaleString()}
+                </p>
+              </div>
+            )}
+            {shipment.weight_kg && (
+              <div>
+                <span className="font-medium text-foreground">Weight:</span>
+                <p className="text-muted-foreground">{shipment.weight_kg.toLocaleString()} kg</p>
+              </div>
+            )}
+            {shipment.forwarder_name && (
+              <div>
+                <span className="font-medium text-foreground">Forwarder:</span>
+                <p className="text-muted-foreground">{shipment.forwarder_name}</p>
+              </div>
+            )}
+            {shipment.notify_party && (
+              <div>
+                <span className="font-medium text-foreground">Notify Party:</span>
+                <p className="text-muted-foreground truncate" title={shipment.notify_party}>
+                  {shipment.notify_party}
+                </p>
+              </div>
+            )}
+            {shipment.container_number && (
+              <div>
+                <span className="font-medium text-foreground">Container #:</span>
+                <p className="text-muted-foreground font-mono">{shipment.container_number}</p>
               </div>
             )}
           </div>
 
-          {/* BOL Numbers */}
+          {/* BOL Numbers and Container Info */}
           {(shipment.master_bol_number || shipment.house_bol_number) && (
             <div className="border-t pt-3 mt-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                 {shipment.master_bol_number && (
                   <div>
-                    <span className="font-medium">Master BOL:</span>
-                    <p className="text-gray-600 font-mono">{shipment.master_bol_number}</p>
+                    <span className="font-medium text-foreground">Master BOL:</span>
+                    <p className="text-muted-foreground font-mono">{shipment.master_bol_number}</p>
                   </div>
                 )}
                 {shipment.house_bol_number && (
                   <div>
-                    <span className="font-medium">House BOL:</span>
-                    <p className="text-gray-600 font-mono">{shipment.house_bol_number}</p>
+                    <span className="font-medium text-foreground">House BOL:</span>
+                    <p className="text-muted-foreground font-mono">{shipment.house_bol_number}</p>
                   </div>
                 )}
               </div>
