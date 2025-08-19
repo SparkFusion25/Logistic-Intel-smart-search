@@ -37,11 +37,22 @@ import { AdminDashboard as AdminDashboardPage } from "./pages/dashboard/AdminDas
 import AffiliatePortal from "./pages/AffiliatePortal";
 import OAuthCallback from "./pages/OAuthCallback";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
       <TooltipProvider>
         <div>
           <Toaster />
@@ -79,9 +90,11 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </div>
-    </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+      </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
+  );
+};
 
 export default App;

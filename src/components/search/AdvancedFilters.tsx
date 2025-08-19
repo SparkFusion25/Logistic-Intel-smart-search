@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import { ChevronDown, ChevronRight, Filter, CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
@@ -49,8 +49,11 @@ function DatePicker({ value, onChange, placeholder }: { value?: Date, onChange: 
 
 export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: AdvancedFiltersProps) {
   const [expandedSections, setExpandedSections] = useState<string[]>(['shipment', 'dates'])
-  const { searchLocations } = useLocationAutocomplete()
-  const { searchCommodities } = useCommodityAutocomplete()
+  const locationAutocomplete = useLocationAutocomplete()
+  const commodityAutocomplete = useCommodityAutocomplete()
+
+  const { searchLocations } = locationAutocomplete
+  const { searchCommodities } = commodityAutocomplete
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
