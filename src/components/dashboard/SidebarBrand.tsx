@@ -11,11 +11,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
     <div className="flex items-center justify-between p-6">
       {!collapsed && (
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 flex items-center justify-center">
+          <div className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg backdrop-blur-sm">
             <img 
               src="/lovable-uploads/df480f44-d09d-4590-a89a-e0b4c3463c93.png" 
               alt="Intelligence Logo" 
-              className="w-10 h-10 object-contain"
+              className="w-6 h-6 object-contain brightness-0 invert"
             />
           </div>
           <div>
@@ -26,11 +26,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       )}
       
       {collapsed && (
-        <div className="w-10 h-10 flex items-center justify-center mx-auto">
+        <div className="w-8 h-8 flex items-center justify-center mx-auto bg-white/10 rounded-lg backdrop-blur-sm">
           <img 
             src="/lovable-uploads/df480f44-d09d-4590-a89a-e0b4c3463c93.png" 
             alt="Intelligence Logo" 
-            className="w-10 h-10 object-contain"
+            className="w-6 h-6 object-contain brightness-0 invert"
           />
         </div>
       )}
