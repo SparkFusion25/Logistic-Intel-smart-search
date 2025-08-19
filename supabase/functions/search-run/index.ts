@@ -48,26 +48,25 @@ serve(async (req) => {
     let results = [];
 
     if (tab === 'companies') {
-      // Query real data from unified_shipments table with search filtering
+      // Query real data from airfreight_shipments table with search filtering
       let query = supabase
-        .from('unified_shipments')
+        .from('airfreight_shipments')
         .select(`
-          unified_company_name,
           shipper_name,
           consignee_name,
-          origin_country,
-          destination_country,
-          destination_city,
-          destination_state,
-          unified_date,
-          unified_value,
-          mode,
-          bol_number,
-          bill_of_lading_number,
+          shipper_country,
+          consignee_country,
           consignee_city,
           consignee_state_region,
           shipper_city,
-          shipper_state_region
+          shipper_state_region,
+          arrival_date,
+          value_usd,
+          weight_kg,
+          bol_number,
+          bill_of_lading_number,
+          hs_code,
+          commodity_description
         `);
 
       // Apply search filter if query provided
@@ -76,15 +75,12 @@ serve(async (req) => {
         console.log(`Applying search filter for: ${searchTerm}`);
         
         query = query.or(`
-          unified_company_name.ilike.%${searchTerm}%,
           shipper_name.ilike.%${searchTerm}%,
           consignee_name.ilike.%${searchTerm}%,
           bol_number.ilike.%${searchTerm}%,
           bill_of_lading_number.ilike.%${searchTerm}%,
-          origin_country.ilike.%${searchTerm}%,
-          destination_country.ilike.%${searchTerm}%,
-          destination_city.ilike.%${searchTerm}%,
-          destination_state.ilike.%${searchTerm}%,
+          shipper_country.ilike.%${searchTerm}%,
+          consignee_country.ilike.%${searchTerm}%,
           consignee_city.ilike.%${searchTerm}%,
           consignee_state_region.ilike.%${searchTerm}%,
           shipper_city.ilike.%${searchTerm}%,
@@ -93,7 +89,7 @@ serve(async (req) => {
       }
 
       const { data: shipmentData, error: shipmentError } = await query
-        .order('unified_date', { ascending: false })
+        .order('arrival_date', { ascending: false })
         .limit(1000);
 
       if (shipmentError) {
@@ -116,7 +112,7 @@ serve(async (req) => {
                 location: null,
                 industry: null,
                 shipment_count: 0,
-                last_shipment_at: shipment.unified_date,
+                last_shipment_at: shipment.arrival_date,
                 trade_volume_usd: 0,
                 confidence: null,
                 trend: null,
@@ -126,11 +122,11 @@ serve(async (req) => {
             
             const company = companyMap.get(companyName);
             company.shipment_count += 1;
-            company.trade_volume_usd += shipment.unified_value;
+            company.trade_volume_usd += (shipment.value_usd || 0);
             
             // Update last shipment date if newer
-            if (shipment.unified_date > company.last_shipment_at) {
-              company.last_shipment_at = shipment.unified_date;
+            if (shipment.arrival_date && (!company.last_shipment_at || shipment.arrival_date > company.last_shipment_at)) {
+              company.last_shipment_at = shipment.arrival_date;
             }
           });
         });
