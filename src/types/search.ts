@@ -1,0 +1,30 @@
+// src/types/search.ts
+export type Mode = 'all' | 'air' | 'ocean';
+export type Filters = {
+  date_from?: string | null;
+  date_to?: string | null;
+  hs_code?: string | null;
+  origin_country?: string | null;
+  destination_country?: string | null;
+  destination_city?: string | null;
+  carrier?: string | null;
+};
+export type UnifiedRow = {
+  id: string;
+  mode: Mode | null;
+  unified_date: string | null;
+  unified_company_name: string | null;
+  origin_country: string | null;
+  destination_country: string | null;
+  destination_city: string | null;
+  hs_code: string | null;
+  description: string | null;
+  vessel_name: string | null;
+  bol_number: string | null;
+  unified_carrier: string | null;
+  container_count: number | null;
+  gross_weight_kg: number | null;
+  value_usd: number | null;
+  score: number | null;
+  total_count: number | null;
+};

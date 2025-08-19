@@ -1,50 +1,16 @@
-"use client";
-
-import { cn } from "@/lib/utils";
-import { ShieldCheck, AlertTriangle } from "lucide-react";
-
-interface ConfidenceIndicatorProps {
-  score?: number | null; // 0–100 scale
-  mode?: "air" | "ocean" | "all";
-  label?: string;
-  className?: string;
-}
-
-export function ConfidenceIndicator({
-  score,
-  mode = "all",
-  label,
-  className,
-}: ConfidenceIndicatorProps) {
-  if (score == null) return null;
-
-  const getColor = (val: number) => {
-    if (val >= 80) return "bg-green-500 text-white";
-    if (val >= 50) return "bg-yellow-500 text-white";
-    return "bg-red-500 text-white";
-  };
-
-  const getIcon = (val: number) => {
-    if (val >= 50) return <ShieldCheck className="w-4 h-4 mr-1" />;
-    return <AlertTriangle className="w-4 h-4 mr-1" />;
-  };
-
+// src/components/search/ConfidenceIndicator.tsx
+import React from 'react';
+import { clamp, cn } from '@/lib/utils';
+export default function ConfidenceIndicator({ score }: { score?: number | null }) {
+  const pct = clamp(Number(score ?? 0), 0, 100);
+  const band = pct >= 80 ? 'high' : pct >= 50 ? 'med' : 'low';
+  const label = band === 'high' ? 'High' : band === 'med' ? 'Medium' : 'Low';
   return (
-    <div
-      className={cn(
-        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm",
-        getColor(score),
-        className
-      )}
-    >
-      {getIcon(score)}
-      <span>
-        {label
-          ? label
-          : `Confidence ${mode !== "all" ? mode.toUpperCase() : ""}: ${score}%`}
-      </span>
+    <div className="flex items-center gap-2">
+      <div className="w-24 h-2 rounded-full bg-white/10 overflow-hidden">
+        <div className={cn('h-full', band === 'high' ? 'bg-emerald-400' : band === 'med' ? 'bg-amber-400' : 'bg-rose-400')} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-xs opacity-80">{label} · {pct}%</span>
     </div>
   );
 }
-
-export default ConfidenceIndicator;
