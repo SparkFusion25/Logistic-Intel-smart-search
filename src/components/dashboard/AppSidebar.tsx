@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Search, Contact, Mail, BarChart3, Flag, LineChart, 
   Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle, BookOpen, Target, ChevronLeft, ChevronRight 
 } from "lucide-react"
-import { NavLink, useLocation } from "react-router-dom"
+import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -46,6 +46,7 @@ export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar()
   const collapsed = state === "collapsed"
   const location = useLocation()
+  const navigate = useNavigate()
 
   return (
     <Sidebar
@@ -74,7 +75,7 @@ export function AppSidebar() {
                 
                 const handleClick = () => {
                   if (item.searchParam) {
-                    window.location.href = `${item.url}?search=true`
+                    navigate(`${item.url}?search=true`)
                   }
                 }
                 
