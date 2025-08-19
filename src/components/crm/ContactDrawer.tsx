@@ -1,5 +1,6 @@
 import React from 'react';
 import SmartEnrichmentPanel from './SmartEnrichmentPanel';
+import SmartPeopleNews from './SmartPeopleNews';
 export default function ContactDrawer({ open, onClose, company, shipments }:{ open:boolean; onClose:()=>void; company:string; shipments:any[] }){
   return (
     <div className={`fixed inset-0 z-40 ${open?'pointer-events-auto':'pointer-events-none'}`}>
@@ -9,8 +10,9 @@ export default function ContactDrawer({ open, onClose, company, shipments }:{ op
           <div className="font-semibold">{company||'Company'}</div>
           <button onClick={onClose} className="px-2 py-1 rounded bg-white/5 border border-white/10 text-xs">Close</button>
         </div>
-        <div className="p-3 sm:p-4 space-y-3">
+        <div className="p-3 sm:p-4 space-y-3 overflow-y-auto">
           <SmartEnrichmentPanel company={company} shipments={shipments}/>
+          <SmartPeopleNews company={company}/>
         </div>
       </aside>
     </div>
