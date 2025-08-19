@@ -1,5 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { removeBackground, loadImage } from "@/utils/backgroundRemoval"
+import { useEffect, useState } from "react"
 
 interface SidebarBrandProps {
   collapsed?: boolean;
@@ -7,41 +9,50 @@ interface SidebarBrandProps {
 }
 
 export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandProps) {
+  const [logoSrc, setLogoSrc] = useState<string>("/lovable-uploads/c7c31567-c6a2-4d98-b45d-7aed7e035657.png");
+
+  useEffect(() => {
+    const processLogo = async () => {
+      try {
+        const response = await fetch("/lovable-uploads/c7c31567-c6a2-4d98-b45d-7aed7e035657.png");
+        const blob = await response.blob();
+        const imageElement = await loadImage(blob);
+        const transparentBlob = await removeBackground(imageElement);
+        const transparentUrl = URL.createObjectURL(transparentBlob);
+        setLogoSrc(transparentUrl);
+      } catch (error) {
+        console.error("Error processing logo:", error);
+        // Keep original logo as fallback
+      }
+    };
+
+    processLogo();
+  }, []);
+
   return (
     <div className="flex items-center justify-between p-6">
       {!collapsed && (
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg backdrop-blur-sm">
-            <svg 
-              width="16" 
-              height="16" 
-              viewBox="0 0 24 24" 
-              className="w-4 h-4"
-            >
-              <circle cx="12" cy="12" r="11" fill="white" />
-              <path d="M8 16V8h3v3h2V8h3v8h-3v-3h-2v3H8z" fill="currentColor" />
-              <path d="M16.5 10l-2 1.5 2 1.5V10z" fill="currentColor" />
-            </svg>
+          <div className="w-8 h-8 flex items-center justify-center rounded-lg">
+            <img 
+              src={logoSrc}
+              alt="Logo"
+              className="w-6 h-6 object-contain"
+            />
           </div>
           <div>
-            <h1 className="text-white font-bold text-lg">Intelligence</h1>
-            <p className="text-white/60 text-xs">Trade Platform</p>
+            <h1 className="text-white font-bold text-lg">LIT</h1>
           </div>
         </div>
       )}
       
       {collapsed && (
-        <div className="w-8 h-8 flex items-center justify-center mx-auto bg-white/10 rounded-lg backdrop-blur-sm">
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            className="w-4 h-4"
-          >
-            <circle cx="12" cy="12" r="11" fill="white" />
-            <path d="M8 16V8h3v3h2V8h3v8h-3v-3h-2v3H8z" fill="currentColor" />
-            <path d="M16.5 10l-2 1.5 2 1.5V10z" fill="currentColor" />
-          </svg>
+        <div className="w-8 h-8 flex items-center justify-center mx-auto rounded-lg">
+          <img 
+            src={logoSrc}
+            alt="Logo"
+            className="w-6 h-6 object-contain"
+          />
         </div>
       )}
 
