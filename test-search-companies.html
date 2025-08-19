@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct Search Test</title>
+</head>
+<body>
+    <h1>Testing Search Function Direct</h1>
+    <div id="results"></div>
+    
+    <script>
+    async function testSearch() {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '<p>Testing search...</p>';
+        
+        try {
+            const response = await fetch('https://zupuxlrtixhfnbuhxhum.supabase.co/functions/v1/search-run', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6IlQxOXlrekV2eHJQQUd2VWQiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3p1cHV4bHJ0aXhoZm5idWh4aHVtLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiYjk5N2I2Yi1mYTFhLTQ2YzgtOTk1Ny1mYWJlODM1ZWVlNTUiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU1NTg4Njc4LCJpYXQiOjE3NTU1ODUwNzgsImVtYWlsIjoiaW5mb0BnZXRiM2Fjb24uY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJhZG1pbl9sZXZlbCI6ImZ1bGwiLCJjb21wYW55IjoiTG9naXN0aWMgSW50ZWwiLCJmdWxsX25hbWUiOiJBZG1pbiBUZXN0IFVzZXIiLCJwbGFuIjoiZW50ZXJwcmlzZSIsInJvbGUiOiJhZG1pbiJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzU1NTg1MDc4fV0sInNlc3Npb25faWQiOiJlZjI0MzMwMC0yOWUxLTQ5NzUtOTkwYi0yYTY1Mzg4MjhhMzUiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.VRpC314xApVjD1GYLs3JSmuwR5Ds3zCkm_KUOtkVvSs',
+                    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1cHV4bHJ0aXhoZm5idWh4aHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MzkyMTYsImV4cCI6MjA3MDAxNTIxNn0.cuKMT_qhg8uOjFImnbQreg09K-TnVqV_NE_E5ngsQw0'
+                },
+                body: JSON.stringify({
+                    q: 'food',
+                    tab: 'companies'
+                })
+            });
+            
+            const data = await response.json();
+            
+            resultsDiv.innerHTML = `
+                <h3>Search Test Results:</h3>
+                <p><strong>Status:</strong> ${response.status}</p>
+                <p><strong>Total Results:</strong> ${data.total || 0}</p>
+                <p><strong>Companies Found:</strong></p>
+                <ul>
+                ${data.items?.map(item => `<li>${item.name} - ${item.industry || 'No industry'} (${item.shipment_count} shipments)</li>`).join('') || '<li>No items found</li>'}
+                </ul>
+                <details>
+                <summary>Full Response</summary>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+                </details>
+            `;
+            
+        } catch (error) {
+            resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+    }
+    
+    // Run test immediately
+    testSearch();
+    </script>
+</body>
+</html>

@@ -48,25 +48,18 @@ serve(async (req) => {
     let results = [];
 
     if (tab === 'companies') {
-      // Query real data from airfreight_shipments table with search filtering
+      // Query real data from companies table with search filtering
       let query = supabase
-        .from('airfreight_shipments')
+        .from('companies')
         .select(`
-          shipper_name,
-          consignee_name,
-          shipper_country,
-          consignee_country,
-          consignee_city,
-          consignee_state_region,
-          shipper_city,
-          shipper_state_region,
-          arrival_date,
-          value_usd,
-          weight_kg,
-          bol_number,
-          bill_of_lading_number,
-          hs_code,
-          commodity_description
+          id,
+          company_name,
+          country,
+          industry,
+          total_shipments,
+          confidence_score,
+          last_activity,
+          website
         `);
 
       // Apply search filter if query provided
@@ -75,66 +68,33 @@ serve(async (req) => {
         console.log(`Applying search filter for: ${searchTerm}`);
         
         query = query.or(`
-          shipper_name.ilike.%${searchTerm}%,
-          consignee_name.ilike.%${searchTerm}%,
-          bol_number.ilike.%${searchTerm}%,
-          bill_of_lading_number.ilike.%${searchTerm}%,
-          shipper_country.ilike.%${searchTerm}%,
-          consignee_country.ilike.%${searchTerm}%,
-          consignee_city.ilike.%${searchTerm}%,
-          consignee_state_region.ilike.%${searchTerm}%,
-          shipper_city.ilike.%${searchTerm}%,
-          shipper_state_region.ilike.%${searchTerm}%
+          company_name.ilike.%${searchTerm}%,
+          industry.ilike.%${searchTerm}%,
+          country.ilike.%${searchTerm}%
         `);
       }
 
-      const { data: shipmentData, error: shipmentError } = await query
-        .order('arrival_date', { ascending: false })
-        .limit(1000);
+      const { data: companyData, error: companyError } = await query
+        .order('total_shipments', { ascending: false })
+        .limit(50);
 
-      if (shipmentError) {
-        console.error('Error fetching shipment data:', shipmentError);
-        // Fall back to empty results on error
+      if (companyError) {
+        console.error('Error fetching company data:', companyError);
         results = [];
       } else {
-        // Group by company and aggregate data
-        const companyMap = new Map();
-        
-        shipmentData?.forEach(shipment => {
-          // Use shipper_name or consignee_name as company identifier
-          const companies = [shipment.shipper_name, shipment.consignee_name].filter(Boolean);
-          
-          companies.forEach(companyName => {
-            if (!companyMap.has(companyName)) {
-              companyMap.set(companyName, {
-                company_id: companyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                name: companyName,
-                location: null,
-                industry: null,
-                shipment_count: 0,
-                last_shipment_at: shipment.arrival_date,
-                trade_volume_usd: 0,
-                confidence: null,
-                trend: null,
-                logo_url: null
-              });
-            }
-            
-            const company = companyMap.get(companyName);
-            company.shipment_count += 1;
-            company.trade_volume_usd += (shipment.value_usd || 0);
-            
-            // Update last shipment date if newer
-            if (shipment.arrival_date && (!company.last_shipment_at || shipment.arrival_date > company.last_shipment_at)) {
-              company.last_shipment_at = shipment.arrival_date;
-            }
-          });
-        });
-
-        // Convert to array and sort by trade volume
-        results = Array.from(companyMap.values())
-          .sort((a, b) => b.trade_volume_usd - a.trade_volume_usd)
-          .slice(0, 50); // Limit to top 50 companies
+        // Map company data to expected format
+        results = companyData?.map(company => ({
+          company_id: company.id,
+          name: company.company_name,
+          location: company.country || null,
+          industry: company.industry || null,
+          shipment_count: company.total_shipments || 0,
+          last_shipment_at: company.last_activity,
+          trade_volume_usd: 0, // Can be calculated from shipments if needed
+          confidence: company.confidence_score || null,
+          trend: null,
+          logo_url: null
+        })) || [];
       }
 
       // **REMOVED**: No default filtering applied
