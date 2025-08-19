@@ -904,7 +904,7 @@ function normalizeFieldName(field: string): string | null {
   
   const normalized = field.toLowerCase()
     .replace(/\s+/g, '_')
-    .replace(/[^\\w]/g, '')
+    .replace(/[^\w]/g, '')
     .trim();
 
   // Comprehensive mappings for your Excel column headers
