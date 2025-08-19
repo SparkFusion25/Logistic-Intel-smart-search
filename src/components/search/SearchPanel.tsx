@@ -189,7 +189,7 @@ export default function SearchPanel() {
       try {
         // Call your Postgres function: public.search_unified
         const { data, error } = await supabase.rpc(
-          "search_unified",
+          "search_run" as any,
           {
             p_q: q.trim() ? q.trim() : null,
             p_mode: mode,
@@ -202,8 +202,7 @@ export default function SearchPanel() {
             p_carrier: filters.carrier ?? null,
             p_limit: limit,
             p_offset: reset ? 0 : offset + rows.length,
-          },
-          { signal: ac.signal as any }
+          }
         );
 
         if (error) throw error;

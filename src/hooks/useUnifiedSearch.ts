@@ -68,7 +68,7 @@ export function useUnifiedSearch(initialLimit = 25) {
 
       try {
         const { data, error } = await supabase.rpc(
-          "search_unified",
+          "search_run" as any,
           {
             p_q: filters.q?.trim() ? filters.q.trim() : null,
             p_mode: filters.mode || "all",
@@ -81,8 +81,7 @@ export function useUnifiedSearch(initialLimit = 25) {
             p_carrier: filters.carrier ?? null,
             p_limit: state.limit,
             p_offset: reset ? 0 : state.offset + state.items.length,
-          },
-          { signal: ac.signal as any }
+          }
         );
 
         if (error) throw error;

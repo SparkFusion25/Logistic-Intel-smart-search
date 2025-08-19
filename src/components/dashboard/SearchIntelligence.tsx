@@ -64,7 +64,7 @@ export function SearchIntelligence() {
   })
   const { toast } = useToast()
   const { makeRequest } = useAPI()
-  const { searchLocations, loading: locationsLoading } = useLocationAutocomplete()
+  const { searchCountries, searchCities, loading: locationsLoading } = useLocationAutocomplete()
   const { searchCommodities, loading: commoditiesLoading } = useCommodityAutocomplete()
 
   // All data now comes from real API - no hardcoded searches

@@ -52,7 +52,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
   const locationAutocomplete = useLocationAutocomplete()
   const commodityAutocomplete = useCommodityAutocomplete()
 
-  const { searchLocations } = locationAutocomplete
+  const { searchCountries, searchCities } = locationAutocomplete
   const { searchCommodities } = commodityAutocomplete
 
   const toggleSection = (section: string) => {
@@ -334,7 +334,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
                   placeholder="Search origin location..."
                   value={filters.origin_country}
                   onValueChange={(value) => updateFilter('origin_country', value)}
-                  options={searchLocations(filters.origin_country)}
+                  options={[]}
                   searchPlaceholder="Type to search locations..."
                 />
               </div>
@@ -344,7 +344,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
                   placeholder="Search destination location..."
                   value={filters.dest_country}
                   onValueChange={(value) => updateFilter('dest_country', value)}
-                  options={searchLocations(filters.dest_country)}
+                  options={[]}
                   searchPlaceholder="Type to search locations..."
                 />
               </div>
