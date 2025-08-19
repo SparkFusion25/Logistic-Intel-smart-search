@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/dashboard/AppSidebar";
+import { TopBar } from "@/components/ui/TopBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -229,68 +232,69 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/50">
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8" style={{ background: 'var(--sidebar-background)' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"></div>
-            <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full -translate-x-48 -translate-y-48 blur-3xl"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-48 translate-y-48 blur-3xl"></div>
-            
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                  Admin Dashboard
-                </h1>
-                <p className="text-white/80 text-lg">
-                  Manage users, affiliates, and system operations
-                </p>
-              </div>
-              <div className="flex items-center gap-4 mt-4 sm:mt-0">
-                <Select defaultValue="7d">
-                  <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7d">Last 7 days</SelectItem>
-                    <SelectItem value="30d">Last 30 days</SelectItem>
-                    <SelectItem value="90d">Last 90 days</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="secondary" size="sm" className="bg-white/20 text-white border-white/20 hover:bg-white/30">
-                  Refresh
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {systemStats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.name} className="border-slate-200 shadow-sm bg-white/70 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-canvas">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <TopBar />
+          <main className="flex-1 p-4 sm:p-6">
+            <div className="space-y-6">
+              {/* Fixed Header Section */}
+              <div className="sticky top-0 z-20 -mt-4 -mx-4 sm:-mx-6">
+                <div className="p-4 sm:p-6" style={{ background: 'var(--sidebar-background)' }}>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-600">{stat.name}</p>
-                      <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">
+                        Admin Dashboard
+                      </h1>
+                      <p className="text-white/80 text-sm sm:text-base">
+                        Manage users, affiliates, and system operations
+                      </p>
                     </div>
-                    <div className="p-3 bg-blue-100 rounded-xl">
-                      <Icon className="h-6 w-6 text-blue-600" />
+                    <div className="flex items-center gap-3 mt-3 sm:mt-0">
+                      <Select defaultValue="7d">
+                        <SelectTrigger className="w-28 bg-white/10 border-white/20 text-white text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="7d">Last 7 days</SelectItem>
+                          <SelectItem value="30d">Last 30 days</SelectItem>
+                          <SelectItem value="90d">Last 90 days</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="secondary" size="sm" className="bg-white/20 text-white border-white/20 hover:bg-white/30 text-xs">
+                        Refresh
+                      </Button>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center">
-                    <span className="text-sm font-medium text-green-600">{stat.change}</span>
-                    <span className="text-sm text-slate-500 ml-2">from last month</span>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                </div>
+              </div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {systemStats.map((stat) => {
+                  const Icon = stat.icon;
+                  return (
+                    <Card key={stat.name} className="group relative bg-gradient-to-br from-card to-card/80 border-border/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">{stat.name}</p>
+                            <p className="text-xl font-bold text-foreground">{stat.value}</p>
+                          </div>
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <Icon className="h-4 w-4 text-primary" />
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center">
+                          <span className="text-xs font-medium text-success">{stat.change}</span>
+                          <span className="text-xs text-muted-foreground ml-1">from last month</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
@@ -809,7 +813,10 @@ export function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
+            </div>
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

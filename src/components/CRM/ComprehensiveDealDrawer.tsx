@@ -274,35 +274,35 @@ export function ComprehensiveDealDrawer({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full lg:max-w-[1200px] lg:h-[90vh] overflow-hidden p-0 flex flex-col">
         {/* Header Section */}
-        <DialogHeader className="sticky top-0 bg-white border-b z-10 p-4 lg:p-6 shrink-0">
+        <DialogHeader className="sticky top-0 bg-card border-b border-border/50 z-10 p-4 lg:p-6 shrink-0">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="w-12 h-12 lg:w-16 lg:h-16">
                 <AvatarImage src={dealData.company?.logo} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary-variant text-white text-lg font-bold">
                   {dealData.company_name.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <DialogTitle className="text-xl lg:text-2xl text-slate-900 mb-1">{dealData.company_name}</DialogTitle>
+                <DialogTitle className="text-xl lg:text-2xl text-foreground mb-1">{dealData.company_name}</DialogTitle>
                 <div className="flex flex-wrap items-center gap-2 lg:gap-3">
-                  <p className="text-sm text-slate-600">{dealData.company?.industry}</p>
+                  <p className="text-sm text-muted-foreground">{dealData.company?.industry}</p>
                   <Badge variant="outline" className="text-xs">{dealData.stage}</Badge>
-                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                  <Badge variant="secondary" className="text-xs">
                     {dealData.source}
                   </Badge>
-                  <span className="text-lg lg:text-2xl font-bold text-green-600">${dealData.value_usd?.toLocaleString()}</span>
-                  <span className="text-xs lg:text-sm text-slate-500">{dealData.probability}% probability</span>
+                  <span className="text-lg lg:text-2xl font-bold text-success">${dealData.value_usd?.toLocaleString()}</span>
+                  <span className="text-xs lg:text-sm text-muted-foreground">{dealData.probability}% probability</span>
                 </div>
               </div>
             </div>
             <Button
-              variant={isEditing ? "default" : "outline"}
+              variant="ghost"
               size="sm"
-              onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+              onClick={() => onOpenChange(false)}
+              className="text-muted-foreground hover:text-foreground"
             >
-              {isEditing ? <Save className="w-4 h-4 mr-1" /> : <Edit3 className="w-4 h-4 mr-1" />}
-              {isEditing ? "Save" : "Edit Deal"}
+              ✕
             </Button>
           </div>
           
@@ -806,16 +806,6 @@ export function ComprehensiveDealDrawer({
             </Tabs>
           </div>
         </DialogContent>
-
-        {/* Email Modal */}
-        <EmailModal
-          isOpen={emailModalOpen}
-          onClose={() => setEmailModalOpen(false)}
-          contactEmail={dealData.contact?.email}
-          contactName={dealData.contact?.name}
-          dealId={dealData.id}
-          templateType={emailType}
-        />
       </Dialog>
     );
   }
