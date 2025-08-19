@@ -35,27 +35,26 @@ type Filters = {
   carrier?: string | null;
 };
 
-/** UI bits */
-const Chip: React.FC<{
-  active?: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}> = ({ active, onClick, children }) => (
+/** Small UI bits */
+const Chip: React.FC<{ active?: boolean; onClick?: () => void; children: React.ReactNode }> = ({
+  active,
+  onClick,
+  children,
+}) => (
   <button
     onClick={onClick}
     className={`px-3 py-1.5 rounded-full text-sm border transition ${
-      active
-        ? "bg-white/10 text-white border-white/20"
-        : "bg-white/5 text-ink-300 border-white/10 hover:text-white"
+      active ? "bg-white/10 text-white border-white/20" : "bg-white/5 text-ink-300 border-white/10 hover:text-white"
     }`}
   >
     {children}
   </button>
 );
 
-const Input: React.FC<
-  React.InputHTMLAttributes<HTMLInputElement> & { label?: string }
-> = ({ label, ...props }) => (
+const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label?: string }> = ({
+  label,
+  ...props
+}) => (
   <label className="block space-y-1">
     {label ? <span className="text-xs text-ink-300">{label}</span> : null}
     <input
@@ -65,7 +64,7 @@ const Input: React.FC<
   </label>
 );
 
-/** Self‑contained Shipment Card (no external imports needed) */
+/** Self‑contained Shipment Card (no external imports) */
 const ShipmentCard: React.FC<{
   row: Row;
   onAddToCrm?: (row: Row) => void;
@@ -74,12 +73,8 @@ const ShipmentCard: React.FC<{
   compact?: boolean;
   loading?: boolean;
 }> = ({ row, onAddToCrm, onViewContacts, onExport, compact, loading }) => {
-  const title =
-    row.unified_company_name || row.vessel_name || row.unified_carrier || "Shipment";
-  const lane =
-    (row.origin_country || "—") +
-    " → " +
-    (row.destination_city || row.destination_country || "—");
+  const title = row.unified_company_name || row.vessel_name || row.unified_carrier || "Shipment";
+  const lane = (row.origin_country || "—") + " → " + (row.destination_city || row.destination_country || "—");
   const modeBadge = row.mode ? (row.mode === "air" ? "✈ AIR" : "🚢 OCEAN") : "—";
 
   return (
@@ -97,9 +92,7 @@ const ShipmentCard: React.FC<{
         {/* Right stats */}
         <div className="text-right text-sm">
           {row.value_usd ? <div>${Number(row.value_usd).toLocaleString()}</div> : null}
-          {row.gross_weight_kg ? (
-            <div>{Number(row.gross_weight_kg).toLocaleString()} kg</div>
-          ) : null}
+          {row.gross_weight_kg ? <div>{Number(row.gross_weight_kg).toLocaleString()} kg</div> : null}
           {row.container_count ? <div>{row.container_count} cntrs</div> : null}
         </div>
       </div>
@@ -109,17 +102,13 @@ const ShipmentCard: React.FC<{
         {row.hs_code ? (
           <div className="inline-flex items-center gap-1">
             <span className="text-ink-300">HS</span>
-            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
-              {row.hs_code}
-            </code>
+            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">{row.hs_code}</code>
           </div>
         ) : null}
         {row.bol_number ? (
           <div className="inline-flex items-center gap-1">
             <span className="text-ink-300">B/L</span>
-            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
-              {row.bol_number}
-            </code>
+            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">{row.bol_number}</code>
             <button
               aria-label="Copy B/L number"
               onClick={() => navigator.clipboard?.writeText(row.bol_number || "")}
@@ -144,9 +133,7 @@ const ShipmentCard: React.FC<{
         ) : null}
       </div>
 
-      {row.description ? (
-        <p className="mt-2 text-sm text-ink-300 line-clamp-2">{row.description}</p>
-      ) : null}
+      {row.description ? <p className="mt-2 text-sm text-ink-300 line-clamp-2">{row.description}</p> : null}
 
       {/* CTAs */}
       <div className="mt-3 flex flex-wrap gap-2">
@@ -188,10 +175,7 @@ export default function SearchPanel() {
 
   const [limit] = useState(25);
   const [offset, setOffset] = useState(0);
-  const hasMore = useMemo(
-    () => offset + rows.length < total,
-    [offset, rows.length, total]
-  );
+  const hasMore = useMemo(() => offset + rows.length < total, [offset, rows, total]);
   const abortRef = useRef<AbortController | null>(null);
 
   const runSearch = useCallback(
@@ -227,9 +211,7 @@ export default function SearchPanel() {
         const list = (data || []) as Row[];
         const next = reset ? list : [...rows, ...list];
         setRows(next);
-        setTotal(
-          list.length ? Number(list[0].total_count ?? next.length) : reset ? 0 : total
-        );
+        setTotal(list.length ? Number(list[0].total_count ?? next.length) : reset ? 0 : total);
         if (reset) setOffset(0);
       } catch (e: any) {
         if (e?.name !== "AbortError") {
@@ -311,25 +293,19 @@ export default function SearchPanel() {
               label="Origin Country"
               placeholder="e.g., China"
               value={filters.origin_country ?? ""}
-              onChange={(e) =>
-                setFilters({ ...filters, origin_country: e.target.value || null })
-              }
+              onChange={(e) => setFilters({ ...filters, origin_country: e.target.value || null })}
             />
             <Input
               label="Destination Country"
               placeholder="e.g., United States"
               value={filters.destination_country ?? ""}
-              onChange={(e) =>
-                setFilters({ ...filters, destination_country: e.target.value || null })
-              }
+              onChange={(e) => setFilters({ ...filters, destination_country: e.target.value || null })}
             />
             <Input
               label="Destination City"
               placeholder="e.g., Los Angeles"
               value={filters.destination_city ?? ""}
-              onChange={(e) =>
-                setFilters({ ...filters, destination_city: e.target.value || null })
-              }
+              onChange={(e) => setFilters({ ...filters, destination_city: e.target.value || null })}
             />
             <Input
               label="Carrier"
@@ -342,23 +318,16 @@ export default function SearchPanel() {
                 label="From"
                 type="date"
                 value={filters.date_from ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, date_from: e.target.value || null })
-                }
+                onChange={(e) => setFilters({ ...filters, date_from: e.target.value || null })}
               />
               <Input
                 label="To"
                 type="date"
                 value={filters.date_to ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, date_to: e.target.value || null })
-                }
+                onChange={(e) => setFilters({ ...filters, date_to: e.target.value || null })}
               />
             </div>
-            <button
-              className="w-full mt-2 px-3 py-2 rounded-xl2 bg-brand-500 hover:bg-brand-400"
-              onClick={onApplyFilters}
-            >
+            <button className="w-full mt-2 px-3 py-2 rounded-xl2 bg-brand-500 hover:bg-brand-400" onClick={onApplyFilters}>
               Apply Filters
             </button>
           </div>
@@ -367,9 +336,7 @@ export default function SearchPanel() {
         {/* Results */}
         <section className="md:col-span-9 lg:col-span-9">
           {errorMsg ? (
-            <div data-card className="p-4 border border-danger-500/30 text-danger-500">
-              {errorMsg}
-            </div>
+            <div data-card className="p-4 border border-danger-500/30 text-danger-500">{errorMsg}</div>
           ) : null}
 
           {loading && rows.length === 0 ? (
@@ -380,8 +347,7 @@ export default function SearchPanel() {
             <div data-card className="p-6 text-ink-300">
               <div className="font-semibold text-white mb-1">Try a sample search</div>
               <div className="text-sm">
-                Examples: <em>“Samsung United States 90d”</em>, <em>“8471 ocean China→US”</em>,{" "}
-                <em>“AA air ORD”</em>
+                Examples: <em>“Samsung United States 90d”</em>, <em>“8471 ocean China→US”</em>, <em>“AA air ORD”</em>
               </div>
             </div>
           ) : (
@@ -413,20 +379,14 @@ export default function SearchPanel() {
         </section>
       </div>
 
-      {/* Mobile filter drawer (self-contained) */}
+      {/* Mobile filter drawer */}
       {openFilters && (
         <div className="fixed inset-0 z-30 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setOpenFilters(false)}
-          />
+          <div className="absolute inset-0 bg-black/50" onClick={() => setOpenFilters(false)} />
           <div className="absolute inset-x-0 bottom-0 bg-ink-900 rounded-t-2xl ring-1 ring-white/10 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="font-semibold">Filters</div>
-              <button
-                className="p-2 rounded-lg hover:bg-white/5"
-                onClick={() => setOpenFilters(false)}
-              >
+              <button className="p-2 rounded-lg hover:bg-white/5" onClick={() => setOpenFilters(false)}>
                 <X />
               </button>
             </div>
@@ -441,25 +401,19 @@ export default function SearchPanel() {
               label="Origin Country"
               placeholder="e.g., China"
               value={filters.origin_country ?? ""}
-              onChange={(e) =>
-                setFilters({ ...filters, origin_country: e.target.value || null })
-              }
+              onChange={(e) => setFilters({ ...filters, origin_country: e.target.value || null })}
             />
             <Input
               label="Destination Country"
               placeholder="e.g., United States"
               value={filters.destination_country ?? ""}
-              onChange={(e) =>
-                setFilters({ ...filters, destination_country: e.target.value || null })
-              }
+              onChange={(e) => setFilters({ ...filters, destination_country: e.target.value || null })}
             />
             <Input
               label="Destination City"
               placeholder="e.g., Los Angeles"
               value={filters.destination_city ?? ""}
-              onChange={(e) =>
-                setFilters({ ...filters, destination_city: e.target.value || null })
-              }
+              onChange={(e) => setFilters({ ...filters, destination_city: e.target.value || null })}
             />
             <Input
               label="Carrier"
@@ -472,17 +426,13 @@ export default function SearchPanel() {
                 label="From"
                 type="date"
                 value={filters.date_from ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, date_from: e.target.value || null })
-                }
+                onChange={(e) => setFilters({ ...filters, date_from: e.target.value || null })}
               />
               <Input
                 label="To"
                 type="date"
                 value={filters.date_to ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, date_to: e.target.value || null })
-                }
+                onChange={(e) => setFilters({ ...filters, date_to: e.target.value || null })}
               />
             </div>
 
