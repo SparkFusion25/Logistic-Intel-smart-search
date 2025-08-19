@@ -13,7 +13,7 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
             <img 
-              src="https://lqbzztypqnxnmnhfkszi.supabase.co/storage/v1/object/public/branding/logo-icon-white.png" 
+              src="https://lqbzztypqnxnmnhfkszi.supabase.co/storage/v1/object/public/branding/logo-icon.svg" 
               alt="Logistic Intel" 
               className="w-6 h-6" 
             />
@@ -28,7 +28,7 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       {collapsed && (
         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg mx-auto">
           <img 
-            src="https://lqbzztypqnxnmnhfkszi.supabase.co/storage/v1/object/public/branding/logo-icon-white.png" 
+            src="https://lqbzztypqnxnmnhfkszi.supabase.co/storage/v1/object/public/branding/logo-icon.svg" 
             alt="Logistic Intel" 
             className="w-6 h-6" 
           />
