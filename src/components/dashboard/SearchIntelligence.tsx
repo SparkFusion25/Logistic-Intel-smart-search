@@ -43,6 +43,11 @@ export function SearchIntelligence() {
     entity: "all",
     min_shipments: "",
     min_confidence: "",
+    // Date filters
+    shipment_date_from: undefined as Date | undefined,
+    shipment_date_to: undefined as Date | undefined,
+    arrival_date_from: undefined as Date | undefined,
+    arrival_date_to: undefined as Date | undefined,
     // Revenue Vessel filters
     importer_name: "",
     carrier_name: "",

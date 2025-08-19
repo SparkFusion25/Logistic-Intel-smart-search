@@ -197,6 +197,19 @@ serve(async (req) => {
       if (filters?.is_lcl && filters.is_lcl !== '') {
         query_unified = query_unified.eq('is_lcl', filters.is_lcl === 'true');
       }
+      // Date filters
+      if (filters?.shipment_date_from) {
+        query_unified = query_unified.gte('unified_date', filters.shipment_date_from);
+      }
+      if (filters?.shipment_date_to) {
+        query_unified = query_unified.lte('unified_date', filters.shipment_date_to);
+      }
+      if (filters?.arrival_date_from) {
+        query_unified = query_unified.gte('arrival_date', filters.arrival_date_from);
+      }
+      if (filters?.arrival_date_to) {
+        query_unified = query_unified.lte('arrival_date', filters.arrival_date_to);
+      }
       if (filters?.dest_country) {
         query_unified = query_unified.ilike('destination_country', `%${filters.dest_country}%`);
       }

@@ -1,13 +1,17 @@
 import { useState } from "react"
-import { ChevronDown, ChevronRight, Filter } from "lucide-react"
+import { ChevronDown, ChevronRight, Filter, CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Autocomplete } from "@/components/ui/autocomplete"
 import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete"
 import { useCommodityAutocomplete } from "@/hooks/useCommodityAutocomplete"
+import { cn } from "@/lib/utils"
 
 interface AdvancedFiltersProps {
   filters: any
@@ -15,8 +19,36 @@ interface AdvancedFiltersProps {
   onApplyFilters: () => void
 }
 
+function DatePicker({ value, onChange, placeholder }: { value?: Date, onChange: (date?: Date) => void, placeholder: string }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            !value && "text-muted-foreground"
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? format(value, "PPP") : <span>{placeholder}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={onChange}
+          initialFocus
+          className={cn("p-3 pointer-events-auto")}
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: AdvancedFiltersProps) {
-  const [expandedSections, setExpandedSections] = useState<string[]>(['shipment'])
+  const [expandedSections, setExpandedSections] = useState<string[]>(['shipment', 'dates'])
   const { searchLocations } = useLocationAutocomplete()
   const { searchCommodities } = useCommodityAutocomplete()
 
@@ -28,7 +60,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
     )
   }
 
-  const updateFilter = (key: string, value: string) => {
+  const updateFilter = (key: string, value: string | Date | undefined) => {
     onFiltersChange({ ...filters, [key]: value })
   }
 
@@ -45,6 +77,11 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
       entity: "all",
       min_shipments: "",
       min_confidence: "",
+      // Date filters
+      shipment_date_from: undefined,
+      shipment_date_to: undefined,
+      arrival_date_from: undefined,
+      arrival_date_to: undefined,
       // Revenue Vessel filters
       importer_name: "",
       carrier_name: "",
@@ -62,7 +99,7 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
 
   const getActiveFilterCount = () => {
     const activeFilters = Object.entries(filters).filter(([key, value]) => 
-      key !== 'mode' && key !== 'range' && value && value !== ''
+      key !== 'mode' && key !== 'range' && value && value !== '' && value !== undefined
     )
     return activeFilters.length
   }
@@ -92,6 +129,56 @@ export function AdvancedFilters({ filters, onFiltersChange, onApplyFilters }: Ad
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Date Filters */}
+        <Collapsible open={expandedSections.includes('dates')}>
+          <CollapsibleTrigger 
+            onClick={() => toggleSection('dates')}
+            className="flex items-center gap-2 w-full text-left font-medium hover:text-primary"
+          >
+            {expandedSections.includes('dates') ? 
+              <ChevronDown className="h-4 w-4" /> : 
+              <ChevronRight className="h-4 w-4" />
+            }
+            Date Filters
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Shipment Date From</label>
+                <DatePicker
+                  value={filters.shipment_date_from}
+                  onChange={(date) => updateFilter('shipment_date_from', date)}
+                  placeholder="Select start date"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Shipment Date To</label>
+                <DatePicker
+                  value={filters.shipment_date_to}
+                  onChange={(date) => updateFilter('shipment_date_to', date)}
+                  placeholder="Select end date"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Arrival Date From</label>
+                <DatePicker
+                  value={filters.arrival_date_from}
+                  onChange={(date) => updateFilter('arrival_date_from', date)}
+                  placeholder="Select start date"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Arrival Date To</label>
+                <DatePicker
+                  value={filters.arrival_date_to}
+                  onChange={(date) => updateFilter('arrival_date_to', date)}
+                  placeholder="Select end date"
+                />
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
         {/* Shipment Details */}
         <Collapsible open={expandedSections.includes('shipment')}>
           <CollapsibleTrigger 
