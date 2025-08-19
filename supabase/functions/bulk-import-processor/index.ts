@@ -316,8 +316,8 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         })
         .eq('id', import_id);
 
-      // Queue enrichment for companies in background (optional step)
-      EdgeRuntime.waitUntil(queueEnrichment(import_id, supabaseClient));
+      // Apollo enrichment removed - only store data during file upload
+      console.log('File processing completed - data stored without external enrichment');
 
     } catch (parseError) {
       console.error('Parse error:', parseError);
@@ -622,13 +622,18 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
             }
           }
         } else {
-          // For CSV and other files: Use medium validation
-          console.log(`Other file type: Using standard validation for company names`);
+          // For CSV files: Use relaxed validation (same as Excel)
+          console.log(`CSV file: Using relaxed validation for company names (same as Excel)`);
           for (const field of companyFields) {
-            if (await isValidCompanyName(field, supabaseClient)) {
+            if (await isValidCompanyNameExcel(field, supabaseClient)) {
               validCompanyName = field;
               break;
             }
+          }
+          // For CSV, even if no "valid" company name, still use the first available (like Excel)
+          if (!validCompanyName && companyFields.length > 0) {
+            validCompanyName = companyFields[0];
+            console.log(`CSV file: Using first available company name: ${validCompanyName}`);
           }
         }
         
@@ -664,11 +669,16 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
           enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
           enrichedRecord.hs_code = record.hs_code || null; // Allow null for Excel
           enrichedRecord.mode = record.mode || null; // Allow null for Excel
-        } else {
-          // XML/CSV: Standard field handling
+        } else if (fileType === 'xml') {
+          // XML: Standard field handling (strict)
           enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
           enrichedRecord.hs_code = record.hs_code || 'PENDING_ENRICHMENT';
           enrichedRecord.mode = record.mode || 'PENDING_ENRICHMENT';
+        } else {
+          // CSV: Flexible field handling (same as Excel) - accept sparse data
+          enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
+          enrichedRecord.hs_code = record.hs_code || null; // Allow null for CSV (like Excel)
+          enrichedRecord.mode = record.mode || null; // Allow null for CSV (like Excel)
         }
         
         console.log(`Enriched record (${fileType}): company=${enrichedRecord.unified_company_name || 'NULL'}, hs_code=${enrichedRecord.hs_code || 'NULL'}, mode=${enrichedRecord.mode || 'NULL'}`);
@@ -868,9 +878,9 @@ function validateXMLRecords(records: TradeRecord[]): TradeRecord[] {
   return validRecords;
 }
 
-// CSV validation - MEDIUM REQUIREMENTS  
+// CSV validation - MINIMAL REQUIREMENTS (same as XLSX)
 function validateCSVRecords(records: TradeRecord[]): TradeRecord[] {
-  console.log(`CSV validation: Using MEDIUM validation - balanced approach`);
+  console.log(`CSV validation: Using MINIMAL validation - accepting sparse data (same as XLSX)`);
   
   const validRecords = [];
   const failedRecords = [];
@@ -878,34 +888,28 @@ function validateCSVRecords(records: TradeRecord[]): TradeRecord[] {
   for (const record of records) {
     const failures = [];
     
-    // MEDIUM VALIDATION for CSV files
+    // MINIMAL VALIDATION for CSV files - only require org_id (same as XLSX)
     if (!record.org_id) {
       failures.push('missing org_id');
     }
     
-    // Require either hs_code OR mode (flexible)
-    if ((!record.hs_code || record.hs_code === 'PENDING_ENRICHMENT') && 
-        (!record.mode || record.mode === 'PENDING_ENRICHMENT')) {
-      failures.push('missing both hs_code and mode');
-    }
+    // Accept ALL records with org_id - even completely sparse data
+    // This handles CSV files with lots of empty cells (from Panjiva)
     
     if (failures.length === 0) {
       validRecords.push(record);
     } else {
       failedRecords.push({ failures, sample_data: {
         org_id: record.org_id,
-        hs_code: record.hs_code,
-        mode: record.mode,
-        unified_company_name: record.unified_company_name
+        hs_code: record.hs_code || 'SPARSE_DATA',
+        mode: record.mode || 'SPARSE_DATA',
+        unified_company_name: record.unified_company_name || 'SPARSE_DATA'
       }});
     }
   }
   
-  console.log(`CSV validation completed: ${validRecords.length}/${records.length} records passed (medium validation)`);
-  
-  if (failedRecords.length > 0) {
-    console.log('CSV validation failures:', JSON.stringify(failedRecords.slice(0, 3), null, 2));
-  }
+  console.log(`CSV validation completed: ${validRecords.length}/${records.length} records passed (minimal validation)`);
+  console.log(`CSV files: Accepting all sparse data to maximize import success (same as XLSX)`);
   
   return validRecords;
 }
@@ -1340,39 +1344,13 @@ async function processContactBatch(contactRecords: ContactRecord[], importId: st
   return processedCount;
 }
 
+// DISABLED: Apollo enrichment function removed from file processing
+// Apollo enrichment is now only available through CRM manual enrichment
+// This ensures file uploads only store data without external API calls
+/*
 async function queueEnrichment(importId: string, supabaseClient: any) {
-  try {
-    console.log(`Queueing enrichment for import ${importId}`);
-    
-    // Get unique company names from the import
-    const { data: companies, error } = await supabaseClient
-      .from('unified_shipments')
-      .select('unified_company_name')
-      .not('unified_company_name', 'is', null)
-      .neq('unified_company_name', '')
-      .limit(1000);
-
-    if (error) {
-      console.error('Error fetching companies for enrichment:', error);
-      return;
-    }
-
-    const uniqueCompanies = [...new Set(companies?.map(c => c.unified_company_name) || [])];
-    console.log(`Found ${uniqueCompanies.length} unique companies to potentially enrich`);
-
-    // Queue companies for enrichment (this would typically be a separate process)
-    for (const companyName of uniqueCompanies.slice(0, 50)) { // Limit to first 50
-      try {
-        await supabaseClient.functions.invoke('contact-enrichment', {
-          body: { company_name: companyName }
-        });
-      } catch (enrichError) {
-        console.error(`Error enriching company ${companyName}:`, enrichError);
-      }
-    }
-
-    console.log('Enrichment queueing completed');
-  } catch (error) {
-    console.error('Error in queueEnrichment:', error);
-  }
+  // This function has been disabled - Apollo enrichment removed from file processing
+  // Use CRM enrichment features instead for Apollo integration
+  console.log('Apollo enrichment disabled for file uploads - use CRM enrichment instead');
 }
+*/
