@@ -1,160 +1,175 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { supabase } from '@/integrations/supabase/client'
+// src/hooks/useLocationAutocomplete.ts
+import { useCallback, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-interface LocationData {
-  countries: string[]
-  cities: string[]
-  states: string[]
-  ports: string[]
-  zipCodes: string[]
-}
+/**
+ * Lightweight country & city autocomplete backed by Supabase.
+ * - Countries come from origin_country + destination_country (deduped).
+ * - Cities come from destination_city (optionally filtered by country).
+ * - All results are client‑deduped and alphabetized.
+ *
+ * Usage:
+ * const { countries, cities, loading, searchCountries, searchCities, clear } = useLocationAutocomplete();
+ * await searchCountries("uni"); // -> ["United Arab Emirates", "United Kingdom", "United States", ...]
+ * await searchCities("United States", "los"); // -> ["Los Angeles", "Los Gatos", ...]
+ */
 
-interface AutocompleteOption {
-  value: string
-  label: string
-  group?: string
-}
+const normalize = (v: unknown) =>
+  typeof v === "string" ? v.trim() : v == null ? "" : String(v).trim();
+
+const uniqSort = (arr: (string | null | undefined)[]) =>
+  Array.from(
+    new Set(
+      arr
+        .map((s) => normalize(s))
+        .filter((s) => s.length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+type CountryRole = "any" | "origin" | "destination";
 
 export function useLocationAutocomplete() {
-  const [locationData, setLocationData] = useState<LocationData>({
-    countries: [],
-    cities: [],
-    states: [],
-    ports: [],
-    zipCodes: []
-  })
-  const [loading, setLoading] = useState(true)
+  const [countries, setCountries] = useState<string[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadLocationData()
-  }, [])
+  // simple in‑memory cache to cut duplicate queries while typing
+  const cacheRef = useRef<Record<string, string[]>>({});
 
-  const loadLocationData = async () => {
-    try {
-      setLoading(true)
-      
-      // Get comprehensive location data from all shipment tables
-      const [unifiedData, oceanData, airData, tradeData] = await Promise.all([
-        supabase.from('unified_shipments').select('origin_country, destination_country, destination_city, destination_state, port_of_loading, port_of_discharge').limit(1000),
-        supabase.from('ocean_shipments').select('origin_country, destination_country, destination_city, port_of_lading, port_of_unlading').limit(1000),
-        supabase.from('airfreight_shipments').select('shipper_country, consignee_country, consignee_city, consignee_state, consignee_zip, port_of_lading, port_of_unlading').limit(1000),
-        supabase.from('trade_shipments').select('origin_country, destination_country, destination_city, port_of_loading, port_of_discharge').limit(1000)
-      ])
+  const searchCountries = useCallback(
+    async (qRaw: string, role: CountryRole = "any", limit = 50) => {
+      const q = normalize(qRaw);
+      const cacheKey = `countries:${role}:${q}:${limit}`;
+      if (cacheRef.current[cacheKey]) {
+        setCountries(cacheRef.current[cacheKey]);
+        return cacheRef.current[cacheKey];
+      }
 
-      const countries = new Set<string>()
-      const cities = new Set<string>()
-      const states = new Set<string>()
-      const ports = new Set<string>()
-      const zipCodes = new Set<string>()
+      setLoading(true);
+      setError(null);
+      try {
+        const cols =
+          role === "origin"
+            ? "origin_country"
+            : role === "destination"
+            ? "destination_country"
+            : "origin_country, destination_country";
 
-      // Process unified shipments
-      unifiedData.data?.forEach((item: any) => {
-        if (item.origin_country) countries.add(item.origin_country)
-        if (item.destination_country) countries.add(item.destination_country)
-        if (item.destination_city) cities.add(item.destination_city)
-        if (item.destination_state) states.add(item.destination_state)
-        if (item.port_of_loading) ports.add(item.port_of_loading)
-        if (item.port_of_discharge) ports.add(item.port_of_discharge)
-      })
+        // Pull a small, representative slice; we'll dedupe client‑side.
+        // Note: using OR with ilike for both columns when role === "any".
+        const base = supabase
+          .from("unified_shipments")
+          .select(cols, { count: "exact", head: false })
+          .limit(limit);
 
-      // Process ocean shipments
-      oceanData.data?.forEach((item: any) => {
-        if (item.origin_country) countries.add(item.origin_country)
-        if (item.destination_country) countries.add(item.destination_country)
-        if (item.destination_city) cities.add(item.destination_city)
-        if (item.port_of_lading) ports.add(item.port_of_lading)
-        if (item.port_of_unlading) ports.add(item.port_of_unlading)
-      })
+        let res;
+        if (q) {
+          if (role === "origin") {
+            res = await base.ilike("origin_country", `%${q}%`);
+          } else if (role === "destination") {
+            res = await base.ilike("destination_country", `%${q}%`);
+          } else {
+            // OR syntax: "col1.ilike.%foo%,col2.ilike.%foo%"
+            res = await base.or(
+              `origin_country.ilike.%${q}%,destination_country.ilike.%${q}%`
+            );
+          }
+        } else {
+          res = await base;
+        }
 
-      // Process air shipments
-      airData.data?.forEach((item: any) => {
-        if (item.shipper_country) countries.add(item.shipper_country)
-        if (item.consignee_country) countries.add(item.consignee_country)
-        if (item.consignee_city) cities.add(item.consignee_city)
-        if (item.consignee_state) states.add(item.consignee_state)
-        if (item.consignee_zip) zipCodes.add(item.consignee_zip)
-        if (item.port_of_lading) ports.add(item.port_of_lading)
-        if (item.port_of_unlading) ports.add(item.port_of_unlading)
-      })
+        if (res.error) throw res.error;
+        const rows = res.data as any[];
 
-      // Process trade shipments
-      tradeData.data?.forEach((item: any) => {
-        if (item.origin_country) countries.add(item.origin_country)
-        if (item.destination_country) countries.add(item.destination_country)
-        if (item.destination_city) cities.add(item.destination_city)
-        if (item.port_of_loading) ports.add(item.port_of_loading)
-        if (item.port_of_discharge) ports.add(item.port_of_discharge)
-      })
+        const values =
+          role === "origin"
+            ? rows.map((r) => r.origin_country)
+            : role === "destination"
+            ? rows.map((r) => r.destination_country)
+            : rows.flatMap((r) => [r.origin_country, r.destination_country]);
 
-      setLocationData({
-        countries: Array.from(countries).filter(Boolean).sort(),
-        cities: Array.from(cities).filter(Boolean).sort(),
-        states: Array.from(states).filter(Boolean).sort(),
-        ports: Array.from(ports).filter(Boolean).sort(),
-        zipCodes: Array.from(zipCodes).filter(Boolean).sort()
-      })
-    } catch (error) {
-      console.error('Error loading location data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+        const list = uniqSort(values);
+        cacheRef.current[cacheKey] = list;
+        setCountries(list);
+        return list;
+      } catch (e: any) {
+        setError(e?.message || "Failed to load countries");
+        setCountries([]);
+        return [];
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
-  const getLocationOptions = useMemo((): AutocompleteOption[] => {
-    const options: AutocompleteOption[] = []
-    
-    // Add countries
-    locationData.countries.forEach(country => {
-      options.push({
-        value: country,
-        label: country,
-        group: 'Countries'
-      })
-    })
+  const searchCities = useCallback(
+    async (countryRaw: string | null, qRaw: string, limit = 50) => {
+      const q = normalize(qRaw);
+      const country = normalize(countryRaw || "");
+      const cacheKey = `cities:${country}:${q}:${limit}`;
+      if (cacheRef.current[cacheKey]) {
+        setCities(cacheRef.current[cacheKey]);
+        return cacheRef.current[cacheKey];
+      }
 
-    // Add major cities
-    locationData.cities.slice(0, 50).forEach(city => {
-      options.push({
-        value: city,
-        label: city,
-        group: 'Cities'
-      })
-    })
+      setLoading(true);
+      setError(null);
+      try {
+        let query = supabase
+          .from("unified_shipments")
+          .select("destination_city, destination_country, origin_country", {
+            count: "exact",
+            head: false,
+          })
+          .limit(limit);
 
-    // Add states/regions
-    locationData.states.slice(0, 30).forEach(state => {
-      options.push({
-        value: state,
-        label: state,
-        group: 'States/Regions'
-      })
-    })
+        // Filter by country if provided (matches either origin or destination country).
+        if (country) {
+          query = query.or(
+            `destination_country.eq.${country},origin_country.eq.${country}`
+          );
+        }
 
-    // Add major ports
-    locationData.ports.slice(0, 30).forEach(port => {
-      options.push({
-        value: port,
-        label: port,
-        group: 'Ports'
-      })
-    })
+        // Filter by city substring if provided.
+        if (q) {
+          query = query.ilike("destination_city", `%${q}%`);
+        }
 
-    return options
-  }, [locationData])
+        const { data, error } = await query;
+        if (error) throw error;
 
-  const searchLocations = (query: string): AutocompleteOption[] => {
-    if (!query || query.length < 2) return getLocationOptions.slice(0, 20)
-    
-    const lowerQuery = query.toLowerCase()
-    return getLocationOptions.filter(option =>
-      option.label.toLowerCase().includes(lowerQuery)
-    ).slice(0, 20)
-  }
+        const list = uniqSort((data as any[]).map((r) => r.destination_city));
+        cacheRef.current[cacheKey] = list;
+        setCities(list);
+        return list;
+      } catch (e: any) {
+        setError(e?.message || "Failed to load cities");
+        setCities([]);
+        return [];
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const clear = useCallback(() => {
+    setCountries([]);
+    setCities([]);
+    setError(null);
+  }, []);
 
   return {
-    locationData,
-    getLocationOptions,
-    searchLocations,
-    loading
-  }
+    countries,
+    cities,
+    loading,
+    error,
+    searchCountries,
+    searchCities,
+    clear,
+  };
 }
+
+export default useLocationAutocomplete;
