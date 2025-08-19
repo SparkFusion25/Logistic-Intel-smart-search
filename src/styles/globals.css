@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --li-bg: 13 17 23;         /* #0d1117 */
+  --li-card: 22 27 34;       /* #161b22 */
+  --li-accent: 59 130 246;   /* tailwind blue-500 */
+  --li-accent-2: 99 102 241; /* indigo-500 */
+  --li-ring: 56 189 248;     /* sky-400 */
+}
+
+html, body, #__next { height: 100%; }
+body{ @apply bg-slate-950 text-slate-100; background: radial-gradient(1200px 700px at 20% -10%, rgba(59,130,246,0.18), transparent), radial-gradient(900px 500px at 110% -10%, rgba(99,102,241,0.18), transparent), rgb(var(--li-bg)); }
+
+/***** Cards *****/
+.li-card { @apply bg-slate-900/70 backdrop-blur rounded-2xl border border-white/10 shadow-xl; }
+.li-card:hover { @apply border-white/20; }
+
+/***** Buttons *****/
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium transition; }
+.btn-primary { @apply bg-blue-600 text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-sky-400/60; }
+.btn-ghost { @apply bg-white/5 text-slate-100 hover:bg-white/10; }
+
+/***** Utilities *****/
+.badge { @apply inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-xs text-slate-200; }
+.kpi { @apply li-card p-4 md:p-5; }
+
+/***** Mobile safe table *****/
+.table-scroll { @apply overflow-x-auto; }
+.table { @apply w-full text-sm; }
+.table th { @apply text-left text-slate-400 font-medium py-2; }
+.table td { @apply py-2 text-slate-100; }
