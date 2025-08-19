@@ -212,7 +212,7 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
 
       // **STEP 2: ENRICH ALL RECORDS WITH COMPANY DATA**
       console.log('Enriching all records with company data...');
-      const enrichedRecords = await enrichAllRecords(records, supabaseClient, import_id);
+      const enrichedRecords = await enrichAllRecords(records, supabaseClient, import_id, file_type);
       
       if (enrichedRecords.length === 0) {
         throw new Error('No records could be enriched with valid company data');
@@ -220,8 +220,8 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
 
       console.log(`Successfully enriched ${enrichedRecords.length}/${records.length} records`);
 
-      // **STEP 3: VALIDATE ALL ENRICHED RECORDS**
-      const validatedRecords = validateEnrichedRecords(enrichedRecords);
+      // **STEP 3: VALIDATE ALL ENRICHED RECORDS WITH FILE-TYPE-SPECIFIC VALIDATION**
+      const validatedRecords = validateEnrichedRecordsByFileType(enrichedRecords, file_type);
       
       if (validatedRecords.length === 0) {
         throw new Error('No records passed validation after enrichment');
@@ -570,11 +570,15 @@ function parseXML(text: string): TradeRecord[] {
 }
 
 // Enrichment and validation functions
-async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, importId: string): Promise<TradeRecord[]> {
-  console.log(`Starting enrichment for ${records.length} records`);
+async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, importId: string, fileType: string): Promise<TradeRecord[]> {
+  console.log(`Starting enrichment for ${records.length} records (file type: ${fileType})`);
   
   const enrichedRecords = [];
   const batchSize = 100;
+  
+  // File-type-specific processing logic
+  const isExcelFile = fileType.toLowerCase() === 'xlsx';
+  const isXmlFile = fileType.toLowerCase() === 'xml';
   
   for (let i = 0; i < records.length; i += batchSize) {
     const batch = records.slice(i, i + batchSize);
@@ -592,18 +596,47 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
         ].filter(Boolean);
         
         let validCompanyName = null;
-        for (const field of companyFields) {
-          if (await isValidCompanyName(field, supabaseClient)) {
-            validCompanyName = field;
-            break;
+        
+        // File-type-specific validation approach
+        if (isExcelFile) {
+          // For Excel files: Use relaxed validation, accept first available company name
+          console.log(`Excel file: Using relaxed validation for company names`);
+          for (const field of companyFields) {
+            if (await isValidCompanyNameExcel(field, supabaseClient)) {
+              validCompanyName = field;
+              break;
+            }
+          }
+          // For Excel, even if no "valid" company name, still use the first available
+          if (!validCompanyName && companyFields.length > 0) {
+            validCompanyName = companyFields[0];
+            console.log(`Excel file: Using first available company name: ${validCompanyName}`);
+          }
+        } else if (isXmlFile) {
+          // For XML files: Use strict validation
+          console.log(`XML file: Using strict validation for company names`);
+          for (const field of companyFields) {
+            if (await isValidCompanyName(field, supabaseClient)) {
+              validCompanyName = field;
+              break;
+            }
+          }
+        } else {
+          // For CSV and other files: Use medium validation
+          console.log(`Other file type: Using standard validation for company names`);
+          for (const field of companyFields) {
+            if (await isValidCompanyName(field, supabaseClient)) {
+              validCompanyName = field;
+              break;
+            }
           }
         }
         
-        // If no valid company name found, queue for enrichment and use null
-        if (!validCompanyName && companyFields.length > 0) {
-          // Queue the invalid company for enrichment
+        // Queue for enrichment only for XML files with invalid company names
+        if (!validCompanyName && companyFields.length > 0 && isXmlFile) {
+          // Queue the invalid company for enrichment (XML only)
           const invalidCompany = companyFields[0];
-          console.log(`Queueing invalid company for enrichment: ${invalidCompany}`);
+          console.log(`XML file: Queueing invalid company for enrichment: ${invalidCompany}`);
           
           try {
             await supabaseClient
@@ -625,12 +658,20 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
           enrichedRecord.unified_company_name = validCompanyName;
         }
         
-        // Flexible field handling - accept sparse data
-        enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
-        enrichedRecord.hs_code = record.hs_code || 'PENDING_ENRICHMENT';
-        enrichedRecord.mode = record.mode || 'PENDING_ENRICHMENT';
+        // File-type-specific field handling
+        if (isExcelFile) {
+          // Excel: More flexible field handling - accept sparse data
+          enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
+          enrichedRecord.hs_code = record.hs_code || null; // Allow null for Excel
+          enrichedRecord.mode = record.mode || null; // Allow null for Excel
+        } else {
+          // XML/CSV: Standard field handling
+          enrichedRecord.org_id = record.org_id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
+          enrichedRecord.hs_code = record.hs_code || 'PENDING_ENRICHMENT';
+          enrichedRecord.mode = record.mode || 'PENDING_ENRICHMENT';
+        }
         
-        console.log(`Enriched record: company=${enrichedRecord.unified_company_name || 'PENDING'}, hs_code=${enrichedRecord.hs_code}, mode=${enrichedRecord.mode}`);
+        console.log(`Enriched record (${fileType}): company=${enrichedRecord.unified_company_name || 'NULL'}, hs_code=${enrichedRecord.hs_code || 'NULL'}, mode=${enrichedRecord.mode || 'NULL'}`);
         
         return enrichedRecord;
       })
@@ -657,7 +698,7 @@ async function enrichAllRecords(records: TradeRecord[], supabaseClient: any, imp
   return enrichedRecords;
 }
 
-// Helper function to validate company names using database function
+// Helper function to validate company names using database function (STRICT for XML)
 async function isValidCompanyName(companyName: string, supabaseClient: any): Promise<boolean> {
   if (!companyName || companyName.trim().length === 0) {
     return false;
@@ -680,8 +721,70 @@ async function isValidCompanyName(companyName: string, supabaseClient: any): Pro
   }
 }
 
-function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
-  console.log(`Starting validation for ${records.length} enriched records - Using flexible validation`);
+// Excel-specific relaxed company name validation
+async function isValidCompanyNameExcel(companyName: string, supabaseClient: any): Promise<boolean> {
+  if (!companyName || companyName.trim().length === 0) {
+    return false;
+  }
+  
+  try {
+    const { data, error } = await supabaseClient.rpc('is_valid_company_name_excel', {
+      company_name: companyName
+    });
+    
+    if (error) {
+      console.log('Excel validation: Database function not found, using fallback validation');
+      // Fallback: More permissive validation for Excel files
+      const trimmed = companyName.trim();
+      
+      // Accept if:
+      // 1. Not null and not empty
+      // 2. More than 1 character (very permissive)
+      // 3. Contains at least one letter
+      if (trimmed.length > 1 && /[a-zA-Z]/.test(trimmed)) {
+        return true;
+      }
+      
+      return false;
+    }
+    
+    return data;
+  } catch (error) {
+    console.log('Excel validation: Exception, using fallback validation');
+    // Fallback: More permissive validation for Excel files
+    const trimmed = companyName.trim();
+    
+    // Accept if:
+    // 1. Not null and not empty
+    // 2. More than 1 character (very permissive)
+    // 3. Contains at least one letter
+    if (trimmed.length > 1 && /[a-zA-Z]/.test(trimmed)) {
+      return true;
+    }
+    
+    return false;
+  }
+}
+
+// File-type-specific validation functions
+function validateEnrichedRecordsByFileType(records: TradeRecord[], fileType: string): TradeRecord[] {
+  console.log(`Starting validation for ${records.length} enriched records with file-type-specific rules (${fileType})`);
+  
+  const isExcelFile = fileType.toLowerCase() === 'xlsx';
+  const isXmlFile = fileType.toLowerCase() === 'xml';
+  
+  if (isExcelFile) {
+    return validateXLSXRecords(records);
+  } else if (isXmlFile) {
+    return validateXMLRecords(records);
+  } else {
+    return validateCSVRecords(records);
+  }
+}
+
+// XLSX/Excel validation - MINIMAL REQUIREMENTS
+function validateXLSXRecords(records: TradeRecord[]): TradeRecord[] {
+  console.log(`Excel validation: Using MINIMAL validation - accepting sparse data`);
   
   const validRecords = [];
   const failedRecords = [];
@@ -689,14 +792,58 @@ function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
   for (const record of records) {
     const failures = [];
     
-    // VERY FLEXIBLE VALIDATION - Only require org_id (system field)
+    // MINIMAL VALIDATION for Excel files - only require org_id
     if (!record.org_id) {
       failures.push('missing org_id');
     }
     
-    // Accept ALL records with org_id - let sparse data through
-    // hs_code, mode, and location fields are now optional
-    // This supports Panjiva's sparse data format
+    // Accept ALL records with org_id - even completely sparse data
+    // This handles Excel files with lots of empty cells
+    
+    if (failures.length === 0) {
+      validRecords.push(record);
+    } else {
+      failedRecords.push({ failures, sample_data: {
+        org_id: record.org_id,
+        hs_code: record.hs_code || 'SPARSE_DATA',
+        mode: record.mode || 'SPARSE_DATA',
+        unified_company_name: record.unified_company_name || 'SPARSE_DATA'
+      }});
+    }
+  }
+  
+  console.log(`Excel validation completed: ${validRecords.length}/${records.length} records passed (minimal validation)`);
+  console.log(`Excel files: Accepting all sparse data to maximize import success`);
+  
+  return validRecords;
+}
+
+// XML validation - STRICT REQUIREMENTS
+function validateXMLRecords(records: TradeRecord[]): TradeRecord[] {
+  console.log(`XML validation: Using STRICT validation - ensuring data quality`);
+  
+  const validRecords = [];
+  const failedRecords = [];
+  
+  for (const record of records) {
+    const failures = [];
+    
+    // STRICT VALIDATION for XML files
+    if (!record.org_id) {
+      failures.push('missing org_id');
+    }
+    
+    if (!record.hs_code || record.hs_code === 'PENDING_ENRICHMENT') {
+      failures.push('missing or invalid hs_code');
+    }
+    
+    if (!record.mode || record.mode === 'PENDING_ENRICHMENT') {
+      failures.push('missing or invalid mode');
+    }
+    
+    if (!record.unified_company_name) {
+      failures.push('missing unified_company_name');
+    }
     
     if (failures.length === 0) {
       validRecords.push(record);
@@ -712,14 +859,61 @@ function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
     }
   }
   
-  console.log(`Flexible validation completed: ${validRecords.length}/${records.length} records passed`);
-  console.log(`Accepted records with sparse data - focusing on import volume over completeness`);
+  console.log(`XML validation completed: ${validRecords.length}/${records.length} records passed (strict validation)`);
   
   if (failedRecords.length > 0) {
-    console.log('Sample validation failures:', JSON.stringify(failedRecords.slice(0, 3), null, 2));
+    console.log('XML validation failures:', JSON.stringify(failedRecords.slice(0, 3), null, 2));
   }
   
   return validRecords;
+}
+
+// CSV validation - MEDIUM REQUIREMENTS  
+function validateCSVRecords(records: TradeRecord[]): TradeRecord[] {
+  console.log(`CSV validation: Using MEDIUM validation - balanced approach`);
+  
+  const validRecords = [];
+  const failedRecords = [];
+  
+  for (const record of records) {
+    const failures = [];
+    
+    // MEDIUM VALIDATION for CSV files
+    if (!record.org_id) {
+      failures.push('missing org_id');
+    }
+    
+    // Require either hs_code OR mode (flexible)
+    if ((!record.hs_code || record.hs_code === 'PENDING_ENRICHMENT') && 
+        (!record.mode || record.mode === 'PENDING_ENRICHMENT')) {
+      failures.push('missing both hs_code and mode');
+    }
+    
+    if (failures.length === 0) {
+      validRecords.push(record);
+    } else {
+      failedRecords.push({ failures, sample_data: {
+        org_id: record.org_id,
+        hs_code: record.hs_code,
+        mode: record.mode,
+        unified_company_name: record.unified_company_name
+      }});
+    }
+  }
+  
+  console.log(`CSV validation completed: ${validRecords.length}/${records.length} records passed (medium validation)`);
+  
+  if (failedRecords.length > 0) {
+    console.log('CSV validation failures:', JSON.stringify(failedRecords.slice(0, 3), null, 2));
+  }
+  
+  return validRecords;
+}
+
+// Legacy validation function - now redirects to file-type-specific validation
+function validateEnrichedRecords(records: TradeRecord[]): TradeRecord[] {
+  console.log(`Legacy validation function called - using flexible validation as fallback`);
+  return validateCSVRecords(records); // Default to medium validation
 }
 
 // Helper functions
@@ -820,19 +1014,39 @@ function parseValue(value: string, fieldName: string): any {
   
   const trimmed = value.trim();
   
+  // **CRITICAL FIX**: Handle string "null" from Excel XLSX.utils.sheet_to_json()
+  // Excel parsing converts empty cells to the string "null", not actual null
+  if (trimmed === 'null') {
+    console.log(`Excel parsing: Converting string "null" to actual null for field: ${fieldName}`);
+    return null;
+  }
+  
   // Parse numeric fields
   if (['weight_kg', 'value_usd', 'quantity', 'container_count'].includes(fieldName)) {
+    // Additional safety check for string "null" in numeric fields
+    if (trimmed === 'null' || trimmed === 'NULL') return null;
+    
     const numericValue = parseFloat(trimmed.replace(/[,$]/g, ''));
     return isNaN(numericValue) ? null : numericValue;
   }
   
-  // Parse date fields
+  // Parse date fields with enhanced null handling
   if (['shipment_date', 'arrival_date', 'departure_date'].includes(fieldName)) {
+    // Additional safety check for string "null" in date fields
+    if (trimmed === 'null' || trimmed === 'NULL' || trimmed === '') return null;
+    
     const date = new Date(trimmed);
-    return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+    if (isNaN(date.getTime())) {
+      console.log(`Date parsing: Invalid date "${trimmed}" for field: ${fieldName}, returning null`);
+      return null;
+    }
+    return date.toISOString().split('T')[0];
   }
   
   // Clean and return string fields
+  // Additional safety check for string "null" in text fields
+  if (trimmed === 'null' || trimmed === 'NULL') return null;
+  
   return trimmed;
 }
 
