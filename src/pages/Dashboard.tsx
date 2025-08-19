@@ -9,7 +9,7 @@ import {
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { TopBar } from "@/components/ui/TopBar";
 import { StatCard } from "@/components/shared";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchIntelligence } from "@/components/dashboard/SearchIntelligence";
@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [greeting, setGreeting] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // Get current user
@@ -33,7 +34,12 @@ const Dashboard = () => {
     if (hour < 12) setGreeting("Good morning");
     else if (hour < 18) setGreeting("Good afternoon");
     else setGreeting("Good evening");
-  }, []);
+
+    // Check if search parameter is set
+    if (searchParams.get('search') === 'true') {
+      setShowSearch(true);
+    }
+  }, [searchParams]);
 
   // Extract first name from user metadata or email
   const getDisplayName = () => {
