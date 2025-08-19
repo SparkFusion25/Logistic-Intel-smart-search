@@ -16,10 +16,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
               width="16" 
               height="16" 
               viewBox="0 0 24 24" 
-              fill="white"
               className="w-4 h-4"
             >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              <circle cx="12" cy="12" r="11" fill="white" />
+              <path d="M8 16V8h3v3h2V8h3v8h-3v-3h-2v3H8z" fill="currentColor" />
+              <path d="M16.5 10l-2 1.5 2 1.5V10z" fill="currentColor" />
             </svg>
           </div>
           <div>
@@ -35,10 +36,11 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
             width="16" 
             height="16" 
             viewBox="0 0 24 24" 
-            fill="white"
             className="w-4 h-4"
           >
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            <circle cx="12" cy="12" r="11" fill="white" />
+            <path d="M8 16V8h3v3h2V8h3v8h-3v-3h-2v3H8z" fill="currentColor" />
+            <path d="M16.5 10l-2 1.5 2 1.5V10z" fill="currentColor" />
           </svg>
         </div>
       )}
