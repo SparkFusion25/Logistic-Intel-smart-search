@@ -48,7 +48,7 @@ serve(async (req) => {
     let results = [];
 
     if (tab === 'companies') {
-      // Query real data from companies table with search filtering
+      // Query real data from companies table with comprehensive search
       let query = supabase
         .from('companies')
         .select(`
@@ -62,17 +62,18 @@ serve(async (req) => {
           website
         `);
 
-      // Apply search filter if query provided
+      // Apply comprehensive search filter - supports empty queries to show all data
       if (q && q.trim() !== '') {
         const searchTerm = q.trim();
-        console.log(`Applying search filter for: ${searchTerm}`);
+        console.log(`Applying comprehensive company search for: ${searchTerm}`);
         
-        query = query.or(`company_name.ilike.%${searchTerm}%,industry.ilike.%${searchTerm}%,country.ilike.%${searchTerm}%`);
+        // Search across all relevant company fields
+        query = query.or(`company_name.ilike.%${searchTerm}%,industry.ilike.%${searchTerm}%,country.ilike.%${searchTerm}%,website.ilike.%${searchTerm}%`);
       }
 
       const { data: companyData, error: companyError } = await query
         .order('total_shipments', { ascending: false })
-        .limit(50);
+        .limit(200);
 
       if (companyError) {
         console.error('Error fetching company data:', companyError);
@@ -94,7 +95,7 @@ serve(async (req) => {
       }
 
     } else if (tab === 'shipments') {
-      // Query unified_shipments with search filtering
+      // Query unified_shipments with comprehensive search across all sources
       let query = supabase
         .from('unified_shipments')
         .select(`
@@ -103,30 +104,38 @@ serve(async (req) => {
           mode,
           origin_country,
           destination_country,
+          destination_city,
+          destination_state,
+          destination_zip,
+          port_of_loading,
+          port_of_discharge,
           unified_value,
           weight_kg,
           unified_date,
           hs_code,
           carrier_name,
-          commodity_description
+          commodity_description,
+          shipper_name,
+          consignee_name
         `);
 
-      // Apply search filter if query provided
+      // Apply comprehensive search - supports empty queries to show all data
       if (q && q.trim() !== '') {
         const searchTerm = q.trim();
-        console.log(`Applying shipments search filter for: ${searchTerm}`);
+        console.log(`Applying comprehensive shipments search for: ${searchTerm}`);
         
-        query = query.or(`unified_company_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%`);
+        // Search across all shipment fields including origin, destination, commodity, HS codes, zip codes
+        query = query.or(`unified_company_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,destination_zip.ilike.%${searchTerm}%,port_of_loading.ilike.%${searchTerm}%,port_of_discharge.ilike.%${searchTerm}%,carrier_name.ilike.%${searchTerm}%,shipper_name.ilike.%${searchTerm}%,consignee_name.ilike.%${searchTerm}%`);
       }
 
-      // Apply mode filter if specified
+      // Apply mode filter if specified (ocean/air)
       if (filters?.mode && filters.mode !== 'all') {
         query = query.eq('mode', filters.mode);
       }
 
       const { data: shipmentData, error: shipmentError } = await query
         .order('unified_date', { ascending: false })
-        .limit(100);
+        .limit(500);
 
       if (shipmentError) {
         console.error('Error fetching shipments:', shipmentError);
@@ -138,33 +147,50 @@ serve(async (req) => {
           mode: shipment.mode,
           origin: shipment.origin_country,
           destination: shipment.destination_country,
+          destination_city: shipment.destination_city,
+          destination_state: shipment.destination_state,
+          destination_zip: shipment.destination_zip,
+          port_of_loading: shipment.port_of_loading,
+          port_of_discharge: shipment.port_of_discharge,
           value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : null,
           weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
           confidence: null,
           date: shipment.unified_date,
           hs_code: shipment.hs_code,
           carrier: shipment.carrier_name,
-          description: shipment.commodity_description
+          description: shipment.commodity_description,
+          shipper: shipment.shipper_name,
+          consignee: shipment.consignee_name
         })) || [];
       }
 
     } else if (tab === 'routes') {
-      // Query route data from unified_shipments grouped by origin-destination
+      // Query route data from unified_shipments with comprehensive search
       let query = supabase
         .from('unified_shipments')
         .select(`
           origin_country,
           destination_country,
+          destination_city,
+          destination_state,
           mode,
-          carrier_name
+          carrier_name,
+          port_of_loading,
+          port_of_discharge
         `);
 
+      // Support comprehensive route search including cities, states, ports
       if (q && q.trim() !== '') {
         const searchTerm = q.trim();
-        query = query.or(`origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%`);
+        query = query.or(`origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%,destination_city.ilike.%${searchTerm}%,destination_state.ilike.%${searchTerm}%,port_of_loading.ilike.%${searchTerm}%,port_of_discharge.ilike.%${searchTerm}%,carrier_name.ilike.%${searchTerm}%`);
       }
 
-      const { data: routeData, error: routeError } = await query.limit(100);
+      // Apply mode filter for routes
+      if (filters?.mode && filters.mode !== 'all') {
+        query = query.eq('mode', filters.mode);
+      }
+
+      const { data: routeData, error: routeError } = await query.limit(300);
 
       if (routeError) {
         console.error('Error fetching routes:', routeError);
@@ -199,7 +225,7 @@ serve(async (req) => {
       }
 
     } else if (tab === 'contacts') {
-      // Query contacts from CRM system
+      // Query contacts from CRM system with comprehensive search
       let query = supabase
         .from('crm_contacts')
         .select(`
@@ -211,17 +237,20 @@ serve(async (req) => {
           country,
           city,
           linkedin,
-          phone
+          phone,
+          industry,
+          source
         `);
 
+      // Support comprehensive contact search across all fields
       if (q && q.trim() !== '') {
         const searchTerm = q.trim();
-        query = query.or(`company_name.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+        query = query.or(`company_name.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,title.ilike.%${searchTerm}%,country.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%,industry.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
       }
 
       const { data: contactData, error: contactError } = await query
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(200);
 
       if (contactError) {
         console.error('Error fetching contacts:', contactError);
