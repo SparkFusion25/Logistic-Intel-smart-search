@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import logisticIntelLogo from "@/assets/logistic-intel-logo.png"
 
 interface SidebarBrandProps {
   collapsed?: boolean;
@@ -13,7 +12,7 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       {!collapsed && (
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-            <img src={logisticIntelLogo} alt="Logistic Intel" className="w-6 h-6" />
+            <img src="https://zupuxlrtixhfnbuhxhum.supabase.co/storage/v1/object/public/branding/logo-icon.svg" alt="Logistic Intel" className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-white font-bold text-lg">Intelligence</h1>
@@ -24,7 +23,7 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       
       {collapsed && (
         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg mx-auto">
-          <img src={logisticIntelLogo} alt="Logistic Intel" className="w-6 h-6" />
+          <img src="https://zupuxlrtixhfnbuhxhum.supabase.co/storage/v1/object/public/branding/logo-icon.svg" alt="Logistic Intel" className="w-6 h-6" />
         </div>
       )}
 
