@@ -93,19 +93,9 @@ serve(async (req) => {
         })) || [];
       }
 
-      // **REMOVED**: No default filtering applied
-
-      // Apply sorting only if sort parameters are provided
-      if (sort?.field === 'trade_volume') {
-        results.sort((a, b) => sort.dir === 'desc' ? 
-          b.trade_volume_usd - a.trade_volume_usd : 
-          a.trade_volume_usd - b.trade_volume_usd
-        );
-      }
-
     } else if (tab === 'shipments') {
-      // Query real shipment data
-      const { data: shipmentData, error: shipmentError } = await supabase
+      // Query unified_shipments with search filtering
+      let query = supabase
         .from('unified_shipments')
         .select(`
           id,
@@ -119,7 +109,22 @@ serve(async (req) => {
           hs_code,
           carrier_name,
           commodity_description
-        `)
+        `);
+
+      // Apply search filter if query provided
+      if (q && q.trim() !== '') {
+        const searchTerm = q.trim();
+        console.log(`Applying shipments search filter for: ${searchTerm}`);
+        
+        query = query.or(`unified_company_name.ilike.%${searchTerm}%,hs_code.ilike.%${searchTerm}%,commodity_description.ilike.%${searchTerm}%,origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%`);
+      }
+
+      // Apply mode filter if specified
+      if (filters?.mode && filters.mode !== 'all') {
+        query = query.eq('mode', filters.mode);
+      }
+
+      const { data: shipmentData, error: shipmentError } = await query
         .order('unified_date', { ascending: false })
         .limit(100);
 
@@ -129,10 +134,10 @@ serve(async (req) => {
       } else {
         results = shipmentData?.map(shipment => ({
           id: shipment.id,
-           company: shipment.unified_company_name,
-           mode: shipment.mode,
-           origin: shipment.origin_country,
-           destination: shipment.destination_country,
+          company: shipment.unified_company_name,
+          mode: shipment.mode,
+          origin: shipment.origin_country,
+          destination: shipment.destination_country,
           value: shipment.unified_value ? `$${shipment.unified_value.toLocaleString()}` : null,
           weight: shipment.weight_kg ? `${shipment.weight_kg.toLocaleString()} kg` : null,
           confidence: null,
@@ -144,12 +149,95 @@ serve(async (req) => {
       }
 
     } else if (tab === 'routes') {
-      // No default route results
-      results = [];
+      // Query route data from unified_shipments grouped by origin-destination
+      let query = supabase
+        .from('unified_shipments')
+        .select(`
+          origin_country,
+          destination_country,
+          mode,
+          carrier_name
+        `);
+
+      if (q && q.trim() !== '') {
+        const searchTerm = q.trim();
+        query = query.or(`origin_country.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%`);
+      }
+
+      const { data: routeData, error: routeError } = await query.limit(100);
+
+      if (routeError) {
+        console.error('Error fetching routes:', routeError);
+        results = [];
+      } else {
+        // Group by route and create route summaries
+        const routeGroups = routeData?.reduce((acc, item) => {
+          const key = `${item.origin_country}-${item.destination_country}-${item.mode}`;
+          if (!acc[key]) {
+            acc[key] = {
+              origin: item.origin_country,
+              destination: item.destination_country,
+              mode: item.mode,
+              carrier: item.carrier_name,
+              count: 0
+            };
+          }
+          acc[key].count++;
+          return acc;
+        }, {} as any) || {};
+
+        results = Object.values(routeGroups).map((route: any) => ({
+          id: `${route.origin}-${route.destination}-${route.mode}`,
+          origin: route.origin,
+          destination: route.destination,
+          mode: route.mode,
+          carrier: route.carrier,
+          shipment_count: route.count,
+          trade_volume: null,
+          frequency: route.count > 10 ? 'High' : route.count > 5 ? 'Medium' : 'Low'
+        }));
+      }
 
     } else if (tab === 'contacts') {
-      // No default contact results
-      results = [];
+      // Query contacts from CRM system
+      let query = supabase
+        .from('crm_contacts')
+        .select(`
+          id,
+          company_name,
+          full_name,
+          email,
+          title,
+          country,
+          city,
+          linkedin,
+          phone
+        `);
+
+      if (q && q.trim() !== '') {
+        const searchTerm = q.trim();
+        query = query.or(`company_name.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      }
+
+      const { data: contactData, error: contactError } = await query
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (contactError) {
+        console.error('Error fetching contacts:', contactError);
+        results = [];
+      } else {
+        results = contactData?.map(contact => ({
+          id: contact.id,
+          name: contact.full_name,
+          company: contact.company_name,
+          email: contact.email,
+          title: contact.title,
+          location: contact.city && contact.country ? `${contact.city}, ${contact.country}` : contact.country,
+          linkedin: contact.linkedin,
+          phone: contact.phone
+        })) || [];
+      }
     }
 
     // Apply pagination only if pagination parameters are provided

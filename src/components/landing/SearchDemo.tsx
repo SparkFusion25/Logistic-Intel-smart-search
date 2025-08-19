@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
 export const SearchDemo = () => {
-  const [activeTab, setActiveTab] = useState('ocean')
+  const [activeTab, setActiveTab] = useState('companies')
   const [searchQuery, setSearchQuery] = useState('')
 
   const mockData = {
