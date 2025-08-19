@@ -153,10 +153,7 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         const arrayBuffer = await fileData.arrayBuffer();
         console.log(`ArrayBuffer size: ${arrayBuffer.byteLength}`);
         
-        // Check file size and refuse if too large (>5MB)
-        if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
-          throw new Error('File too large. Please upload files smaller than 5MB.');
-        }
+        // File size restriction removed for CSV/XLSX files
         
         processedData = parseXLSXWithContacts(arrayBuffer);
         console.log(`Parsed ${processedData.tradeRecords.length} trade records and ${processedData.contactRecords.length} contact records from XLSX`);
