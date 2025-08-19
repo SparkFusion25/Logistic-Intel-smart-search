@@ -70,37 +70,37 @@ export function AppSidebar() {
                 const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + "/")
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild
-                      tooltip={collapsed ? item.title : undefined}
-                      className={`
-                        relative overflow-hidden transition-all duration-300 mx-2 my-1 rounded-xl group
-                        ${isActive 
-                          ? 'bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20' 
-                          : 'hover:bg-white/10 text-white/85 hover:text-white'
-                        }
-                      `}
+                     <SidebarMenuButton 
+                       asChild
+                       tooltip={collapsed ? item.title : undefined}
+                       className={`
+                         relative overflow-hidden transition-all duration-300 mx-2 my-1 rounded-xl
+                         ${isActive 
+                           ? 'bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20' 
+                           : 'text-white/85'
+                         }
+                       `}
                     >
                       <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
                         {/* Enhanced Icon Container */}
-                        <div className={`
-                          w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
-                          ${isActive 
-                            ? 'bg-gradient-to-br from-primary via-primary-foreground to-primary shadow-lg scale-110' 
-                            : 'bg-white/10 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:via-primary-foreground group-hover:to-primary group-hover:scale-105'
-                          }
-                        `}>
-                          <item.icon className="w-4 h-4 text-white" />
-                        </div>
+                         <div className={`
+                           w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
+                           ${isActive 
+                             ? 'bg-gradient-to-br from-primary via-primary-foreground to-primary shadow-lg scale-110' 
+                             : 'bg-white/10'
+                           }
+                         `}>
+                           <item.icon className="w-4 h-4 text-white" />
+                         </div>
                         
                         {/* Enhanced Text - Only show when not collapsed */}
                         {!collapsed && (
-                          <span className={`
-                            font-medium truncate text-[15px] leading-5 transition-all duration-300
-                            ${isActive ? 'text-white font-semibold' : 'text-white/90 group-hover:text-white'}
-                          `}>
-                            {item.title}
-                          </span>
+                           <span className={`
+                             font-medium truncate text-[15px] leading-5 transition-all duration-300
+                             ${isActive ? 'text-white font-semibold' : 'text-white/90'}
+                           `}>
+                             {item.title}
+                           </span>
                         )}
                         
                         {/* Active Indicator */}
@@ -123,31 +123,31 @@ export function AppSidebar() {
             const isActive = location.pathname === item.url
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton 
-                  asChild
-                  tooltip={collapsed ? item.title : undefined}
-                  className={`
-                    transition-all duration-300 mx-2 my-1 rounded-xl group
-                    ${isActive 
-                      ? 'bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20' 
-                      : 'hover:bg-white/10 text-white/85 hover:text-white'
-                    }
-                  `}
+                 <SidebarMenuButton 
+                   asChild
+                   tooltip={collapsed ? item.title : undefined}
+                   className={`
+                     transition-all duration-300 mx-2 my-1 rounded-xl
+                     ${isActive 
+                       ? 'bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20' 
+                       : 'text-white/85'
+                     }
+                   `}
                 >
                   <NavLink to={item.url} className={`flex items-center gap-3 px-3 py-2 ${collapsed ? 'justify-center' : ''}`}>
-                    <div className={`
-                      w-8 h-8 shrink-0 rounded-lg transition-all duration-300 group-hover:scale-105 flex items-center justify-center
-                      ${isActive 
-                        ? 'bg-gradient-to-br from-primary via-primary-foreground to-primary shadow-lg' 
-                        : 'bg-white/10 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:via-primary-foreground group-hover:to-primary'
-                      }
-                    `}>
-                      <item.icon className="w-4 h-4 text-white" />
-                    </div>
+                     <div className={`
+                       w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
+                       ${isActive 
+                         ? 'bg-gradient-to-br from-primary via-primary-foreground to-primary shadow-lg' 
+                         : 'bg-white/10'
+                       }
+                     `}>
+                       <item.icon className="w-4 h-4 text-white" />
+                     </div>
                     {!collapsed && (
-                      <span className={`text-white/90 font-medium truncate text-[15px] leading-5 group-hover:text-white transition-colors duration-300 ${isActive ? 'text-white font-semibold' : ''}`}>
-                        {item.title}
-                      </span>
+                       <span className={`text-white/90 font-medium truncate text-[15px] leading-5 transition-colors duration-300 ${isActive ? 'text-white font-semibold' : ''}`}>
+                         {item.title}
+                       </span>
                     )}
                   </NavLink>
                 </SidebarMenuButton>
@@ -157,7 +157,7 @@ export function AppSidebar() {
         </SidebarMenu>
         
         {/* Enhanced User Profile - Responsive to collapse state */}
-        <div className={`mt-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300 ${collapsed ? 'px-2' : ''}`}>
+        <div className={`mt-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 shadow-lg transition-all duration-300 ${collapsed ? 'px-2' : ''}`}>
           {!collapsed ? (
             // Full Profile View
             <div className="flex items-center gap-3">
