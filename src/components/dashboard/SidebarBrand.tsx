@@ -13,9 +13,9 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg backdrop-blur-sm">
             <img 
-              src="/lovable-uploads/df480f44-d09d-4590-a89a-e0b4c3463c93.png" 
+              src="/lovable-uploads/eb2815fc-aefa-4b9f-8e44-e6165942adbd.png" 
               alt="Intelligence Logo" 
-              className="w-6 h-6 object-contain brightness-0 invert"
+              className="w-6 h-6 object-contain"
             />
           </div>
           <div>
@@ -28,9 +28,9 @@ export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandP
       {collapsed && (
         <div className="w-8 h-8 flex items-center justify-center mx-auto bg-white/10 rounded-lg backdrop-blur-sm">
           <img 
-            src="/lovable-uploads/df480f44-d09d-4590-a89a-e0b4c3463c93.png" 
+            src="/lovable-uploads/eb2815fc-aefa-4b9f-8e44-e6165942adbd.png" 
             alt="Intelligence Logo" 
-            className="w-6 h-6 object-contain brightness-0 invert"
+            className="w-6 h-6 object-contain"
           />
         </div>
       )}
