@@ -48,6 +48,10 @@ serve(async (req) => {
     let results = [];
 
     if (tab === 'companies') {
+      // **CRITICAL FIX**: Filter by user's org_id
+      const userOrgId = authUser.user?.id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
+      console.log(`Filtering by org_id: ${userOrgId}`);
+
       // Query real data from unified_shipments table with search filtering
       let query = supabase
         .from('unified_shipments')
@@ -68,7 +72,8 @@ serve(async (req) => {
           consignee_state_region,
           shipper_city,
           shipper_state_region
-        `);
+        `)
+        .eq('org_id', userOrgId); // **CRITICAL**: Filter by organization
 
       // **CRITICAL FIX**: Apply search filter if query provided
       if (q && q.trim() !== '') {
@@ -90,9 +95,6 @@ serve(async (req) => {
           shipper_city.ilike.%${searchTerm}%,
           shipper_state_region.ilike.%${searchTerm}%
         `);
-      } else {
-        // If no search term, filter out null company names
-        query = query.not('unified_company_name', 'is', null);
       }
 
       const { data: shipmentData, error: shipmentError } = await query
