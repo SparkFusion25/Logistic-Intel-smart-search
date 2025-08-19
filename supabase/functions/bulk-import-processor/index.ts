@@ -210,21 +210,30 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         throw new Error(`AI enrichment required but failed: ${aiError.message}`);
       }
 
-      // **STEP 2: ENRICH ALL RECORDS WITH COMPANY DATA**
-      console.log('Enriching all records with company data...');
-      const enrichedRecords = await enrichAllRecords(records, supabaseClient, import_id, file_type);
+      // **STEP 2: PROCESS RECORDS BASED ON FILE TYPE**
+      let finalRecords;
       
-      if (enrichedRecords.length === 0) {
-        throw new Error('No records could be enriched with valid company data');
-      }
+      if (file_type === 'xml') {
+        // XML files: Full enrichment and strict validation
+        console.log('XML file: Enriching all records with company data...');
+        const enrichedRecords = await enrichAllRecords(records, supabaseClient, import_id, file_type);
+        
+        if (enrichedRecords.length === 0) {
+          throw new Error('No records could be enriched with valid company data');
+        }
 
-      console.log(`Successfully enriched ${enrichedRecords.length}/${records.length} records`);
+        console.log(`Successfully enriched ${enrichedRecords.length}/${records.length} records`);
 
-      // **STEP 3: VALIDATE ALL ENRICHED RECORDS WITH FILE-TYPE-SPECIFIC VALIDATION**
-      const validatedRecords = validateEnrichedRecordsByFileType(enrichedRecords, file_type);
-      
-      if (validatedRecords.length === 0) {
-        throw new Error('No records passed validation after enrichment');
+        // Strict validation for XML
+        finalRecords = validateEnrichedRecordsByFileType(enrichedRecords, file_type);
+        
+        if (finalRecords.length === 0) {
+          throw new Error('No records passed validation after enrichment');
+        }
+      } else {
+        // CSV/XLSX files: NO enrichment, NO validation (except duplicates later)
+        console.log(`${file_type.toUpperCase()} file: Processing without enrichment or validation...`);
+        finalRecords = records; // Use records as-is, no enrichment or validation
       }
 
       // Update status to processing
@@ -232,14 +241,15 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
         .from('bulk_imports')
         .update({ 
           status: 'processing',
-          total_records: validatedRecords.length, // Update with validated count
+          total_records: finalRecords.length,
           processing_metadata: { 
             batch_size: 500,
-            total_batches: Math.ceil(validatedRecords.length / 500),
+            total_batches: Math.ceil(finalRecords.length / 500),
             current_batch: 0,
-            enriched_records: enrichedRecords.length,
+            file_type: file_type,
+            processing_mode: file_type === 'xml' ? 'enriched_and_validated' : 'as_is_with_duplicates_only',
             original_records: records.length,
-            validation_passed: validatedRecords.length
+            final_records: finalRecords.length
           },
           updated_at: new Date().toISOString() 
         })
@@ -249,7 +259,7 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
       let contactProcessedCount = 0;
       if (processedData.contactRecords.length > 0) {
         console.log(`Processing ${processedData.contactRecords.length} contact records...`);
-        const linkedContacts = linkContactsToCompanies(processedData.contactRecords, validatedRecords);
+        const linkedContacts = linkContactsToCompanies(processedData.contactRecords, finalRecords);
         contactProcessedCount = await processContactBatch(linkedContacts, import_id, userId, supabaseClient);
         console.log(`Successfully processed ${contactProcessedCount} contact records`);
       }
@@ -260,16 +270,16 @@ async function processFileInBackground(supabaseClient: any, import_id: string, f
       let duplicateCount = 0;
       let errorCount = 0;
 
-      console.log(`Starting batch processing: ${validatedRecords.length} validated trade records in batches of ${batchSize}`);
+      console.log(`Starting batch processing: ${finalRecords.length} trade records in batches of ${batchSize}`);
 
       // Process in fixed batches of 500
-      for (let i = 0; i < validatedRecords.length; i += batchSize) {
+      for (let i = 0; i < finalRecords.length; i += batchSize) {
         const batchNumber = Math.floor(i / batchSize) + 1;
-        const totalBatches = Math.ceil(validatedRecords.length / batchSize);
+        const totalBatches = Math.ceil(finalRecords.length / batchSize);
         
-        console.log(`Processing trade batch ${batchNumber}/${totalBatches} (records ${i + 1}-${Math.min(i + batchSize, validatedRecords.length)})`);
-        
-        const batch = validatedRecords.slice(i, i + batchSize);
+        console.log(`Processing trade batch ${batchNumber}/${totalBatches} (records ${i + 1}-${Math.min(i + batchSize, finalRecords.length)})`);
+
+        const batch = finalRecords.slice(i, i + batchSize);
         const processedBatch = await processBatch(batch, import_id, userId, supabaseClient);
         
         processedCount += processedBatch.processed;
@@ -1093,22 +1103,17 @@ async function processBatch(records: TradeRecord[], importId: string, userId: st
         continue;
       }
 
-      // **CRITICAL FIX**: Ensure date fields are properly null instead of string "null"
-      // AND ensure required fields have default values for database insertion
-      const cleanRecord = {
-        ...record,
-        // Fix date fields
-        shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
-        arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
-        departure_date: record.departure_date === 'null' || record.departure_date === '' ? null : record.departure_date,
-        
-        // **CRITICAL**: Ensure required fields are not null (database constraint)
-        mode: record.mode || 'ocean', // Default to 'ocean' if mode is missing or null
-        
-        // Timestamps
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+        // **ONLY**: Fix date string "null" to actual null and add timestamps
+        const cleanRecord = {
+          ...record,
+          // Fix date fields only
+          shipment_date: record.shipment_date === 'null' || record.shipment_date === '' ? null : record.shipment_date,
+          arrival_date: record.arrival_date === 'null' || record.arrival_date === '' ? null : record.arrival_date,
+          departure_date: record.departure_date === 'null' || record.departure_date === '' ? null : record.departure_date,
+          // Timestamps only
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
 
       recordsToInsert.push(cleanRecord);
 
