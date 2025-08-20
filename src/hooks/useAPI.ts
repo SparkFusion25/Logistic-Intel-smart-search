@@ -11,8 +11,9 @@ interface UseAPIOptions {
   defaultHeaders?: Record<string, string>;
 }
 
-interface ExtendedRequestInit extends RequestInit {
+interface ExtendedRequestInit extends Omit<RequestInit, 'body'> {
   params?: Record<string, any>;
+  body?: any; // Allow any type for body - we'll handle JSON.stringify internally
 }
 
 export function useAPI(options: UseAPIOptions = {}) {
@@ -46,7 +47,18 @@ export function useAPI(options: UseAPIOptions = {}) {
       }
 
       // Remove params from config before passing to fetch
-      const { params, ...fetchConfig } = config;
+      const { params, body, ...fetchConfig } = config;
+      
+      // Handle body - automatically stringify objects
+      let processedBody: string | FormData | Blob | ArrayBufferView | ArrayBuffer | ReadableStream | null = null;
+      if (body !== undefined) {
+        if (typeof body === 'string' || body instanceof FormData || body instanceof Blob || 
+            body instanceof ArrayBuffer || body instanceof ReadableStream) {
+          processedBody = body;
+        } else {
+          processedBody = JSON.stringify(body);
+        }
+      }
       
       const response = await fetch(url, {
         headers: {
@@ -54,6 +66,7 @@ export function useAPI(options: UseAPIOptions = {}) {
           ...options.defaultHeaders,
           ...fetchConfig.headers,
         },
+        body: processedBody,
         ...fetchConfig,
       });
 
