@@ -34,7 +34,7 @@ const navigationItems = [
   { title: "Quote Generator", url: "/dashboard/widgets/quote", icon: FileText },
   { title: "Tariff Calculator", url: "/dashboard/widgets/tariff", icon: Calculator },
   { title: "Benchmark", url: "/dashboard/widgets/benchmark", icon: Activity },
-  { title: "Admin", url: "/admin", icon: ShieldCheck },
+  { title: "Admin", url: "/admin-simple", icon: ShieldCheck },
 ]
 
 const bottomItems = [
