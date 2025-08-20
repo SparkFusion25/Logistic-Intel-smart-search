@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     `;
 
     let emailSent = false;
-    let emailResponse = null;
+    let emailResponse: any = null;
 
     if (type === 'gmail') {
       // Gmail API integration with real credentials
