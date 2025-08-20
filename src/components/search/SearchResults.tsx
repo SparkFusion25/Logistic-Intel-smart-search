@@ -18,7 +18,7 @@ export type SearchResultsProps = {
 const SkeletonCard: React.FC = () => (
   <div
     data-card
-    className="p-4 rounded-2xl bg-ink-900/60 border border-white/10 animate-pulse space-y-3"
+    className="card-glass p-4 animate-pulse space-y-3"
     aria-busy="true"
   >
     <div className="h-3 w-24 bg-white/10 rounded" />
@@ -41,7 +41,7 @@ export default function SearchResults({
 }: SearchResultsProps) {
   if (error) {
     return (
-      <div data-card className="p-4 border border-danger-500/30 text-danger-500">
+      <div className="card-glass p-4 border-red-500/30 text-red-400">
         {error}
       </div>
     );
@@ -72,12 +72,12 @@ export default function SearchResults({
   return (
     <div className="space-y-3">
       {/* Optional header with count */}
-      <div className="text-sm text-ink-300">
-        Showing <span className="text-white">{items.length.toLocaleString()}</span>
+      <div className="text-sm text-muted-foreground">
+        Showing <span className="text-foreground">{items.length.toLocaleString()}</span>
         {total ? (
           <>
             {" "}
-            of <span className="text-white">{Number(total).toLocaleString()}</span>
+            of <span className="text-foreground">{Number(total).toLocaleString()}</span>
           </>
         ) : null}
       </div>

@@ -114,8 +114,8 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
   return (
     <Card 
       className={cn(
-        "cursor-pointer rounded-lg p-2 sm:p-2.5 bg-white border border-slate-200 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
-        "hover:border-blue-300 hover:-translate-y-0.5 group touch-manipulation",
+        "card-glass cursor-pointer p-2 sm:p-2.5 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
+        "hover:border-blue-300/50 hover:-translate-y-0.5 group touch-manipulation",
         "min-h-20 sm:min-h-24 w-72 xl:w-80"
       )}
       onClick={() => setShowDetailsDrawer(true)}

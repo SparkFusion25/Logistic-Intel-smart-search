@@ -109,7 +109,7 @@ export function CompanyContactDrawer({
       />
       
       {/* Drawer */}
-      <div className="relative w-full max-w-2xl h-full bg-background shadow-2xl overflow-y-auto transform transition-transform duration-300 animate-in slide-in-from-right">
+      <div className="relative w-full max-w-2xl h-full card-glass shadow-2xl overflow-y-auto transform transition-transform duration-300 animate-in slide-in-from-right">
         {/* Header Section */}
         <div className="sticky top-0 z-10 bg-gradient-to-r from-card via-card/95 to-card/90 backdrop-blur-sm border-b border-border/50">
           <div className="p-6">
