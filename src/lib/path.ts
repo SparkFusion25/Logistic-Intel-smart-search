@@ -1,0 +1,2 @@
+export function filenameFromPath(p?: string | null) { if (!p) return ''; const i = p.lastIndexOf('/'); return i >= 0 ? p.slice(i+1) : p; }
+export function extFromFilename(name?: string | null) { if (!name) return ''; const i = name.lastIndexOf('.'); return i >= 0 ? name.slice(i+1).toLowerCase() : ''; }

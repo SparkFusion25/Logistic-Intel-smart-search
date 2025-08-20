@@ -11,32 +11,24 @@ import { fetchTableColumns } from '@/lib/import/schema';
 import { TABLE_ALIASES } from '@/lib/import/aliases';
 import { buildMapping } from '@/lib/import/matcher';
 import { saveImportMapping, loadImportMapping } from '@/repositories/import.repo';
+import { filenameFromPath, extFromFilename } from '@/lib/path';
 import { useDropzone } from 'react-dropzone';
 
-interface BulkImport {
+// Use the normalized type that matches our toUi mapper
+type BulkImport = {
   id: string;
+  status: 'queued'|'running'|'success'|'error';
   filename: string;
   file_type: string;
-  status: string;
   total_records: number;
   processed_records: number;
+  failed_records: number;
   duplicate_records: number;
-  error_records: number;
-  created_at: string;
-  updated_at: string;
-  processing_metadata?: {
-    batch_size?: number;
-    total_batches?: number;
-    current_batch?: number;
-    progress_percentage?: number;
-    ai_analysis?: {
-      data_quality_score: number;
-      estimated_processing_time: string;
-      suggested_cleaning: string[];
-      processing_recommendations: string[];
-    };
-  };
-}
+  processing_metadata: any;
+  created_at: string | null;
+  finished_at: string | null;
+  updated_at: string | null;
+};
 
 export const BulkImportManager = () => {
   const { toast } = useToast();
@@ -78,27 +70,28 @@ export const BulkImportManager = () => {
       
       type ImportRow = Tables<'import_jobs'>;
       
-      type UiBulkImport = {
-        id: string;
-        status: ImportRow['status'];
-        total_records: number;
-        ok_rows: number;
-        error_rows: number;
-        processing_metadata: ImportRow['processing_metadata'];
-        created_at: string | null;
-        finished_at: string | null;
-      };
+
       
-      const toUi = (r: ImportRow): UiBulkImport => ({
-        id: r.id,
-        status: r.status,
-        total_records: (r.total_rows ?? 0),
-        ok_rows: (r.ok_rows ?? 0),
-        error_rows: (r.error_rows ?? 0),
-        processing_metadata: r.processing_metadata,
-        created_at: r.created_at,
-        finished_at: r.finished_at,
-      });
+      const toUi = (r: ImportRow): BulkImport => {
+        const name = filenameFromPath(r.object_path);
+        const ext = extFromFilename(name);
+        const md = (r.processing_metadata ?? null) as any;
+        const dup = typeof md?.duplicate_records === 'number' ? md.duplicate_records : 0;
+        return {
+          id: r.id,
+          status: r.status,
+          filename: name,
+          file_type: ext || 'csv',
+          total_records: (r.total_rows ?? 0),
+          processed_records: (r.ok_rows ?? 0),
+          failed_records: (r.error_rows ?? 0),
+          duplicate_records: dup,
+          processing_metadata: r.processing_metadata,
+          created_at: r.created_at,
+          finished_at: r.finished_at,
+          updated_at: r.finished_at ?? r.created_at
+        };
+      };
       
       setImports((data ?? []).map(toUi));
     } catch (error) {
@@ -372,7 +365,7 @@ export const BulkImportManager = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        {(item.status === 'deduplicating' || item.status === 'processing' || item.status === 'parsing') && (
+                        {(item.status === 'running') && (
                           <Button
                             size="sm"
                             variant="outline"
@@ -384,7 +377,7 @@ export const BulkImportManager = () => {
                           </Button>
                         )}
                         <span className="text-sm text-muted-foreground">
-                          {new Date(item.created_at).toLocaleDateString()}
+                          {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
                         </span>
                       </div>
                     </div>
@@ -460,7 +453,7 @@ export const BulkImportManager = () => {
                             {item.processed_records} / {item.total_records} records processed
                           </span>
                           <span>
-                            {item.duplicate_records} duplicates, {item.error_records} errors
+                            {item.duplicate_records} duplicates, {item.failed_records} errors
                           </span>
                         </div>
                       </div>

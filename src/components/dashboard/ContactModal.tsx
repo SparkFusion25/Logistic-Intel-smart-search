@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { useCRMAPI } from '@/hooks/useAPI'
+import { useAPI } from '@/hooks/useAPI'
 import { X, Plus } from 'lucide-react'
 
 interface Contact {

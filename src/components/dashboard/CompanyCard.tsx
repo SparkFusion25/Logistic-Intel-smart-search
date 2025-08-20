@@ -53,7 +53,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
   const [isAdding, setIsAdding] = useState(false)
   const [showDetailsDrawer, setShowDetailsDrawer] = useState(false)
   const { toast } = useToast()
-  const { makeRequest } = useAPI()
+  const { request } = useAPI()
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -81,7 +81,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
       
       console.log('🔧 CompanyCard: Request payload:', requestPayload)
       
-      const response = await makeRequest('/crm-add-from-search', {
+      const response = await request('/crm-add-from-search', {
         method: 'POST',
         body: requestPayload
       })
