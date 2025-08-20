@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useRouter } from "next/router"
 import { 
   Search, Filter, Download, ArrowRight, Star, Eye, ExternalLink, 
   MoreHorizontal, Building2, MapPin, Calendar, Globe, Ship, TrendingUp,
@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Autocomplete } from "@/components/ui/autocomplete"
 import { useToast } from "@/hooks/use-toast"
 import { useAPI } from "@/hooks/useAPI"
-import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete"
+import { useRouterAutocomplete } from "@/hooks/useRouterAutocomplete"
 import { useCommodityAutocomplete } from "@/hooks/useCommodityAutocomplete"
 import { CompanyCard } from "./CompanyCard"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
@@ -23,7 +23,7 @@ import { RevenueVesselResults } from "../search/RevenueVesselResults"
 import { ExportButton } from "../search/ExportButton"
 
 export function SearchIntelligence() {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("companies")
   const [hasSearched, setHasSearched] = useState(false)
@@ -64,7 +64,7 @@ export function SearchIntelligence() {
   })
   const { toast } = useToast()
   const { makeRequest } = useAPI()
-  const { countryOptions, cityOptions, loadingCountries, loadingCities } = useLocationAutocomplete()
+  const { countryOptions, cityOptions, loadingCountries, loadingCities } = useRouterAutocomplete()
   const { searchCommodities, loading: commoditiesLoading } = useCommodityAutocomplete()
 
   // All data now comes from real API - no hardcoded searches
@@ -198,7 +198,7 @@ export function SearchIntelligence() {
 
   const handleViewFullProfile = (company: any) => {
     // Navigate to dedicated company profile page in the same tab
-    navigate(`/dashboard/company/${company.company_id}`)
+    router.push(`/dashboard/company/${company.company_id}`)
     toast({
       title: "Opening Full Profile",
       description: `Loading detailed profile for ${company.name}...`

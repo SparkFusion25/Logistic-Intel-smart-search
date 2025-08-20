@@ -1,5 +1,5 @@
 import { ArrowRight, Shield, Zap, Globe, BarChart3, Users, TrendingUp, Play, Package } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -52,7 +52,7 @@ export const HeroSection = () => {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-start gap-3 pt-2">
-              <Link to="/dashboard">
+              <Link href="/dashboard">
                 <Button className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white px-6 py-3 font-semibold rounded-lg shadow-lg hover:shadow-blue-500/25 hover:scale-105 transition-all duration-300">
                   Start Free Trial
                   <ArrowRight className="w-4 h-4 ml-2" />

@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useRouter } from 'next/router';
 import { Search, Users, Mail, Rocket } from 'lucide-react';
 
 const Tab: React.FC<{ href: string; icon: React.ReactNode; label: string }> = ({ href, icon, label }) => {
-  const { pathname } = useLocation();
+  const { pathname } = useRouter();
   const active = pathname.startsWith(href);
   return (
-    <Link to={href} className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-xs ${active ? 'text-white' : 'text-slate-400'}`}>
+    <Link href={href} className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-xs ${active ? 'text-white' : 'text-slate-400'}`}>
       {icon}
       {label}
     </Link>

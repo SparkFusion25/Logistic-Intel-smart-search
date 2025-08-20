@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Search, Contact, Mail, BarChart3, Flag, LineChart, 
   Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle, BookOpen, Target, ChevronLeft, ChevronRight 
 } from "lucide-react"
-import { NavLink, useLocation, useNavigate } from "react-router-dom"
+import { NavLink, useRouter, useRouter } from "next/router"
 import {
   Sidebar,
   SidebarContent,
@@ -45,8 +45,8 @@ const bottomItems = [
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar()
   const collapsed = state === "collapsed"
-  const location = useLocation()
-  const navigate = useNavigate()
+  const location = useRouter()
+  const router = useRouter()
 
   return (
     <Sidebar

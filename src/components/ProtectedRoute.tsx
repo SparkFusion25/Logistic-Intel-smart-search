@@ -1,12 +1,21 @@
-import { useAuth } from '@/components/AuthProvider';
-import { Navigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+  const router = useRouter();
+  // Mock auth for now - replace with actual auth logic
+  const user = true; // Replace with real auth check
+  const loading = false;
+
+  useEffect(() => {
+    if (!user && !loading) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -20,7 +29,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return null; // Will redirect via useEffect
   }
 
   return <>{children}</>;
