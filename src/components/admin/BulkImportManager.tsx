@@ -7,6 +7,10 @@ import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabaseClient';
 import type { Tables } from '@/types/db';
+import { fetchTableColumns } from '@/lib/import/schema';
+import { TABLE_ALIASES } from '@/lib/import/aliases';
+import { buildMapping } from '@/lib/import/matcher';
+import { saveImportMapping, loadImportMapping } from '@/repositories/import.repo';
 import { useDropzone } from 'react-dropzone';
 
 interface BulkImport {
