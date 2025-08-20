@@ -22,19 +22,15 @@ import { SidebarBrand } from "./SidebarBrand"
 
 const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Search", url: "/search-simple", icon: Search },
-  { title: "CRM", url: "/crm-simple", icon: Contact },
+  { title: "Search", url: "/dashboard/search", icon: Search },
+  { title: "CRM", url: "/dashboard/crm", icon: Contact },
   { title: "Email", url: "/dashboard/email", icon: Mail },
-  { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
   { title: "Campaigns", url: "/dashboard/campaigns", icon: Flag },
-  { title: "Templates", url: "/dashboard/campaigns/templates", icon: FileText },
   { title: "Campaign Analytics", url: "/dashboard/campaigns/analytics", icon: LineChart },
-  { title: "Follow‑Ups", url: "/dashboard/campaigns/follow-ups", icon: Clock8 },
-  { title: "Widgets", url: "/widgets-simple", icon: Boxes },
   { title: "Quote Generator", url: "/dashboard/widgets/quote", icon: FileText },
   { title: "Tariff Calculator", url: "/dashboard/widgets/tariff", icon: Calculator },
-  { title: "Benchmark", url: "/dashboard/widgets/benchmark", icon: Activity },
-  { title: "Admin", url: "/admin-simple", icon: ShieldCheck },
+  { title: "Benchmark", url: "/dashboard/benchmark", icon: Activity },
+  { title: "Admin", url: "/dashboard/admin", icon: ShieldCheck },
 ]
 
 const bottomItems = [
@@ -55,7 +51,7 @@ export function AppSidebar() {
       collapsible="icon"
       className="border-r-0 shadow-2xl transition-all duration-300"
       style={{
-        background: 'linear-gradient(180deg, #0f172a 0%, #1e3a8a 40%, #312e81 100%)',
+        background: 'linear-gradient(180deg, #0A1A2F 0%, #122C57 100%)',
         width: collapsed ? '72px' : '280px'
       }}
     >

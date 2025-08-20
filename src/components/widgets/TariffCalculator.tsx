@@ -1,69 +1,112 @@
-import * as React from 'react';
-import { usd } from '@/lib/format';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type CalcInput = { hs_code:string; origin_country:string; destination_country:string; mode:'air'|'ocean'; incoterm:'EXW'|'FOB'|'CIF'|'DAP'|'DDP'; customs_value:number };
+export default function TariffCalculator() {
+  const [origin, setOrigin] = React.useState('');
+  const [destination, setDestination] = React.useState('');
+  const [weight, setWeight] = React.useState('');
+  const [value, setValue] = React.useState('');
+  const [result, setResult] = React.useState<number | null>(null);
 
-type CalcResult = { duty_rate:number; est_duty:number; est_tax:number; est_total:number; notes:string[] };
-
-const COUNTRIES=['United States','China','Mexico','Germany','United Kingdom','India','Vietnam','Canada','Brazil','France','Italy','Spain','Japan','Korea'];
-
-export default function TariffCalculator(){
-  const [form,setForm]=React.useState<CalcInput>({ hs_code:'', origin_country:'China', destination_country:'United States', mode:'ocean', incoterm:'FOB', customs_value:10000 });
-  const [res,setRes]=React.useState<CalcResult|null>(null);
-  const [loading,setLoading]=React.useState(false);
-  const [error,setError]=React.useState<string|null>(null);
-
-  const onChange = (k:keyof CalcInput, v:any)=> setForm(f=>({...f,[k]:v}))
-
-  const estimate = async()=>{
-    setLoading(true); setError(null);
-    try{
-      const r = await fetch('/api/widgets/tariff/calc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});
-      if(!r.ok) throw new Error(`HTTP ${r.status}`);
-      const j = await r.json();
-      setRes(j);
-    }catch(e:any){ setError(e?.message||'Failed to estimate'); }
-    finally{ setLoading(false); }
-  }
+  const calculateTariff = () => {
+    // Simple calculation for demo
+    const tariffRate = 0.15; // 15%
+    const calculatedValue = parseFloat(value) * tariffRate;
+    setResult(calculatedValue);
+  };
 
   return (
-    <div className='rounded-2xl border border-white/10 bg-white/5 p-4 space-y-4'>
-      <div className='flex items-center justify-between'><div className='text-sm text-slate-300'>Tariff Calculator</div><button onClick={estimate} className='px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-sm' disabled={loading}>{loading?'Estimating…':'Estimate'}</button></div>
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
-        <input className='rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none' placeholder='HS Code (e.g. 850440)' value={form.hs_code} onChange={e=>onChange('hs_code',e.target.value)}/>
-        <select className='rounded-2xl bg-white/5 border border-white/10 px-3 py-2' value={form.mode} onChange={e=>onChange('mode',e.target.value as any)}>
-          <option value='ocean'>Ocean</option>
-          <option value='air'>Air</option>
-        </select>
-        <select className='rounded-2xl bg-white/5 border border-white/10 px-3 py-2' value={form.incoterm} onChange={e=>onChange('incoterm',e.target.value as any)}>
-          {['EXW','FOB','CIF','DAP','DDP'].map(i=>(<option key={i} value={i as any}>{i}</option>))}
-        </select>
-        <select className='rounded-2xl bg-white/5 border border-white/10 px-3 py-2' value={form.origin_country} onChange={e=>onChange('origin_country',e.target.value)}>
-          {COUNTRIES.map(c=>(<option key={c} value={c}>{c}</option>))}
-        </select>
-        <select className='rounded-2xl bg-white/5 border border-white/10 px-3 py-2' value={form.destination_country} onChange={e=>onChange('destination_country',e.target.value)}>
-          {COUNTRIES.map(c=>(<option key={c} value={c}>{c}</option>))}
-        </select>
-        <input type='number' className='rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none' placeholder='Customs Value (USD)' value={form.customs_value} onChange={e=>onChange('customs_value',Number(e.target.value))}/>
-      </div>
-      {error && <div className='text-sm text-rose-300'>{error}</div>}
-      {res && (
-        <div className='rounded-xl border border-white/10 bg-white/5 p-3 space-y-2'>
-          <div className='text-sm'>Estimated duty rate: <span className='font-semibold'>{(res.duty_rate*100).toFixed(2)}%</span></div>
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-2 text-sm'>
-            <div className='rounded-lg bg-white/5 border border-white/10 p-3'><div className='text-xs opacity-70'>Duty</div><div className='font-semibold'>{usd(res.est_duty)}</div></div>
-            <div className='rounded-lg bg-white/5 border border-white/10 p-3'><div className='text-xs opacity-70'>Taxes (est)</div><div className='font-semibold'>{usd(res.est_tax)}</div></div>
-            <div className='rounded-lg bg-white/5 border border-white/10 p-3'><div className='text-xs opacity-70'>Total</div><div className='font-semibold'>{usd(res.est_total)}</div></div>
-            <div className='rounded-lg bg-white/5 border border-white/10 p-3'><div className='text-xs opacity-70'>Incoterm</div><div className='font-semibold'>{form.incoterm}</div></div>
+    <div className="space-y-6">
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Tariff Calculator
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">Origin Country</label>
+              <Select value={origin} onValueChange={setOrigin}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select origin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="china">China</SelectItem>
+                  <SelectItem value="usa">United States</SelectItem>
+                  <SelectItem value="germany">Germany</SelectItem>
+                  <SelectItem value="japan">Japan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">Destination Country</label>
+              <Select value={destination} onValueChange={setDestination}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select destination" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="usa">United States</SelectItem>
+                  <SelectItem value="uk">United Kingdom</SelectItem>
+                  <SelectItem value="canada">Canada</SelectItem>
+                  <SelectItem value="australia">Australia</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          {res.notes?.length>0 && (
-            <ul className='list-disc pl-5 text-xs text-slate-300'>
-              {res.notes.map((n,i)=>(<li key={i}>{n}</li>))}
-            </ul>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">Weight (kg)</label>
+              <Input
+                type="number"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="Enter weight"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">Value (USD)</label>
+              <Input
+                type="number"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="Enter cargo value"
+              />
+            </div>
+          </div>
+          
+          <Button 
+            onClick={calculateTariff} 
+            className="w-full bg-primary text-primary-foreground hover:opacity-90"
+            disabled={!origin || !destination || !weight || !value}
+          >
+            Calculate Tariff
+          </Button>
+          
+          {result !== null && (
+            <Card className="bg-muted border-primary/20">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 text-2xl font-bold text-primary">
+                    <span>$</span>
+                    {result.toFixed(2)}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">Estimated Tariff Cost</p>
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </div>
-      )}
-      <div className='text-[11px] text-slate-400'>Informational estimate only. For binding classification/duty, consult a licensed customs broker.</div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

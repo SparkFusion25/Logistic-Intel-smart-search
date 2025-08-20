@@ -9,12 +9,12 @@ interface AppShellProps {
 
 export const AppShell = ({ children }: AppShellProps) => {
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-background">
+    <SidebarProvider defaultOpen={true} className="min-h-screen">
+      <div className="min-h-screen flex w-full bg-canvas">
         <AppSidebar />
         <SidebarInset className="flex-1">
           <TopBar />
-          <main className="flex-1 p-4 sm:p-6 max-w-[var(--container-max)] mx-auto w-full">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[var(--container-max)] mx-auto w-full">
             {children}
           </main>
         </SidebarInset>

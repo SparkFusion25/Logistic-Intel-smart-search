@@ -29,12 +29,24 @@ export default function CRMPanel(){
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="text-sm opacity-80">{loading?'Loading…':`${rows.length} contacts`}</div>
-        <div className="flex items-center gap-2">
-          <button onClick={enrichViaApollo} className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-sm">Enrich via Apollo</button>
-          <button onClick={enrichFallback} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm">LinkedIn Fallback</button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-border shadow-card">
+        <div className="text-sm text-muted-foreground font-medium">
+          {loading?'Loading…':`${rows.length} contacts`}
+        </div>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={enrichViaApollo} 
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm font-medium shadow-sm transition-opacity"
+          >
+            Enrich via Apollo
+          </button>
+          <button 
+            onClick={enrichFallback} 
+            className="px-4 py-2 rounded-lg bg-muted border border-border hover:bg-accent text-sm font-medium transition-colors"
+          >
+            LinkedIn Fallback
+          </button>
         </div>
       </div>
       <div onClickCapture={(e)=>{
@@ -44,20 +56,34 @@ export default function CRMPanel(){
           onRowClick(rows[idx]);
         }
       }}>
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-border shadow-card bg-card">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-900/80 text-slate-300"><tr>
-              {['Company','Name','Title','Email','Source'].map((h)=>(<th key={h} className="text-left px-3 py-2 font-medium">{h}</th>))}
-            </tr></thead>
+            <thead className="bg-muted">
+              <tr>
+                {['Company','Name','Title','Email','Source'].map((h)=>(
+                  <th key={h} className="text-left px-4 py-3 font-semibold text-foreground border-b border-border">{h}</th>
+                ))}
+              </tr>
+            </thead>
             <tbody>
-              {rows.length===0 && (<tr><td colSpan={5} className="px-3 py-6 text-center text-slate-400">No contacts yet — add from Search.</td></tr>)}
+              {rows.length===0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                    No contacts yet — add from Search.
+                  </td>
+                </tr>
+              )}
               {rows.map((r,i)=>(
-                <tr key={i} data-row-index={i} className="odd:bg-slate-900/40 even:bg-slate-900/20 cursor-pointer hover:bg-white/5">
-                  <td className="px-3 py-2 whitespace-nowrap">{r.company_name||''}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">{r.full_name||''}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">{r.title||''}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">{r.email||''}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">{r.source||''}</td>
+                <tr 
+                  key={i} 
+                  data-row-index={i} 
+                  className="border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                >
+                  <td className="px-4 py-3 whitespace-nowrap font-medium text-foreground">{r.company_name||'—'}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-foreground">{r.full_name||'—'}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{r.title||'—'}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-foreground">{r.email||'—'}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{r.source||'—'}</td>
                 </tr>
               ))}
             </tbody>

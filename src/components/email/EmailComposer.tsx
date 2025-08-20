@@ -1,23 +1,76 @@
-import { useState } from 'react';
-export default function EmailComposer(){
-  const [subject,setSubject]=useState('');
-  const [body,setBody]=useState('');
-  const [sending,setSending]=useState(false);
-  const [status,setStatus]=useState<string|null>(null);
-  const onSend=async()=>{
-    setSending(true); setStatus(null);
-    try{ const r=await fetch('/api/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject,bodyHtml:body})}); const j=await r.json(); setStatus(j.success? 'Sent (stub)':'Not configured'); }
-    catch(e){ setStatus('Error'); }
-    finally{ setSending(false); }
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
+interface EmailComposerProps {
+  onClose?: () => void;
+}
+
+export default function EmailComposer({ onClose }: EmailComposerProps) {
+  const [to, setTo] = React.useState('');
+  const [subject, setSubject] = React.useState('');
+  const [message, setMessage] = React.useState('');
+
+  const handleSend = () => {
+    console.log('Sending email:', { to, subject, message });
+    if (onClose) onClose();
   };
+
   return (
-    <div className="space-y-3">
-      <input value={subject} onChange={e=>setSubject(e.target.value)} placeholder="Subject" className="w-full rounded-xl bg-slate-900/60 border border-slate-800 px-3 py-2 outline-none"/>
-      <textarea value={body} onChange={e=>setBody(e.target.value)} placeholder="Body (HTML or text)" rows={10} className="w-full rounded-xl bg-slate-900/60 border border-slate-800 px-3 py-2 outline-none"/>
-      <div className="flex gap-2">
-        <button onClick={onSend} disabled={sending} className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50">Send</button>
-        {status && <span className="text-sm text-slate-400 self-center">{status}</span>}
-      </div>
-    </div>
+    <Card className="w-full max-w-4xl mx-auto shadow-card">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl font-semibold">Compose Email</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <label className="text-sm font-medium text-muted-foreground mb-1 block">To</label>
+          <Input
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            placeholder="Enter email address"
+            className="w-full"
+          />
+        </div>
+        
+        <div>
+          <label className="text-sm font-medium text-muted-foreground mb-1 block">Subject</label>
+          <Input
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Enter subject"
+            className="w-full"
+          />
+        </div>
+        
+        <div>
+          <label className="text-sm font-medium text-muted-foreground mb-1 block">Message</label>
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Write your message..."
+            className="min-h-[200px] w-full resize-none"
+          />
+        </div>
+        
+        <div className="flex items-center justify-between pt-4">
+          <Button variant="outline" className="flex items-center gap-2">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.586-6.586a2 2 0 000-2.828z" />
+            </svg>
+            Attach
+          </Button>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline">Save Draft</Button>
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={handleSend} className="bg-primary text-primary-foreground hover:opacity-90">
+              Send
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -12,7 +12,11 @@ function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
   const Btn=(m:Mode,label:string)=>(
     <button
       onClick={()=>setMode(m)}
-      className={`px-3 py-1.5 rounded-full border ${mode===m?'bg-blue-600 border-blue-400':'bg-white/5 border-white/10 hover:bg-white/10'}`}
+      className={`px-3 py-1.5 rounded-full border transition-all duration-200 ${
+        mode===m
+          ?'bg-primary text-primary-foreground border-primary shadow-sm' 
+          :'bg-white border-border hover:bg-muted hover:border-border-hover'
+      }`}
     >{label}</button>
   );
   return (
@@ -26,24 +30,35 @@ function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
 
 function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(row:UnifiedRow)=>void }){
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-3 md:p-4 flex flex-col gap-2">
+    <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-3 shadow-card hover:shadow-medium transition-all duration-200 hover:scale-[1.01]">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full border border-white/10 bg-white/5">{r.mode?upper(r.mode):'—'}</span>
-          <div className="font-semibold text-sm md:text-base"><Highlight text={r.unified_company_name} query={q}/></div>
+          <span className="text-xs px-2 py-1 rounded-full border border-border bg-muted text-muted-foreground font-medium">
+            {r.mode?upper(r.mode):'—'}
+          </span>
+          <div className="font-semibold text-sm md:text-base text-foreground">
+            <Highlight text={r.unified_company_name} query={q}/>
+          </div>
         </div>
         <ConfidenceIndicator score={r?.score!=null?Number(r.score)*100:null}/>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs opacity-85">
-        <div><span className="opacity-60">HS:</span> {r.hs_code||'—'}</div>
-        <div><span className="opacity-60">Origin:</span> {r.origin_country||'—'}</div>
-        <div><span className="opacity-60">Dest:</span> {r.destination_city||r.destination_country||'—'}</div>
-        <div><span className="opacity-60">Date:</span> {r.unified_date||'—'}</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted-foreground">
+        <div><span className="font-medium">HS:</span> {r.hs_code||'—'}</div>
+        <div><span className="font-medium">Origin:</span> {r.origin_country||'—'}</div>
+        <div><span className="font-medium">Dest:</span> {r.destination_city||r.destination_country||'—'}</div>
+        <div><span className="font-medium">Date:</span> {r.unified_date||'—'}</div>
       </div>
-      <div className="text-xs line-clamp-2 opacity-80">{r.description||'No description'}</div>
+      <div className="text-xs line-clamp-2 text-muted-foreground">{r.description||'No description'}</div>
       <div className="flex items-center gap-2 pt-1">
-        <button className="rounded-xl bg-white/5 border border-white/10 px-2 py-1 text-xs hover:bg-white/10" onClick={()=>onAddToCrm(r)}>Add to CRM</button>
-        <button className="rounded-xl bg-white/5 border border-white/10 px-2 py-1 text-xs hover:bg-white/10">Export</button>
+        <button 
+          className="rounded-lg bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium hover:opacity-90 transition-opacity shadow-sm" 
+          onClick={()=>onAddToCrm(r)}
+        >
+          Add to CRM
+        </button>
+        <button className="rounded-lg bg-muted border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors">
+          Export
+        </button>
       </div>
     </div>
   );
@@ -75,9 +90,9 @@ export default function SearchPanel(){
   const onClearFilters = () => run();
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {/* Top controls */}
-      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-4 bg-card p-4 rounded-xl border border-border shadow-card">
         <ModeToggle mode={mode} setMode={setMode}/>
         <div className="flex-1"/>
         <div className="w-full md:w-96">
@@ -86,10 +101,16 @@ export default function SearchPanel(){
             onChange={(e)=>setQ(e.target.value)}
             onKeyDown={(e)=>{if(e.key==='Enter') run();}}
             placeholder="Search companies, HS codes, carriers…"
-            className="w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
+            className="w-full rounded-lg bg-background border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
-        <button onClick={()=>run()} className="px-3 py-2 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60" disabled={loading}>Search</button>
+        <button 
+          onClick={()=>run()} 
+          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-60 font-medium shadow-sm transition-opacity" 
+          disabled={loading}
+        >
+          Search
+        </button>
       </div>
 
       {/* AI Assist */}
@@ -105,15 +126,23 @@ export default function SearchPanel(){
       <AdvancedFilters value={filters as Filters} onChange={setFilters as any} onApply={onApplyFilters} onClear={onClearFilters}/>
 
       {/* Summary / load more */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm opacity-75">{loading?'Loading…':(error?`Error: ${error}`:`${total} results`)}</div>
+      <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-border">
+        <div className="text-sm text-muted-foreground font-medium">
+          {loading?'Loading…':(error?`Error: ${error}`:`${total} results found`)}
+        </div>
         {hasMore&&(
-          <button onClick={loadMore} disabled={loading} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm">Load more</button>
+          <button 
+            onClick={loadMore} 
+            disabled={loading} 
+            className="px-3 py-1.5 rounded-lg bg-muted border border-border hover:bg-accent text-sm font-medium transition-colors"
+          >
+            Load more
+          </button>
         )}
       </div>
 
       {/* Results */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {items.map((r)=>(<ResultRow key={r.id} r={r} q={q} onAddToCrm={onAddToCrm}/>))}
       </div>
     </div>
