@@ -1,107 +1,96 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { supabase } from '@/integrations/supabase/client'
+import { useState, useCallback } from 'react';
 
-interface CommodityData {
-  hsCodes: string[]
-  descriptions: string[]
-}
-
-interface AutocompleteOption {
-  value: string
-  label: string
-  group?: string
+interface CommodityOption {
+  value: string;
+  label: string;
+  hs_code?: string;
+  description?: string;
 }
 
 export function useCommodityAutocomplete() {
-  const [commodityData, setCommodityData] = useState<CommodityData>({
-    hsCodes: [],
-    descriptions: []
-  })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false);
+  const [commodities, setCommodities] = useState<CommodityOption[]>([]);
 
-  useEffect(() => {
-    loadCommodityData()
-  }, [])
-
-  const loadCommodityData = async () => {
-    try {
-      setLoading(true)
-      
-      // Get commodity data from all shipment tables
-      const [unifiedData, oceanData, airData] = await Promise.all([
-        supabase.from('unified_shipments').select('hs_code, commodity_description').limit(1000),
-        supabase.from('ocean_shipments').select('hs_code, commodity_description').limit(1000),
-        supabase.from('airfreight_shipments').select('hs_code, commodity_description').limit(1000)
-      ])
-
-      const hsCodes = new Set<string>()
-      const descriptions = new Set<string>()
-
-      // Process all data sources
-      const allData = [
-        ...(unifiedData.data || []),
-        ...(oceanData.data || []),
-        ...(airData.data || [])
-      ]
-
-      allData.forEach((item: any) => {
-        if (item.hs_code && item.hs_code.trim()) {
-          hsCodes.add(item.hs_code.trim())
-        }
-        if (item.commodity_description && item.commodity_description.trim()) {
-          descriptions.add(item.commodity_description.trim())
-        }
-      })
-
-      setCommodityData({
-        hsCodes: Array.from(hsCodes).filter(Boolean).sort(),
-        descriptions: Array.from(descriptions).filter(Boolean).sort()
-      })
-    } catch (error) {
-      console.error('Error loading commodity data:', error)
-    } finally {
-      setLoading(false)
+  const searchCommodities = useCallback(async (query: string) => {
+    if (!query || query.length < 2) {
+      setCommodities([]);
+      return [];
     }
-  }
 
-  const getCommodityOptions = useMemo((): AutocompleteOption[] => {
-    const options: AutocompleteOption[] = []
-    
-    // Add HS codes
-    commodityData.hsCodes.slice(0, 100).forEach(hsCode => {
-      options.push({
-        value: hsCode,
-        label: `${hsCode}`,
-        group: 'HS Codes'
-      })
-    })
+    setLoading(true);
+    try {
+      // In a real implementation, this would call your commodity search API
+      // For now, we'll use mock data based on common trade commodities
+      const mockCommodities = [
+        { value: 'electronics', label: 'Electronics', hs_code: '85', description: 'Electronic equipment and components' },
+        { value: 'automotive-parts', label: 'Automotive Parts', hs_code: '87', description: 'Motor vehicle parts and accessories' },
+        { value: 'textiles', label: 'Textiles', hs_code: '63', description: 'Textile articles and fabrics' },
+        { value: 'machinery', label: 'Machinery', hs_code: '84', description: 'Industrial machinery and equipment' },
+        { value: 'chemicals', label: 'Chemicals', hs_code: '38', description: 'Chemical products' },
+        { value: 'plastics', label: 'Plastics', hs_code: '39', description: 'Plastic products and materials' },
+        { value: 'pharmaceuticals', label: 'Pharmaceuticals', hs_code: '30', description: 'Medical and pharmaceutical products' },
+        { value: 'furniture', label: 'Furniture', hs_code: '94', description: 'Furniture and furnishings' },
+        { value: 'steel', label: 'Steel Products', hs_code: '72', description: 'Iron and steel products' },
+        { value: 'food-products', label: 'Food Products', hs_code: '19', description: 'Prepared food products' }
+      ];
 
-    // Add commodity descriptions
-    commodityData.descriptions.slice(0, 50).forEach(description => {
-      options.push({
-        value: description,
-        label: description.length > 50 ? `${description.substring(0, 50)}...` : description,
-        group: 'Commodity Descriptions'
-      })
-    })
+      const filtered = mockCommodities.filter(commodity =>
+        commodity.label.toLowerCase().includes(query.toLowerCase()) ||
+        commodity.hs_code?.includes(query) ||
+        commodity.description?.toLowerCase().includes(query.toLowerCase())
+      );
 
-    return options
-  }, [commodityData])
+      setCommodities(filtered);
+      return filtered;
+    } catch (error) {
+      console.error('Failed to search commodities:', error);
+      setCommodities([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const searchCommodities = (query: string): AutocompleteOption[] => {
-    if (!query || query.length < 2) return getCommodityOptions.slice(0, 20)
-    
-    const lowerQuery = query.toLowerCase()
-    return getCommodityOptions.filter(option =>
-      option.label.toLowerCase().includes(lowerQuery) ||
-      option.value.toLowerCase().includes(lowerQuery)
-    ).slice(0, 20)
-  }
+  const getCommodityByHsCode = useCallback(async (hsCode: string) => {
+    if (!hsCode) return null;
+
+    try {
+      // Mock implementation - in real app, this would query your HS code database
+      const hsCodeMap: Record<string, CommodityOption> = {
+        '84': { value: 'machinery', label: 'Machinery', hs_code: '84', description: 'Industrial machinery and equipment' },
+        '85': { value: 'electronics', label: 'Electronics', hs_code: '85', description: 'Electronic equipment and components' },
+        '87': { value: 'automotive-parts', label: 'Automotive Parts', hs_code: '87', description: 'Motor vehicle parts and accessories' },
+        '39': { value: 'plastics', label: 'Plastics', hs_code: '39', description: 'Plastic products and materials' },
+        '72': { value: 'steel', label: 'Steel Products', hs_code: '72', description: 'Iron and steel products' },
+        '30': { value: 'pharmaceuticals', label: 'Pharmaceuticals', hs_code: '30', description: 'Medical and pharmaceutical products' },
+        '94': { value: 'furniture', label: 'Furniture', hs_code: '94', description: 'Furniture and furnishings' },
+        '63': { value: 'textiles', label: 'Textiles', hs_code: '63', description: 'Textile articles and fabrics' },
+        '38': { value: 'chemicals', label: 'Chemicals', hs_code: '38', description: 'Chemical products' },
+        '19': { value: 'food-products', label: 'Food Products', hs_code: '19', description: 'Prepared food products' }
+      };
+
+      // Try exact match first, then partial match
+      let match = hsCodeMap[hsCode];
+      if (!match) {
+        const partialMatch = Object.keys(hsCodeMap).find(code => 
+          hsCode.startsWith(code) || code.startsWith(hsCode)
+        );
+        if (partialMatch) {
+          match = hsCodeMap[partialMatch];
+        }
+      }
+
+      return match || null;
+    } catch (error) {
+      console.error('Failed to get commodity by HS code:', error);
+      return null;
+    }
+  }, []);
 
   return {
-    commodityData,
-    getCommodityOptions,
     searchCommodities,
+    getCommodityByHsCode,
+    commodities,
     loading
-  }
+  };
 }
