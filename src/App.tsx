@@ -26,76 +26,108 @@ const DashboardPage = () => <DashboardOverview />;
 const SearchPage = () => <SearchPanel />;
 
 const CRMPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">CRM</h1>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          CRM Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <CRMPanel />
     </div>
-    <CRMPanel />
   </div>
 );
 
 const EmailPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Email</h1>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Email Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <EmailComposer />
     </div>
-    <EmailComposer />
   </div>
 );
 
 const CampaignsPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Campaigns</h1>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Campaign Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <CampaignBuilder onSave={(campaign) => console.log('Campaign saved:', campaign)} />
     </div>
-    <CampaignBuilder onSave={(campaign) => console.log('Campaign saved:', campaign)} />
   </div>
 );
 
 const CampaignAnalyticsPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Campaign Analytics</h1>
-    </div>
-    <div className="bg-card rounded-lg p-6 shadow-card">
-      <p className="text-muted-foreground">Campaign analytics and performance metrics coming soon.</p>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Analytics Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <div className="bg-card rounded-lg p-6 shadow-card">
+        <p className="text-muted-foreground">Campaign analytics and performance metrics coming soon.</p>
+      </div>
     </div>
   </div>
 );
 
 const TariffPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Tariff Calculator</h1>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Tariff Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <TariffCalculator />
     </div>
-    <TariffCalculator />
   </div>
 );
 
 const QuotePage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Quote Generator</h1>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Quote Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <QuoteGenerator />
     </div>
-    <QuoteGenerator />
   </div>
 );
 
 const AdminPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Admin</h1>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Admin Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <AdminPageClient />
     </div>
-    <AdminPageClient />
   </div>
 );
 
 const BenchmarkPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Market Benchmark</h1>
+  <div className="flex flex-col">
+    <div className="card-glass p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Market Intelligence<span className="text-lg">™</span>
+        </h1>
+      </div>
+      <MarketBenchmark />
     </div>
-    <MarketBenchmark />
   </div>
 );
 

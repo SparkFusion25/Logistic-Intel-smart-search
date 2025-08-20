@@ -6,21 +6,25 @@ import { TariffCalculatorCard } from './TariffCalculatorCard';
 
 export function DashboardOverview() {
   return (
-    <div className="space-y-8 animate-fade-in-up">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard Overview</h1>
+    <div className="flex flex-col">
+      {/* Premium Header */}
+      <div className="card-glass p-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">
+            Dashboard Intelligence<span className="text-lg">™</span>
+          </h1>
           <p className="text-muted-foreground mt-1">
             Welcome back! Here's what's happening with your trade operations.
           </p>
         </div>
+        
+        {/* KPI Stats inside header */}
+        <DashboardStats />
       </div>
 
-      {/* KPI Stats */}
-      <DashboardStats />
+      <div className="space-y-8 p-4 sm:p-6 lg:p-8">
 
-      {/* Main Widgets Grid */}
+        {/* Main Widgets Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Quick Search */}
         <QuickSearchCard />
@@ -78,6 +82,7 @@ export function DashboardOverview() {
             <span className="text-xs text-muted-foreground text-center">Configure preferences</span>
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
