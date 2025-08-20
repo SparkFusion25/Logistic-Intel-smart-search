@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { Search, Plane, Ship } from 'lucide-react';
-import { searchAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 export function QuickSearchCard() {
@@ -23,24 +23,28 @@ export function QuickSearchCard() {
 
     setLoading(true);
     try {
-      const result = await searchAPI.search({
-        company: company.trim(),
-        origin: origin.trim() || undefined,
-        region: region.trim() || undefined,
-        mode,
-        pageSize: 10
+      const { data, error } = await supabase.functions.invoke('search-unified', {
+        body: {
+          q: company.trim(),
+          mode: mode === 'air' ? 'air' : 'ocean',
+          filters: {
+            origin_country: origin.trim() || undefined,
+            destination_country: region.trim() || undefined
+          },
+          limit: 10,
+          offset: 0
+        }
       });
 
-      if (result.ok && result.data) {
-        toast({
-          title: "Search completed",
-          description: `Found ${result.data.total} results for "${company}"`,
-        });
-        // Navigate to search results or show in modal
-        // You could use router.push('/search') with state
-      } else {
-        throw new Error(result.error?.message || 'Search failed');
-      }
+      if (error) throw error;
+
+      const results = data?.results || [];
+      toast({
+        title: "Search completed",
+        description: `Found ${results.length} results for "${company}"`,
+      });
+      // Navigate to search results or show in modal
+      // You could use router.push('/search') with state
     } catch (error) {
       toast({
         title: "Search failed",

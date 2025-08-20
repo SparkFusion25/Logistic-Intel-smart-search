@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { Users, Plus, Mail, Phone, Building } from 'lucide-react';
-import { crmAPI, type Contact } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 export function MiniCRMList() {
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -14,11 +14,16 @@ export function MiniCRMList() {
 
   const loadContacts = async () => {
     try {
-      const result = await crmAPI.getContacts({ page: 1 });
-      if (result.ok && result.data) {
-        setContacts(result.data.contacts.slice(0, 4)); // Top 4 contacts
-      }
+      const { data, error } = await supabase
+        .from('crm_contacts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(4);
+        
+      if (error) throw error;
+      setContacts(data || []);
     } catch (error) {
+      console.error('Failed to load contacts:', error);
       toast({
         title: "Failed to load contacts",
         description: "Please try again",
@@ -85,12 +90,12 @@ export function MiniCRMList() {
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-sm font-medium text-primary">
-                  {contact.name.charAt(0).toUpperCase()}
+                  {(contact.full_name || contact.company_name || 'U').charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground truncate">
-                  {contact.name}
+                  {contact.full_name || contact.company_name || 'Unnamed Contact'}
                 </p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   {contact.email && (

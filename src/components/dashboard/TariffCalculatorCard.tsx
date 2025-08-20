@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { Calculator, Globe } from 'lucide-react';
-import { tariffAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 export function TariffCalculatorCard() {
@@ -25,20 +25,25 @@ export function TariffCalculatorCard() {
     setResult(null);
     
     try {
-      const response = await tariffAPI.calculate({
-        originCountry: originCountry.trim(),
-        destinationCountry: destinationCountry.trim(),
-        hsCode: hsCode.trim()
+      // Use Supabase edge function for tariff calculation
+      const { data, error } = await supabase.functions.invoke('calculate-tariff', {
+        body: {
+          originCountry: originCountry.trim(),
+          destinationCountry: destinationCountry.trim(),
+          hsCode: hsCode.trim()
+        }
       });
 
-      if (response.ok && response.data) {
-        setResult(response.data);
+      if (error) throw error;
+
+      if (data) {
+        setResult(data);
         toast({
           title: "Tariff calculated successfully",
-          description: `Duty: ${response.data.dutyRate}%, VAT: ${response.data.vatRate}%`,
+          description: `Duty: ${data.dutyRate}%, VAT: ${data.vatRate}%`,
         });
       } else {
-        throw new Error(response.error?.message || 'Failed to calculate tariff');
+        throw new Error('No data returned from calculation');
       }
     } catch (error) {
       toast({

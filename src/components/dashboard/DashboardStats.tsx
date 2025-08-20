@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, Users, Search, FileText, DollarSign, Globe } from 'lucide-react';
 
 interface StatCardProps {
@@ -39,18 +40,78 @@ function StatCard({ title, value, icon, trend }: StatCardProps) {
 
 export function DashboardStats() {
   const [stats, setStats] = useState({
-    totalContacts: '2,847',
-    searchQueries: '1,234',
-    quotesGenerated: '89',
-    activeDeals: '12',
-    monthlyRevenue: '$45.2K',
-    globalReach: '47 Countries'
+    totalContacts: '0',
+    searchQueries: '0',
+    quotesGenerated: '0',
+    activeDeals: '0',
+    monthlyRevenue: '$0',
+    globalReach: '0 Countries'
   });
 
-  // Mock data - replace with real API calls
+  // Load real data from Supabase
   useEffect(() => {
-    // This would fetch real KPIs from your API
-    // fetchDashboardStats().then(setStats);
+    const loadRealStats = async () => {
+      try {
+        // Get CRM contacts count
+        const { count: contactCount, error: contactError } = await supabase
+          .from('crm_contacts')
+          .select('*', { count: 'exact', head: true });
+        
+        if (contactError) throw contactError;
+
+        // Get quotes count
+        const { count: quotesCount, error: quotesError } = await supabase
+          .from('quotes')
+          .select('*', { count: 'exact', head: true });
+
+        // Get deals count
+        const { count: dealsCount, error: dealsError } = await supabase
+          .from('deals')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'open');
+
+        // Get unified shipments for trade volume
+        const { data: shipmentsData, error: shipmentsError } = await supabase
+          .from('unified_shipments')
+          .select('value_usd')
+          .not('value_usd', 'is', null)
+          .limit(1000);
+
+        // Get unique countries for global reach
+        const { data: countriesData, error: countriesError } = await supabase
+          .from('unified_shipments')
+          .select('origin_country, destination_country')
+          .not('origin_country', 'is', null)
+          .not('destination_country', 'is', null);
+
+        const tradeVolume = shipmentsData?.reduce((sum, item) => sum + (item.value_usd || 0), 0) || 0;
+        const countries = new Set();
+        countriesData?.forEach(item => {
+          if (item.origin_country) countries.add(item.origin_country);
+          if (item.destination_country) countries.add(item.destination_country);
+        });
+
+        const formatCurrency = (amount: number) => {
+          if (amount >= 1000000000) return `$${(amount / 1000000000).toFixed(1)}B`;
+          if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
+          if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
+          return `$${amount.toLocaleString()}`;
+        };
+
+        setStats({
+          totalContacts: (contactCount || 0).toLocaleString(),
+          searchQueries: '2,847', // Mock data for now
+          quotesGenerated: (quotesCount || 0).toLocaleString(),
+          activeDeals: (dealsCount || 0).toLocaleString(),
+          monthlyRevenue: formatCurrency(tradeVolume),
+          globalReach: `${countries.size} Countries`
+        });
+      } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
+      }
+    };
+
+    loadRealStats();
   }, []);
 
   return (

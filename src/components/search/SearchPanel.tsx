@@ -1,5 +1,6 @@
 // src/components/search/SearchPanel.tsx
 import React from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedSearch } from '@/hooks/useUnifiedSearch';
 import type { Mode, Filters, UnifiedRow } from '@/types/search';
 import AdvancedFilters from './AdvancedFilters';
@@ -67,23 +68,20 @@ function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(ro
 export default function SearchPanel(){
   const { q,setQ,mode,setMode,filters,setFilters,items,total,loading,error,hasMore,run,loadMore }=useUnifiedSearch({ initialMode:'all', initialLimit:25 });
 
-  // Add-to-CRM
+  // Add-to-CRM using Supabase
   const onAddToCrm=async(row:UnifiedRow)=>{
     try{
-      await fetch('/api/crm/contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        company_name:row.unified_company_name,
-        mode:row.mode,
-        hs_code:row.hs_code,
-        origin_country:row.origin_country,
-        destination_country:row.destination_country,
-        destination_city:row.destination_city,
-        carrier:row.unified_carrier,
-        bol_number:row.bol_number,
-        vessel_name:row.vessel_name,
-        last_seen:row.unified_date,
-        source:'search_unified'
-      })});
-    }catch{}
+      const { error } = await supabase.from('crm_contacts').insert({
+        org_id: (await supabase.auth.getUser()).data.user?.id,
+        company_name: row.unified_company_name || 'Unknown Company',
+        source: 'search_unified',
+        notes: `Added from search - ${row.mode?.toUpperCase()} shipment`,
+        tags: [row.mode || 'unknown', 'prospect'].filter(Boolean)
+      });
+      if (error) throw error;
+    }catch(e){
+      console.error('Failed to add to CRM:', e);
+    }
   };
 
   const onApplyFilters = () => run();

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import ContactsTable from './ContactsTable';
 import ContactDrawer from './ContactDrawer';
 
@@ -11,7 +12,11 @@ export default function CRMPanel(){
 
   const load=async()=>{
     setLoading(true);
-    try{ const r=await fetch('/api/crm/contacts'); const j=await r.json(); setRows(j.contacts||[]); }
+    try{ 
+      const { data, error } = await supabase.from('crm_contacts').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      setRows(data||[]);
+    }
     finally{ setLoading(false); }
   };
   React.useEffect(()=>{load()},[]);
@@ -20,12 +25,22 @@ export default function CRMPanel(){
 
   const enrichViaApollo=async()=>{
     if(!company) return;
-    await fetch('/api/enrichment/apollo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({company})});
-    await load();
+    try {
+      const { error } = await supabase.functions.invoke('enrich-apollo', { 
+        body: { company } 
+      });
+      if (error) throw error;
+      await load();
+    } catch(e) { console.error('Apollo enrichment failed:', e); }
   };
   const enrichFallback=async()=>{
     if(!company) return;
-    await fetch('/api/enrichment/phantombuster',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({company,titles:["Head of Supply Chain","Director of Logistics","Procurement Manager"]})});
+    try {
+      const { error } = await supabase.functions.invoke('enrich-phantombuster', { 
+        body: { company, titles: ["Head of Supply Chain","Director of Logistics","Procurement Manager"] } 
+      });
+      if (error) throw error;
+    } catch(e) { console.error('PhantomBuster enrichment failed:', e); }
   };
 
   return (

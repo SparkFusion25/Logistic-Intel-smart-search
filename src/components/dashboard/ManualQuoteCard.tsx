@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { FileText, Plane, Ship, DollarSign } from 'lucide-react';
-import { quoteAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 export function ManualQuoteCard() {
@@ -34,28 +34,34 @@ export function ManualQuoteCard() {
 
     setLoading(true);
     try {
-      const result = await quoteAPI.createQuote({
-        pol: pol.trim(),
-        pod: pod.trim(),
-        mode,
-        commodity: commodity.trim(),
-        total_cost: cost,
-        currency: 'USD'
-      });
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
 
-      if (result.ok && result.data) {
-        toast({
-          title: "Quote generated successfully",
-          description: `Quote ID: ${result.data.id}`,
-        });
-        // Reset form
-        setPol('');
-        setPod('');
-        setCommodity('');
-        setTotalCost('');
-      } else {
-        throw new Error(result.error?.message || 'Failed to generate quote');
-      }
+      const { data, error } = await supabase.from('quotes').insert({
+        creator_id: user.data.user.id,
+        org_id: user.data.user.id, // Use user ID as org_id for now
+        amount: cost,
+        status: 'draft',
+        line_items: {
+          pol: pol.trim(),
+          pod: pod.trim(),
+          mode,
+          commodity: commodity.trim(),
+          currency: 'USD'
+        }
+      }).select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Quote generated successfully",
+        description: `Quote ID: ${data[0]?.id || 'N/A'}`,
+      });
+      // Reset form
+      setPol('');
+      setPod('');
+      setCommodity('');
+      setTotalCost('');
     } catch (error) {
       toast({
         title: "Quote generation failed",
