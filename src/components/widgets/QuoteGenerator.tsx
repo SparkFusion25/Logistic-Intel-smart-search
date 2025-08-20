@@ -17,8 +17,10 @@ export default function QuoteGenerator(){
       const r=await fetch('/api/widgets/quote/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(f)});
       const j=await r.json();
       const html=j?.html||'<p>Preview error</p>';
-      const w=window.open('about:blank','_blank'); if(!w) return;
-      w.document.open(); w.document.write(html); w.document.close();
+      if (typeof window !== 'undefined') {
+        const w=window.open('about:blank','_blank'); if(!w) return;
+        w.document.open(); w.document.write(html); w.document.close();
+      }
     } finally{ setLoading(false); }
   }
 

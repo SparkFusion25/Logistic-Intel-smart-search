@@ -161,7 +161,7 @@ export function useNotifications() {
       await navigator.serviceWorker.ready;
 
       // Get VAPID public key from environment
-      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidPublicKey) {
         console.error('VAPID public key not found');
         return false;

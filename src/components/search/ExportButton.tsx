@@ -12,9 +12,11 @@ interface ExportButtonProps {
 export function ExportButton({ data, searchQuery, filters }: ExportButtonProps) {
   const exportToCSV = () => {
     if (!data || data.length === 0) {
-      alert('No data to export')
+      if (typeof window !== 'undefined') alert('No data to export')
       return
     }
+
+    if (typeof window === 'undefined') return;
 
     // Get all unique keys from the data
     const allKeys = Array.from(new Set(data.flatMap(item => Object.keys(item))))
@@ -50,9 +52,11 @@ export function ExportButton({ data, searchQuery, filters }: ExportButtonProps) 
 
   const exportToJSON = () => {
     if (!data || data.length === 0) {
-      alert('No data to export')
+      if (typeof window !== 'undefined') alert('No data to export')
       return
     }
+
+    if (typeof window === 'undefined') return;
 
     const exportData = {
       exportDate: new Date().toISOString(),
