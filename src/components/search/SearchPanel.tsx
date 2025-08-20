@@ -19,7 +19,7 @@ function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
     >{label}</button>
   );
   return (
-    <div className="flex items-center gap-3 p-2 bg-white/50 backdrop-blur-sm rounded-full border border-white/30">
+    <div className="flex items-center gap-2">
       {Btn('all','All')}
       {Btn('air','Air ✈')}
       {Btn('ocean','Ocean 🚢')}
@@ -112,29 +112,46 @@ export default function SearchPanel(){
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Premium Search Header */}
-      <div className="glass p-6 flex flex-col md:flex-row md:items-center gap-6">
-        <ModeToggle mode={mode} setMode={setMode}/>
-        <div className="flex-1"/>
-        <div className="relative w-full md:w-96">
-          <input
-            value={q}
-            onChange={(e)=>setQ(e.target.value)}
-            onKeyDown={(e)=>{if(e.key==='Enter') run();}}
-            placeholder="Search companies, HS codes, carriers…"
-            className="w-full h-12 rounded-full bg-white/90 backdrop-blur-sm border-2 border-white/30 px-6 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:shadow-glow transition-all duration-300 shadow-premium"
-          />
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-            🔍
+      {/* Unified Search Card */}
+      <div className="card-glass p-8">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="icon-circle-gradient">
+            <div className="text-white text-lg">🔍</div>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Search Trade Intelligence</h2>
+            <p className="text-muted-foreground">Find companies, shipments, and trade patterns worldwide</p>
           </div>
         </div>
-        <button 
-          onClick={()=>run()} 
-          className="btn-primary px-6 py-3 h-12 disabled:opacity-60" 
-          disabled={loading}
-        >
-          {loading ? 'Searching...' : 'Search'}
-        </button>
+
+        <div className="space-y-6">
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              value={q}
+              onChange={(e)=>setQ(e.target.value)}
+              onKeyDown={(e)=>{if(e.key==='Enter') run();}}
+              placeholder="Search companies, HS codes, carriers, products..."
+              className="w-full h-14 rounded-2xl bg-background border-2 border-border px-6 pr-32 text-base placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300"
+            />
+            <button 
+              onClick={()=>run()} 
+              className="absolute right-2 top-2 btn-primary px-6 py-2.5 h-10 disabled:opacity-60 text-sm font-medium" 
+              disabled={loading}
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
+
+          {/* Mode Toggle */}
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-foreground">Transport Mode:</span>
+            <ModeToggle mode={mode} setMode={setMode}/>
+          </div>
+
+          {/* Filters */}
+          <AdvancedFilters value={filters as Filters} onChange={setFilters as any} onApply={onApplyFilters} onClear={onClearFilters}/>
+        </div>
       </div>
 
       {/* AI Assist */}
@@ -145,9 +162,6 @@ export default function SearchPanel(){
         onPickSuggestion={(s)=>{ setQ(s); run(); }}
         onApplyStructured={(f)=>{ setFilters((x)=>({ ...(x as Filters), ...(f||{}) })); run(); }}
       />
-
-      {/* Filters */}
-      <AdvancedFilters value={filters as Filters} onChange={setFilters as any} onApply={onApplyFilters} onClear={onClearFilters}/>
 
       {/* Summary / load more */}
       <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-border">
