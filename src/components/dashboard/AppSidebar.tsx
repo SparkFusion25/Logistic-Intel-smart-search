@@ -22,15 +22,15 @@ import { SidebarBrand } from "./SidebarBrand"
 
 const navigationItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Search", url: "/search", icon: Search },
-  { title: "CRM", url: "/crm", icon: Contact },
+  { title: "Search", url: "/search-simple", icon: Search },
+  { title: "CRM", url: "/crm-simple", icon: Contact },
   { title: "Email", url: "/dashboard/email", icon: Mail },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
   { title: "Campaigns", url: "/dashboard/campaigns", icon: Flag },
   { title: "Templates", url: "/dashboard/campaigns/templates", icon: FileText },
   { title: "Campaign Analytics", url: "/dashboard/campaigns/analytics", icon: LineChart },
   { title: "Follow‑Ups", url: "/dashboard/campaigns/follow-ups", icon: Clock8 },
-  { title: "Widgets", url: "/widgets", icon: Boxes },
+  { title: "Widgets", url: "/widgets-simple", icon: Boxes },
   { title: "Quote Generator", url: "/dashboard/widgets/quote", icon: FileText },
   { title: "Tariff Calculator", url: "/dashboard/widgets/tariff", icon: Calculator },
   { title: "Benchmark", url: "/dashboard/widgets/benchmark", icon: Activity },
