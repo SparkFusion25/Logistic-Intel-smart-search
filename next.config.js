@@ -1,27 +1,8 @@
-module.exports = {
+/* Clean next config — remove unsupported experimental flags that break Next 14 builds. */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  webpack: (config, { isServer }) => {
-    // Handle .mjs files
-    config.module.rules.push({
-      test: /\.mjs$/,
-      include: /node_modules/,
-      type: 'javascript/auto',
-    });
-    
-    // Fix for onnxruntime-web and other ES modules
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
-      crypto: false,
-    };
-    
-    return config;
-  },
+  /* If you previously had experimental.appDir, it is not needed for Pages Router projects. */
+  experimental: {}
 };
+module.exports = nextConfig;
