@@ -23,14 +23,7 @@ const queryClient = new QueryClient();
 // Dashboard Page Wrappers
 const DashboardPage = () => <DashboardOverview />;
 
-const SearchPage = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Global Trade Search</h1>
-    </div>
-    <SearchPanel />
-  </div>
-);
+const SearchPage = () => <SearchPanel />;
 
 const CRMPage = () => (
   <div className="space-y-6">

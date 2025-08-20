@@ -111,7 +111,7 @@ export default function SearchPanel(){
   const onClearFilters = () => run();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       {/* Unified Search Card */}
       <div className="card-glass p-8">
         {/* Premium Title */}
