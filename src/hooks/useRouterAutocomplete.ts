@@ -23,7 +23,7 @@ export function useRouterAutocomplete(options: UseRouterAutocompleteOptions = {}
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { get } = useAPI();
+  const { request } = useAPI();
 
   const searchRoutes = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < minLength) {
@@ -35,9 +35,13 @@ export function useRouterAutocomplete(options: UseRouterAutocompleteOptions = {}
     setError(null);
 
     try {
-      const { data, error: apiError } = await get<{ routes: Route[] }>(
-        `/api/routes/autocomplete?q=${encodeURIComponent(searchQuery)}&limit=${limit}`
+      const response = await request(
+        `/api/routes/autocomplete`, 
+        { params: { q: searchQuery, limit } }
       );
+      
+      const data = response.data;
+      const apiError = response.error;
 
       if (apiError) {
         setError(apiError);

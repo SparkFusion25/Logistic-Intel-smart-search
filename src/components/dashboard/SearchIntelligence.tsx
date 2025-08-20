@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Autocomplete } from "@/components/ui/autocomplete"
 import { useToast } from "@/hooks/use-toast"
 import { useAPI } from "@/hooks/useAPI"
-import { useRouterAutocomplete } from "@/hooks/useRouterAutocomplete"
+import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete"
 import { useCommodityAutocomplete } from "@/hooks/useCommodityAutocomplete"
 import { CompanyCard } from "./CompanyCard"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
@@ -27,10 +27,10 @@ export function SearchIntelligence() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("companies")
   const [hasSearched, setHasSearched] = useState(false)
-  const [selectedCompany, setSelectedCompany] = useState(null)
+  const [selectedCompany, setSelectedCompany] = useState<any>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [watchlist, setWatchlist] = useState(new Set())
-  const [searchResults, setSearchResults] = useState({ total: 0, items: [] })
+  const [searchResults, setSearchResults] = useState<{ total: number; items: any[] }>({ total: 0, items: [] })
   const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
     mode: "all",
@@ -63,9 +63,9 @@ export function SearchIntelligence() {
     is_lcl: "all"
   })
   const { toast } = useToast()
-  const { makeRequest } = useAPI()
-  const { countryOptions, cityOptions, loadingCountries, loadingCities } = useRouterAutocomplete()
-  const { searchCommodities, loading: commoditiesLoading } = useCommodityAutocomplete()
+  const { request } = useAPI()
+  const { countryOptions, cityOptions, loadingCountries, loadingCities } = useLocationAutocomplete()
+  const { searchCommodities, isLoading: commoditiesLoading } = useCommodityAutocomplete()
 
   // All data now comes from real API - no hardcoded searches
 
@@ -86,7 +86,7 @@ export function SearchIntelligence() {
     setHasSearched(true)
     
     try {
-      const response = await makeRequest('/search-run', {
+      const response = await request('/search-run', {
         method: 'POST',
         body: {
           q: searchQuery,
@@ -98,10 +98,13 @@ export function SearchIntelligence() {
       })
       
       if (response) {
-        setSearchResults(response)
+        setSearchResults({
+          total: response.total || 0,
+          items: response.data || []
+        })
         toast({
           title: "Search Complete",
-          description: `Found ${response.total} results for "${searchQuery}"`
+          description: `Found ${response.total || 0} results for "${searchQuery}"`
         })
       }
     } catch (error) {
@@ -159,7 +162,7 @@ export function SearchIntelligence() {
       
       console.log('🔧 SearchIntelligence: Request payload:', requestPayload)
       
-      const response = await makeRequest('/crm-add-from-search', {
+      const response = await request('/crm-add-from-search', {
         method: 'POST',
         body: requestPayload
       })
