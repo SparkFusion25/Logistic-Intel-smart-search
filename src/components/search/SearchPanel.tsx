@@ -13,15 +13,13 @@ function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
   const Btn=(m:Mode,label:string)=>(
     <button
       onClick={()=>setMode(m)}
-      className={`px-3 py-1.5 rounded-full border transition-all duration-200 ${
-        mode===m
-          ?'bg-primary text-primary-foreground border-primary shadow-sm' 
-          :'bg-white border-border hover:bg-muted hover:border-border-hover'
+      className={`pill-glossy font-medium text-sm ${
+        mode===m ? 'active' : ''
       }`}
     >{label}</button>
   );
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3 p-2 bg-white/50 backdrop-blur-sm rounded-full border border-white/30">
       {Btn('all','All')}
       {Btn('air','Air ✈')}
       {Btn('ocean','Ocean 🚢')}
@@ -30,35 +28,60 @@ function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
 }
 
 function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(row:UnifiedRow)=>void }){
+  const companyInitial = r.unified_company_name?.charAt(0).toUpperCase() || '?';
+  
   return (
-    <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-3 shadow-card hover:shadow-medium transition-all duration-200 hover:scale-[1.01]">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-1 rounded-full border border-border bg-muted text-muted-foreground font-medium">
+    <div className="card-glass p-6 flex flex-col gap-4 hover:scale-[1.02] transition-all duration-300 group">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-glow">
+            {companyInitial}
+          </div>
+          <div className="pill-glossy text-xs font-medium px-3 py-1">
             {r.mode?upper(r.mode):'—'}
-          </span>
-          <div className="font-semibold text-sm md:text-base text-foreground">
+          </div>
+          <div className="font-bold text-base text-foreground">
             <Highlight text={r.unified_company_name} query={q}/>
           </div>
         </div>
         <ConfidenceIndicator score={r?.score!=null?Number(r.score)*100:null}/>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted-foreground">
-        <div><span className="font-medium">HS:</span> {r.hs_code||'—'}</div>
-        <div><span className="font-medium">Origin:</span> {r.origin_country||'—'}</div>
-        <div><span className="font-medium">Dest:</span> {r.destination_city||r.destination_country||'—'}</div>
-        <div><span className="font-medium">Date:</span> {r.unified_date||'—'}</div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+        <div className="flex flex-col">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">HS Code</span>
+          <span className="font-semibold">{r.hs_code||'—'}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Origin</span>
+          <span className="font-semibold">{r.origin_country||'—'}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Destination</span>
+          <span className="font-semibold">{r.destination_city||r.destination_country||'—'}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Date</span>
+          <span className="font-semibold">{r.unified_date||'—'}</span>
+        </div>
       </div>
-      <div className="text-xs line-clamp-2 text-muted-foreground">{r.description||'No description'}</div>
-      <div className="flex items-center gap-2 pt-1">
+      
+      <div className="text-sm text-muted-foreground line-clamp-2 bg-muted/50 p-3 rounded-lg">
+        {r.description||'No description available'}
+      </div>
+      
+      <div className="flex items-center gap-3 pt-2">
         <button 
-          className="rounded-lg bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium hover:opacity-90 transition-opacity shadow-sm" 
+          className="btn-gradient px-4 py-2 text-sm font-medium rounded-lg group-hover:scale-105 transition-transform" 
           onClick={()=>onAddToCrm(r)}
         >
-          Add to CRM
+          + Add to CRM
         </button>
-        <button className="rounded-lg bg-muted border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors">
-          Export
+        <button className="pill-glossy px-4 py-2 text-sm font-medium hover:scale-105 transition-transform">
+          View Trade
+        </button>
+        <button className="pill-glossy px-4 py-2 text-sm font-medium hover:scale-105 transition-transform">
+          Quote
         </button>
       </div>
     </div>
@@ -89,25 +112,28 @@ export default function SearchPanel(){
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Top controls */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 bg-card p-4 rounded-xl border border-border shadow-card">
+      {/* Premium Search Header */}
+      <div className="glass p-6 flex flex-col md:flex-row md:items-center gap-6">
         <ModeToggle mode={mode} setMode={setMode}/>
         <div className="flex-1"/>
-        <div className="w-full md:w-96">
+        <div className="relative w-full md:w-96">
           <input
             value={q}
             onChange={(e)=>setQ(e.target.value)}
             onKeyDown={(e)=>{if(e.key==='Enter') run();}}
             placeholder="Search companies, HS codes, carriers…"
-            className="w-full rounded-lg bg-background border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="w-full h-12 rounded-full bg-white/90 backdrop-blur-sm border-2 border-white/30 px-6 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:shadow-glow transition-all duration-300 shadow-premium"
           />
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+            🔍
+          </div>
         </div>
         <button 
           onClick={()=>run()} 
-          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-60 font-medium shadow-sm transition-opacity" 
+          className="btn-primary px-6 py-3 h-12 disabled:opacity-60" 
           disabled={loading}
         >
-          Search
+          {loading ? 'Searching...' : 'Search'}
         </button>
       </div>
 
@@ -139,8 +165,8 @@ export default function SearchPanel(){
         )}
       </div>
 
-      {/* Results */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      {/* Premium Results Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {items.map((r)=>(<ResultRow key={r.id} r={r} q={q} onAddToCrm={onAddToCrm}/>))}
       </div>
     </div>

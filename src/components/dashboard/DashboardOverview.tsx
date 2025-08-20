@@ -37,25 +37,41 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Additional Quick Actions */}
-      <div className="card-glass p-6">
-        <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
+      {/* Premium Quick Actions */}
+      <div className="card-glass p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="icon-circle-gradient">
+            <div className="text-white">⚡</div>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-foreground">Quick Actions</h3>
+            <p className="text-sm text-muted-foreground">Streamline your workflow</p>
+          </div>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="btn-secondary flex flex-col items-center gap-2 h-20">
-            <div className="text-primary">📊</div>
-            <span className="text-sm">View Reports</span>
+          <button className="glass p-6 flex flex-col items-center gap-3 h-24 hover:scale-105 transition-all duration-300 group">
+            <div className="icon-circle-gradient group-hover:scale-110 transition-transform">
+              <div className="text-white text-lg">📊</div>
+            </div>
+            <span className="text-sm font-medium">View Reports</span>
           </button>
-          <button className="btn-secondary flex flex-col items-center gap-2 h-20">
-            <div className="text-primary">📧</div>
-            <span className="text-sm">Send Campaign</span>
+          <button className="glass p-6 flex flex-col items-center gap-3 h-24 hover:scale-105 transition-all duration-300 group">
+            <div className="icon-circle-gradient group-hover:scale-110 transition-transform">
+              <div className="text-white text-lg">🚀</div>
+            </div>
+            <span className="text-sm font-medium">Create Campaign</span>
           </button>
-          <button className="btn-secondary flex flex-col items-center gap-2 h-20">
-            <div className="text-primary">📈</div>
-            <span className="text-sm">Analytics</span>
+          <button className="glass p-6 flex flex-col items-center gap-3 h-24 hover:scale-105 transition-all duration-300 group">
+            <div className="icon-circle-gradient group-hover:scale-110 transition-transform">
+              <div className="text-white text-lg">📈</div>
+            </div>
+            <span className="text-sm font-medium">Analytics</span>
           </button>
-          <button className="btn-secondary flex flex-col items-center gap-2 h-20">
-            <div className="text-primary">⚙️</div>
-            <span className="text-sm">Settings</span>
+          <button className="glass p-6 flex flex-col items-center gap-3 h-24 hover:scale-105 transition-all duration-300 group">
+            <div className="icon-circle-gradient group-hover:scale-110 transition-transform">
+              <div className="text-white text-lg">⚙️</div>
+            </div>
+            <span className="text-sm font-medium">Settings</span>
           </button>
         </div>
       </div>

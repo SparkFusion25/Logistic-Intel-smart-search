@@ -14,10 +14,10 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, trend }: StatCardProps) {
   return (
-    <div className="card-glass p-6 animate-fade-in-up">
+    <div className="card-glass p-6 animate-fade-in-up hover:animate-pulse-glow">
       <div className="flex items-center justify-between mb-4">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <div className="text-primary">
+        <div className="icon-circle-gradient">
+          <div className="text-white">
             {icon}
           </div>
         </div>
@@ -31,8 +31,8 @@ function StatCard({ title, value, icon, trend }: StatCardProps) {
         )}
       </div>
       <div className="space-y-1">
-        <p className="text-2xl font-bold text-foreground">{value}</p>
-        <p className="text-sm text-muted-foreground">{title}</p>
+        <p className="text-3xl font-bold gradient-text animate-count-up">{value}</p>
+        <p className="text-sm text-muted-foreground font-medium">{title}</p>
       </div>
     </div>
   );
