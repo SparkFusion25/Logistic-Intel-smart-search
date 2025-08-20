@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Shell from '../../../components/layout/DashboardShell';
+import Shell from '@/components/layout/DashboardShell';
 
 export default function QuoteWidgetPage(){
   return (

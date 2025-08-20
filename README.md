@@ -1,27 +1,34 @@
-# Valesco — Logistics Intel + CRM + Widgets
+# Logistic Intel Smart Search
 
-## Run locally
-1) Copy `.env.local.example` to `.env.local` and paste your keys.
-2) Install & run:
+AI-powered logistics intelligence platform with CRM, search, and automation tools.
+
+## Architecture
+
+- **React Router pages**: Located in `src/rr/pages/` - render client-side only via BrowserRouter
+- **Next.js pages**: Located in `src/pages/` - SSR/ISR capable marketing/API surfaces
+- **API routes**: Located in `src/pages/api/` - server-side endpoints
+
+## Features
+
+- 🔍 Smart search with Air/Ocean filtering and confidence scoring
+- 👥 CRM with Apollo and PhantomBuster enrichment
+- 📧 Email tracking and campaign management
+- 📊 Quote generator with PDF export
+- 🧮 Tariff calculator with HS code lookup
+- 🔐 Plan gating (Free/Pro/Enterprise)
+
+## Development
+
 ```bash
-pnpm i
-pnpm dev # http://localhost:3000
+npm install
+npm run dev
 ```
 
-## New pages
-- `/widgets` — hub
-- `/widgets/tariff` — Tariff Calculator (estimates, API fallback)
-- `/widgets/quote` — Quote Generator (HTML preview/export)
-- `/api/health` — deploy health check
+## Deployment
 
-## Tariff Calculator
-- Uses Avalara/Flexport if keys exist; otherwise chapter-based estimator.
-- *Not a binding ruling.*
+```bash
+npm run build
+npm start
+```
 
-## Quote Generator
-- Client fills form → server returns styled HTML → opens in new tab for print/PDF.
-
-## Deploy (Vercel)
-- Project → Settings → Environment Variables → set all from `.env.local.example`.
-- Deploy branch: `main`.
-- After deploy: check `/api/health`, then `/search`, `/crm`, `/widgets`.
+Built with Next.js 14, React 18, TypeScript, and Tailwind CSS.
