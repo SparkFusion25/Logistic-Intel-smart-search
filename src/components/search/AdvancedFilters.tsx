@@ -1,119 +1,171 @@
 // src/components/search/AdvancedFilters.tsx
-import React from "react";
-import AutocompleteInput from "@/components/inputs/AutocompleteInput";
-import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete";
+import React, { useEffect, useMemo, useState } from 'react';
+import AutocompleteInput from '@/components/inputs/AutocompleteInput';
+import type { Filters } from '@/types/search';
 
-export type Filters = {
-  date_from?: string | null;
-  date_to?: string | null;
-  hs_code?: string | null;
-  origin_country?: string | null;
-  destination_country?: string | null;
-  destination_city?: string | null;
-  carrier?: string | null;
-};
+/**
+ * AdvancedFilters
+ * - Mobile-first, collapsible-ready container (keeps DOM light)
+ * - HS code, date range, geo (origin/destination), carrier
+ * - Debounced autocomplete inputs for countries/cities
+ * - No hard coupling to search logic — parent owns value + onChange
+ */
 
-type Props = {
-  value: Filters;
-  onChange: (next: Filters) => void;
-  onApply?: () => void;
-  dense?: boolean; // use true inside the mobile drawer
-  className?: string;
-};
+const field = (v: any) => (typeof v === 'string' ? v : v == null ? '' : String(v));
 
-const Input: React.FC<
-  React.InputHTMLAttributes<HTMLInputElement> & { label?: string }
-> = ({ label, ...props }) => (
-  <label className="block space-y-1">
-    {label ? <span className="text-xs text-ink-300">{label}</span> : null}
-    <input
-      {...props}
-      className={`w-full px-3 py-2 rounded-xl2 bg-white/5 text-white placeholder:text-ink-300 outline-none border border-white/10 focus:border-brand-400 ${props.className || ""}`}
-    />
-  </label>
-);
+const COUNTRIES = [
+  'United States', 'China', 'Mexico', 'Germany', 'United Kingdom', 'India', 'Vietnam',
+  'Canada', 'Brazil', 'France', 'Italy', 'Spain', 'Japan', 'Korea'
+];
+
+const CITIES = [
+  'Los Angeles', 'New York', 'Chicago', 'Houston', 'Dallas', 'Miami',
+  'Atlanta', 'Seattle', 'San Francisco', 'Savannah', 'Long Beach'
+];
 
 export default function AdvancedFilters({
   value,
   onChange,
   onApply,
-  dense,
-  className,
-}: Props) {
-  const { searchCountries, searchCities } = useLocationAutocomplete();
+  onClear
+}: {
+  value?: Filters;
+  onChange?: (next: Filters) => void;
+  onApply?: () => void;
+  onClear?: () => void;
+}) {
+  const [local, setLocal] = useState<Filters>({
+    date_from: value?.date_from ?? null,
+    date_to: value?.date_to ?? null,
+    hs_code: value?.hs_code ?? '',
+    origin_country: value?.origin_country ?? '',
+    destination_country: value?.destination_country ?? '',
+    destination_city: value?.destination_city ?? '',
+    carrier: value?.carrier ?? ''
+  });
+
+  // keep local state in sync if parent changes (e.g., AI applied filters)
+  useEffect(() => {
+    setLocal({
+      date_from: value?.date_from ?? null,
+      date_to: value?.date_to ?? null,
+      hs_code: value?.hs_code ?? '',
+      origin_country: value?.origin_country ?? '',
+      destination_country: value?.destination_country ?? '',
+      destination_city: value?.destination_city ?? '',
+      carrier: value?.carrier ?? ''
+    });
+  }, [
+    value?.date_from,
+    value?.date_to,
+    value?.hs_code,
+    value?.origin_country,
+    value?.destination_country,
+    value?.destination_city,
+    value?.carrier
+  ]);
+
+  const applyDisabled = useMemo(() => false, [local]);
+
+  const push = (next: Partial<Filters>) => {
+    const merged = { ...local, ...next } as Filters;
+    setLocal(merged);
+    onChange?.(merged);
+  };
+
+  const clear = () => {
+    const cleared: Filters = {
+      date_from: null,
+      date_to: null,
+      hs_code: '',
+      origin_country: '',
+      destination_country: '',
+      destination_city: '',
+      carrier: ''
+    };
+    setLocal(cleared);
+    onChange?.(cleared);
+    onClear?.();
+  };
 
   return (
-    <div className={className}>
-      <div className={dense ? "space-y-2" : "space-y-3"}>
-        <Input
-          label="HS Code"
-          placeholder="e.g., 8471"
-          value={value.hs_code ?? ""}
-          onChange={(e) => onChange({ ...value, hs_code: e.target.value || null })}
-        />
-
-        <AutocompleteInput
-          label="Origin Country"
-          placeholder="Type to search…"
-          value={value.origin_country ?? ""}
-          onChange={(v) => onChange({ ...value, origin_country: v || null })}
-          onSelect={(v) => onChange({ ...value, origin_country: v || null })}
-          fetchOptions={(term) => searchCountries(term, "origin")}
-          minChars={1}
-        />
-
-        <AutocompleteInput
-          label="Destination Country"
-          placeholder="Type to search…"
-          value={value.destination_country ?? ""}
-          onChange={(v) => onChange({ ...value, destination_country: v || null })}
-          onSelect={(v) => onChange({ ...value, destination_country: v || null })}
-          fetchOptions={(term) => searchCountries(term, "destination")}
-          minChars={1}
-        />
-
-        <AutocompleteInput
-          label="Destination City"
-          placeholder="e.g., Los Angeles"
-          value={value.destination_city ?? ""}
-          onChange={(v) => onChange({ ...value, destination_city: v || null })}
-          onSelect={(v) => onChange({ ...value, destination_city: v || null })}
-          fetchOptions={(term) =>
-            searchCities(value.destination_country ?? null, term)
-          }
-          minChars={2}
-        />
-
-        <Input
-          label="Carrier"
-          placeholder="e.g., Maersk / AA"
-          value={value.carrier ?? ""}
-          onChange={(e) => onChange({ ...value, carrier: e.target.value || null })}
-        />
-
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            label="From"
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-3 md:p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* Date range */}
+        <div className="flex gap-2">
+          <input
             type="date"
-            value={value.date_from ?? ""}
-            onChange={(e) => onChange({ ...value, date_from: e.target.value || null })}
+            value={field(local.date_from)}
+            onChange={(e) => push({ date_from: e.target.value || null })}
+            className="flex-1 rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
+            placeholder="From"
           />
-          <Input
-            label="To"
+          <input
             type="date"
-            value={value.date_to ?? ""}
-            onChange={(e) => onChange({ ...value, date_to: e.target.value || null })}
+            value={field(local.date_to)}
+            onChange={(e) => push({ date_to: e.target.value || null })}
+            className="flex-1 rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
+            placeholder="To"
           />
         </div>
 
-        {onApply ? (
-          <button
-            className="w-full mt-1 px-3 py-2 rounded-xl2 bg-brand-500 hover:bg-brand-400"
-            onClick={onApply}
-          >
-            Apply Filters
-          </button>
-        ) : null}
+        {/* HS code */}
+        <input
+          value={field(local.hs_code)}
+          onChange={(e) => push({ hs_code: e.target.value })}
+          className="w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
+          placeholder="HS code"
+          inputMode="numeric"
+        />
+
+        {/* Origin country */}
+        <AutocompleteInput
+          value={field(local.origin_country)}
+          onChange={(v) => push({ origin_country: v })}
+          options={COUNTRIES.map((l) => ({ label: l }))}
+          placeholder="Origin country"
+        />
+
+        {/* Destination country */}
+        <AutocompleteInput
+          value={field(local.destination_country)}
+          onChange={(v) => push({ destination_country: v })}
+          options={COUNTRIES.map((l) => ({ label: l }))}
+          placeholder="Destination country"
+        />
+
+        {/* Destination city */}
+        <AutocompleteInput
+          value={field(local.destination_city)}
+          onChange={(v) => push({ destination_city: v })}
+          options={CITIES.map((l) => ({ label: l }))}
+          placeholder="Destination city"
+        />
+
+        {/* Carrier */}
+        <input
+          value={field(local.carrier)}
+          onChange={(e) => push({ carrier: e.target.value })}
+          className="w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
+          placeholder="Carrier"
+        />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          className="px-3 py-2 rounded-2xl bg-blue-600 hover:bg-blue-500"
+          disabled={applyDisabled}
+          onClick={onApply}
+        >
+          Apply filters
+        </button>
+        <button
+          className="px-3 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10"
+          onClick={clear}
+        >
+          Clear
+        </button>
+        <span className="text-xs opacity-70">Mobile‑ready.</span>
       </div>
     </div>
   );

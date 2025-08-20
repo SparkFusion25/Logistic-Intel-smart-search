@@ -1,332 +1,121 @@
 // src/components/search/SearchPanel.tsx
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Search as SearchIcon, Filter, X, Loader2, Copy, ExternalLink } from "lucide-react";
-import AdvancedFilters, { type Filters as FiltersType } from "@/components/search/AdvancedFilters";
+import React from 'react';
+import { useUnifiedSearch } from '@/hooks/useUnifiedSearch';
+import type { Mode, Filters, UnifiedRow } from '@/types/search';
+import AdvancedFilters from './AdvancedFilters';
+import ConfidenceIndicator from './ConfidenceIndicator';
+import { Highlight } from '@/lib/highlight';
+import { upper } from '@/lib/strings';
+import AIAssistBar from '@/components/search/AIAssistBar';
 
-type Mode = "all" | "ocean" | "air";
+function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
+  const Btn=(m:Mode,label:string)=>(
+    <button
+      onClick={()=>setMode(m)}
+      className={`px-3 py-1.5 rounded-full border ${mode===m?'bg-blue-600 border-blue-400':'bg-white/5 border-white/10 hover:bg-white/10'}`}
+    >{label}</button>
+  );
+  return (
+    <div className="flex items-center gap-2">
+      {Btn('all','All')}
+      {Btn('air','Air ✈')}
+      {Btn('ocean','Ocean 🚢')}
+    </div>
+  );
+}
 
-type Row = {
-  id: string;
-  mode: Mode | null;
-  unified_date: string | null;
-  unified_company_name: string | null;
-  origin_country: string | null;
-  destination_country: string | null;
-  destination_city: string | null;
-  hs_code: string | null;
-  description: string | null;
-  vessel_name: string | null;
-  bol_number: string | null;
-  unified_carrier: string | null;
-  container_count: number | null;
-  gross_weight_kg: number | null;
-  value_usd: number | null;
-  score: number | null;
-  total_count: number | null;
-};
+function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(row:UnifiedRow)=>void }){
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-3 md:p-4 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-0.5 rounded-full border border-white/10 bg-white/5">{r.mode?upper(r.mode):'—'}</span>
+          <div className="font-semibold text-sm md:text-base"><Highlight text={r.unified_company_name} query={q}/></div>
+        </div>
+        <ConfidenceIndicator score={r?.score!=null?Number(r.score)*100:null}/>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs opacity-85">
+        <div><span className="opacity-60">HS:</span> {r.hs_code||'—'}</div>
+        <div><span className="opacity-60">Origin:</span> {r.origin_country||'—'}</div>
+        <div><span className="opacity-60">Dest:</span> {r.destination_city||r.destination_country||'—'}</div>
+        <div><span className="opacity-60">Date:</span> {r.unified_date||'—'}</div>
+      </div>
+      <div className="text-xs line-clamp-2 opacity-80">{r.description||'No description'}</div>
+      <div className="flex items-center gap-2 pt-1">
+        <button className="rounded-xl bg-white/5 border border-white/10 px-2 py-1 text-xs hover:bg-white/10" onClick={()=>onAddToCrm(r)}>Add to CRM</button>
+        <button className="rounded-xl bg-white/5 border border-white/10 px-2 py-1 text-xs hover:bg-white/10">Export</button>
+      </div>
+    </div>
+  );
+}
 
-/** Small UI bits */
-const Chip: React.FC<{ active?: boolean; onClick?: () => void; children: React.ReactNode }> = ({
-  active,
-  onClick,
-  children,
-}) => (
-  <button
-    onClick={onClick}
-    className={`px-3 py-1.5 rounded-full text-sm border transition ${
-      active ? "bg-white/10 text-white border-white/20" : "bg-white/5 text-ink-300 border-white/10 hover:text-white"
-    }`}
-  >
-    {children}
-  </button>
-);
+export default function SearchPanel(){
+  const { q,setQ,mode,setMode,filters,setFilters,items,total,loading,error,hasMore,run,loadMore }=useUnifiedSearch({ initialMode:'all', initialLimit:25 });
 
-/** Self‑contained Shipment Card (no external imports) */
-const ShipmentCard: React.FC<{
-  row: Row;
-  onAddToCrm?: (row: Row) => void;
-  onViewContacts?: (row: Row) => void;
-  onExport?: (row: Row) => void;
-  compact?: boolean;
-  loading?: boolean;
-}> = ({ row, onAddToCrm, onViewContacts, onExport, compact, loading }) => {
-  const title = row.unified_company_name || row.vessel_name || row.unified_carrier || "Shipment";
-  const lane = (row.origin_country || "—") + " → " + (row.destination_city || row.destination_country || "—");
-  const modeBadge = row.mode ? (row.mode === "air" ? "✈ AIR" : "🚢 OCEAN") : "—";
+  // Add-to-CRM
+  const onAddToCrm=async(row:UnifiedRow)=>{
+    try{
+      await fetch('/api/crm/contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        company_name:row.unified_company_name,
+        mode:row.mode,
+        hs_code:row.hs_code,
+        origin_country:row.origin_country,
+        destination_country:row.destination_country,
+        destination_city:row.destination_city,
+        carrier:row.unified_carrier,
+        bol_number:row.bol_number,
+        vessel_name:row.vessel_name,
+        last_seen:row.unified_date,
+        source:'search_unified'
+      })});
+    }catch{}
+  };
+
+  const onApplyFilters=()=>run(true);
+  const onClearFilters=()=>run(true);
 
   return (
-    <article data-card className={`p-4 ${compact ? "py-3" : ""}`} aria-busy={!!loading}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-xs md:text-sm text-ink-300">
-            {modeBadge} • {row.unified_date || "—"}
-          </div>
-          <div className="text-base md:text-lg font-semibold leading-tight">{title}</div>
-          <div className="text-sm text-ink-300">{lane}</div>
+    <div className="flex flex-col gap-4">
+      {/* Top controls */}
+      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+        <ModeToggle mode={mode} setMode={setMode}/>
+        <div className="flex-1"/>
+        <div className="w-full md:w-96">
+          <input
+            value={q}
+            onChange={(e)=>setQ(e.target.value)}
+            onKeyDown={(e)=>{if(e.key==='Enter') run(true);}}
+            placeholder="Search companies, HS codes, carriers…"
+            className="w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
+          />
         </div>
-
-        {/* Right stats */}
-        <div className="text-right text-sm">
-          {row.value_usd ? <div>${Number(row.value_usd).toLocaleString()}</div> : null}
-          {row.gross_weight_kg ? <div>{Number(row.gross_weight_kg).toLocaleString()} kg</div> : null}
-          {row.container_count ? <div>{row.container_count} cntrs</div> : null}
-        </div>
+        <button onClick={()=>run(true)} className="px-3 py-2 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60" disabled={loading}>Search</button>
       </div>
 
-      {/* Meta */}
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-        {row.hs_code ? (
-          <div className="inline-flex items-center gap-1">
-            <span className="text-ink-300">HS</span>
-            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">{row.hs_code}</code>
-          </div>
-        ) : null}
-        {row.bol_number ? (
-          <div className="inline-flex items-center gap-1">
-            <span className="text-ink-300">B/L</span>
-            <code className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">{row.bol_number}</code>
-            <button
-              aria-label="Copy B/L number"
-              onClick={() => navigator.clipboard?.writeText(row.bol_number || "")}
-              className="p-1 rounded hover:bg-white/5"
-              title="Copy"
-            >
-              <Copy size={14} />
-            </button>
-          </div>
-        ) : null}
-        {row.vessel_name ? (
-          <div className="inline-flex items-center gap-1">
-            <span className="text-ink-300">Vessel</span>
-            <span>{row.vessel_name}</span>
-          </div>
-        ) : null}
-        {row.unified_carrier ? (
-          <div className="inline-flex items-center gap-1">
-            <span className="text-ink-300">Carrier</span>
-            <span>{row.unified_carrier}</span>
-          </div>
-        ) : null}
+      {/* AI Assist */}
+      <AIAssistBar
+        q={q}
+        filters={filters}
+        lastResults={items}
+        onPickSuggestion={(s)=>{ setQ(s); run(true); }}
+        onApplyStructured={(f)=>{ setFilters((x)=>({ ...(x as Filters), ...(f||{}) })); run(true); }}
+      />
+
+      {/* Filters */}
+      <AdvancedFilters value={filters as Filters} onChange={setFilters as any} onApply={onApplyFilters} onClear={onClearFilters}/>
+
+      {/* Summary / load more */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm opacity-75">{loading?'Loading…':(error?`Error: ${error}`:`${total} results`)}</div>
+        {hasMore&&(
+          <button onClick={loadMore} disabled={loading} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm">Load more</button>
+        )}
       </div>
 
-      {row.description ? <p className="mt-2 text-sm text-ink-300 line-clamp-2">{row.description}</p> : null}
-
-      {/* CTAs */}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <button
-          onClick={() => onAddToCrm?.(row)}
-          className="px-3 py-2 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10"
-        >
-          {loading ? <Loader2 className="animate-spin inline-block mr-2 h-4 w-4" /> : null}
-          Add to CRM
-        </button>
-        <button
-          onClick={() => onViewContacts?.(row)}
-          className="px-3 py-2 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10"
-        >
-          View Contacts
-        </button>
-        <button
-          onClick={() => onExport?.(row)}
-          className="px-3 py-2 rounded-xl2 bg-white/5 border border-white/10 hover:bg-white/10 inline-flex items-center gap-2"
-        >
-          Export <ExternalLink size={14} />
-        </button>
+      {/* Results */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        {items.map((r)=>(<ResultRow key={r.id} r={r} q={q} onAddToCrm={onAddToCrm}/>))}
       </div>
-    </article>
-  );
-};
-
-/** Main Search Panel */
-export default function SearchPanel() {
-  const [mode, setMode] = useState<Mode>("all");
-  const [q, setQ] = useState("");
-  const [filters, setFilters] = useState<FiltersType>({});
-  const [openFilters, setOpenFilters] = useState(false);
-
-  const [rows, setRows] = useState<Row[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  const [limit] = useState(25);
-  const [offset, setOffset] = useState(0);
-  const hasMore = useMemo(() => offset + rows.length < total, [offset, rows, total]);
-  const abortRef = useRef<AbortController | null>(null);
-
-  const runSearch = useCallback(
-    async (reset = true) => {
-      setLoading(true);
-      setErrorMsg(null);
-      if (abortRef.current) abortRef.current.abort();
-      const ac = new AbortController();
-      abortRef.current = ac;
-
-      try {
-        // Call your Postgres function: public.search_unified
-        const { data, error } = await supabase.rpc(
-          "search_unified",
-          {
-            p_q: q.trim() ? q.trim() : null,
-            p_mode: mode,
-            p_date_from: filters.date_from ?? null,
-            p_date_to: filters.date_to ?? null,
-            p_hs_code: filters.hs_code ?? null,
-            p_origin_country: filters.origin_country ?? null,
-            p_destination_country: filters.destination_country ?? null,
-            p_destination_city: filters.destination_city ?? null,
-            p_carrier: filters.carrier ?? null,
-            p_limit: limit,
-            p_offset: reset ? 0 : offset + rows.length,
-          },
-          { signal: ac.signal as any }
-        );
-
-        if (error) throw error;
-
-        const list = (data || []) as Row[];
-        const next = reset ? list : [...rows, ...list];
-        setRows(next);
-        setTotal(list.length ? Number(list[0].total_count ?? next.length) : reset ? 0 : total);
-        if (reset) setOffset(0);
-      } catch (e: any) {
-        if (e?.name !== "AbortError") {
-          setErrorMsg(e?.message || "Search failed");
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [q, mode, filters, limit, offset, rows, total]
-  );
-
-  const loadMore = useCallback(async () => {
-    if (!hasMore || loading) return;
-    await runSearch(false);
-  }, [hasMore, loading, runSearch]);
-
-  const onApplyFilters = useCallback(() => {
-    setOpenFilters(false);
-    runSearch(true);
-  }, [runSearch]);
-
-  return (
-    <div className="max-w-7xl mx-auto">
-      {/* Sticky top bar */}
-      <div className="sticky top-0 z-10 bg-ink-900/70 backdrop-blur border-b border-white/10">
-        <div className="p-3 space-y-3">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <SearchIcon className="absolute left-3 top-2.5 h-5 w-5 text-ink-300" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && runSearch(true)}
-                placeholder="Search companies, HS codes, lanes, B/L, vessels..."
-                className="w-full pl-10 pr-10 py-2 rounded-xl2 bg-white/5 text-white placeholder:text-ink-300 outline-none border border-white/10 focus:border-brand-400"
-              />
-              <button
-                className="absolute right-2 top-1.5 px-3 py-1.5 text-sm rounded-xl2 bg-brand-500 hover:bg-brand-400"
-                onClick={() => runSearch(true)}
-              >
-                Search
-              </button>
-            </div>
-
-            {/* Mobile filters button */}
-            <button
-              className="md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-xl2 border border-white/10 bg-white/5"
-              onClick={() => setOpenFilters(true)}
-            >
-              <Filter size={16} /> Filters
-            </button>
-          </div>
-
-          {/* Mode chips */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar">
-            {(["all", "ocean", "air"] as Mode[]).map((m) => (
-              <Chip key={m} active={mode === m} onClick={() => setMode(m)}>
-                {m === "all" ? "All" : m === "ocean" ? "Ocean 🚢" : "Air ✈️"}
-              </Chip>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-3">
-        {/* Desktop filter rail — now using AdvancedFilters */}
-        <aside className="hidden md:block md:col-span-3 lg:col-span-3" aria-label="Filters">
-          <div data-card className="p-4">
-            <div className="text-sm font-semibold mb-3">Filters</div>
-            <AdvancedFilters value={filters} onChange={setFilters} onApply={onApplyFilters} />
-          </div>
-        </aside>
-
-        {/* Results */}
-        <section className="md:col-span-9 lg:col-span-9">
-          {errorMsg ? (
-            <div data-card className="p-4 border border-danger-500/30 text-danger-500">{errorMsg}</div>
-          ) : null}
-
-          {loading && rows.length === 0 ? (
-            <div data-card className="p-6 flex items-center gap-3">
-              <Loader2 className="animate-spin" /> Loading…
-            </div>
-          ) : rows.length === 0 ? (
-            <div data-card className="p-6 text-ink-300">
-              <div className="font-semibold text-white mb-1">Try a sample search</div>
-              <div className="text-sm">
-                Examples: <em>“Samsung United States 90d”</em>, <em>“8471 ocean China→US”</em>, <em>“AA air ORD”</em>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {rows.map((r) => (
-                <ShipmentCard
-                  key={r.id}
-                  row={r}
-                  onAddToCrm={(row) => console.log("Add to CRM", row)}
-                  onViewContacts={(row) => console.log("View Contacts", row)}
-                  onExport={(row) => console.log("Export", row)}
-                />
-              ))}
-
-              {hasMore && (
-                <div className="flex justify-center">
-                  <button
-                    onClick={loadMore}
-                    disabled={loading}
-                    className="px-4 py-2 rounded-xl2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 inline-flex items-center gap-2"
-                  >
-                    {loading ? <Loader2 className="animate-spin h-4 w-4" /> : null}
-                    Load more
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-      </div>
-
-      {/* Mobile filter drawer — uses AdvancedFilters with dense layout */}
-      {openFilters && (
-        <div className="fixed inset-0 z-30 md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setOpenFilters(false)} />
-          <div className="absolute inset-x-0 bottom-0 bg-ink-900 rounded-t-2xl ring-1 ring-white/10 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="font-semibold">Filters</div>
-              <button className="p-2 rounded-lg hover:bg-white/5" onClick={() => setOpenFilters(false)}>
-                <X />
-              </button>
-            </div>
-
-            <AdvancedFilters value={filters} onChange={setFilters} onApply={onApplyFilters} dense />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
