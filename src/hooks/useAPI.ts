@@ -11,28 +11,50 @@ interface UseAPIOptions {
   defaultHeaders?: Record<string, string>;
 }
 
+interface ExtendedRequestInit extends RequestInit {
+  params?: Record<string, any>;
+}
+
 export function useAPI(options: UseAPIOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const request = useCallback(async <T = any>(
     endpoint: string,
-    config: RequestInit = {}
+    config: ExtendedRequestInit = {}
   ): Promise<APIResponse<T>> => {
     setLoading(true);
     setError(null);
 
     try {
       const baseURL = options.baseURL || '';
-      const url = endpoint.startsWith('http') ? endpoint : `${baseURL}${endpoint}`;
+      let url = endpoint.startsWith('http') ? endpoint : `${baseURL}${endpoint}`;
+      
+      // Handle params by converting to query string
+      if (config.params) {
+        const searchParams = new URLSearchParams();
+        Object.entries(config.params).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            searchParams.append(key, String(value));
+          }
+        });
+        
+        const queryString = searchParams.toString();
+        if (queryString) {
+          url += (url.includes('?') ? '&' : '?') + queryString;
+        }
+      }
+
+      // Remove params from config before passing to fetch
+      const { params, ...fetchConfig } = config;
       
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           ...options.defaultHeaders,
-          ...config.headers,
+          ...fetchConfig.headers,
         },
-        ...config,
+        ...fetchConfig,
       });
 
       if (!response.ok) {
@@ -51,24 +73,24 @@ export function useAPI(options: UseAPIOptions = {}) {
     }
   }, [options.baseURL, options.defaultHeaders]);
 
-  const get = useCallback(<T = any>(endpoint: string, config?: RequestInit) => 
+  const get = useCallback(<T = any>(endpoint: string, config?: ExtendedRequestInit) => 
     request<T>(endpoint, { ...config, method: 'GET' }), [request]);
 
-  const post = useCallback(<T = any>(endpoint: string, data?: any, config?: RequestInit) => 
+  const post = useCallback(<T = any>(endpoint: string, data?: any, config?: ExtendedRequestInit) => 
     request<T>(endpoint, { 
       ...config, 
       method: 'POST', 
       body: data ? JSON.stringify(data) : undefined 
     }), [request]);
 
-  const put = useCallback(<T = any>(endpoint: string, data?: any, config?: RequestInit) => 
+  const put = useCallback(<T = any>(endpoint: string, data?: any, config?: ExtendedRequestInit) => 
     request<T>(endpoint, { 
       ...config, 
       method: 'PUT', 
       body: data ? JSON.stringify(data) : undefined 
     }), [request]);
 
-  const del = useCallback(<T = any>(endpoint: string, config?: RequestInit) => 
+  const del = useCallback(<T = any>(endpoint: string, config?: ExtendedRequestInit) => 
     request<T>(endpoint, { ...config, method: 'DELETE' }), [request]);
 
   return {
