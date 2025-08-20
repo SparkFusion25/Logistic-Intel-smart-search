@@ -75,6 +75,7 @@ export function useAPI(options: UseAPIOptions = {}) {
     loading,
     error,
     request,
+    makeRequest: request, // Alias for backward compatibility
     get,
     post,
     put,
