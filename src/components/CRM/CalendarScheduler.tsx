@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { createActivityMeeting } from '@/repositories/crm.repo';
 import { Calendar as CalendarIcon, Clock, Video, Phone, MapPin } from 'lucide-react';
 
 interface CalendarSchedulerProps {
@@ -48,15 +48,22 @@ export function CalendarScheduler({ dealId, contactId, contactName, contactEmail
 
     setLoading(true);
     try {
-      const meetingDateTime = new Date(selectedDate);
+      // Build ISO datetime safely
+      const meetingDate = new Date(selectedDate);
       const [hours, minutes] = selectedTime.split(':');
-      meetingDateTime.setHours(parseInt(hours), parseInt(minutes));
+      meetingDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const iso = isNaN(meetingDate.getTime()) ? null : meetingDate.toISOString();
 
-      const { data, error } = await supabase.from('activities').insert({
-        deal_id: dealId,
+      // Guard required ids
+      if (!contactId) {
+        toast({ title: 'Missing contact', description: 'Select a contact before scheduling.', variant: 'destructive' });
+        return;
+      }
+
+      const { success, error } = await createActivityMeeting({
         contact_id: contactId,
-        type: 'meeting',
-        subject: meetingData.title,
+        deal_id: dealId || null,
+        title: meetingData.title || null,
         body: JSON.stringify({
           description: meetingData.description,
           meeting_type: meetingType,
@@ -64,11 +71,12 @@ export function CalendarScheduler({ dealId, contactId, contactName, contactEmail
           duration: meetingData.duration,
           attendees: contactEmail ? [contactEmail] : []
         }),
-        due_at: meetingDateTime.toISOString(),
-        org_id: (await supabase.auth.getUser()).data.user?.id
+        scheduled_at: iso,
+        created_by: null, // Add user ID when auth is implemented
+        org_id: null // Add org ID when multi-tenancy is implemented
       });
 
-      if (error) throw error;
+      if (!success) throw new Error(error);
 
       toast({
         title: "Meeting Scheduled",

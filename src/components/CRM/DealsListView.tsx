@@ -65,12 +65,12 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 50;
 
-  const { makeRequest } = useAPI();
+  const { request } = useAPI();
   const { toast } = useToast();
 
   const loadPipelines = async () => {
     try {
-      const response = await makeRequest("crm-pipelines");
+      const response = await request("crm-pipelines");
       if (response?.success && response?.data) {
         setPipelines(response.data);
         if (!selectedPipeline && response.data.length > 0) {
@@ -87,7 +87,7 @@ export function DealsListView({ pipelineId }: DealsListViewProps) {
     
     setLoading(true);
     try {
-      const response = await makeRequest("crm-deals", {
+      const response = await request("crm-deals", {
         method: "GET",
         params: { 
           pipeline_id: pipeline,

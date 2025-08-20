@@ -63,7 +63,7 @@ export function DealPipeline() {
   const [newDealOpen, setNewDealOpen] = useState(false);
   const [selectedStageId, setSelectedStageId] = useState<string>("");
 
-  const { makeRequest } = useAPI();
+  const { request } = useAPI();
   const { toast } = useToast();
 
   // Enhanced sensors for better drag detection
@@ -93,9 +93,9 @@ export function DealPipeline() {
   const loadPipelines = async () => {
     try {
       // Always seed pipeline first to ensure default exists
-      await makeRequest('/crm-seed-pipeline', { method: 'POST' });
+      await request('/crm-seed-pipeline', { method: 'POST' });
       
-      const response = await makeRequest('/crm-pipelines', {
+      const response = await request('/crm-pipelines', {
         method: 'GET'
       });
 
@@ -119,7 +119,7 @@ export function DealPipeline() {
 
   const loadDeals = async (pipelineId: string) => {
     try {
-      const response = await makeRequest('/crm-deals', {
+      const response = await request('/crm-deals', {
         method: 'GET',
         params: { pipeline_id: pipelineId, search: searchQuery }
       });
@@ -225,7 +225,7 @@ export function DealPipeline() {
 
     try {
       console.log('🔧 Making API call to persist move');
-      const response = await makeRequest('/crm-deal-move', {
+      const response = await request('/crm-deal-move', {
         method: 'POST',
         body: {
           deal_id: active.id,

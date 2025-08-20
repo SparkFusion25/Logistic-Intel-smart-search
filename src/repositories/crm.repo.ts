@@ -1,5 +1,34 @@
 import { supabaseServer } from '@/lib/supabase-server';
 
+export type CreateMeetingParams = {
+  contact_id: string;          // required
+  deal_id?: string | null;     // optional
+  title?: string | null;
+  body?: string | null;
+  scheduled_at?: string | null; // ISO string
+  created_by?: string | null;
+  org_id?: string | null;
+};
+
+export async function createActivityMeeting(p: CreateMeetingParams) {
+  if (!p.contact_id) return { success: false, error: 'contact_id is required' } as const;
+  const payload = {
+    contact_id: p.contact_id,
+    deal_id: p.deal_id ?? null,
+    type: 'meeting' as const,
+    title: p.title ?? null,
+    body: p.body ?? null,
+    scheduled_at: p.scheduled_at ?? null,
+    created_by: p.created_by ?? null,
+    org_id: p.org_id ?? null
+  };
+
+  const sb = supabaseServer();
+  const { data, error } = await sb.from('activities').insert(payload).select().single();
+  if (error) return { success: false, error: error.message } as const;
+  return { success: true, activity: data } as const;
+}
+
 export type ListParams = { search?: string; company?: string; tags?: string[]; limit?: number; offset?: number };
 
 export async function listContacts(params: ListParams = {}) {

@@ -50,6 +50,11 @@ export async function makeRequest<T = any>(endpoint: string, opts: MakeRequestOp
     const r = await listContacts(opts.params || {});
     return r.success ? { success: true, data: r.data, total: r.total, total_count: r.total } : { success: false, data: [] as any, error: r.error };
   }
+  if (endpoint.startsWith('/api/crm/activities') && opts.method === 'POST') {
+    const { createActivityMeeting } = await import('@/repositories/crm.repo');
+    const r = await createActivityMeeting(opts.body || {});
+    return r.success ? { success: true, data: r.activity, total: 1, total_count: 1 } : { success: false, data: [] as any, error: r.error };
+  }
   if (endpoint.startsWith('/api/crm/deals/move') && opts.method === 'POST') {
     const r = await moveDealStage(opts.body);
     return r.success ? { success: true, data: r.deal, total: 1, total_count: 1 } : { success: false, data: [] as any, error: r.error };
