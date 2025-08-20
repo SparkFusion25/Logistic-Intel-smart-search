@@ -114,27 +114,45 @@
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-backdrop: blur(20px);
+    
+    /* Missing Variables for Dark Mode */
+    --surface: var(--bg-elevated);
+    --text-on-dark: 0 0% 98%;
+    --text-dark: var(--text-primary);
+    --muted-text: var(--text-muted);
+    --surface-glass: rgba(255, 255, 255, 0.08);
+    --border-glass: 217 33% 85%;
+    --accent-muted: var(--bg-subtle);
+    --brand: var(--brand-500);
+    
+    /* Background Gradients */
+    --hero-gradient: linear-gradient(135deg, hsl(var(--brand-500)), hsl(var(--brand-600)));
+    --cta-gradient: linear-gradient(135deg, hsl(var(--brand-500)), hsl(var(--brand-600)));
+    
+    /* Shadows */
+    --shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 4px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   
   .dark {
-    /* Dark mode inherits the same values - we're dark-first */
+    /* Dark mode uses same light theme variables for consistency */
     --background: var(--bg-canvas);
-    --foreground: var(--text-on-dark);
-    --card: var(--surface);
-    --card-foreground: var(--text-dark);
-    --popover: var(--surface);
-    --popover-foreground: var(--text-dark);
-    --primary: var(--brand);
-    --primary-foreground: var(--surface);
-    --secondary: var(--bg-elevated);
-    --secondary-foreground: var(--text-on-dark);
-    --muted: hsl(var(--surface));
-    --muted-foreground: var(--muted-text);
-    --destructive: var(--danger);
-    --destructive-foreground: var(--surface);
-    --border: hsl(var(--border-glass));
-    --input: hsl(var(--border-glass));
-    --ring: var(--brand);
+    --foreground: var(--text-primary);
+    --card: var(--bg-elevated);
+    --card-foreground: var(--text-primary);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--brand-500);
+    --primary-foreground: var(--text-primary);
+    --secondary: var(--bg-subtle);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--bg-subtle);
+    --muted-foreground: var(--text-muted);
+    --destructive: var(--pipeline-danger);
+    --destructive-foreground: var(--text-primary);
+    --border: var(--border);
+    --input: var(--border-subtle);
+    --ring: var(--brand-500);
   }
 }
 
