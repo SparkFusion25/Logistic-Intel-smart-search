@@ -35,7 +35,7 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
   }catch(e:any){ return res.status(200).json({success:true, inserted:0, people:[], note:'Apollo call failed (returned empty).'}); }
 
   const SUPABASE_URL=process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-  const SUPABASE_KEY=(process.env.SUPABASE_SERVICE_ROLE||process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) as string;
+  const SUPABASE_KEY=(process.env.SUPABASE_SERVICE_ROLE_KEY||process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) as string;
   if(!SUPABASE_URL||!SUPABASE_KEY) return res.status(200).json({success:true, inserted:0, people, note:'Supabase env missing — returning people only'});
   const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
