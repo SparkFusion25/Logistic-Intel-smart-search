@@ -1,23 +1,18 @@
-'use client';
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/dashboard/AppSidebar";
-import { BulkImportManager } from "@/components/admin/BulkImportManager";
+import dynamic from 'next/dynamic';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Load admin page client-side only to avoid SSR issues
+const AdminPageClient = dynamic(() => import('@/components/admin/AdminPageClient'), { 
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <p>Loading Admin Panel...</p>
+      </div>
+    </div>
+  )
+});
 
 export default function AdminPage() {
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <div className="min-h-screen bg-slate-950 text-white p-6">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8">Admin Panel</h1>
-            <BulkImportManager />
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+  return <AdminPageClient />;
 }
