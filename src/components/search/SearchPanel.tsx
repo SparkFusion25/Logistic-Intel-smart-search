@@ -71,8 +71,8 @@ export default function SearchPanel(){
     }catch{}
   };
 
-  const onApplyFilters=()=>run(true);
-  const onClearFilters=()=>run(true);
+  const onApplyFilters = () => run();
+  const onClearFilters = () => run();
 
   return (
     <div className="flex flex-col gap-4">
@@ -84,12 +84,12 @@ export default function SearchPanel(){
           <input
             value={q}
             onChange={(e)=>setQ(e.target.value)}
-            onKeyDown={(e)=>{if(e.key==='Enter') run(true);}}
+            onKeyDown={(e)=>{if(e.key==='Enter') run();}}
             placeholder="Search companies, HS codes, carriers…"
             className="w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
           />
         </div>
-        <button onClick={()=>run(true)} className="px-3 py-2 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60" disabled={loading}>Search</button>
+        <button onClick={()=>run()} className="px-3 py-2 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60" disabled={loading}>Search</button>
       </div>
 
       {/* AI Assist */}
@@ -97,8 +97,8 @@ export default function SearchPanel(){
         q={q}
         filters={filters}
         lastResults={items}
-        onPickSuggestion={(s)=>{ setQ(s); run(true); }}
-        onApplyStructured={(f)=>{ setFilters((x)=>({ ...(x as Filters), ...(f||{}) })); run(true); }}
+        onPickSuggestion={(s)=>{ setQ(s); run(); }}
+        onApplyStructured={(f)=>{ setFilters((x)=>({ ...(x as Filters), ...(f||{}) })); run(); }}
       />
 
       {/* Filters */}
