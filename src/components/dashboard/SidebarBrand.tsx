@@ -1,7 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { removeBackground, loadImage } from "@/utils/backgroundRemoval"
-import { useEffect, useState } from "react"
 
 interface SidebarBrandProps {
   collapsed?: boolean;
@@ -9,26 +7,7 @@ interface SidebarBrandProps {
 }
 
 export function SidebarBrand({ collapsed = false, toggleSidebar }: SidebarBrandProps) {
-  const [logoSrc, setLogoSrc] = useState<string>("/lovable-uploads/c7c31567-c6a2-4d98-b45d-7aed7e035657.png");
-
-  useEffect(() => {
-    const processLogo = async () => {
-      try {
-        const response = await fetch("/lovable-uploads/c7c31567-c6a2-4d98-b45d-7aed7e035657.png");
-        const blob = await response.blob();
-        const imageElement = await loadImage(blob);
-        const transparentBlob = await removeBackground(imageElement);
-        const transparentUrl = URL.createObjectURL(transparentBlob);
-        setLogoSrc(transparentUrl);
-      } catch (error) {
-        console.error("Error processing logo:", error);
-        // Use original logo with CSS to make background transparent
-        setLogoSrc("/lovable-uploads/c7c31567-c6a2-4d98-b45d-7aed7e035657.png");
-      }
-    };
-
-    processLogo();
-  }, []);
+  const logoSrc = "/lovable-uploads/c7c31567-c6a2-4d98-b45d-7aed7e035657.png";
 
   return (
     <div className="flex items-center justify-between p-6">
