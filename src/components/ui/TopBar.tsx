@@ -2,7 +2,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 
 export function TopBar() {
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm">
+    <header className="relative z-30 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
         <div className="flex items-center gap-4">
           <SidebarTrigger className="h-8 w-8" />
