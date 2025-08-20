@@ -4,6 +4,7 @@ interface APIResponse<T = any> {
   data?: T;
   error?: string;
   loading: boolean;
+  success?: boolean;
 }
 
 interface UseAPIOptions {
@@ -77,12 +78,12 @@ export function useAPI(options: UseAPIOptions = {}) {
       const data = await response.json();
       
       setLoading(false);
-      return { data, loading: false };
+      return { data, loading: false, success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
       setLoading(false);
-      return { error: errorMessage, loading: false };
+      return { error: errorMessage, loading: false, success: false };
     }
   }, [options.baseURL, options.defaultHeaders]);
 
