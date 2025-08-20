@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Container from '@/components/ui/Container';
+import MobileMenu from './MobileMenu';
 
 export default function ImportGeniusHeader() {
   return (
@@ -9,9 +10,9 @@ export default function ImportGeniusHeader() {
         <div className='flex items-center justify-between py-4'>
           <Link to='/' className='flex items-center gap-3'>
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">IG</span>
+              <span className="text-white font-bold text-sm">LI</span>
             </div>
-            <span className='text-xl font-semibold text-gray-900'>ImportGenius</span>
+            <span className='text-xl font-semibold text-gray-900'>Logistic Intel</span>
           </Link>
           
           <nav className='hidden md:flex items-center gap-8'>
@@ -30,12 +31,15 @@ export default function ImportGeniusHeader() {
           </nav>
           
           <div className='flex items-center gap-3'>
-            <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
-              Sign in
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              Request demo
-            </Button>
+            <div className="hidden md:flex items-center gap-3">
+              <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                Sign in
+              </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                Request demo
+              </Button>
+            </div>
+            <MobileMenu />
           </div>
         </div>
       </Container>
