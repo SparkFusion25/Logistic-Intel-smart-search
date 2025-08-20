@@ -1,120 +1,186 @@
-import { useState, useCallback } from 'react';
+// src/hooks/useapi.ts
+'use client';
 
-interface APIResponse<T = any> {
-  data?: T;
-  error?: string;
-  loading: boolean;
-  success?: boolean;
+export interface PaginationMeta {
+  hasMore?: boolean;
+  limit?: number;
+  offset?: number;
+  page?: number;
 }
 
-interface UseAPIOptions {
-  baseURL?: string;
-  defaultHeaders?: Record<string, string>;
+export interface APIResponse<T = any, M = any> {
+  // canonical fields
+  success: boolean;
+  data: T;
+  total?: number;                // unified/search endpoints often use "total"
+  total_count?: number;          // some CRM screens expect "total_count"
+  count?: number;                // some list endpoints return "count"
+  pagination?: PaginationMeta;   // normalized pagination
+  summary?: any;                 // search/unified summary block
+  message?: string;              // optional message on success
+  error?: string;                // populated on failure
+  status?: number;               // HTTP status for error handling
+  meta?: M;                      // extra metadata if needed
+  raw?: any;                     // original JSON (for debugging/migration)
 }
 
-interface ExtendedRequestInit extends Omit<RequestInit, 'body'> {
-  params?: Record<string, any>;
-  body?: any; // Allow any type for body - we'll handle JSON.stringify internally
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export type MakeRequestOptions = {
+  method?: HttpMethod;
+  params?: Record<string, string | number | boolean | null | undefined>;
+  body?: any;
+  headers?: Record<string, string>;
+  cache?: RequestCache;
+};
+
+/** Build a query string from params, skipping null/undefined */
+function toQuery(params?: MakeRequestOptions['params']) {
+  if (!params) return '';
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v === null || v === undefined) continue;
+    qs.set(k, String(v));
+  }
+  const s = qs.toString();
+  return s ? `?${s}` : '';
 }
 
-export function useAPI(options: UseAPIOptions = {}) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+/** Normalize various API shapes into one predictable payload */
+function normalizePayload<T = any>(json: any): APIResponse<T> {
+  // Prefer arrays/lists from: data | items | results | rows
+  let data: any =
+    json?.data ??
+    json?.items ??
+    json?.results ??
+    json?.rows ??
+    json;
 
-  const request = useCallback(async <T = any>(
-    endpoint: string,
-    config: ExtendedRequestInit = {}
-  ): Promise<APIResponse<T>> => {
-    setLoading(true);
-    setError(null);
+  // Allow non-array single objects too
+  // (most of our callers expect arrays; leave objects as-is)
+  const pagination: PaginationMeta | undefined =
+    json?.pagination ??
+    (typeof json?.page === 'number' || typeof json?.limit === 'number'
+      ? { page: json.page, limit: json.limit, offset: json.offset }
+      : undefined);
 
-    try {
-      const baseURL = options.baseURL || '';
-      let url = endpoint.startsWith('http') ? endpoint : `${baseURL}${endpoint}`;
-      
-      // Handle params by converting to query string
-      if (config.params) {
-        const searchParams = new URLSearchParams();
-        Object.entries(config.params).forEach(([key, value]) => {
-          if (value !== null && value !== undefined && value !== '') {
-            searchParams.append(key, String(value));
-          }
-        });
-        
-        const queryString = searchParams.toString();
-        if (queryString) {
-          url += (url.includes('?') ? '&' : '?') + queryString;
-        }
-      }
-
-      // Remove params from config before passing to fetch
-      const { params, body, ...fetchConfig } = config;
-      
-      // Handle body - automatically stringify objects
-      let processedBody: string | FormData | Blob | ArrayBufferView | ArrayBuffer | ReadableStream | null = null;
-      if (body !== undefined) {
-        if (typeof body === 'string' || body instanceof FormData || body instanceof Blob || 
-            body instanceof ArrayBuffer || body instanceof ReadableStream) {
-          processedBody = body;
-        } else {
-          processedBody = JSON.stringify(body);
-        }
-      }
-      
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.defaultHeaders,
-          ...fetchConfig.headers,
-        },
-        body: processedBody,
-        ...fetchConfig,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      setLoading(false);
-      return { data, loading: false, success: true };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      setLoading(false);
-      return { error: errorMessage, loading: false, success: false };
-    }
-  }, [options.baseURL, options.defaultHeaders]);
-
-  const get = useCallback(<T = any>(endpoint: string, config?: ExtendedRequestInit) => 
-    request<T>(endpoint, { ...config, method: 'GET' }), [request]);
-
-  const post = useCallback(<T = any>(endpoint: string, data?: any, config?: ExtendedRequestInit) => 
-    request<T>(endpoint, { 
-      ...config, 
-      method: 'POST', 
-      body: data ? JSON.stringify(data) : undefined 
-    }), [request]);
-
-  const put = useCallback(<T = any>(endpoint: string, data?: any, config?: ExtendedRequestInit) => 
-    request<T>(endpoint, { 
-      ...config, 
-      method: 'PUT', 
-      body: data ? JSON.stringify(data) : undefined 
-    }), [request]);
-
-  const del = useCallback(<T = any>(endpoint: string, config?: ExtendedRequestInit) => 
-    request<T>(endpoint, { ...config, method: 'DELETE' }), [request]);
+  // Compute a unified total for convenience
+  const computedTotal =
+    json?.total ??
+    json?.total_count ??
+    json?.count ??
+    (Array.isArray(data) ? data.length : undefined);
 
   return {
-    loading,
-    error,
-    request,
-    makeRequest: request, // Alias for backward compatibility
-    get,
-    post,
-    put,
-    delete: del,
+    success: json?.success ?? true, // many endpoints return success: true
+    data,
+    total: json?.total ?? computedTotal,
+    total_count: json?.total_count ?? computedTotal,
+    count: json?.count,
+    pagination,
+    summary: json?.summary,
+    message: json?.message,
+    error: json?.error,
+    meta: json?.meta,
+    raw: json, // keep original for debugging
   };
+}
+
+/** Low-level request helper (no React state) */
+export async function makeRequest<T = any, M = any>(
+  endpoint: string,
+  opts: MakeRequestOptions = {}
+): Promise<APIResponse<T, M>> {
+  const { method = 'GET', params, body, headers, cache } = opts;
+
+  const url = `${endpoint}${toQuery(params)}`;
+  const init: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(headers || {}),
+    },
+    cache,
+  };
+
+  if (body != null && method !== 'GET') {
+    init.body = typeof body === 'string' ? body : JSON.stringify(body);
+  }
+
+  const res = await fetch(url, init);
+
+  let json: any = null;
+  try {
+    json = await res.json();
+  } catch {
+    // empty body or non-JSON — treat as error if not ok
+    if (!res.ok) {
+      return {
+        success: false,
+        data: [] as any,
+        error: `HTTP ${res.status} ${res.statusText}`,
+        status: res.status,
+        raw: null,
+      };
+    }
+    // ok but empty — return minimal success
+    return {
+      success: true,
+      data: [] as any,
+      total: 0,
+      total_count: 0,
+      raw: null,
+    };
+  }
+
+  if (!res.ok || json?.success === false) {
+    // unify error shape
+    return {
+      success: false,
+      data: (json?.data ?? []) as any,
+      error: json?.error || json?.message || `HTTP ${res.status} ${res.statusText}`,
+      status: res.status,
+      raw: json,
+    };
+  }
+
+  // success path — normalize
+  return normalizePayload<T>(json);
+}
+
+/** Optional React wrapper if you want loading/error state */
+import { useCallback, useState } from 'react';
+
+export function useAPI() {
+  const [loading, setLoading] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
+
+  const request = useCallback(
+    async <T = any, M = any>(
+      endpoint: string,
+      opts: MakeRequestOptions = {}
+    ): Promise<APIResponse<T, M>> => {
+      setLoading(true);
+      setLastError(null);
+      try {
+        const res = await makeRequest<T, M>(endpoint, opts);
+        if (!res.success) setLastError(res.error ?? 'Unknown error');
+        return res;
+      } catch (e: any) {
+        const err: APIResponse<T, M> = {
+          success: false,
+          data: [] as any,
+          error: e?.message ?? 'Network error',
+          status: 0,
+        };
+        setLastError(err.error!);
+        return err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  return { request, loading, error: lastError };
 }
