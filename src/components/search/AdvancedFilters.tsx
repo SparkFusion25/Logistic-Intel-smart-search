@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import AutocompleteInput from '@/components/inputs/AutocompleteInput';
 import type { Filters } from '@/types/search';
+import { WORLD_COUNTRIES, MAJOR_CITIES } from '@/data/locations';
 
 /**
  * AdvancedFilters
@@ -12,16 +13,6 @@ import type { Filters } from '@/types/search';
  */
 
 const field = (v: any) => (typeof v === 'string' ? v : v == null ? '' : String(v));
-
-const COUNTRIES = [
-  'United States', 'China', 'Mexico', 'Germany', 'United Kingdom', 'India', 'Vietnam',
-  'Canada', 'Brazil', 'France', 'Italy', 'Spain', 'Japan', 'Korea'
-];
-
-const CITIES = [
-  'Los Angeles', 'New York', 'Chicago', 'Houston', 'Dallas', 'Miami',
-  'Atlanta', 'Seattle', 'San Francisco', 'Savannah', 'Long Beach'
-];
 
 export default function AdvancedFilters({
   value,
@@ -89,83 +80,102 @@ export default function AdvancedFilters({
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-3 md:p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div className="card-glass p-4 md:p-6">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Filters</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Date range */}
-        <div className="flex gap-2">
-          <input
-            type="date"
-            value={field(local.date_from)}
-            onChange={(e) => push({ date_from: e.target.value || null })}
-            className="flex-1 rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
-            placeholder="From"
-          />
-          <input
-            type="date"
-            value={field(local.date_to)}
-            onChange={(e) => push({ date_to: e.target.value || null })}
-            className="flex-1 rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
-            placeholder="To"
-          />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Date Range</label>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={field(local.date_from)}
+              onChange={(e) => push({ date_from: e.target.value || null })}
+              className="flex-1 rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+              placeholder="From"
+            />
+            <input
+              type="date"
+              value={field(local.date_to)}
+              onChange={(e) => push({ date_to: e.target.value || null })}
+              className="flex-1 rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+              placeholder="To"
+            />
+          </div>
         </div>
 
         {/* HS code */}
-        <input
-          value={field(local.hs_code)}
-          onChange={(e) => push({ hs_code: e.target.value })}
-          className="w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
-          placeholder="HS code"
-          inputMode="numeric"
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">HS Code</label>
+          <input
+            value={field(local.hs_code)}
+            onChange={(e) => push({ hs_code: e.target.value })}
+            className="w-full rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+            placeholder="Enter HS code..."
+            inputMode="numeric"
+          />
+        </div>
 
         {/* Origin country */}
-        <AutocompleteInput
-          value={field(local.origin_country)}
-          onChange={(v) => push({ origin_country: v })}
-          options={COUNTRIES.map((l) => ({ label: l }))}
-          placeholder="Origin country"
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Origin Country</label>
+          <AutocompleteInput
+            value={field(local.origin_country)}
+            onChange={(v) => push({ origin_country: v })}
+            options={WORLD_COUNTRIES.map((l) => ({ label: l }))}
+            placeholder="Select or type country..."
+          />
+        </div>
 
         {/* Destination country */}
-        <AutocompleteInput
-          value={field(local.destination_country)}
-          onChange={(v) => push({ destination_country: v })}
-          options={COUNTRIES.map((l) => ({ label: l }))}
-          placeholder="Destination country"
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Destination Country</label>
+          <AutocompleteInput
+            value={field(local.destination_country)}
+            onChange={(v) => push({ destination_country: v })}
+            options={WORLD_COUNTRIES.map((l) => ({ label: l }))}
+            placeholder="Select or type country..."
+          />
+        </div>
 
         {/* Destination city */}
-        <AutocompleteInput
-          value={field(local.destination_city)}
-          onChange={(v) => push({ destination_city: v })}
-          options={CITIES.map((l) => ({ label: l }))}
-          placeholder="Destination city"
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Destination City</label>
+          <AutocompleteInput
+            value={field(local.destination_city)}
+            onChange={(v) => push({ destination_city: v })}
+            options={MAJOR_CITIES.map((l) => ({ label: l }))}
+            placeholder="Select or type city..."
+          />
+        </div>
 
         {/* Carrier */}
-        <input
-          value={field(local.carrier)}
-          onChange={(e) => push({ carrier: e.target.value })}
-          className="w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 outline-none focus:border-blue-400"
-          placeholder="Carrier"
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Carrier</label>
+          <input
+            value={field(local.carrier)}
+            onChange={(e) => push({ carrier: e.target.value })}
+            className="w-full rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+            placeholder="Enter carrier name..."
+          />
+        </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
-          className="px-3 py-2 rounded-2xl bg-blue-600 hover:bg-blue-500"
+          className="btn-primary px-6 py-2 text-sm font-medium"
           disabled={applyDisabled}
           onClick={onApply}
         >
-          Apply filters
+          Apply Filters
         </button>
         <button
-          className="px-3 py-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10"
+          className="btn-secondary px-6 py-2 text-sm font-medium"
           onClick={clear}
         >
-          Clear
+          Clear All
         </button>
-        <span className="text-xs opacity-70">Mobile‑ready.</span>
       </div>
     </div>
   );

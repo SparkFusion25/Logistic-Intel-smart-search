@@ -157,31 +157,31 @@ export default function AutocompleteInput({
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled}
-          className={`w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 pr-8 outline-none focus:border-blue-400 transition-colors ${className}`}
+          className={`w-full rounded-xl bg-background border-2 border-border px-3 py-2 pr-8 text-sm focus:outline-none focus:border-primary transition-colors ${className}`}
           autoComplete="off"
         />
         <ChevronDown 
-          className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       </div>
 
       {isOpen && filteredOptions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-gray-900 border border-white/20 rounded-xl shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-card border-2 border-border rounded-xl shadow-elegant max-h-60 overflow-auto">
           <ul ref={listRef} className="py-1">
             {filteredOptions.map((option, index) => (
               <li
                 key={`${option.label}-${index}`}
                 className={`px-3 py-2 cursor-pointer text-sm transition-colors ${
                   index === highlightedIndex 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-white/90 hover:bg-white/10'
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-foreground hover:bg-accent'
                 }`}
                 onClick={() => handleOptionClick(option)}
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
                 {option.label}
                 {option.group && (
-                  <span className="text-xs text-white/60 ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     ({option.group})
                   </span>
                 )}

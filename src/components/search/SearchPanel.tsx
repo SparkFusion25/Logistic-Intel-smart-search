@@ -114,15 +114,6 @@ export default function SearchPanel(){
     <div className="flex flex-col gap-6">
       {/* Unified Search Card */}
       <div className="card-glass p-8">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="icon-circle-gradient">
-            <div className="text-white text-lg">🔍</div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Search Trade Intelligence</h2>
-            <p className="text-muted-foreground">Find companies, shipments, and trade patterns worldwide</p>
-          </div>
-        </div>
 
         <div className="space-y-6">
           {/* Search Bar */}
