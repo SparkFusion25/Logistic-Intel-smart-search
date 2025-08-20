@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { createActivityMeeting } from '@/repositories/crm.repo';
+import { supabase } from '@/lib/supabaseClient';
 import { Calendar as CalendarIcon, Clock, Video, Phone, MapPin } from 'lucide-react';
 
 interface CalendarSchedulerProps {
@@ -48,35 +48,23 @@ export function CalendarScheduler({ dealId, contactId, contactName, contactEmail
 
     setLoading(true);
     try {
-      // Build ISO datetime safely
-      const meetingDate = new Date(selectedDate);
+      const meetingDateTime = new Date(selectedDate);
       const [hours, minutes] = selectedTime.split(':');
-      meetingDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-      const iso = isNaN(meetingDate.getTime()) ? null : meetingDate.toISOString();
+      meetingDateTime.setHours(parseInt(hours), parseInt(minutes));
 
-      // Guard required ids
-      if (!contactId) {
-        toast({ title: 'Missing contact', description: 'Select a contact before scheduling.', variant: 'destructive' });
-        return;
-      }
+      const { data, error } = await supabase
+        .from('activities')
+        .insert({
+          contact_id: contactId,
+          type: 'meeting',
+          status: 'scheduled',
+          due_at: meetingDateTime.toISOString(),
+          notes: meetingData.description ?? null,
+          org_id: null, // Add current org ID when available
+          created_by: null, // Add current user ID when available
+        });
 
-      const { success, error } = await createActivityMeeting({
-        contact_id: contactId,
-        deal_id: dealId || null,
-        title: meetingData.title || null,
-        body: JSON.stringify({
-          description: meetingData.description,
-          meeting_type: meetingType,
-          location: meetingData.location,
-          duration: meetingData.duration,
-          attendees: contactEmail ? [contactEmail] : []
-        }),
-        scheduled_at: iso,
-        created_by: null, // Add user ID when auth is implemented
-        org_id: null // Add org ID when multi-tenancy is implemented
-      });
-
-      if (!success) throw new Error(error);
+      if (error) throw error;
 
       toast({
         title: "Meeting Scheduled",

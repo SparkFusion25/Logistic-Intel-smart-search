@@ -5,7 +5,8 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain, RotateCcw, TestTube } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
+import type { Tables } from '@/types/db';
 import { useDropzone } from 'react-dropzone';
 
 interface BulkImport {
@@ -65,15 +66,37 @@ export const BulkImportManager = () => {
   const loadImports = async () => {
     try {
       const { data, error } = await supabase
-        .from('bulk_imports')
+        .from('import_jobs')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setImports((data || []).map(item => ({
-        ...item,
-        processing_metadata: item.processing_metadata as BulkImport['processing_metadata']
-      })));
+      
+      type ImportRow = Tables<'import_jobs'>;
+      
+      type UiBulkImport = {
+        id: string;
+        status: ImportRow['status'];
+        total_records: number;
+        ok_rows: number;
+        error_rows: number;
+        processing_metadata: ImportRow['processing_metadata'];
+        created_at: string | null;
+        finished_at: string | null;
+      };
+      
+      const toUi = (r: ImportRow): UiBulkImport => ({
+        id: r.id,
+        status: r.status,
+        total_records: (r.total_rows ?? 0),
+        ok_rows: (r.ok_rows ?? 0),
+        error_rows: (r.error_rows ?? 0),
+        processing_metadata: r.processing_metadata,
+        created_at: r.created_at,
+        finished_at: r.finished_at,
+      });
+      
+      setImports((data ?? []).map(toUi));
     } catch (error) {
       toast({
         title: "Error",
