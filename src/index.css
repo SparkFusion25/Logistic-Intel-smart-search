@@ -3,153 +3,116 @@
 @tailwind utilities;
 
 @layer base {
+  /* ImportGenius Light Theme - Professional B2B Look */
   :root {
-    /* LOGISTIC-INTEL Design System v5.0 - Enterprise Premium */
+    /* Clean white canvas and surfaces */
+    --bg-canvas: 0 0% 100%;
+    --bg-elevated: 0 0% 98%;
+    --bg-subtle: 210 40% 98%;
     
-    /* Core System Colors - Light Theme */
-    --bg-canvas: 0 0% 100%;           /* Clean White Base */
-    --bg-elevated: 0 0% 99%;          /* Slightly Elevated */
-    --bg-subtle: 210 40% 98%;         /* Subtle Background */
-    --text-primary: 222 84% 4%;       /* Dark Text */
-    --text-secondary: 215 20% 15%;    /* Secondary Text */
-    --text-muted: 215 20% 35%;        /* Muted Text */
-    --border: 217 33% 80%;            /* Border Color */
-    --border-subtle: 217 33% 85%;     /* Subtle Border */
+    /* Professional text colors */
+    --text-primary: 222 84% 4.9%;
+    --text-secondary: 215 16% 47%;
+    --text-muted: 215 13% 65%;
+    --text-subtle: 215 20% 65%;
     
-    /* Premium Brand Colors */
-    --brand-500: 207 85% 53%;         /* Primary Blue */
-    --brand-600: 207 85% 45%;         /* Darker Blue */
-    --brand-400: 207 85% 63%;         /* Lighter Blue */
-    --brand-grad-start: 207 85% 53%;  /* Gradient Start */
-    --brand-grad-end: 197 71% 52%;    /* Gradient End */
+    /* ImportGenius brand colors */
+    --brand-500: 217 91% 60%;
+    --brand-600: 221 83% 53%;
+    --brand-700: 224 76% 48%;
+    --brand-800: 226 71% 40%;
     
-    /* Vibrant CRM Pipeline Colors (Pipedrive-style) */
-    --pipeline-primary: 47 107 255;      /* #2F6BFF - Electric Blue */
-    --pipeline-success: 16 185 129;      /* #10B981 - Emerald Green */
-    --pipeline-warning: 245 158 11;      /* #F59E0B - Amber */
-    --pipeline-danger: 239 68 68;        /* #EF4444 - Red */
-    --pipeline-purple: 139 92 246;       /* #8B5CF6 - Purple */
-    --pipeline-teal: 20 184 166;         /* #14B8A6 - Teal */
-    --pipeline-pink: 236 72 153;         /* #EC4899 - Pink */
-    --pipeline-indigo: 99 102 241;       /* #6366F1 - Indigo */
+    /* Clean borders */
+    --border: 214 32% 91%;
+    --border-subtle: 214 32% 91%;
+    --border-hover: 214 32% 85%;
     
-    /* Stage-specific colors */
-    --stage-prospect: var(--pipeline-primary);
-    --stage-contact: var(--pipeline-teal);
-    --stage-qualified: var(--pipeline-purple);
-    --stage-proposal: var(--pipeline-warning);
-    --stage-negotiation: var(--pipeline-pink);
-    --stage-won: var(--pipeline-success);
-    --stage-lost: var(--pipeline-danger);
+    /* Professional accent colors */
+    --accent: 217 91% 60%;
+    --warning: 32 95% 44%;
+    --danger: 346 87% 43%;
+    --success: 142 76% 36%;
     
-    /* Navigation Gradient */
-    --nav-gradient: linear-gradient(180deg, hsl(var(--brand-grad-start)), hsl(var(--brand-grad-end)));
-    --nav-text: 0 0% 100%;            /* #FFFFFF */
-    --nav-text-dim: 0 0% 100% / 0.85;
-    --nav-hover: 0 0% 100% / 0.1;
-    --nav-active: 0 0% 100% / 0.16;
+    /* Pipeline colors */
+    --pipeline-lead: 217 91% 60%;
+    --pipeline-qualified: 38 92% 50%;
+    --pipeline-proposal: 271 81% 56%;
+    --pipeline-negotiation: 346 87% 43%;
+    --pipeline-closed: 142 76% 36%;
+    --pipeline-danger: 346 87% 43%;
     
-    /* Card Shadow */
-    --card-shadow: 0 12px 28px rgba(16, 24, 40, 0.06);
+    /* Stages */
+    --stage-new: var(--pipeline-lead);
+    --stage-contacted: 200 98% 39%;
+    --stage-qualified: var(--pipeline-qualified);
+    --stage-proposal: var(--pipeline-proposal);
+    --stage-negotiation: var(--pipeline-negotiation);
+    --stage-closed-won: var(--pipeline-closed);
+    --stage-closed-lost: var(--pipeline-danger);
     
-    /* Chart Palette */
-    --chart-1: var(--brand-500);
-    --chart-2: var(--success-500);
-    --chart-3: var(--warning-500);
-    --chart-4: var(--neutral-600);
-    --chart-5: 258 90% 66%;           /* #A855F7 */
+    /* Clean navigation */
+    --nav-bg: rgba(255, 255, 255, 0.95);
+    --nav-border: rgba(0, 0, 0, 0.08);
+    --nav-item-hover: rgba(0, 0, 0, 0.04);
+    --nav-item-active: rgba(47, 107, 255, 0.08);
     
-    /* Semantic tokens for shadcn - Enhanced */
-    --background: var(--bg-canvas);
-    --foreground: var(--text-primary);
-    --card: var(--bg-elevated);
-    --card-foreground: var(--text-primary);
-    --popover: var(--bg-elevated);
-    --popover-foreground: var(--text-primary);
-    --primary: var(--brand-500);
-    --primary-foreground: var(--text-primary);
-    --secondary: var(--bg-subtle);
-    --secondary-foreground: var(--text-primary);
-    --muted: var(--bg-subtle);
-    --muted-foreground: var(--text-muted);
-    --accent: var(--bg-subtle);
-    --accent-foreground: var(--text-primary);
-    --destructive: var(--pipeline-danger);
-    --destructive-foreground: var(--text-primary);
-    --border: var(--border);
-    --input: var(--border-subtle);
-    --ring: var(--brand-500);
-    --radius: 0.75rem;
-
-    /* Enhanced Card & Shadow System */
-    --card-border: var(--border-subtle);
-    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
-    --card-shadow-hover: 0 8px 32px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(59, 130, 246, 0.1);
-    --card-shadow-enterprise: 0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 20px rgba(0, 0, 0, 0.1);
-
-    /* Premium Sidebar System */
-    --sidebar-background: linear-gradient(180deg, hsl(215, 28%, 8%) 0%, hsl(222, 84%, 4%) 50%, hsl(215, 28%, 8%) 100%);
-    --sidebar-foreground: var(--text-primary);
-    --sidebar-primary: var(--brand-500);
-    --sidebar-primary-foreground: var(--text-primary);
-    --sidebar-accent: rgba(255, 255, 255, 0.05);
-    --sidebar-accent-foreground: var(--text-primary);
-    --sidebar-border: var(--border-subtle);
-    --sidebar-ring: var(--brand-500);
-
-    /* Enhanced Token System */
-    --success: var(--pipeline-success);
-    --warning: var(--pipeline-warning);
-    --danger: var(--pipeline-danger);
-    --radius-card: 16px;
-    --radius-button: 12px;
-    --radius-chip: 999px;
+    /* Professional card shadows */
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    --card-shadow-hover: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     
-    /* Layout & Spacing */
-    --spacing-section: 6rem;
-    --spacing-component: 2rem;
-    --container-max: 1400px;
+    /* Chart colors */
+    --chart-1: 217 91% 60%;
+    --chart-2: 142 76% 36%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 271 81% 56%;
+    --chart-5: 346 87% 43%;
     
-    /* Glass Effect */
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    /* Container and layout */
+    --container-max: 1200px;
+    --radius-card: 8px;
+    --radius-pill: 9999px;
+    --radius: 6px;
+    
+    /* Subtle glassmorphism */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.08);
     --glass-backdrop: blur(20px);
     
-    /* Missing Variables for Dark Mode */
+    /* Light mode variables */
     --surface: var(--bg-elevated);
-    --text-on-dark: 0 0% 98%;
+    --text-on-dark: var(--text-primary);
     --text-dark: var(--text-primary);
     --muted-text: var(--text-muted);
-    --surface-glass: rgba(255, 255, 255, 0.08);
-    --border-glass: 217 33% 85%;
+    --surface-glass: rgba(255, 255, 255, 0.8);
+    --border-glass: 214 32% 91%;
     --accent-muted: var(--bg-subtle);
     --brand: var(--brand-500);
     
-    /* Background Gradients */
+    /* Professional gradients */
     --hero-gradient: linear-gradient(135deg, hsl(var(--brand-500)), hsl(var(--brand-600)));
     --cta-gradient: linear-gradient(135deg, hsl(var(--brand-500)), hsl(var(--brand-600)));
     
-    /* Shadows */
-    --shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 4px 25px -5px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    /* Professional shadows */
+    --shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.08), 0 4px 25px -5px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
   }
   
-  .dark {
-    /* Dark mode uses same light theme variables for consistency */
+  .light, .dark {
+    /* ImportGenius light theme for all modes */
     --background: var(--bg-canvas);
     --foreground: var(--text-primary);
     --card: var(--bg-elevated);
     --card-foreground: var(--text-primary);
-    --popover: var(--bg-elevated);
+    --popover: var(--bg-canvas);
     --popover-foreground: var(--text-primary);
     --primary: var(--brand-500);
-    --primary-foreground: var(--text-primary);
+    --primary-foreground: 0 0% 100%;
     --secondary: var(--bg-subtle);
     --secondary-foreground: var(--text-primary);
     --muted: var(--bg-subtle);
     --muted-foreground: var(--text-muted);
     --destructive: var(--pipeline-danger);
-    --destructive-foreground: var(--text-primary);
+    --destructive-foreground: 0 0% 100%;
     --border: var(--border);
     --input: var(--border-subtle);
     --ring: var(--brand-500);

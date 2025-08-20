@@ -1,23 +1,25 @@
 import { Link } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import Container from "@/components/ui/Container"
 
 export const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-20">
-      {/* Ocean Blue Background matching ImportGenius */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900" />
-
-      <div className="relative z-10 max-w-7xl mx-auto w-full">
+    <section className="bg-white py-20 lg:py-32">
+      <Container>
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Column - Content matching ImportGenius exactly */}
-          <div className="text-left space-y-8">
+          {/* Left Column - ImportGenius exact copy */}
+          <div className="space-y-8">
             <div className="space-y-6">
-              <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight">
-                The global leader in trade
-                <span className="block">
-                  intelligence
+              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                See the world of trade
+                <span className="block text-blue-600">
+                  like never before
                 </span>
               </h1>
-              <p className="text-lg lg:text-xl text-white/90 leading-relaxed max-w-2xl">
+              <p className="text-xl text-gray-600 leading-relaxed">
+                —gain the insights your business needs
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed max-w-xl">
                 For nearly two decades, ImportGenius has set the standard in global 
                 trade data, providing businesses with the insights to stay ahead. We 
                 offer access to U.S. customs import and export records at the bill of 
@@ -25,32 +27,58 @@ export const HeroSection = () => {
               </p>
             </div>
 
-            {/* CTA Buttons matching ImportGenius */}
+            {/* CTA Buttons - ImportGenius style */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/dashboard">
-                <button className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200">
+                <Button className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg">
                   Request a demo
-                </button>
+                </Button>
               </Link>
-              <button className="px-8 py-4 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-lg transition-colors duration-200">
+              <Button variant="outline" className="px-8 py-4 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold text-lg">
                 Sign up
-              </button>
+              </Button>
             </div>
           </div>
 
-          {/* Right Column - Container Ship Image matching ImportGenius */}
+          {/* Right Column - Professional Data Visualization */}
           <div className="relative">
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center"
-                alt="Container ship carrying cargo across the ocean"
-                className="w-full h-[500px] object-cover rounded-2xl shadow-2xl"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/30 to-transparent rounded-2xl" />
+            <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Trade Data Dashboard</h3>
+                  <div className="text-sm text-green-600 font-medium">Live</div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">2.4M+</div>
+                    <div className="text-sm text-gray-600">Shipments tracked</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">180+</div>
+                    <div className="text-sm text-gray-600">Countries covered</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Electronics • CN → US</span>
+                    <span className="text-sm font-medium text-gray-900">$2.3B</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Textiles • IN → EU</span>
+                    <span className="text-sm font-medium text-gray-900">$1.8B</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-sm text-gray-600">Machinery • DE → US</span>
+                    <span className="text-sm font-medium text-gray-900">$1.2B</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   )
 }
