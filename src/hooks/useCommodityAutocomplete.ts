@@ -24,7 +24,7 @@ export function useCommodityAutocomplete(options: UseCommodityAutocompleteOption
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { get } = useAPI();
+  const { request } = useAPI();
 
   const searchCommodities = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < minLength) {
@@ -42,7 +42,7 @@ export function useCommodityAutocomplete(options: UseCommodityAutocompleteOption
         mode: searchMode,
       });
 
-      const { data, error: apiError } = await get<{ commodities: Commodity[] }>(
+      const { data, error: apiError } = await request({ commodities: Commodity[] }>(
         `/api/commodities/autocomplete?${params.toString()}`
       );
 

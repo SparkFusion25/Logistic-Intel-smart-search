@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Link, useRouter } from 'next/router';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { Logo } from '../Logo';
 import { BarChart3, Search, Users, Mail, Rocket, Target, Calculator, FileText } from 'lucide-react';
 
