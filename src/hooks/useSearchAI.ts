@@ -1,10 +1,78 @@
-import { useState } from 'react';
-export function useSearchAI(){
-  const [suggestions,setSuggestions]=useState<string[]>([]);
-  const [structured,setStructured]=useState<any>({});
-  const [summary,setSummary]=useState<string>('');
-  const [loading,setLoading]=useState(false);
-  const assist=async(q:string,filters:any,lastResults:any[])=>{ setLoading(true); try{ const r=await fetch('/api/ai/search-assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,filters,lastResults})}); const j=await r.json(); setSuggestions(j.query_suggestions||[]); setStructured(j.structured_filters||{}); setSummary(j.natural_summary||''); return j; } finally{ setLoading(false); } };
-  return { suggestions,structured,summary,loading,assist } as const;
+import { useState, useCallback } from 'react';
+
+interface SearchAIState {
+  suggestions: string[];
+  structured: Record<string, any> | null;
+  summary: string | null;
+  loading: boolean;
+  error: string | null;
 }
-export default useSearchAI;
+
+export default function useSearchAI() {
+  const [state, setState] = useState<SearchAIState>({
+    suggestions: [],
+    structured: null,
+    summary: null,
+    loading: false,
+    error: null,
+  });
+
+  const assist = useCallback(async (
+    query: string,
+    filters: any,
+    lastResults: any[]
+  ) => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await fetch('/api/search/ai-assist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: query.trim(),
+          filters,
+          lastResults: lastResults.slice(0, 10), // Send only first 10 results for context
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI assist failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        suggestions: data.suggestions || [],
+        structured: data.structured || null,
+        summary: data.summary || null,
+      }));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'AI assist failed';
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+    }
+  }, []);
+
+  const clear = useCallback(() => {
+    setState({
+      suggestions: [],
+      structured: null,
+      summary: null,
+      loading: false,
+      error: null,
+    });
+  }, []);
+
+  return {
+    ...state,
+    assist,
+    clear,
+  };
+}
