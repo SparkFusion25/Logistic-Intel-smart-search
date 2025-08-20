@@ -1,16 +1,13 @@
-// src/pages/search.tsx
-import React from 'react';
-import AppShell from '@/components/layout/AppShell';
-import SearchPanel from '@/components/search/SearchPanel';
-
-export default function SearchPage() {
+import dynamic from 'next/dynamic';
+import SiteShell from '@/components/layout/SiteShell';
+const SearchPanel = dynamic(()=>import('@/components/search/SearchPanel'),{ ssr:false });
+export default function SearchPage(){
   return (
-    <AppShell>
-      <header className="mb-4 md:mb-6 flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-semibold">Search Intelligence</h1>
-        <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/20">Live Data</span>
-      </header>
-      <SearchPanel />
-    </AppShell>
+    <SiteShell>
+      <div className='flex items-center justify-between mb-3'>
+        <h1 className='text-lg font-semibold'>Search Intelligence</h1>
+      </div>
+      <SearchPanel/>
+    </SiteShell>
   );
 }
