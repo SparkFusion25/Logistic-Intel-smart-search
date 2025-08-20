@@ -1,14 +1,13 @@
-/* Clean next config — remove unsupported experimental flags that break Next 14 builds. */
+/* Next.js config – remove invalid experimental.appDir and add rewrite for /app/* */
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  /* If you previously had experimental.appDir, it is not needed for Pages Router projects. */
-  experimental: {},
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  experimental: { instrumentationHook: false },
+  async rewrites() {
+    return [
+      { source: '/app', destination: '/app/index' },
+      { source: '/app/:path*', destination: '/app/index' }
+    ];
+  }
 };
 module.exports = nextConfig;
