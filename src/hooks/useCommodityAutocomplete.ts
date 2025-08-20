@@ -42,9 +42,13 @@ export function useCommodityAutocomplete(options: UseCommodityAutocompleteOption
         mode: searchMode,
       });
 
-      const { data, error: apiError } = await request({ commodities: Commodity[] }>(
-        `/api/commodities/autocomplete?${params.toString()}`
+      const response = await request(
+        `/api/commodities/autocomplete`,
+        { params: { q: searchQuery, limit, mode: searchMode } }
       );
+      
+      const data = response.data;
+      const apiError = response.error;
 
       if (apiError) {
         setError(apiError);
@@ -60,7 +64,7 @@ export function useCommodityAutocomplete(options: UseCommodityAutocompleteOption
     } finally {
       setIsLoading(false);
     }
-  }, [get, minLength, limit, searchMode]);
+  }, [request, minLength, limit, searchMode]);
 
   // Debounced search effect
   useEffect(() => {

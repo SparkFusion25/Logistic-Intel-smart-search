@@ -57,7 +57,7 @@ export function useRouterAutocomplete(options: UseRouterAutocompleteOptions = {}
     } finally {
       setIsLoading(false);
     }
-  }, [get, minLength, limit]);
+  }, [request, minLength, limit]);
 
   // Debounced search effect
   useEffect(() => {
