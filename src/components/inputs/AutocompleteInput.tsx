@@ -1,121 +1,195 @@
-// src/components/inputs/AutocompleteInput.tsx
-import * as React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 
-export type AutocompleteOption = { label: string; value?: string };
+interface AutocompleteOption {
+  label: string;
+  value?: string;
+  group?: string;
+}
 
-type Props = {
+interface AutocompleteInputProps {
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
+  options: AutocompleteOption[];
   placeholder?: string;
-  /** Optional static list of suggestions */
-  options?: AutocompleteOption[];
-  /** Optional async loader for suggestions (debounced) */
-  loadOptions?: (q: string) => Promise<AutocompleteOption[]>;
   className?: string;
   disabled?: boolean;
-  name?: string;
-  id?: string;
-};
+  onFocus?: () => void;
+  onBlur?: () => void;
+  debounceMs?: number;
+}
 
 export default function AutocompleteInput({
   value,
   onChange,
-  placeholder,
   options,
-  loadOptions,
-  className = '',
-  disabled,
-  name,
-  id,
-}: Props) {
-  const [open, setOpen] = React.useState(false);
-  const [query, setQuery] = React.useState(value || '');
-  const [items, setItems] = React.useState<AutocompleteOption[]>(options || []);
-  const [loading, setLoading] = React.useState(false);
+  placeholder = "Search...",
+  className = "",
+  disabled = false,
+  onFocus,
+  onBlur,
+  debounceMs = 300
+}: AutocompleteInputProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filteredOptions, setFilteredOptions] = useState<AutocompleteOption[]>([]);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // keep internal query in sync when parent value changes externally
-  React.useEffect(() => {
-    setQuery(value || '');
-  }, [value]);
+  // Filter options based on input value
+  useEffect(() => {
+    if (!value.trim()) {
+      setFilteredOptions(options.slice(0, 10)); // Show first 10 options when empty
+      return;
+    }
 
-  // update suggestions when options prop changes
-  React.useEffect(() => {
-    if (options && !loadOptions) setItems(options);
-  }, [options, loadOptions]);
+    const filtered = options.filter(option =>
+      option.label.toLowerCase().includes(value.toLowerCase())
+    ).slice(0, 10); // Limit to 10 results
 
-  // debounced async fetch
-  React.useEffect(() => {
-    if (!loadOptions) return;
-    let alive = true;
-    const t = setTimeout(async () => {
-      try {
-        setLoading(true);
-        const res = await loadOptions(query);
-        if (alive) setItems(res || []);
-      } finally {
-        if (alive) setLoading(false);
+    setFilteredOptions(filtered);
+    setHighlightedIndex(-1);
+  }, [value, options]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        setIsOpen(true);
+        e.preventDefault();
       }
-    }, 200);
-    return () => {
-      alive = false;
-      clearTimeout(t);
-    };
-  }, [query, loadOptions]);
+      return;
+    }
 
-  const choose = (opt: AutocompleteOption) => {
-    const v = opt.value ?? opt.label;
-    onChange(v);
-    setQuery(v);
-    setOpen(false);
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev < filteredOptions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => prev > 0 ? prev - 1 : prev);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
+          const selectedOption = filteredOptions[highlightedIndex];
+          onChange(selectedOption.value || selectedOption.label);
+          setIsOpen(false);
+          setHighlightedIndex(-1);
+        }
+        break;
+      case 'Escape':
+        setIsOpen(false);
+        setHighlightedIndex(-1);
+        inputRef.current?.blur();
+        break;
+    }
   };
 
+  // Handle option selection
+  const handleOptionClick = (option: AutocompleteOption) => {
+    onChange(option.value || option.label);
+    setIsOpen(false);
+    setHighlightedIndex(-1);
+    inputRef.current?.focus();
+  };
+
+  // Handle input focus
+  const handleFocus = () => {
+    setIsOpen(true);
+    onFocus?.();
+  };
+
+  // Handle input blur
+  const handleBlur = (e: React.FocusEvent) => {
+    // Don't close if clicking on an option
+    if (containerRef.current?.contains(e.relatedTarget as Node)) {
+      return;
+    }
+    
+    setTimeout(() => {
+      setIsOpen(false);
+      setHighlightedIndex(-1);
+      onBlur?.();
+    }, 150);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setHighlightedIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Scroll highlighted option into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && listRef.current) {
+      const highlightedElement = listRef.current.children[highlightedIndex] as HTMLElement;
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({
+          block: 'nearest',
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [highlightedIndex]);
+
   return (
-    <div className={`relative ${className}`}>
-      <input
-        id={id}
-        name={name}
-        disabled={disabled}
-        className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none ring-0 placeholder:text-white/40 focus:border-white/20"
-        placeholder={placeholder}
-        value={query}
-        onChange={(e) => {
-          const v = e.target.value;
-          setQuery(v);
-          setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => {
-          // slight delay to allow click selection
-          setTimeout(() => setOpen(false), 120);
-        }}
-      />
-      {open && (items?.length || loading) ? (
-        <div className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-white/10 bg-slate-900/95 shadow-xl backdrop-blur">
-          {loading ? (
-            <div className="px-3 py-2 text-xs text-white/60">Loading…</div>
-          ) : (
-            items.map((opt, i) => (
-              <button
-                key={`${opt.value ?? opt.label}-${i}`}
-                type="button"
-                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-white/5"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => choose(opt)}
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`w-full rounded-2xl bg-white/5 border border-white/10 px-3 py-2 pr-8 outline-none focus:border-blue-400 transition-colors ${className}`}
+          autoComplete="off"
+        />
+        <ChevronDown 
+          className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </div>
+
+      {isOpen && filteredOptions.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-gray-900 border border-white/20 rounded-xl shadow-lg max-h-60 overflow-auto">
+          <ul ref={listRef} className="py-1">
+            {filteredOptions.map((option, index) => (
+              <li
+                key={`${option.label}-${index}`}
+                className={`px-3 py-2 cursor-pointer text-sm transition-colors ${
+                  index === highlightedIndex 
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-white/90 hover:bg-white/10'
+                }`}
+                onClick={() => handleOptionClick(option)}
+                onMouseEnter={() => setHighlightedIndex(index)}
               >
-                <span className="truncate">{opt.label}</span>
-                {opt.value && opt.value !== opt.label ? (
-                  <span className="ml-2 shrink-0 text-xs text-white/40">
-                    {opt.value}
+                {option.label}
+                {option.group && (
+                  <span className="text-xs text-white/60 ml-2">
+                    ({option.group})
                   </span>
-                ) : null}
-              </button>
-            ))
-          )}
-          {!loading && (!items || items.length === 0) ? (
-            <div className="px-3 py-2 text-xs text-white/50">No matches</div>
-          ) : null}
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
