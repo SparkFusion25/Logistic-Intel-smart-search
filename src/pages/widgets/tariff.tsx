@@ -1,10 +1,11 @@
-import AppShell from '@/components/layout/AppShell';
-import TariffCalculator from '@/components/widgets/TariffCalculator';
+import dynamic from 'next/dynamic';
+import SiteShell from '@/components/layout/SiteShell';
+const TariffCalculator = dynamic(()=>import('@/components/widgets/TariffCalculator'),{ ssr:false });
 export default function TariffPage(){
   return (
-    <AppShell>
-      <h1 className="text-xl font-semibold mb-3">Tariff Calculator</h1>
+    <SiteShell>
+      <h1 className='text-lg font-semibold mb-3'>Tariff Calculator</h1>
       <TariffCalculator/>
-    </AppShell>
+    </SiteShell>
   );
 }

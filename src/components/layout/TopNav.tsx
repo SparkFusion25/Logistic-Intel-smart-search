@@ -17,6 +17,7 @@ export default function TopNav(){
           {tab('/dashboard','Dashboard')}
           {tab('/search','Search')}
           {tab('/crm','CRM')}
+          {tab('/widgets','Widgets')}
         </nav>
       </div>
     </header>
