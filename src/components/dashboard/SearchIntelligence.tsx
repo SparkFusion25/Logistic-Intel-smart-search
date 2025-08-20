@@ -18,7 +18,7 @@ import { useLocationAutocomplete } from "@/hooks/useLocationAutocomplete"
 import { useCommodityAutocomplete } from "@/hooks/useCommodityAutocomplete"
 import { CompanyCard } from "./CompanyCard"
 import { CompanyContactDrawer } from "./CompanyContactDrawer"
-import { AdvancedFilters } from "../search/AdvancedFilters"
+import AdvancedFilters from "../search/AdvancedFilters"
 import { RevenueVesselResults } from "../search/RevenueVesselResults"
 import { ExportButton } from "../search/ExportButton"
 
@@ -64,7 +64,7 @@ export function SearchIntelligence() {
   })
   const { toast } = useToast()
   const { makeRequest } = useAPI()
-  const { searchCountries, searchCities, loading: locationsLoading } = useLocationAutocomplete()
+  const { countryOptions, cityOptions, loadingCountries, loadingCities } = useLocationAutocomplete()
   const { searchCommodities, loading: commoditiesLoading } = useCommodityAutocomplete()
 
   // All data now comes from real API - no hardcoded searches
@@ -318,9 +318,9 @@ export function SearchIntelligence() {
         
         {/* Advanced Filters */}
         <AdvancedFilters 
-          filters={filters}
-          onFiltersChange={setFilters}
-          onApplyFilters={handleSearch}
+          value={filters}
+          onChange={setFilters}
+          onApply={handleSearch}
         />
       </div>
 
