@@ -1,119 +1,83 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 interface APIResponse<T = any> {
-  success: boolean;
   data?: T;
   error?: string;
-  message?: string;
-  [key: string]: any;
+  loading: boolean;
 }
 
-interface APIRequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  body?: any;
-  headers?: Record<string, string>;
+interface UseAPIOptions {
+  baseURL?: string;
+  defaultHeaders?: Record<string, string>;
 }
 
-export function useAPI() {
+export function useAPI(options: UseAPIOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const makeRequest = async <T = any>(
-    endpoint: string, 
-    options: APIRequestOptions = {}
+  const request = useCallback(async <T = any>(
+    endpoint: string,
+    config: RequestInit = {}
   ): Promise<APIResponse<T>> => {
     setLoading(true);
     setError(null);
 
     try {
-      const { method = 'GET', body, headers = {} } = options;
-
-      // Ensure endpoint starts with /api if it's a relative path
-      const url = endpoint.startsWith('/api') 
-        ? endpoint 
-        : endpoint.startsWith('/') 
-          ? `/api${endpoint}`
-          : `/api/${endpoint}`;
-
-      const config: RequestInit = {
-        method,
+      const baseURL = options.baseURL || '';
+      const url = endpoint.startsWith('http') ? endpoint : `${baseURL}${endpoint}`;
+      
+      const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          ...headers,
+          ...options.defaultHeaders,
+          ...config.headers,
         },
-      };
+        ...config,
+      });
 
-      if (body && method !== 'GET') {
-        config.body = JSON.stringify(body);
-      }
-
-      const response = await fetch(url, config);
-      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
-      return data;
+      
+      setLoading(false);
+      return { data, loading: false };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
       setLoading(false);
+      return { error: errorMessage, loading: false };
     }
-  };
+  }, [options.baseURL, options.defaultHeaders]);
+
+  const get = useCallback(<T = any>(endpoint: string, config?: RequestInit) => 
+    request<T>(endpoint, { ...config, method: 'GET' }), [request]);
+
+  const post = useCallback(<T = any>(endpoint: string, data?: any, config?: RequestInit) => 
+    request<T>(endpoint, { 
+      ...config, 
+      method: 'POST', 
+      body: data ? JSON.stringify(data) : undefined 
+    }), [request]);
+
+  const put = useCallback(<T = any>(endpoint: string, data?: any, config?: RequestInit) => 
+    request<T>(endpoint, { 
+      ...config, 
+      method: 'PUT', 
+      body: data ? JSON.stringify(data) : undefined 
+    }), [request]);
+
+  const del = useCallback(<T = any>(endpoint: string, config?: RequestInit) => 
+    request<T>(endpoint, { ...config, method: 'DELETE' }), [request]);
 
   return {
-    makeRequest,
     loading,
     error,
-  };
-}
-
-// Specialized hook for CRM operations
-export function useCRMAPI() {
-  const { makeRequest, loading, error } = useAPI();
-
-  const addContact = async (contactData: any) => {
-    return makeRequest('/crm/contacts', {
-      method: 'POST',
-      body: contactData,
-    });
-  };
-
-  const getContacts = async (page = 0, limit = 50, search?: string) => {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    });
-    
-    if (search) {
-      params.append('search', search);
-    }
-
-    return makeRequest(`/crm/contacts?${params.toString()}`);
-  };
-
-  const updateContact = async (contactId: string, updates: any) => {
-    return makeRequest(`/crm/contacts/${contactId}`, {
-      method: 'PUT',
-      body: updates,
-    });
-  };
-
-  const deleteContact = async (contactId: string) => {
-    return makeRequest(`/crm/contacts/${contactId}`, {
-      method: 'DELETE',
-    });
-  };
-
-  return {
-    addContact,
-    getContacts,
-    updateContact,
-    deleteContact,
-    loading,
-    error,
+    request,
+    get,
+    post,
+    put,
+    delete: del,
   };
 }
