@@ -1,1 +1,7 @@
 project_id = "zupuxlrtixhfnbuhxhum"
+
+[functions.quote-generator]
+verify_jwt = false
+
+[functions.search-unified]
+verify_jwt = false

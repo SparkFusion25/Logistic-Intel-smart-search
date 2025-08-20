@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 
 // Types based on your search components
 export type Mode = 'all' | 'air' | 'ocean';
@@ -85,18 +86,17 @@ export function useUnifiedSearch(options: UseUnifiedSearchOptions = {}) {
       }
     });
 
-    const response = await fetch(`/api/search/unified?${searchParams.toString()}`);
+    // Use Supabase edge function instead of API route
+    const { data, error } = await supabase.functions.invoke('search-unified?' + searchParams.toString());
     
-    if (!response.ok) {
-      throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+    if (error) {
+      throw new Error(`Search failed: ${error.message}`);
     }
     
-    const data = await response.json();
-    
     return {
-      items: data.items || [],
-      total: data.total || 0,
-      hasMore: data.hasMore || false,
+      items: data.results || [],
+      total: data.pagination?.total || 0,
+      hasMore: data.pagination?.has_more || false,
     };
   }, []);
 

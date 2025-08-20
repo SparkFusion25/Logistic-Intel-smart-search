@@ -1,8 +1,19 @@
 import { useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
+
 export default function QuoteForm(){
   const [form,setForm]=useState({company_name:'',origin:'',destination:'',mode:'ocean',hs_code:'',commodity:''});
   const [resp,setResp]=useState<any>(null);
-  const submit=async()=>{ const r=await fetch('/api/widgets/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)}); setResp(await r.json()); };
+  
+  const submit = async () => { 
+    try {
+      const { data, error } = await supabase.functions.invoke('quote-generator', { body: form });
+      if (error) throw error;
+      setResp(data);
+    } catch (error: any) {
+      setResp({ success: false, error: error.message });
+    }
+  };
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
