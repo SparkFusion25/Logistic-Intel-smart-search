@@ -1,94 +1,88 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useAPI } from './useAPI';
 
-interface CountryOption {
-  value: string;
-  label: string;
+interface Route {
+  id: string;
+  origin: string;
+  destination: string;
+  mode: 'air' | 'ocean';
+  frequency?: number;
+  lastSeen?: string;
 }
 
-interface CityOption {
-  value: string;
-  label: string;
-  country: string;
+interface UseRouterAutocompleteOptions {
+  minLength?: number;
+  debounceMs?: number;
+  limit?: number;
 }
 
-export function useRouterAutocomplete() {
-  const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
-  const [cityOptions, setCityOptions] = useState<CityOption[]>([]);
-  const [loadingCountries, setLoadingCountries] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
+export function useRouterAutocomplete(options: UseRouterAutocompleteOptions = {}) {
+  const { minLength = 2, debounceMs = 300, limit = 10 } = options;
+  const [query, setQuery] = useState('');
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { get } = useAPI();
 
-  // Load countries on mount
+  const searchRoutes = useCallback(async (searchQuery: string) => {
+    if (searchQuery.length < minLength) {
+      setRoutes([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: apiError } = await get<{ routes: Route[] }>(
+        `/api/routes/autocomplete?q=${encodeURIComponent(searchQuery)}&limit=${limit}`
+      );
+
+      if (apiError) {
+        setError(apiError);
+        setRoutes([]);
+      } else if (data?.routes) {
+        setRoutes(data.routes);
+      } else {
+        setRoutes([]);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to search routes');
+      setRoutes([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [get, minLength, limit]);
+
+  // Debounced search effect
   useEffect(() => {
-    loadCountries();
+    const timeoutId = setTimeout(() => {
+      searchRoutes(query);
+    }, debounceMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [query, searchRoutes, debounceMs]);
+
+  const selectRoute = useCallback((route: Route) => {
+    setQuery(`${route.origin} → ${route.destination}`);
+    setRoutes([]);
   }, []);
 
-  const loadCountries = async () => {
-    setLoadingCountries(true);
-    try {
-      const response = await fetch('/api/search/countries');
-      const data = await response.json();
-      
-      if (data.success && data.countries) {
-        const options = data.countries.map((country: string) => ({
-          value: country,
-          label: country
-        }));
-        setCountryOptions(options);
-      }
-    } catch (error) {
-      console.error('Failed to load countries:', error);
-      // Fallback to common countries
-      setCountryOptions([
-        { value: 'United States', label: 'United States' },
-        { value: 'China', label: 'China' },
-        { value: 'Germany', label: 'Germany' },
-        { value: 'Mexico', label: 'Mexico' },
-        { value: 'United Kingdom', label: 'United Kingdom' }
-      ]);
-    } finally {
-      setLoadingCountries(false);
-    }
-  };
-
-  const loadCities = async (country?: string) => {
-    setLoadingCities(true);
-    try {
-      const url = country 
-        ? `/api/search/cities?country=${encodeURIComponent(country)}`
-        : '/api/search/cities';
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (data.success && data.cities) {
-        const options = data.cities.map((city: string) => ({
-          value: city,
-          label: city,
-          country: country || ''
-        }));
-        setCityOptions(options);
-      }
-    } catch (error) {
-      console.error('Failed to load cities:', error);
-      // Fallback to common cities
-      setCityOptions([
-        { value: 'Los Angeles', label: 'Los Angeles', country: 'United States' },
-        { value: 'New York', label: 'New York', country: 'United States' },
-        { value: 'Chicago', label: 'Chicago', country: 'United States' },
-        { value: 'Houston', label: 'Houston', country: 'United States' },
-        { value: 'Shanghai', label: 'Shanghai', country: 'China' },
-        { value: 'Hamburg', label: 'Hamburg', country: 'Germany' }
-      ]);
-    } finally {
-      setLoadingCities(false);
-    }
-  };
+  const clearRoutes = useCallback(() => {
+    setRoutes([]);
+    setQuery('');
+    setError(null);
+  }, []);
 
   return {
-    countryOptions,
-    cityOptions,
-    loadingCountries,
-    loadingCities,
-    loadCities
+    query,
+    setQuery,
+    routes,
+    isLoading,
+    error,
+    selectRoute,
+    clearRoutes,
+    searchRoutes,
   };
 }
