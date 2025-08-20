@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, X, ArrowRight, Book, ChartLine, Download, Calendar } from 'lucide-react'
+import { Plus, X, ArrowRight, Book, TrendingUp, Download, Calendar } from 'lucide-react'
 
 const ICON_OPTIONS = [
   { value: 'arrow', label: 'Arrow', icon: ArrowRight },
   { value: 'book', label: 'Book', icon: Book },
-  { value: 'chart', label: 'Chart', icon: ChartLine },
+  { value: 'chart', label: 'Chart', icon: TrendingUp },
   { value: 'download', label: 'Download', icon: Download },
   { value: 'calendar', label: 'Calendar', icon: Calendar }
 ]

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
   Mail, MessageCircle, Users, Clock, ArrowRight, Book, 
-  ChartLine, Download, Calendar, Eye, FileText 
+  TrendingUp, Download, Calendar, Eye, FileText 
 } from 'lucide-react'
 import { CampaignTemplate, Step } from '@/types/campaign'
 
@@ -20,7 +20,7 @@ const CHANNEL_CONFIG = {
 const ICON_MAP = {
   arrow: ArrowRight,
   book: Book,
-  chart: ChartLine,
+  chart: TrendingUp,
   download: Download,
   calendar: Calendar
 }
