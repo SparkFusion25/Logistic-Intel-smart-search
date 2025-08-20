@@ -120,7 +120,7 @@ function getAlertBg(type: string) {
   }
 }
 
-export function AdminDashboard() {
+export default function AdminDashboard() {
   const [newAffiliateOpen, setNewAffiliateOpen] = useState(false);
   const [payoutDialogOpen, setPayoutDialogOpen] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);

@@ -16,6 +16,9 @@ dist-ssr
 .next/
 out/
 
+# Supabase Edge Functions (Deno-based, not for Next.js build)
+supabase/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

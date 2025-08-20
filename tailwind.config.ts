@@ -41,18 +41,15 @@ export default {
 				/* Enhanced Design System Colors */
 				'canvas': 'hsl(var(--bg-canvas))',
 				'elevated': 'hsl(var(--bg-elevated))',
-				'surface': 'hsl(var(--surface))',
+
 				'surface-glass': 'hsl(var(--surface-glass))',
 				'text-on-dark': 'hsl(var(--text-on-dark))',
 				'text-dark': 'hsl(var(--text-dark))',
 				'muted-text': 'hsl(var(--muted-text))',
-				'brand': 'hsl(var(--brand))',
-				'brand-hover': 'hsl(var(--brand-hover))',
-				'accent': 'hsl(var(--accent))',
+
 				'accent-muted': 'hsl(var(--accent-muted))',
 				'success': 'hsl(var(--success))',
-				'warning': 'hsl(var(--warning))',
-				'danger': 'hsl(var(--danger))',
+
 				'border-glass': 'hsl(var(--border-glass))',
 				
 				/* Extended Primary/Secondary Palettes */
