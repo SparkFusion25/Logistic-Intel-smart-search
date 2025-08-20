@@ -1,14 +1,14 @@
 import * as React from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Logo } from '../Logo';
 import { BarChart3, Search, Users, Mail, Rocket, Target, Calculator, FileText } from 'lucide-react';
 
 const NavItem: React.FC<{ href: string; label: string; icon: React.ReactNode }> = ({ href, label, icon }) => {
-  const { pathname } = useRouter();
+  const { pathname } = useLocation();
   const active = pathname.startsWith(href);
   return (
-    <Link href={href} className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${active ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
+    <Link to={href} className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${active ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}>
       {icon}
       <span>{label}</span>
     </Link>

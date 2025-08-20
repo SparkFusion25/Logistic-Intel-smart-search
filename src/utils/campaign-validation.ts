@@ -108,7 +108,7 @@ export function extractMergeFields(step: Step): string[] {
   if (step.type === 'email') {
     const text = `${step.subject} ${step.body_html}`
     const matches = text.match(/\{\{([^}]+)\}\}/g) || []
-    matches.forEach(match => {
+    matches.forEach((match: string) => {
       const field = match.slice(2, -2).trim()
       if (!field.startsWith('tracking_link') && field !== 'unsubscribe_link') {
         fields.add(field)
@@ -116,13 +116,13 @@ export function extractMergeFields(step: Step): string[] {
     })
   } else if (step.type === 'linkedin_message') {
     const matches = step.text.match(/\{\{([^}]+)\}\}/g) || []
-    matches.forEach(match => {
+    matches.forEach((match: string) => {
       const field = match.slice(2, -2).trim()
       fields.add(field)
     })
   } else if (step.type === 'linkedin_connect' && step.note) {
     const matches = step.note.match(/\{\{([^}]+)\}\}/g) || []
-    matches.forEach(match => {
+    matches.forEach((match: string) => {
       const field = match.slice(2, -2).trim()
       fields.add(field)
     })

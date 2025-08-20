@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 interface ProtectedRouteProps {
@@ -6,16 +6,16 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   // Mock auth for now - replace with actual auth logic
   const user = true; // Replace with real auth check
   const loading = false;
 
   useEffect(() => {
     if (!user && !loading) {
-      router.push('/login');
+      navigate('/login');
     }
-  }, [user, loading, router]);
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (

@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
-import { useRouter } from 'next/router'
+import { useLocation } from 'react-router-dom'
 import { ANALYTICS_CONFIG, trackPageView } from '@/lib/analytics'
 
 export function useAnalytics() {
-  const router = useRouter()
+  const location = useLocation()
 
   useEffect(() => {
     // Track page views on route changes
-    trackPageView(router.pathname)
-  }, [router.pathname])
+    trackPageView(location.pathname)
+  }, [location.pathname])
 
   // Return analytics functions for components to use
   return {

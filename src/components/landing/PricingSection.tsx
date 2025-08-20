@@ -1,5 +1,5 @@
 import { Check, Star, ArrowRight, Zap, Crown, Building } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -176,7 +176,7 @@ export const PricingSection = () => {
 
               {/* CTA Button */}
               <Link
-                href={plan.cta === "Contact Sales" ? "/contact" : "/dashboard"}
+                to={plan.cta === "Contact Sales" ? "/contact" : "/dashboard"}
                 className={`w-full py-4 rounded-lg font-bold transition-all duration-300 flex items-center justify-center ${
                   plan.popular
                     ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 shadow-lg'

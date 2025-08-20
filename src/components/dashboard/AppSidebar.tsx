@@ -2,8 +2,8 @@ import {
   LayoutDashboard, Search, Contact, Mail, BarChart3, Flag, LineChart, 
   Clock8, Boxes, FileText, Calculator, Activity, ShieldCheck, Settings, HelpCircle, BookOpen, Target, ChevronLeft, ChevronRight 
 } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/router"
+import { Link } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -46,7 +46,7 @@ const bottomItems = [
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar()
   const collapsed = state === "collapsed"
-  const router = useRouter()
+  const location = useLocation()
 
   return (
     <Sidebar
@@ -68,7 +68,7 @@ export function AppSidebar() {
           <SidebarGroupContent className="px-2">
             <SidebarMenu>
               {navigationItems.map((item) => {
-                const isActive = router.pathname === item.url || router.pathname.startsWith(item.url + "/")
+                const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + "/")
                 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -83,7 +83,7 @@ export function AppSidebar() {
                          }
                        `}
                      >
-                       <Link href={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
+                       <Link to={item.url} className={`flex items-center gap-3 px-3 py-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
                          {/* Enhanced Icon Container */}
                          <div className={`
                            w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
@@ -116,8 +116,8 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 border-t border-white/10 bg-transparent">
         <SidebarMenu>
-          {bottomItems.map((item) => {
-            const isActive = router.pathname === item.url
+         {bottomItems.map((item) => {
+            const isActive = location.pathname === item.url
             return (
               <SidebarMenuItem key={item.title}>
                  <SidebarMenuButton 
@@ -131,7 +131,7 @@ export function AppSidebar() {
                      }
                    `}
                  >
-                   <Link href={item.url} className={`flex items-center gap-3 px-3 py-2 ${collapsed ? 'justify-center' : ''}`}>
+                   <Link to={item.url} className={`flex items-center gap-3 px-3 py-2 ${collapsed ? 'justify-center' : ''}`}>
                      <div className={`
                        w-8 h-8 shrink-0 rounded-lg transition-all duration-300 flex items-center justify-center
                        ${isActive 

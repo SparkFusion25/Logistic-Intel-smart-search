@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useRouter } from "next/router"
+import { useLocation } from "react-router-dom"
 import { 
   Search, Filter, Download, ArrowRight, Star, Eye, ExternalLink, 
   MoreHorizontal, Building2, MapPin, Calendar, Globe, Ship, TrendingUp,
@@ -23,7 +23,7 @@ import { RevenueVesselResults } from "../search/RevenueVesselResults"
 import { ExportButton } from "../search/ExportButton"
 
 export function SearchIntelligence() {
-  const router = useRouter()
+  const location = useLocation()
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("companies")
   const [hasSearched, setHasSearched] = useState(false)
@@ -201,7 +201,7 @@ export function SearchIntelligence() {
 
   const handleViewFullProfile = (company: any) => {
     // Navigate to dedicated company profile page in the same tab
-    router.push(`/dashboard/company/${company.company_id}`)
+    window.location.href = `/dashboard/company/${company.company_id}`
     toast({
       title: "Opening Full Profile",
       description: `Loading detailed profile for ${company.name}...`

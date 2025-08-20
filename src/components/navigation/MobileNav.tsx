@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 export default function MobileNav() {
-  const router = useRouter();
+  const router = useLocation();
   
   const navItems = [
     { href: "/dashboard", label: "Dashboard" },
@@ -20,7 +20,7 @@ export default function MobileNav() {
         return (
           <Link 
             key={item.href}
-            href={item.href} 
+            to={item.href} 
             className={`flex-1 text-center py-2 text-[11px] ${
               isActive ? 'text-white' : 'text-slate-400'
             }`}
