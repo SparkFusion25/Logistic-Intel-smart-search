@@ -10,6 +10,7 @@ import { AppShell } from "@/components/ui/AppShell";
 import SearchPanel from "@/components/search/SearchPanel";
 import CRMPanel from "@/components/crm/CRMPanel";
 import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import EmailComposer from "@/components/email/EmailComposer";
 import CampaignBuilder from "@/components/campaigns/CampaignBuilder";
 import TariffCalculator from "@/components/widgets/TariffCalculator";
@@ -20,14 +21,7 @@ import MarketBenchmark from "@/components/benchmark/MarketBenchmark";
 const queryClient = new QueryClient();
 
 // Dashboard Page Wrappers
-const DashboardOverview = () => (
-  <div className="space-y-6">
-    <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-    </div>
-    <CRMDashboard />
-  </div>
-);
+const DashboardPage = () => <DashboardOverview />;
 
 const SearchPage = () => (
   <div className="space-y-6">
@@ -121,7 +115,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<AppShell><DashboardOverview /></AppShell>} />
+            <Route path="/dashboard" element={<AppShell><DashboardPage /></AppShell>} />
             <Route path="/dashboard/search" element={<AppShell><SearchPage /></AppShell>} />
             <Route path="/dashboard/crm" element={<AppShell><CRMPage /></AppShell>} />
             <Route path="/dashboard/email" element={<AppShell><EmailPage /></AppShell>} />
