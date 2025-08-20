@@ -1,0 +1,94 @@
+import { useState, useEffect } from 'react';
+
+interface CountryOption {
+  value: string;
+  label: string;
+}
+
+interface CityOption {
+  value: string;
+  label: string;
+  country: string;
+}
+
+export function useRouterAutocomplete() {
+  const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
+  const [cityOptions, setCityOptions] = useState<CityOption[]>([]);
+  const [loadingCountries, setLoadingCountries] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+
+  // Load countries on mount
+  useEffect(() => {
+    loadCountries();
+  }, []);
+
+  const loadCountries = async () => {
+    setLoadingCountries(true);
+    try {
+      const response = await fetch('/api/search/countries');
+      const data = await response.json();
+      
+      if (data.success && data.countries) {
+        const options = data.countries.map((country: string) => ({
+          value: country,
+          label: country
+        }));
+        setCountryOptions(options);
+      }
+    } catch (error) {
+      console.error('Failed to load countries:', error);
+      // Fallback to common countries
+      setCountryOptions([
+        { value: 'United States', label: 'United States' },
+        { value: 'China', label: 'China' },
+        { value: 'Germany', label: 'Germany' },
+        { value: 'Mexico', label: 'Mexico' },
+        { value: 'United Kingdom', label: 'United Kingdom' }
+      ]);
+    } finally {
+      setLoadingCountries(false);
+    }
+  };
+
+  const loadCities = async (country?: string) => {
+    setLoadingCities(true);
+    try {
+      const url = country 
+        ? `/api/search/cities?country=${encodeURIComponent(country)}`
+        : '/api/search/cities';
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.success && data.cities) {
+        const options = data.cities.map((city: string) => ({
+          value: city,
+          label: city,
+          country: country || ''
+        }));
+        setCityOptions(options);
+      }
+    } catch (error) {
+      console.error('Failed to load cities:', error);
+      // Fallback to common cities
+      setCityOptions([
+        { value: 'Los Angeles', label: 'Los Angeles', country: 'United States' },
+        { value: 'New York', label: 'New York', country: 'United States' },
+        { value: 'Chicago', label: 'Chicago', country: 'United States' },
+        { value: 'Houston', label: 'Houston', country: 'United States' },
+        { value: 'Shanghai', label: 'Shanghai', country: 'China' },
+        { value: 'Hamburg', label: 'Hamburg', country: 'Germany' }
+      ]);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  return {
+    countryOptions,
+    cityOptions,
+    loadingCountries,
+    loadingCities,
+    loadCities
+  };
+}
