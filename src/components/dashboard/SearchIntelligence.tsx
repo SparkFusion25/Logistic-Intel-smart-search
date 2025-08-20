@@ -318,8 +318,24 @@ export function SearchIntelligence() {
         
         {/* Advanced Filters */}
         <AdvancedFilters 
-          value={filters}
-          onChange={setFilters}
+          value={{
+            date_from: null,
+            date_to: null,
+            hs_code: filters.hs_codes || '',
+            origin_country: filters.origin_country || '',
+            destination_country: filters.dest_country || '',
+            destination_city: filters.dest_zip || '',
+            carrier: ''
+          }}
+          onChange={(newFilters) => {
+            setFilters(prev => ({
+              ...prev,
+              hs_codes: newFilters.hs_code || '',
+              origin_country: newFilters.origin_country || '',
+              dest_country: newFilters.destination_country || '',
+              dest_zip: newFilters.destination_city || ''
+            }));
+          }}
           onApply={handleSearch}
         />
       </div>
