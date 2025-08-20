@@ -72,16 +72,28 @@ const Home: NextPage = () => {
           
           <div className="space-x-4">
             <Link 
-              href="/api/health" 
+              href="/dashboard" 
               className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-colors"
             >
-              API Health Check
+              Open Dashboard
             </Link>
             <Link 
-              href="/AffiliatePortal" 
+              href="/search" 
+              className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-medium transition-colors"
+            >
+              Try Search
+            </Link>
+            <Link 
+              href="/crm" 
+              className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-xl font-medium transition-colors"
+            >
+              View CRM
+            </Link>
+            <Link 
+              href="/widgets" 
               className="inline-flex items-center px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-medium transition-colors border border-white/20"
             >
-              Affiliate Portal
+              Use Widgets
             </Link>
           </div>
 
