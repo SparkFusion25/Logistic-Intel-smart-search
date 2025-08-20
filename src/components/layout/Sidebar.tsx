@@ -1,10 +1,9 @@
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { Link, useLocation } from 'react-router-dom';
 const NavItem = ({ href, label }: { href: string; label: string }) => {
-  const { pathname } = useRouter();
+  const { pathname } = useLocation();
   const active = pathname === href || pathname.startsWith(href);
   return (
-    <Link href={href} className={`block rounded-xl px-3 py-2 text-sm md:text-[13px] transition ${active ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800/60'}`}>{label}</Link>
+    <Link to={href} className={`block rounded-xl px-3 py-2 text-sm md:text-[13px] transition ${active ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800/60'}`}>{label}</Link>
   );
 };
 export default function Sidebar() {
