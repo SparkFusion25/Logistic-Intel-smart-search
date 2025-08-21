@@ -114,65 +114,85 @@ export async function searchCompanies(params: { q?: string; limit?: number; offs
 }
 
 export async function searchCompaniesAggregated(params: SearchParams = {}) {
-  const { 
-    q, 
-    mode = 'all', 
-    origin_country, 
-    destination_country, 
-    hs_code, 
-    carrier, 
-    date_from, 
-    date_to, 
-    limit = 25, 
-    offset = 0 
-  } = params;
+  try {
+    const { 
+      q = '', 
+      limit = 50, 
+      offset = 0,
+      mode = 'all',
+      date_from,
+      date_to,
+      origin_country,
+      destination_country,
+      hs_code,
+      carrier
+    } = params;
 
-  // Use the company_trade_profiles table for aggregated company data
-  let query = supabase
-    .from('company_trade_profiles')
-    .select('*', { count: 'exact' })
-    .order('total_shipments', { ascending: false })
-    .range(offset, offset + limit - 1);
+    // Use the company_trade_profiles table for enhanced aggregated data
+    let query = supabase
+      .from('company_trade_profiles')
+      .select(`
+        *,
+        id as company_id
+      `, { count: 'exact' })
+      .order('total_shipments', { ascending: false });
 
-  // Apply filters
-  if (q) {
-    query = query.ilike('company_name', `%${q}%`);
-  }
+    // Apply filters
+    if (q && q.trim()) {
+      query = query.ilike('company_name', `%${q.trim()}%`);
+    }
 
-  const { data, error, count } = await query;
-  
-  if (error) {
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Company trade profiles query error:', error);
+      return { success: false, error: error.message, data: [], total: 0 };
+    }
+
+    // Transform data to match SearchCompanyView format with enhanced fields
+    const transformedData = (data ?? []).map(company => ({
+      company_name: company.company_name,
+      company_id: company.id,
+      contacts_count: 0, // Would need to be calculated from CRM contacts
+      shipments_count: company.total_shipments || 0,
+      last_shipment_date: company.last_shipment_date,
+      modes: [
+        ...(company.total_ocean_shipments > 0 ? ['ocean'] : []),
+        ...(company.total_air_shipments > 0 ? ['air'] : [])
+      ],
+      dest_countries: company.top_destination_countries || [],
+      top_commodities: company.top_commodities || [],
+      website: null, // Would need enrichment from companies table
+      country: company.top_origin_countries?.[0] || null,
+      industry: null, // Would need enrichment
+      // Enhanced fields from company_trade_profiles
+      total_ocean_shipments: company.total_ocean_shipments,
+      total_air_shipments: company.total_air_shipments,
+      total_trade_value_usd: company.total_trade_value_usd,
+      avg_shipment_value_usd: company.avg_shipment_value_usd,
+      top_origin_countries: company.top_origin_countries,
+      top_destination_countries: company.top_destination_countries,
+    }));
+
+    const total = typeof count === 'number' ? count : (Array.isArray(data) ? data.length : 0);
+
+    return {
+      success: true,
+      data: transformedData,
+      total: total
+    };
+  } catch (error) {
+    console.error('Search companies aggregated error:', error);
     return { 
       success: false, 
-      error: error.message, 
-      data: [], 
-      total: 0 
-    } as const;
+      error: error instanceof Error ? error.message : 'Unknown error',
+      data: [],
+      total: 0
+    };
   }
-  
-  const total = typeof count === 'number' ? count : (Array.isArray(data) ? data.length : 0);
-  
-  // Transform data to match SearchCompanyView format
-  const transformedData = (data ?? []).map(company => ({
-    company_name: company.company_name,
-    company_id: company.id,
-    contacts_count: 0, // This would need to be calculated from CRM contacts
-    shipments_count: company.total_shipments || 0,
-    last_shipment_date: company.last_shipment_date,
-    modes: [], // Would need to be derived from trade data
-    dest_countries: company.top_destination_countries || [],
-    top_commodities: company.top_commodities || [],
-    website: null, // Would need enrichment
-    country: null, // Would need enrichment
-    industry: null, // Would need enrichment
-  }));
-  
-  return { 
-    success: true, 
-    data: transformedData, 
-    total, 
-    pagination: { hasMore: total > offset + limit } 
-  } as const;
 }
 
 export async function insertCrmContacts(contacts: any[]) {

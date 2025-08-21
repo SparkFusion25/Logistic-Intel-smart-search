@@ -4632,6 +4632,10 @@ export type Database = {
       }
     }
     Functions: {
+      aggregate_company_trade_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       current_org_id: {
         Args: Record<PropertyKey, never>
         Returns: string
