@@ -88,7 +88,11 @@ function ResultRow({ r, q, onAddToCrm, onViewCompany }:{ r:UnifiedRow; q:string;
         </div>
         <div className="flex flex-col p-3 bg-muted/30 rounded-lg border border-border/50">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Destination</span>
-          <span className="font-bold text-foreground truncate">{r.destination_city||r.destination_country||'—'}</span>
+          <span className="font-bold text-foreground truncate">
+            {r.destination_city && r.destination_country 
+              ? `${r.destination_city}, ${r.destination_country}` 
+              : r.destination_city || r.destination_country || '—'}
+          </span>
         </div>
         <div className="flex flex-col p-3 bg-muted/30 rounded-lg border border-border/50">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Date</span>
@@ -267,19 +271,21 @@ export default function SearchPanel(){
         </div>
       </div>
 
-      {/* Filters Card - Mobile Optimized */}
-      <div className="card-glass p-4 sm:p-6">
+      {/* Integrated Filters and AI Assist Card */}
+      <div className="card-glass p-4 sm:p-6 space-y-4">
         <AdvancedFilters value={filters as Filters} onChange={setFilters as any} onApply={onApplyFilters} onClear={onClearFilters}/>
+        
+        {/* Integrated AI Assistant */}
+        <div className="border-t border-border pt-4">
+          <AIAssistBar
+            q={q}
+            filters={filters}
+            lastResults={items}
+            onPickSuggestion={(s)=>{ setQ(s); run(); }}
+            onApplyStructured={(f)=>{ setFilters((x)=>({ ...(x as Filters), ...(f||{}) })); run(); }}
+          />
+        </div>
       </div>
-
-      {/* AI Assist */}
-      <AIAssistBar
-        q={q}
-        filters={filters}
-        lastResults={items}
-        onPickSuggestion={(s)=>{ setQ(s); run(); }}
-        onApplyStructured={(f)=>{ setFilters((x)=>({ ...(x as Filters), ...(f||{}) })); run(); }}
-      />
 
       {/* Results Summary and Pagination */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-4 rounded-xl border border-border gap-3 sm:gap-0">

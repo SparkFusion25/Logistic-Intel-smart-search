@@ -1,6 +1,7 @@
 import { FourCardStats } from './FourCardStats';
 import { RecentCompaniesCard } from './RecentCompaniesCard';
-import { BulkImportProcessor } from './BulkImportProcessor';
+import { QuickSearchCard } from './QuickSearchCard';
+import MarketBenchmark from '@/components/benchmark/MarketBenchmark';
 
 export function DashboardOverview() {
   return (
@@ -25,8 +26,25 @@ export function DashboardOverview() {
         {/* Recent Companies Added - Full Width */}
         <RecentCompaniesCard />
         
-        {/* Bulk Import Processor */}
-        <BulkImportProcessor />
+        {/* Quick Search and Market Benchmark */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-foreground mb-2">Quick Search</h3>
+              <p className="text-sm text-muted-foreground">Search companies and shipments</p>
+            </div>
+            <QuickSearchCard />
+          </div>
+          <div>
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-foreground mb-2">Market Benchmark</h3>
+              <p className="text-sm text-muted-foreground">Trade route intelligence</p>
+            </div>
+            <div className="card-glass p-6">
+              <MarketBenchmark />
+            </div>
+          </div>
+        </div>
 
       {/* Premium Quick Actions */}
       <div className="card-glass p-8">

@@ -1,7 +1,13 @@
 import * as React from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import ContactsTable from './ContactsTable';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { LayoutGrid, List, Mail, ExternalLink, Plus } from 'lucide-react';
+import { CRMCardView } from './CRMCardView';
+import { CRMListView } from './CRMListView';
+import { CRMFeaturedCards } from './CRMFeaturedCards';
 import ContactDrawer from './ContactDrawer';
+import { toast } from 'sonner';
 
 export default function CRMPanel(){
   const [rows,setRows]=React.useState<any[]>([]);
@@ -9,6 +15,7 @@ export default function CRMPanel(){
   const [open,setOpen]=React.useState(false);
   const [company,setCompany]=React.useState<string>('');
   const [shipments,setShipments]=React.useState<any[]>([]);
+  const [viewMode, setViewMode] = React.useState<'cards' | 'list'>('cards');
 
   const load=async()=>{
     setLoading(true);
@@ -22,6 +29,27 @@ export default function CRMPanel(){
   React.useEffect(()=>{load()},[]);
 
   const onRowClick=(r:any)=>{ setCompany(r.company_name||''); setShipments([]); setOpen(true); };
+
+  const handleEmailContact = (contact: any) => {
+    if (contact.email) {
+      window.location.href = `mailto:${contact.email}`;
+    } else {
+      toast.error('No email address available for this contact');
+    }
+  };
+
+  const handleLinkedInContact = (contact: any) => {
+    if (contact.linkedin_url) {
+      window.open(contact.linkedin_url, '_blank');
+    } else {
+      toast.error('No LinkedIn profile available for this contact');
+    }
+  };
+
+  const handleAddToCampaign = (contact: any) => {
+    toast.success(`${contact.company_name} added to campaign!`);
+    // TODO: Implement campaign addition
+  };
 
   const enrichViaApollo=async()=>{
     if(!company) return;
@@ -44,127 +72,79 @@ export default function CRMPanel(){
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header Card - Mobile Optimized */}
-      <div className="bg-card p-4 rounded-xl border border-border shadow-card">
+    <div className="space-y-6">
+      {/* CRM Featured Cards */}
+      <CRMFeaturedCards />
+
+      {/* Header with View Toggle */}
+      <div className="card-glass p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground font-medium">
-            {loading ? 'Loading…' : `${rows.length} contacts`}
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground font-medium">
+              {loading ? 'Loading…' : `${rows.length} contacts`}
+            </div>
+            
+            {/* View Toggle */}
+            <div className="flex items-center gap-2 border border-border rounded-lg p-1">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className="flex items-center gap-2 h-8"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Cards
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="flex items-center gap-2 h-8"
+              >
+                <List className="h-4 w-4" />
+                List
+              </Button>
+            </div>
           </div>
+          
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-            <button 
+            <Button 
               onClick={enrichViaApollo} 
-              className="px-4 py-3 sm:py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm font-medium shadow-sm transition-opacity touch-manipulation"
+              variant="default"
+              size="sm"
+              className="shadow-sm"
             >
               Enrich via Apollo
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={enrichFallback} 
-              className="px-4 py-3 sm:py-2 rounded-lg bg-muted border border-border hover:bg-accent text-sm font-medium transition-colors touch-manipulation"
+              variant="outline"
+              size="sm"
             >
               LinkedIn Fallback
-            </button>
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Card View / Desktop Table View */}
-      <div className="space-y-4">
-        {/* Mobile Cards (visible on small screens) */}
-        <div className="md:hidden space-y-3">
-          {rows.length === 0 ? (
-            <div className="bg-card p-8 rounded-xl border border-border text-center">
-              <p className="text-muted-foreground">No contacts yet — add from Search.</p>
-            </div>
-          ) : (
-            rows.map((r, i) => (
-              <div 
-                key={i}
-                onClick={() => onRowClick(r)}
-                className="bg-card p-4 rounded-xl border border-border shadow-card hover:shadow-lg transition-all duration-200 cursor-pointer touch-manipulation"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-foreground truncate">{r.company_name || 'Unknown Company'}</h3>
-                    <p className="text-sm text-muted-foreground">{r.full_name || 'No name'}</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 ml-3">
-                    <span className="text-sm font-semibold text-primary">
-                      {(r.company_name || r.full_name || '?').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-2 text-sm">
-                  {r.title && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Title:</span>
-                      <span className="font-medium text-foreground truncate ml-2">{r.title}</span>
-                    </div>
-                  )}
-                  {r.email && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Email:</span>
-                      <span className="font-medium text-foreground truncate ml-2">{r.email}</span>
-                    </div>
-                  )}
-                  {r.source && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Source:</span>
-                      <span className="font-medium text-foreground truncate ml-2">{r.source}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Desktop Table (hidden on mobile) */}
-        <div className="hidden md:block">
-          <div onClickCapture={(e)=>{
-            const row=(e.target as HTMLElement).closest('tr');
-            if(row && (row as HTMLElement).dataset['rowIndex']){
-              const idx=Number((row as HTMLElement).dataset['rowIndex']);
-              onRowClick(rows[idx]);
-            }
-          }}>
-            <div className="overflow-x-auto rounded-xl border border-border shadow-card bg-card">
-              <table className="min-w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    {['Company','Name','Title','Email','Source'].map((h)=>(
-                      <th key={h} className="text-left px-4 py-3 font-semibold text-foreground border-b border-border">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.length===0 && (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                        No contacts yet — add from Search.
-                      </td>
-                    </tr>
-                  )}
-                  {rows.map((r,i)=>(
-                    <tr 
-                      key={i} 
-                      data-row-index={i} 
-                      className="border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
-                    >
-                      <td className="px-4 py-3 whitespace-nowrap font-medium text-foreground">{r.company_name||'—'}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-foreground">{r.full_name||'—'}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{r.title||'—'}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-foreground">{r.email||'—'}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{r.source||'—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Contacts View */}
+      {viewMode === 'cards' ? (
+        <CRMCardView
+          contacts={rows}
+          onContactClick={onRowClick}
+          onEmailContact={handleEmailContact}
+          onLinkedInContact={handleLinkedInContact}
+          onAddToCampaign={handleAddToCampaign}
+        />
+      ) : (
+        <CRMListView
+          contacts={rows}
+          onContactClick={onRowClick}
+          onEmailContact={handleEmailContact}
+          onLinkedInContact={handleLinkedInContact}
+          onAddToCampaign={handleAddToCampaign}
+        />
+      )}
 
       <ContactDrawer open={open} onClose={()=>setOpen(false)} company={company} shipments={shipments}/>
     </div>
