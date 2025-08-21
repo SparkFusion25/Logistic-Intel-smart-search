@@ -210,9 +210,7 @@ export function EnhancedSearchPanel({ className }: EnhancedSearchPanelProps) {
           <PaginationControls
             currentPage={page}
             totalPages={totalPages}
-            onNext={nextPage}
-            onPrev={prevPage}
-            onGoToPage={goToPage}
+            onPageChange={goToPage}
             loading={loading}
           />
         </div>
