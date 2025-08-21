@@ -72,40 +72,39 @@ export function BulkImportManager() {
     try {
       setProcessing(importId);
       
-      // First try the edge function
-      const { data, error } = await supabase.functions.invoke('process-bulk-import', {
-        body: { importId }
+      // Get import record to access stored file
+      const { data: importRecord, error: fetchError } = await supabase
+        .from('bulk_imports')
+        .select('*')
+        .eq('id', importId)
+        .single();
+
+      if (fetchError) {
+        throw new Error(`Failed to fetch import record: ${fetchError.message}`);
+      }
+
+      if (!importRecord.file_path) {
+        throw new Error('No file path found for this import');
+      }
+
+      // Download file from storage
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from('bulk-import-files')
+        .download(importRecord.file_path);
+
+      if (downloadError) {
+        throw new Error(`Failed to download file: ${downloadError.message}`);
+      }
+
+      // Convert blob to file
+      const file = new File([fileData], importRecord.filename, { 
+        type: importRecord.file_type === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv'
       });
 
-      if (error) {
-        console.error('Edge function error:', error);
-        // Fallback: directly update the database with valid constraint values
-        const { error: updateError } = await supabase
-          .from('bulk_imports')
-          .update({
-            status: 'completed',
-            // Keep ai_processing_status as 'pending' to avoid constraint violation
-            processed_records: 25,
-            total_records: 25,
-            completed_at: new Date().toISOString(),
-            processing_metadata: {
-              records_processed: 25,
-              processing_method: 'direct_update',
-              note: 'Processed via direct database update due to edge function issue',
-              timestamp: new Date().toISOString()
-            }
-          })
-          .eq('id', importId);
-
-        if (updateError) {
-          throw new Error(`Database update failed: ${updateError.message}`);
-        }
-
-        toast.success('Processing completed successfully!');
-      } else {
-        toast.success('Processing started successfully');
-      }
+      // Process the file using existing logic
+      await processFile(file, importId);
       
+      toast.success('Processing completed successfully!');
       loadImports(); // Refresh the list
     } catch (error) {
       console.error('Failed to trigger processing:', error);
@@ -291,20 +290,33 @@ export function BulkImportManager() {
       const { data: { user } } = await supabase.auth.getUser();
       const currentUserId = user?.id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
 
-      // Create import job record
+      // Store file in Supabase storage for later processing
+      const filePath = `bulk-imports/${currentUserId}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('bulk-import-files')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('File upload error:', uploadError);
+        throw new Error(`Failed to upload file: ${uploadError.message}`);
+      }
+
+      // Create import job record with file path
       const { data: importData, error: importError } = await supabase
         .from('bulk_imports')
         .insert({
           filename: file.name,
           file_type: file.name.split('.').pop() || 'csv',
           file_size: file.size,
+          file_path: filePath,
           status: 'uploaded',
           total_records: 0,
           org_id: currentUserId,
           processing_metadata: {
             original_filename: file.name,
             file_size: file.size,
-            file_type: file.name.split('.').pop()
+            file_type: file.name.split('.').pop(),
+            storage_path: filePath
           }
         })
         .select()
