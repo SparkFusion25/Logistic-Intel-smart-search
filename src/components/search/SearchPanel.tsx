@@ -51,7 +51,7 @@ function ViewToggle({ view, setView }:{ view:ViewType; setView:(v:ViewType)=>voi
   );
 }
 
-function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(row:UnifiedRow)=>void }){
+function ResultRow({ r, q, onAddToCrm, onViewCompany }:{ r:UnifiedRow; q:string; onAddToCrm:(row:UnifiedRow)=>void; onViewCompany:(row:UnifiedRow)=>void }){
   const companyInitial = r.unified_company_name?.charAt(0).toUpperCase() || '?';
   
   return (
@@ -107,7 +107,7 @@ function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(ro
           + Add to CRM
         </button>
         <button 
-          onClick={() => window.open(`https://panjiva.com/search?query=${encodeURIComponent(r.unified_company_name || '')}`, '_blank')}
+          onClick={() => onViewCompany(r)}
           className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border border-border/50 flex-1 sm:flex-none"
         >
           View Trade
@@ -125,6 +125,21 @@ export default function SearchPanel(){
   const [companyLoading, setCompanyLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [showCompanyModal, setShowCompanyModal] = useState(false);
+
+  // Convert UnifiedRow to company format for modal
+  const createCompanyFromRow = (row: UnifiedRow) => ({
+    company_name: row.unified_company_name || 'Unknown Company',
+    company_id: null,
+    contacts_count: 0, // Mock data since we don't have this from shipment
+    shipments_count: 1, // At least this one shipment
+    last_shipment_date: row.unified_date,
+    modes: row.mode ? [row.mode.toUpperCase()] : [],
+    dest_countries: row.destination_country ? [row.destination_country] : [],
+    top_commodities: row.description ? [row.description] : [],
+    website: null,
+    country: row.origin_country,
+    industry: null
+  });
 
   // Add-to-CRM using Supabase for shipments
   const onAddToCrm=async(row:UnifiedRow)=>{
@@ -305,7 +320,18 @@ export default function SearchPanel(){
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-          {items.map((r)=>(<ResultRow key={r.id} r={r} q={q} onAddToCrm={onAddToCrm}/>))}
+          {items.map((r)=>(
+            <ResultRow 
+              key={r.id} 
+              r={r} 
+              q={q} 
+              onAddToCrm={onAddToCrm}
+              onViewCompany={(row) => {
+                setSelectedCompany(createCompanyFromRow(row));
+                setShowCompanyModal(true);
+              }}
+            />
+          ))}
         </div>
       )}
 
