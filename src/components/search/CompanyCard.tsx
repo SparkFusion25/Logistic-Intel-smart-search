@@ -112,27 +112,20 @@ export function CompanyCard({ company, onAddToCRM, onViewDetails }: CompanyCardP
           </div>
         </div>
 
-        {/* Mini Trend Cards */}
+        {/* Mini Trend Cards - Mobile Optimized */}
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <TrendCard
-            title="Volume"
-            value={mockTrends.volume}
-            trend={mockTrends.growth > 0 ? 'up' : mockTrends.growth < 0 ? 'down' : 'stable'}
-            percentage={Math.abs(mockTrends.growth)}
-            compact
-          />
-          <TrendCard
-            title="Growth"
-            value={`${mockTrends.growth > 0 ? '+' : ''}${mockTrends.growth}%`}
-            trend={mockTrends.growth > 10 ? 'up' : mockTrends.growth < -10 ? 'down' : 'stable'}
-            compact
-          />
-          <TrendCard
-            title="Pattern"
-            value={mockTrends.frequency}
-            trend="stable"
-            compact
-          />
+          <div className="bg-muted/30 rounded-lg p-2 text-center">
+            <div className="text-xs text-muted-foreground mb-1">Volume</div>
+            <div className="text-sm font-bold">{mockTrends.volume}</div>
+          </div>
+          <div className="bg-muted/30 rounded-lg p-2 text-center">
+            <div className="text-xs text-muted-foreground mb-1">Growth</div>
+            <div className="text-sm font-bold text-green-600">+{Math.abs(mockTrends.growth)}%</div>
+          </div>
+          <div className="bg-muted/30 rounded-lg p-2 text-center">
+            <div className="text-xs text-muted-foreground mb-1">Pattern</div>
+            <div className="text-sm font-bold">{mockTrends.frequency}</div>
+          </div>
         </div>
 
         {company.last_shipment_date && (

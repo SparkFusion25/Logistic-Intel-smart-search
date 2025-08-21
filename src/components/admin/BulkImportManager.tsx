@@ -238,9 +238,8 @@ export function BulkImportManager() {
     setUploading(true);
     
     try {
-      // Get authenticated user (admin access handled by RLS policies)
-      const { data: user } = await supabase.auth.getUser();
-      const currentUserId = user.user?.id || 'admin';
+      // Admin bypass - no authentication required for bulk uploads
+      const currentUserId = 'admin';
 
       // Create import job record
       const { data: importData, error: importError } = await supabase

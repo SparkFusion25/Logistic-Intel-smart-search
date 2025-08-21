@@ -58,8 +58,10 @@ function ResultRow({ r, q, onAddToCrm, onViewCompany }:{ r:UnifiedRow; q:string;
     <div className="bg-card border-2 border-border hover:border-primary/30 rounded-xl p-4 sm:p-6 flex flex-col gap-4 transition-all duration-200 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
       <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center text-primary-foreground font-bold text-sm shadow-lg flex-shrink-0 border border-primary/20">
-            {companyInitial}
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center text-primary-foreground shadow-lg flex-shrink-0 border border-primary/20">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
