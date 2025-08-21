@@ -8,6 +8,3 @@ verify_jwt = false
 
 [functions.ai-company-processor]
 verify_jwt = false
-
-[functions.setup-admin]
-verify_jwt = false
