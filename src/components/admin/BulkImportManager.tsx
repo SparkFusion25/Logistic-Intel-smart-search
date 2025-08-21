@@ -199,15 +199,25 @@ export function BulkImportManager() {
         throw new Error('No data found in file');
       }
 
-      // Determine target table based on headers
+      // Determine target table based on headers - fixed logic
       const headers = Object.keys(rows[0]);
-      const isContactsFile = headers.some(h => 
-        ['email', 'contact', 'name', 'person'].some(keyword => 
+      
+      // Look for CRM-specific indicators (genuine contact files)
+      const hasCrmIndicators = headers.some(h => 
+        ['email', 'linkedin', 'phone', 'contact_name', 'title', 'position'].some(keyword => 
           h.toLowerCase().includes(keyword)
         )
       );
-
-      const targetTable = isContactsFile ? 'crm_contacts' : 'unified_shipments';
+      
+      // Look for shipment/trade indicators (Panjiva files should go to shipments)
+      const hasShipmentIndicators = headers.some(h => 
+        ['shipper', 'consignee', 'vessel', 'hs_code', 'port', 'carrier', 'bol', 'container', 'freight'].some(keyword => 
+          h.toLowerCase().includes(keyword)
+        )
+      );
+      
+      // Default to unified_shipments for trade files, only use crm_contacts for genuine CRM files
+      const targetTable = (hasCrmIndicators && !hasShipmentIndicators) ? 'crm_contacts' : 'unified_shipments';
 
       // Build column mapping
       const tableSchema = TABLE_SCHEMAS[targetTable];
