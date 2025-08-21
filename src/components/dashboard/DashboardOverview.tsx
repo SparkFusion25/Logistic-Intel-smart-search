@@ -1,8 +1,7 @@
 import { FourCardStats } from './FourCardStats';
 import { QuickSearchCard } from './QuickSearchCard';
 import { MiniCRMList } from './MiniCRMList';
-import { ManualQuoteCard } from './ManualQuoteCard';
-import { TariffCalculatorCard } from './TariffCalculatorCard';
+import { EnhancedCRMCard } from './EnhancedCRMCard';
 
 export function DashboardOverview() {
   return (
@@ -32,13 +31,8 @@ export function DashboardOverview() {
         {/* Mini CRM */}
         <MiniCRMList />
         
-        {/* Manual Quote */}
-        <ManualQuoteCard />
-        
-        {/* Tariff Calculator */}
-        <div className="xl:col-span-2">
-          <TariffCalculatorCard />
-        </div>
+        {/* Enhanced CRM Contact Card - spans 2 columns on xl screens */}
+        <EnhancedCRMCard />
       </div>
 
       {/* Premium Quick Actions */}
