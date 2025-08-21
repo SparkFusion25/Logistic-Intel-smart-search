@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface StatCardProps {
   title: string
@@ -8,6 +9,8 @@ interface StatCardProps {
   icon: LucideIcon
   color?: string
   trend?: 'up' | 'down'
+  href?: string
+  onClick?: () => void
 }
 
 export default function StatCard({ 
@@ -17,10 +20,29 @@ export default function StatCard({
   changeType = 'increase', 
   icon: Icon, 
   color = 'from-sky-400 to-blue-500',
-  trend = 'up' 
+  trend = 'up',
+  href,
+  onClick 
 }: StatCardProps) {
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    } else if (href) {
+      navigate(href)
+    }
+  }
+
+  const isClickable = !!(onClick || href)
+
   return (
-    <div className="bg-card rounded-lg border border-card-border p-4 hover:shadow-md transition-all duration-200">
+    <div 
+      className={`bg-card rounded-lg border border-card-border p-4 hover:shadow-md transition-all duration-200 ${
+        isClickable ? 'cursor-pointer hover:border-primary/20' : ''
+      }`}
+      onClick={isClickable ? handleClick : undefined}
+    >
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>

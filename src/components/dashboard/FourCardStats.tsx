@@ -53,6 +53,7 @@ export function FourCardStats() {
         change="+12%"
         changeType="increase"
         color="from-blue-400 to-blue-500"
+        href="/dashboard/search"
       />
       <StatCard
         title="Companies"
@@ -61,6 +62,7 @@ export function FourCardStats() {
         change="+8%"
         changeType="increase"
         color="from-green-400 to-green-500"
+        href="/dashboard/search"
       />
       <StatCard
         title="Campaigns"
@@ -69,6 +71,7 @@ export function FourCardStats() {
         change="+25%"
         changeType="increase"
         color="from-purple-400 to-purple-500"
+        href="/dashboard/crm"
       />
       
       {/* Email Mini Card as the 4th stat */}
