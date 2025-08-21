@@ -14,7 +14,7 @@
   --accent: 262 83% 58%; /* #7C3AED */
   --surface: 0 0% 100%; /* #FFFFFF */
   --surface-alt: 216 50% 97%; /* #F6F8FB */
-  --border: 215 27% 92%; /* #E5EAF0 */
+  --border: 215 27% 82%; /* #D1DCE8 - stronger border */
   --border-focus: 215 88% 61% / 0.35;
   --text-primary: 222 84% 15%; /* #0B1220 */
   --text-secondary: 215 25% 55%; /* #5B6472 */
@@ -39,16 +39,16 @@
   /* Semantic Design Tokens */
   --background: 216 50% 97%; /* #F6F8FB */
   --foreground: 222 84% 15%; /* #0B1220 */
-  --card: 0 0% 100%; /* #FFFFFF */
+  --card: 0 0% 98%; /* #FAFAFA - slightly more visible */
   --card-foreground: 222 84% 15%;
   --popover: 0 0% 100%;
   --popover-foreground: 222 84% 15%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 216 50% 97%;
+  --secondary: 216 50% 95%; /* #F0F4F8 - slightly darker */
   --secondary-foreground: 222 84% 15%;
-  --muted: 216 50% 97%;
+  --muted: 216 50% 95%;
   --muted-foreground: 215 23% 69%;
-  --input: 215 27% 92%;
+  --input: 215 27% 88%; /* #DAE4ED - stronger input border */
   --ring: 215 88% 61% / 0.35;
   --radius: 12px;
   --destructive: 0 84% 60%;
@@ -153,29 +153,35 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass:hover {
-  border-color: hsl(var(--primary) / 0.2);
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    0 8px 24px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+/* Only apply hover effects on devices with true hover capability */
+@media (hover: hover) {
+  .glass:hover {
+    border-color: hsl(var(--primary) / 0.2);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
 }
 
+/* Enhanced card with stronger borders and shadows */
 .card-glass {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: 20px;
   box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.1),
-    0 4px 16px rgba(0, 0, 0, 0.05);
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 6px 20px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card-glass:hover {
-  border-color: hsl(var(--primary) / 0.15);
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    0 8px 24px rgba(0, 0, 0, 0.1);
+@media (hover: hover) {
+  .card-glass:hover {
+    border-color: hsl(var(--primary) / 0.25);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.1),
+      0 12px 32px rgba(0, 0, 0, 0.08);
+  }
 }
 
 /* Premium Icon Circles */
@@ -205,12 +211,15 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   cursor: pointer;
 }
 
-.pill-glossy:hover {
-  background: hsl(var(--muted) / 0.8);
-  border-color: hsl(var(--primary) / 0.3);
-  color: hsl(var(--foreground));
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* Mobile-friendly pill hover */
+@media (hover: hover) {
+  .pill-glossy:hover {
+    background: hsl(var(--muted) / 0.8);
+    border-color: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .pill-glossy.active {
@@ -252,9 +261,12 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   pointer-events: none;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--gradient-glow);
+/* Mobile-friendly button interactions */
+@media (hover: hover) {
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--gradient-glow);
+  }
 }
 
 .btn-primary:active {
@@ -277,9 +289,11 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   box-shadow: var(--shadow-premium);
 }
 
-.btn-gradient:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--gradient-glow);
+@media (hover: hover) {
+  .btn-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--gradient-glow);
+  }
 }
 
 .btn-secondary {
@@ -299,9 +313,11 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   cursor: pointer;
 }
 
-.btn-secondary:hover {
-  background: hsl(var(--card));
-  border-color: hsl(var(--primary) / 0.2);
+@media (hover: hover) {
+  .btn-secondary:hover {
+    background: hsl(var(--card));
+    border-color: hsl(var(--primary) / 0.2);
+  }
 }
 
 /* Input Styles */
@@ -373,9 +389,11 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   text-decoration: none;
 }
 
-.sidebar-nav-item:hover {
-  color: hsl(var(--sidebar-primary));
-  background: hsl(var(--sidebar-accent));
+@media (hover: hover) {
+  .sidebar-nav-item:hover {
+    color: hsl(var(--sidebar-primary));
+    background: hsl(var(--sidebar-accent));
+  }
 }
 
 .sidebar-nav-item[data-active="true"] {
@@ -463,4 +481,30 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
+}
+
+/* Enhanced mobile touch targets and accessibility */
+@media (max-width: 768px) {
+  button, [role="button"], input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Improved mobile typography */
+  h1, .h1 { font-size: 2.5rem; }
+  h2, .h2 { font-size: 2rem; }
+  h3, .h3 { font-size: 1.5rem; }
+  
+  /* Mobile-optimized cards */
+  .card-glass {
+    border-radius: 16px;
+    margin: 0.5rem 0;
+  }
+  
+  /* Better mobile spacing */
+  .glass {
+    border-radius: 12px;
+    padding: 1rem;
+  }
 }
