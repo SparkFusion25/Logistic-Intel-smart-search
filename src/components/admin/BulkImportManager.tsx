@@ -45,6 +45,7 @@ export function BulkImportManager() {
   const [imports, setImports] = useState<BulkImport[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [processing, setProcessing] = useState<string | null>(null);
 
   // Load imports on mount
   useEffect(() => {
@@ -65,6 +66,27 @@ export function BulkImportManager() {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Manual processing trigger for stuck imports
+  const triggerProcessing = async (importId: string) => {
+    try {
+      setProcessing(importId);
+      
+      const { data, error } = await supabase.functions.invoke('process-bulk-import', {
+        body: { importId }
+      });
+
+      if (error) throw error;
+
+      toast.success('Processing started successfully');
+      loadImports(); // Refresh the list
+    } catch (error) {
+      console.error('Failed to trigger processing:', error);
+      toast.error(`Failed to start processing: ${error.message}`);
+    } finally {
+      setProcessing(null);
+    }
+  };
 
   const loadImports = useCallback(async () => {
     setLoading(true);
@@ -441,6 +463,19 @@ export function BulkImportManager() {
                         >
                           AI: {imp.aiProcessingStatus.replace('ai_', '')}
                         </Badge>
+                      )}
+                      {imp.status === 'uploaded' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => triggerProcessing(imp.id)}
+                          disabled={processing === imp.id}
+                        >
+                          {processing === imp.id ? (
+                            <RefreshCw className="h-4 w-4 animate-spin mr-1" />
+                          ) : null}
+                          {processing === imp.id ? 'Processing...' : 'Process'}
+                        </Button>
                       )}
                     </div>
                   </div>
