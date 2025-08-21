@@ -256,18 +256,68 @@ export function BulkImportManager() {
         })
         .eq('id', importId);
 
-      toast.success(`Successfully imported ${result.data.length} records to ${targetTable}`);
+      // Start AI processing for shipments with enhanced batch processing
+      if (result.data.length > 0) {
+        console.log(`Triggering AI processing for import ${importId}`);
+        
+        // Get unique company names from the imported data
+        const uniqueCompanies = Array.from(new Set(mappedRows
+          .filter(row => row.unified_company_name && row.unified_company_name.trim() !== '')
+          .map(row => row.unified_company_name.trim())
+        ));
 
-      // Trigger AI processing for company intelligence
-      if (targetTable === 'unified_shipments') {
-        try {
-          await supabase.functions.invoke('ai-company-processor', {
-            body: { import_id: importId }
-          });
-          toast.info('AI company processing started in background');
-        } catch (aiError) {
-          console.warn('AI processing failed to start:', aiError);
+        console.log(`Processing ${uniqueCompanies.length} unique companies with AI`);
+
+        // Process companies in batches to avoid timeouts
+        const batchSize = 5;
+        let processedCompanies = 0;
+
+        for (let i = 0; i < uniqueCompanies.length; i += batchSize) {
+          const batch = uniqueCompanies.slice(i, i + batchSize);
+          
+          await Promise.allSettled(
+            batch.map(async (companyName) => {
+              try {
+                const { error: aiError } = await supabase.functions.invoke('ai-company-processor', {
+                  body: { 
+                    importId,
+                    companyName,
+                    filename: file.name
+                  }
+                });
+
+                if (!aiError) {
+                  processedCompanies++;
+                }
+              } catch (error) {
+                console.error(`AI processing failed for company ${companyName}:`, error);
+              }
+            })
+          );
         }
+
+        // Update final AI processing status
+        await supabase
+          .from('bulk_imports')
+          .update({ 
+            ai_processing_status: processedCompanies > 0 ? 'completed' : 'failed',
+            processing_metadata: { 
+              target_table: targetTable,
+              mapping: mappingResult.mapping,
+              original_filename: file.name,
+              file_size: file.size,
+              file_type: file.name.split('.').pop(),
+              ai_companies_processed: processedCompanies,
+              ai_total_companies: uniqueCompanies.length,
+              ai_completed_at: new Date().toISOString()
+            }
+          })
+          .eq('id', importId);
+
+        console.log(`AI processing completed: ${processedCompanies}/${uniqueCompanies.length} companies processed`);
+        toast.success(`Successfully imported ${result.data.length} records and processed ${processedCompanies} companies with AI`);
+      } else {
+        toast.success(`Successfully imported ${result.data.length} records to ${targetTable}`);
       }
 
     } catch (error) {
