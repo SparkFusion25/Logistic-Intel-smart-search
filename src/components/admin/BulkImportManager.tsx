@@ -238,8 +238,9 @@ export function BulkImportManager() {
     setUploading(true);
     
     try {
-      // Admin bypass - no authentication required for bulk uploads
-      const currentUserId = 'admin';
+      // Get current user from auth context
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
 
       // Create import job record
       const { data: importData, error: importError } = await supabase

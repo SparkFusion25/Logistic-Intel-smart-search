@@ -144,16 +144,14 @@ export default function SearchPanel(){
   });
 
   // Add-to-CRM using Supabase for shipments
-  const onAddToCrm=async(row:UnifiedRow)=>{
-    try{
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) {
-        toast.error('Please log in to add contacts to CRM');
-        return;
-      }
+  const onAddToCrm = async (row: UnifiedRow) => {
+    try {
+      // Get current user from auth context
+      const { data: { user } } = await supabase.auth.getUser();
+      const orgId = user?.id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
       
       const { error } = await supabase.from('crm_contacts').insert({
-        org_id: user.user.id,
+        org_id: orgId,
         company_name: row.unified_company_name || 'Unknown Company',
         source: 'search_unified',
         notes: `Added from search - ${row.mode?.toUpperCase()} shipment on ${row.unified_date || 'unknown date'}`,

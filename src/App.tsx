@@ -5,7 +5,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/components/AuthProvider";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./components/pages/Index";
+import AuthPage from "@/pages/AuthPage";
 import { AppShell } from "@/components/ui/AppShell";
 import SearchPanel from "@/components/search/SearchPanel";
 import CRMPanel from "@/components/crm/CRMPanel";
@@ -149,27 +152,30 @@ const BenchmarkPage = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<AppShell><DashboardPage /></AppShell>} />
-            <Route path="/dashboard/search" element={<AppShell><SearchPage /></AppShell>} />
-            <Route path="/dashboard/crm" element={<AppShell><CRMPage /></AppShell>} />
-            <Route path="/dashboard/email" element={<AppShell><EmailPage /></AppShell>} />
-            <Route path="/dashboard/campaigns" element={<AppShell><CampaignsPage /></AppShell>} />
-            <Route path="/dashboard/campaigns/analytics" element={<AppShell><CampaignAnalyticsPage /></AppShell>} />
-            <Route path="/dashboard/widgets/tariff" element={<AppShell><TariffPage /></AppShell>} />
-            <Route path="/dashboard/widgets/quote" element={<AppShell><QuotePage /></AppShell>} />
-            <Route path="/dashboard/admin" element={<AppShell><AdminPage /></AppShell>} />
-            <Route path="/dashboard/benchmark" element={<AppShell><BenchmarkPage /></AppShell>} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/search" element={<ProtectedRoute><AppShell><SearchPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/crm" element={<ProtectedRoute><AppShell><CRMPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/email" element={<ProtectedRoute><AppShell><EmailPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/campaigns" element={<ProtectedRoute><AppShell><CampaignsPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/campaigns/analytics" element={<ProtectedRoute><AppShell><CampaignAnalyticsPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/widgets/tariff" element={<ProtectedRoute><AppShell><TariffPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/widgets/quote" element={<ProtectedRoute><AppShell><QuotePage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/admin" element={<ProtectedRoute><AppShell><AdminPage /></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/benchmark" element={<ProtectedRoute><AppShell><BenchmarkPage /></AppShell></ProtectedRoute>} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
