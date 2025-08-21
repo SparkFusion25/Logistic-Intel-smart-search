@@ -27,6 +27,12 @@ export const TABLE_ALIASES: TableAliasMap = {
     origin_country: ['origin','country of origin','from country'],
     destination_country: ['destination','dest','to country'],
     destination_city: ['dest city','city of arrival','arrival city'],
-    unified_date: ['date','shipment date','arrival date','departure date']
+    unified_date: ['date','shipment date','arrival date','departure date'],
+    trade_direction_explicit: ['trade direction','direction','import/export','i/e','shipment type'],
+    shipper_name: ['shipper','shipper name','us shipper','export shipper'],
+    exporter_name: ['exporter','exporter name','us exporter','seller (export)'],
+    importer_name: ['importer','importer name','importer of record','ior','us importer'],
+    consignee_name: ['consignee','consignee name','cnee','bl consignee'],
+    receiver_name: ['receiver','ship to','deliver to','deliver-to','receiving dc','warehouse']
   }
 };

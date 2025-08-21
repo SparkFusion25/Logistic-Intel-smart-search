@@ -537,6 +537,7 @@ export type Database = {
           shipper_revenue: string | null
           shipper_state_region: string | null
           shipper_trade_roles: string | null
+          trade_direction_explicit: string | null
           transport_method: string | null
           unit_of_measure: string | null
           value_usd: number | null
@@ -628,6 +629,7 @@ export type Database = {
           shipper_revenue?: string | null
           shipper_state_region?: string | null
           shipper_trade_roles?: string | null
+          trade_direction_explicit?: string | null
           transport_method?: string | null
           unit_of_measure?: string | null
           value_usd?: number | null
@@ -719,6 +721,7 @@ export type Database = {
           shipper_revenue?: string | null
           shipper_state_region?: string | null
           shipper_trade_roles?: string | null
+          trade_direction_explicit?: string | null
           transport_method?: string | null
           unit_of_measure?: string | null
           value_usd?: number | null
@@ -2712,6 +2715,7 @@ export type Database = {
           shipment_type: string | null
           shipper_country: string | null
           shipper_name: string | null
+          trade_direction_explicit: string | null
           transport_method: string | null
           unit_of_measure: string | null
           value_usd: number | null
@@ -2766,6 +2770,7 @@ export type Database = {
           shipment_type?: string | null
           shipper_country?: string | null
           shipper_name?: string | null
+          trade_direction_explicit?: string | null
           transport_method?: string | null
           unit_of_measure?: string | null
           value_usd?: number | null
@@ -2820,6 +2825,7 @@ export type Database = {
           shipment_type?: string | null
           shipper_country?: string | null
           shipper_name?: string | null
+          trade_direction_explicit?: string | null
           transport_method?: string | null
           unit_of_measure?: string | null
           value_usd?: number | null
@@ -3810,6 +3816,7 @@ export type Database = {
           shipper_revenue: string | null
           shipper_state_region: string | null
           shipper_trade_roles: string | null
+          trade_direction_explicit: string | null
           transport_method: string | null
           transport_mode: string | null
           ts_all: unknown | null
@@ -3915,6 +3922,7 @@ export type Database = {
           shipper_revenue?: string | null
           shipper_state_region?: string | null
           shipper_trade_roles?: string | null
+          trade_direction_explicit?: string | null
           transport_method?: string | null
           transport_mode?: string | null
           ts_all?: unknown | null
@@ -4020,6 +4028,7 @@ export type Database = {
           shipper_revenue?: string | null
           shipper_state_region?: string | null
           shipper_trade_roles?: string | null
+          trade_direction_explicit?: string | null
           transport_method?: string | null
           transport_mode?: string | null
           ts_all?: unknown | null
@@ -4228,6 +4237,330 @@ export type Database = {
           updated_at: string | null
           value_usd: number | null
           vessel_name: string | null
+        }
+        Relationships: []
+      }
+      unified_shipments_enhanced: {
+        Row: {
+          air_confidence_score: number | null
+          arrival_date: string | null
+          bill_of_lading_number: string | null
+          bol_number: string | null
+          carrier_code: string | null
+          carrier_name: string | null
+          commodity_description: string | null
+          consignee: string | null
+          consignee_address: string | null
+          consignee_city: string | null
+          consignee_email_1: string | null
+          consignee_employees: string | null
+          consignee_full_address: string | null
+          consignee_industry: string | null
+          consignee_name: string | null
+          consignee_phone_1: string | null
+          consignee_postal_code: string | null
+          consignee_revenue: string | null
+          consignee_state_region: string | null
+          consignee_trade_roles: string | null
+          consignee_website_1: string | null
+          container_count: number | null
+          container_marks: string | null
+          container_number: string | null
+          container_type_descriptions: string | null
+          container_types: string | null
+          created_at: string | null
+          departure_date: string | null
+          description: string | null
+          destination_city: string | null
+          destination_country: string | null
+          destination_state: string | null
+          forwarder_name: string | null
+          forwarder_scac_code: string | null
+          goods_shipped: string | null
+          gross_weight_kg: number | null
+          house_bol_number: string | null
+          hs_code: string | null
+          hs_description: string | null
+          id: string | null
+          importer_id: string | null
+          importer_name: string | null
+          is_lcl: boolean | null
+          is_likely_air_shipper: boolean | null
+          master_bol_number: string | null
+          matching_fields: string | null
+          mode: string | null
+          notify_party: string | null
+          number_of_containers: number | null
+          org_id: string | null
+          origin_country: string | null
+          port_of_discharge: string | null
+          port_of_lading: string | null
+          port_of_lading_country: string | null
+          port_of_lading_id: string | null
+          port_of_lading_name: string | null
+          port_of_lading_region: string | null
+          port_of_loading: string | null
+          port_of_unlading: string | null
+          port_of_unlading_id: string | null
+          port_of_unlading_name: string | null
+          port_of_unlading_region: string | null
+          quantity: number | null
+          shipment_date: string | null
+          shipment_destination: string | null
+          shipment_destination_region: string | null
+          shipment_mode: string | null
+          shipment_origin: string | null
+          shipment_type: string | null
+          shipper: string | null
+          shipper_address: string | null
+          shipper_city: string | null
+          shipper_email_1: string | null
+          shipper_employees: string | null
+          shipper_full_address: string | null
+          shipper_industry: string | null
+          shipper_name: string | null
+          shipper_phone_1: string | null
+          shipper_postal_code: string | null
+          shipper_revenue: string | null
+          shipper_state_region: string | null
+          shipper_trade_roles: string | null
+          trade_direction_computed: string | null
+          trade_direction_explicit: string | null
+          transport_method: string | null
+          transport_mode: string | null
+          ts_all: unknown | null
+          unified_carrier: string | null
+          unified_company_name: string | null
+          unified_date: string | null
+          unified_destination: string | null
+          unified_id: string | null
+          unified_value: number | null
+          unified_weight: number | null
+          updated_at: string | null
+          value_usd: number | null
+          vessel: string | null
+          vessel_imo: string | null
+          vessel_name: string | null
+          vessel_voyage_id: string | null
+          voyage_number: string | null
+          w: string | null
+          weight_kg: number | null
+          weight_original_format: string | null
+          weight_t: number | null
+        }
+        Insert: {
+          air_confidence_score?: number | null
+          arrival_date?: string | null
+          bill_of_lading_number?: string | null
+          bol_number?: string | null
+          carrier_code?: string | null
+          carrier_name?: string | null
+          commodity_description?: string | null
+          consignee?: string | null
+          consignee_address?: string | null
+          consignee_city?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_full_address?: string | null
+          consignee_industry?: string | null
+          consignee_name?: string | null
+          consignee_phone_1?: string | null
+          consignee_postal_code?: string | null
+          consignee_revenue?: string | null
+          consignee_state_region?: string | null
+          consignee_trade_roles?: string | null
+          consignee_website_1?: string | null
+          container_count?: number | null
+          container_marks?: string | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
+          created_at?: string | null
+          departure_date?: string | null
+          description?: string | null
+          destination_city?: string | null
+          destination_country?: string | null
+          destination_state?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
+          goods_shipped?: string | null
+          gross_weight_kg?: number | null
+          house_bol_number?: string | null
+          hs_code?: string | null
+          hs_description?: string | null
+          id?: string | null
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
+          is_likely_air_shipper?: boolean | null
+          master_bol_number?: string | null
+          matching_fields?: string | null
+          mode?: string | null
+          notify_party?: string | null
+          number_of_containers?: number | null
+          org_id?: string | null
+          origin_country?: string | null
+          port_of_discharge?: string | null
+          port_of_lading?: string | null
+          port_of_lading_country?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
+          port_of_lading_region?: string | null
+          port_of_loading?: string | null
+          port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
+          port_of_unlading_region?: string | null
+          quantity?: number | null
+          shipment_date?: string | null
+          shipment_destination?: string | null
+          shipment_destination_region?: string | null
+          shipment_mode?: string | null
+          shipment_origin?: string | null
+          shipment_type?: string | null
+          shipper?: string | null
+          shipper_address?: string | null
+          shipper_city?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_full_address?: string | null
+          shipper_industry?: string | null
+          shipper_name?: string | null
+          shipper_phone_1?: string | null
+          shipper_postal_code?: string | null
+          shipper_revenue?: string | null
+          shipper_state_region?: string | null
+          shipper_trade_roles?: string | null
+          trade_direction_computed?: never
+          trade_direction_explicit?: string | null
+          transport_method?: string | null
+          transport_mode?: string | null
+          ts_all?: unknown | null
+          unified_carrier?: string | null
+          unified_company_name?: string | null
+          unified_date?: string | null
+          unified_destination?: string | null
+          unified_id?: string | null
+          unified_value?: number | null
+          unified_weight?: number | null
+          updated_at?: string | null
+          value_usd?: number | null
+          vessel?: string | null
+          vessel_imo?: string | null
+          vessel_name?: string | null
+          vessel_voyage_id?: string | null
+          voyage_number?: string | null
+          w?: string | null
+          weight_kg?: number | null
+          weight_original_format?: string | null
+          weight_t?: number | null
+        }
+        Update: {
+          air_confidence_score?: number | null
+          arrival_date?: string | null
+          bill_of_lading_number?: string | null
+          bol_number?: string | null
+          carrier_code?: string | null
+          carrier_name?: string | null
+          commodity_description?: string | null
+          consignee?: string | null
+          consignee_address?: string | null
+          consignee_city?: string | null
+          consignee_email_1?: string | null
+          consignee_employees?: string | null
+          consignee_full_address?: string | null
+          consignee_industry?: string | null
+          consignee_name?: string | null
+          consignee_phone_1?: string | null
+          consignee_postal_code?: string | null
+          consignee_revenue?: string | null
+          consignee_state_region?: string | null
+          consignee_trade_roles?: string | null
+          consignee_website_1?: string | null
+          container_count?: number | null
+          container_marks?: string | null
+          container_number?: string | null
+          container_type_descriptions?: string | null
+          container_types?: string | null
+          created_at?: string | null
+          departure_date?: string | null
+          description?: string | null
+          destination_city?: string | null
+          destination_country?: string | null
+          destination_state?: string | null
+          forwarder_name?: string | null
+          forwarder_scac_code?: string | null
+          goods_shipped?: string | null
+          gross_weight_kg?: number | null
+          house_bol_number?: string | null
+          hs_code?: string | null
+          hs_description?: string | null
+          id?: string | null
+          importer_id?: string | null
+          importer_name?: string | null
+          is_lcl?: boolean | null
+          is_likely_air_shipper?: boolean | null
+          master_bol_number?: string | null
+          matching_fields?: string | null
+          mode?: string | null
+          notify_party?: string | null
+          number_of_containers?: number | null
+          org_id?: string | null
+          origin_country?: string | null
+          port_of_discharge?: string | null
+          port_of_lading?: string | null
+          port_of_lading_country?: string | null
+          port_of_lading_id?: string | null
+          port_of_lading_name?: string | null
+          port_of_lading_region?: string | null
+          port_of_loading?: string | null
+          port_of_unlading?: string | null
+          port_of_unlading_id?: string | null
+          port_of_unlading_name?: string | null
+          port_of_unlading_region?: string | null
+          quantity?: number | null
+          shipment_date?: string | null
+          shipment_destination?: string | null
+          shipment_destination_region?: string | null
+          shipment_mode?: string | null
+          shipment_origin?: string | null
+          shipment_type?: string | null
+          shipper?: string | null
+          shipper_address?: string | null
+          shipper_city?: string | null
+          shipper_email_1?: string | null
+          shipper_employees?: string | null
+          shipper_full_address?: string | null
+          shipper_industry?: string | null
+          shipper_name?: string | null
+          shipper_phone_1?: string | null
+          shipper_postal_code?: string | null
+          shipper_revenue?: string | null
+          shipper_state_region?: string | null
+          shipper_trade_roles?: string | null
+          trade_direction_computed?: never
+          trade_direction_explicit?: string | null
+          transport_method?: string | null
+          transport_mode?: string | null
+          ts_all?: unknown | null
+          unified_carrier?: string | null
+          unified_company_name?: string | null
+          unified_date?: string | null
+          unified_destination?: string | null
+          unified_id?: string | null
+          unified_value?: number | null
+          unified_weight?: number | null
+          updated_at?: string | null
+          value_usd?: number | null
+          vessel?: string | null
+          vessel_imo?: string | null
+          vessel_name?: string | null
+          vessel_voyage_id?: string | null
+          voyage_number?: string | null
+          w?: string | null
+          weight_kg?: number | null
+          weight_original_format?: string | null
+          weight_t?: number | null
         }
         Relationships: []
       }
