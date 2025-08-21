@@ -1,35 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Building2, Megaphone, Route } from 'lucide-react';
+import StatCard from '@/components/shared/StatCard';
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-}
-
-function StatCard({ title, value, icon, trend }: StatCardProps) {
-  return (
-    <div className="card-glass p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-      <div className="flex items-center justify-between mb-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
-          {icon}
-        </div>
-        {trend && (
-          <div className={`text-xs font-medium ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
-            {trend.isPositive ? '+' : ''}{trend.value}%
-          </div>
-        )}
-      </div>
-      <div className="text-2xl font-bold text-foreground mb-1">{value}</div>
-      <div className="text-sm text-muted-foreground">{title}</div>
-    </div>
-  );
-}
 
 export function FourCardStats() {
   const [stats, setStats] = useState({
@@ -94,25 +67,32 @@ export function FourCardStats() {
       <StatCard
         title="Contacts"
         value={stats.contacts.toLocaleString()}
-        icon={<Users className="h-6 w-6 text-white" />}
-        trend={{ value: 12, isPositive: true }}
+        icon={Users}
+        change="+12%"
+        changeType="increase"
+        color="from-blue-400 to-blue-500"
       />
       <StatCard
         title="Companies"
         value={stats.companies.toLocaleString()}
-        icon={<Building2 className="h-6 w-6 text-white" />}
-        trend={{ value: 8, isPositive: true }}
+        icon={Building2}
+        change="+8%"
+        changeType="increase"
+        color="from-green-400 to-green-500"
       />
       <StatCard
         title="Campaigns"
-        value={stats.campaigns}
-        icon={<Megaphone className="h-6 w-6 text-white" />}
-        trend={{ value: 25, isPositive: true }}
+        value={stats.campaigns.toString()}
+        icon={Megaphone}
+        change="+25%"
+        changeType="increase"
+        color="from-purple-400 to-purple-500"
       />
       <StatCard
         title="Top Tradelane"
         value={stats.topTradelane}
-        icon={<Route className="h-6 w-6 text-white" />}
+        icon={Route}
+        color="from-orange-400 to-orange-500"
       />
     </div>
   );
