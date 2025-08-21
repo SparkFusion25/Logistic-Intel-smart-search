@@ -1,8 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building2, Users, Ship, Calendar, Globe, TrendingUp, Eye } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Building2, Users, Ship, Calendar, Globe, TrendingUp, Eye, Plus } from 'lucide-react';
 import { TrendCard } from './TrendCard';
+import { toast } from 'sonner';
 type SearchCompanyView = {
   company_name: string;
   company_id: string | null;
@@ -19,11 +21,11 @@ type SearchCompanyView = {
 
 type CompanyCardProps = {
   company: SearchCompanyView;
-  onClick?: () => void;
+  onAddToCRM?: (company: SearchCompanyView) => void;
   onViewDetails?: () => void;
 };
 
-export function CompanyCard({ company, onClick, onViewDetails }: CompanyCardProps) {
+export function CompanyCard({ company, onAddToCRM, onViewDetails }: CompanyCardProps) {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'N/A';
     return new Date(dateStr).toLocaleDateString();
@@ -37,17 +39,27 @@ export function CompanyCard({ company, onClick, onViewDetails }: CompanyCardProp
   };
 
   return (
-    <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-primary/20"
-      onClick={onClick}
-    >
+    <Card className="hover:shadow-md transition-shadow border-2 hover:border-primary/20">
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-muted-foreground" />
-            <h3 className="font-semibold text-lg leading-tight">
-              {company.company_name}
-            </h3>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 border-2 border-primary/20">
+              <AvatarImage 
+                src={company.website ? `https://logo.clearbit.com/${new URL(company.website).hostname}` : undefined} 
+                alt={`${company.company_name} logo`}
+              />
+              <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+                <Building2 className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-semibold text-lg leading-tight">
+                {company.company_name}
+              </h3>
+              {company.country && (
+                <p className="text-sm text-muted-foreground">{company.country}</p>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {company.website && (
@@ -76,11 +88,12 @@ export function CompanyCard({ company, onClick, onViewDetails }: CompanyCardProp
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onClick?.();
+              onAddToCRM?.(company);
             }}
             className="flex items-center gap-1"
           >
-            + Add to CRM
+            <Plus className="h-3 w-3" />
+            Add to CRM
           </Button>
         </div>
 

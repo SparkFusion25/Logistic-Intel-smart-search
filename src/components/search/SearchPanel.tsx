@@ -12,6 +12,7 @@ import { PaginationControls } from './PaginationControls';
 import { CompanyCard } from './CompanyCard';
 import { CompanyDetailsModal } from './CompanyDetailsModal';
 import { searchCompaniesAggregated } from '@/repositories/search.repo';
+import { toast } from 'sonner';
 
 function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
   const Btn=(m:Mode,label:string)=>(
@@ -105,11 +106,11 @@ function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(ro
         >
           + Add to CRM
         </button>
-        <button className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border border-border/50 flex-1 sm:flex-none">
+        <button 
+          onClick={() => window.open(`https://panjiva.com/search?query=${encodeURIComponent(r.unified_company_name || '')}`, '_blank')}
+          className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border border-border/50 flex-1 sm:flex-none"
+        >
           View Trade
-        </button>
-        <button className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border border-border/50 flex-1 sm:flex-none">
-          Quote
         </button>
       </div>
     </div>
@@ -128,32 +129,52 @@ export default function SearchPanel(){
   // Add-to-CRM using Supabase for shipments
   const onAddToCrm=async(row:UnifiedRow)=>{
     try{
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        toast.error('Please log in to add contacts to CRM');
+        return;
+      }
+      
       const { error } = await supabase.from('crm_contacts').insert({
-        org_id: (await supabase.auth.getUser()).data.user?.id,
+        org_id: user.user.id,
         company_name: row.unified_company_name || 'Unknown Company',
         source: 'search_unified',
-        notes: `Added from search - ${row.mode?.toUpperCase()} shipment`,
-        tags: [row.mode || 'unknown', 'prospect'].filter(Boolean)
+        notes: `Added from search - ${row.mode?.toUpperCase()} shipment on ${row.unified_date || 'unknown date'}`,
+        tags: ['search', row.mode || 'unknown', 'prospect'].filter(Boolean)
       });
       if (error) throw error;
+      
+      toast.success(`Added ${row.unified_company_name} to CRM successfully!`);
     }catch(e){
       console.error('Failed to add to CRM:', e);
+      toast.error('Failed to add to CRM. Please try again.');
     }
   };
 
   // Add-to-CRM for companies
   const onAddCompanyToCrm = async(company: any) => {
     try{
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        toast.error('Please log in to add contacts to CRM');
+        return;
+      }
+      
       const { error } = await supabase.from('crm_contacts').insert({
-        org_id: (await supabase.auth.getUser()).data.user?.id,
+        org_id: user.user.id,
         company_name: company.company_name || 'Unknown Company',
         source: 'search_company',
-        notes: `Added from company search - ${company.shipments_count} shipments`,
-        tags: ['company', 'prospect']
+        notes: `Added from company search - ${company.shipments_count} shipments, ${company.contacts_count} contacts`,
+        tags: ['company', 'search', 'prospect'],
+        country: company.country,
+        industry: company.industry
       });
       if (error) throw error;
+      
+      toast.success(`Added ${company.company_name} to CRM successfully!`);
     }catch(e){
       console.error('Failed to add company to CRM:', e);
+      toast.error('Failed to add to CRM. Please try again.');
     }
   };
 
@@ -274,7 +295,7 @@ export default function SearchPanel(){
             <CompanyCard 
               key={company.company_id || company.company_name} 
               company={company}
-              onClick={() => onAddCompanyToCrm(company)}
+              onAddToCRM={onAddCompanyToCrm}
               onViewDetails={() => {
                 setSelectedCompany(company);
                 setShowCompanyModal(true);

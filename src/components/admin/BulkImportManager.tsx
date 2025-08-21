@@ -247,7 +247,7 @@ export function BulkImportManager() {
           file_size: file.size,
           status: 'uploaded',
           total_records: 0,
-          org_id: '00000000-0000-0000-0000-000000000000', // Default org for now
+          org_id: (await supabase.auth.getUser()).data.user?.id || '00000000-0000-0000-0000-000000000000',
           processing_metadata: {
             original_filename: file.name,
             file_size: file.size,
