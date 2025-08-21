@@ -3758,6 +3758,7 @@ export type Database = {
           shipper_trade_roles: string | null
           transport_method: string | null
           transport_mode: string | null
+          ts_all: unknown | null
           unified_carrier: string | null
           unified_company_name: string | null
           unified_date: string | null
@@ -3862,6 +3863,7 @@ export type Database = {
           shipper_trade_roles?: string | null
           transport_method?: string | null
           transport_mode?: string | null
+          ts_all?: unknown | null
           unified_carrier?: string | null
           unified_company_name?: string | null
           unified_date?: string | null
@@ -3966,6 +3968,7 @@ export type Database = {
           shipper_trade_roles?: string | null
           transport_method?: string | null
           transport_mode?: string | null
+          ts_all?: unknown | null
           unified_carrier?: string | null
           unified_company_name?: string | null
           unified_date?: string | null
@@ -4314,6 +4317,40 @@ export type Database = {
         Args: { p_company_name: string }
         Returns: undefined
       }
+      search_unified: {
+        Args: {
+          p_carrier?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_destination_city?: string
+          p_destination_country?: string
+          p_hs_code?: string
+          p_limit?: number
+          p_mode?: string
+          p_offset?: number
+          p_origin_country?: string
+          p_q?: string
+        }
+        Returns: {
+          bol_number: string
+          container_count: number
+          description: string
+          destination_city: string
+          destination_country: string
+          gross_weight_kg: number
+          hs_code: string
+          id: string
+          mode: string
+          origin_country: string
+          score: number
+          total_count: number
+          unified_carrier: string
+          unified_company_name: string
+          unified_date: string
+          value_usd: number
+          vessel_name: string
+        }[]
+      }
       set_limit: {
         Args: { "": number }
         Returns: number
@@ -4329,6 +4366,14 @@ export type Database = {
       standardize_company_name: {
         Args: { company_name: string }
         Returns: string
+      }
+      unaccent: {
+        Args: { "": string }
+        Returns: string
+      }
+      unaccent_init: {
+        Args: { "": unknown }
+        Returns: unknown
       }
       upsert_crm_contact: {
         Args: {
