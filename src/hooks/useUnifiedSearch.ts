@@ -72,31 +72,37 @@ export function useUnifiedSearch(options: UseUnifiedSearchOptions = {}) {
     total: number;
     hasMore: boolean;
   }> => {
-    const searchParams = new URLSearchParams();
+    // Use the virtual API endpoint that routes to repository
+    const { makeRequest } = await import('@/hooks/useAPI');
     
-    if (params.q) searchParams.set('q', params.q);
-    if (params.mode !== 'all') searchParams.set('mode', params.mode);
-    searchParams.set('limit', params.limit.toString());
-    searchParams.set('offset', params.offset.toString());
-    
-    // Add filters
-    Object.entries(params.filters).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        searchParams.set(key, String(value));
+    const result = await makeRequest('/api/search/unified', {
+      method: 'GET',
+      params: {
+        q: params.q,
+        mode: params.mode,
+        origin_country: params.filters?.origin_country,
+        destination_country: params.filters?.destination_country,
+        hs_code: params.filters?.hs_code,
+        carrier: params.filters?.carrier,
+        date_from: params.filters?.date_from,
+        date_to: params.filters?.date_to,
+        limit: params.limit,
+        offset: params.offset
       }
     });
 
-    // Use Supabase edge function instead of API route
-    const { data, error } = await supabase.functions.invoke('search-unified?' + searchParams.toString());
-    
-    if (error) {
-      throw new Error(`Search failed: ${error.message}`);
+    if (!result.success) {
+      throw new Error(result.error || 'Search failed');
     }
-    
+
+    const items = Array.isArray(result.data) ? result.data : [];
+    const total = result.total || result.total_count || items.length;
+    const hasMore = result.pagination?.hasMore || (items.length === params.limit && total > items.length);
+
     return {
-      items: data.results || [],
-      total: data.pagination?.total || 0,
-      hasMore: data.pagination?.has_more || false,
+      items,
+      total,
+      hasMore,
     };
   }, []);
 

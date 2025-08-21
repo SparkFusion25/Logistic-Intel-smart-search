@@ -1,65 +1,69 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, Database, AlertTriangle, CheckCircle, Sparkles, Brain, RotateCcw, TestTube } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/lib/supabaseClient';
-import type { Tables } from '@/types/db';
-import { fetchTableColumns } from '@/lib/import/schema';
-import { TABLE_ALIASES } from '@/lib/import/aliases';
-import { buildMapping } from '@/lib/import/matcher';
-import { saveImportMapping, loadImportMapping } from '@/repositories/import.repo';
-import { filenameFromPath, extFromFilename } from '@/lib/path';
+import { supabase } from '@/integrations/supabase/client';
 import { useDropzone } from 'react-dropzone';
+import { toast } from 'sonner';
+import { 
+  Upload, 
+  FileText, 
+  AlertCircle, 
+  CheckCircle, 
+  Clock, 
+  X,
+  RefreshCw,
+  Download
+} from 'lucide-react';
+import { buildMapping, applyMappingToRow } from '@/lib/import/matcher';
+import { saveImportMapping, loadImportMapping } from '@/repositories/import.repo';
+import { insertCrmContacts, insertUnifiedShipments } from '@/repositories/search.repo';
 
-// Use the normalized type that matches our toUi mapper
+// Types
 type BulkImport = {
   id: string;
-  status: 'queued'|'running'|'success'|'error';
   filename: string;
-  file_type: string;
-  total_records: number;
-  processed_records: number;
-  failed_records: number;
-  duplicate_records: number;
-  processing_metadata: any;
-  created_at: string | null;
-  finished_at: string | null;
-  updated_at: string | null;
+  status: 'uploaded' | 'processing' | 'completed' | 'failed';
+  totalRecords: number;
+  processedRecords: number;
+  errorRecords: number;
+  duplicateRecords: number;
+  createdAt: string;
+  completedAt: string | null;
+  processingMetadata: Record<string, any>;
+  errorDetails: Record<string, any>;
+  fileSize: number;
+  fileType: string;
 };
 
-export const BulkImportManager = () => {
-  const { toast } = useToast();
+export function BulkImportManager() {
   const [imports, setImports] = useState<BulkImport[]>([]);
+  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [loading, setLoading] = useState(true);
 
+  // Load imports on mount
   useEffect(() => {
     loadImports();
-    // Set up realtime subscription for import status updates
-    const channel = supabase
-      .channel('bulk-imports-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bulk_imports'
-        },
-        () => {
-          loadImports();
-        }
+    
+    // Set up real-time subscription
+    const subscription = supabase
+      .channel('import_jobs_changes')
+      .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'import_jobs' }, 
+          () => {
+            loadImports();
+          }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      subscription.unsubscribe();
     };
   }, []);
 
-  const loadImports = async () => {
+  const loadImports = useCallback(async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('import_jobs')
@@ -67,147 +71,235 @@ export const BulkImportManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      type ImportRow = Tables<'import_jobs'>;
-      
 
-      
-      const toUi = (r: ImportRow): BulkImport => {
-        const name = filenameFromPath(r.object_path);
-        const ext = extFromFilename(name);
-        const md = (r.processing_metadata ?? null) as any;
-        const dup = typeof md?.duplicate_records === 'number' ? md.duplicate_records : 0;
-        return {
-          id: r.id,
-          status: r.status,
-          filename: name,
-          file_type: ext || 'csv',
-          total_records: (r.total_rows ?? 0),
-          processed_records: (r.ok_rows ?? 0),
-          failed_records: (r.error_rows ?? 0),
-          duplicate_records: dup,
-          processing_metadata: r.processing_metadata,
-          created_at: r.created_at,
-          finished_at: r.finished_at,
-          updated_at: r.finished_at ?? r.created_at
-        };
-      };
-      
-      setImports((data ?? []).map(toUi));
+      const transformedImports = (data || []).map((item): BulkImport => ({
+        id: item.id,
+        filename: (item.processing_metadata as any)?.original_filename || item.object_path?.split('/').pop() || 'Unknown',
+        status: (item.status === 'success' ? 'completed' : item.status) as 'uploaded' | 'processing' | 'completed' | 'failed',
+        totalRecords: item.total_rows || 0,
+        processedRecords: item.ok_rows || 0,
+        errorRecords: item.error_rows || 0,
+        duplicateRecords: 0,
+        createdAt: item.created_at || '',
+        completedAt: item.finished_at,
+        processingMetadata: (item.processing_metadata as any) || {},
+        errorDetails: {},
+        fileSize: (item.processing_metadata as any)?.file_size || 0,
+        fileType: (item.processing_metadata as any)?.file_type || 'unknown'
+      }));
+
+      setImports(transformedImports);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load imports",
-        variant: "destructive",
-      });
+      console.error('Error loading imports:', error);
+      toast.error('Failed to load import history');
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Parse CSV/Excel files
+  const parseFile = async (file: File): Promise<any[]> => {
+    if (file.name.endsWith('.csv')) {
+      const text = await file.text();
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+      if (lines.length === 0) return [];
+      
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+      const rows = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.replace(/"/g, '').trim());
+        const obj: any = {};
+        headers.forEach((header, index) => {
+          obj[header] = values[index] || '';
+        });
+        return obj;
+      });
+      return rows;
+    } else {
+      throw new Error('Only CSV files are supported in this version');
+    }
   };
 
-  const onDrop = async (acceptedFiles: File[]) => {
+  // Process uploaded file
+  const processFile = async (file: File, importId: string) => {
+    try {
+      // Update status to processing
+      await supabase
+        .from('import_jobs')
+        .update({ status: 'running' })
+        .eq('id', importId);
+
+      // Parse file
+      const rows = await parseFile(file);
+      if (rows.length === 0) {
+        throw new Error('No data found in file');
+      }
+
+      // Determine target table based on headers
+      const headers = Object.keys(rows[0]);
+      const isContactsFile = headers.some(h => 
+        ['email', 'contact', 'name', 'person'].some(keyword => 
+          h.toLowerCase().includes(keyword)
+        )
+      );
+
+      const targetTable = isContactsFile ? 'crm_contacts' : 'unified_shipments';
+
+      // Build column mapping
+      const mapping = buildMapping(headers, targetTable);
+      
+      // Save mapping as preset
+      await saveImportMapping({
+        org_id: null,
+        table_name: targetTable,
+        source_label: file.name.split('.')[0],
+        mapping
+      });
+
+      // Apply mapping to rows
+      const mappedRows = rows.map(row => applyMappingToRow(row, mapping));
+
+      // Insert data
+      let result;
+      if (targetTable === 'crm_contacts') {
+        result = await insertCrmContacts(mappedRows);
+      } else {
+        result = await insertUnifiedShipments(mappedRows);
+      }
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      // Update import job status
+      await supabase
+        .from('import_jobs')
+        .update({
+          status: 'success',
+          total_rows: rows.length,
+          ok_rows: result.data.length,
+          error_rows: rows.length - result.data.length,
+          finished_at: new Date().toISOString(),
+          processing_metadata: {
+            target_table: targetTable,
+            mapping,
+            original_filename: file.name,
+            file_size: file.size,
+            file_type: file.name.split('.').pop()
+          }
+        })
+        .eq('id', importId);
+
+      toast.success(`Successfully imported ${result.data.length} records to ${targetTable}`);
+
+    } catch (error) {
+      console.error('Processing failed:', error);
+      
+      // Update status to error
+      await supabase
+        .from('import_jobs')
+        .update({
+          status: 'error',
+          finished_at: new Date().toISOString(),
+          processing_metadata: {
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }
+        })
+        .eq('id', importId);
+
+      throw error;
+    }
+  };
+
+  // File upload handler
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
     const file = acceptedFiles[0];
-    const allowedTypes = ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/xml', 'application/xml'];
-    const maxFileSize = 50 * 1024 * 1024; // 50MB limit
     
-    if (!allowedTypes.includes(file.type)) {
-      toast({
-        title: "Invalid File Type",
-        description: "Please upload CSV, XLSX, or XML files only",
-        variant: "destructive",
-      });
+    // Validate file
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Only CSV files are supported');
       return;
     }
-
-    if (file.size > maxFileSize) {
-      toast({
-        title: "File Too Large",
-        description: `File size must be under 50MB. Your file is ${Math.round(file.size / 1024 / 1024)}MB.`,
-        variant: "destructive",
-      });
+    
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast.error('File size must be less than 10MB');
       return;
     }
 
     setUploading(true);
-
+    
     try {
-      // Get user ID for folder structure
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      // Upload file to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}-${file.name}`;
+      // Upload file to Supabase storage
+      const fileName = `${Date.now()}-${file.name}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('bulk-imports')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
 
-      // Create import record
+      // Create import job record
       const { data: importData, error: importError } = await supabase
-        .from('bulk_imports')
+        .from('import_jobs')
         .insert({
-          org_id: user.id,
-          filename: file.name,
-          file_type: fileExt?.toLowerCase() || 'unknown',
-          file_path: uploadData.path,
-          file_size: file.size,
-          status: 'uploaded'
+          source_bucket: 'bulk-imports',
+          object_path: uploadData.path,
+          status: 'queued',
+          processing_metadata: {
+            original_filename: file.name,
+            file_size: file.size,
+            file_type: file.name.split('.').pop()
+          }
         })
         .select()
         .single();
 
-      if (importError) throw importError;
+      if (importError) {
+        throw new Error(`Database insert failed: ${importError.message}`);
+      }
 
-      // Trigger processing
-      const { error: processError } = await supabase.functions.invoke('bulk-import-processor', {
-        body: {
-          import_id: importData.id,
-          file_path: uploadData.path,
-          file_type: fileExt?.toLowerCase()
+      toast.success('File uploaded and queued for processing');
+
+      // Auto-process small files
+      if (file.size < 1024 * 1024) { // < 1MB
+        try {
+          await processFile(file, importData.id);
+        } catch (processError) {
+          console.error('Auto-processing failed:', processError);
+          toast.warning('File uploaded but auto-processing failed. Use manual processing.');
         }
-      });
+      }
 
-      if (processError) throw processError;
-
-      toast({
-        title: "Upload Successful",
-        description: `${file.name} has been uploaded and is being processed`,
-      });
+      // Refresh imports list
+      loadImports();
 
     } catch (error) {
-      console.error('Upload error:', error);
-      toast({
-        title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to upload file",
-        variant: "destructive",
-      });
+      console.error('Upload failed:', error);
+      toast.error(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setUploading(false);
     }
-  };
+  }, [loadImports]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'text/csv': ['.csv'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'text/xml': ['.xml'],
-      'application/xml': ['.xml']
+      'application/vnd.ms-excel': ['.csv']
     },
     multiple: false,
     disabled: uploading
   });
 
+  // Helper functions
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-500';
-      case 'error': return 'bg-red-500';
-      case 'processing': case 'parsing': case 'deduplicating': case 'enriching': case 'processing_batches': return 'bg-blue-500';
+      case 'processing': return 'bg-blue-500';
+      case 'failed': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
   };
@@ -215,255 +307,164 @@ export const BulkImportManager = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle className="h-4 w-4" />;
-      case 'error': return <AlertTriangle className="h-4 w-4" />;
-      case 'processing': case 'parsing': case 'deduplicating': case 'enriching': case 'processing_batches': return <Database className="h-4 w-4 animate-spin" />;
-      default: return <FileText className="h-4 w-4" />;
+      case 'processing': return <RefreshCw className="h-4 w-4 animate-spin" />;
+      case 'failed': return <AlertCircle className="h-4 w-4" />;
+      default: return <Clock className="h-4 w-4" />;
     }
   };
 
-  const calculateProgress = (item: BulkImport) => {
-    if (item.total_records === 0) return 0;
-    return Math.round((item.processed_records / item.total_records) * 100);
+  const calculateProgress = (imp: BulkImport) => {
+    if (imp.totalRecords === 0) return 0;
+    return Math.round((imp.processedRecords / imp.totalRecords) * 100);
   };
-
-  const testImportInsert = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('test-import-insert');
-
-      if (error) throw error;
-
-      toast({
-        title: "Import Test Results",
-        description: `${data.summary.successful}/${data.summary.totalTests} tests passed. Check console for details.`,
-        variant: data.summary.failed > 0 ? "destructive" : "default",
-      });
-
-      console.log('Import test results:', data.summary);
-    } catch (error) {
-      console.error('Test error:', error);
-      toast({
-        title: "Test Failed",
-        description: error instanceof Error ? error.message : "Failed to run import tests",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const resetStuckImport = async (importId: string) => {
-    try {
-      const { error } = await supabase.functions.invoke('reset-stuck-import', {
-        body: { import_id: importId }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Import Reset",
-        description: "The stuck import has been reset and can be reprocessed",
-      });
-
-      // Reload imports to show updated status
-      loadImports();
-    } catch (error) {
-      console.error('Reset error:', error);
-      toast({
-        title: "Reset Failed",
-        description: error instanceof Error ? error.message : "Failed to reset import",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (loading) {
-    return <div className="flex items-center justify-center p-8">Loading imports...</div>;
-  }
 
   return (
     <div className="space-y-6">
       {/* Upload Area */}
       <Card>
         <CardHeader>
-          <CardTitle>Bulk Trade Data Import</CardTitle>
-          <CardDescription>
-            Upload CSV, XLSX, or XML files containing trade shipment data from BTS, US Census, or IATA sources
-          </CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Upload File
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex justify-end">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={testImportInsert}
-              className="flex items-center gap-2"
-            >
-              <TestTube className="h-4 w-4" />
-              Test Import Schema
-            </Button>
-          </div>
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-              isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-            } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
+              isDragActive
+                ? 'border-primary bg-primary/5'
+                : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+            } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <input {...getInputProps()} />
-            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            
             {uploading ? (
-              <div>
-                <p className="text-lg font-medium">Uploading...</p>
-                <p className="text-sm text-muted-foreground">Please wait while your file is being uploaded</p>
-              </div>
-            ) : isDragActive ? (
-              <div>
-                <p className="text-lg font-medium">Drop your file here</p>
-                <p className="text-sm text-muted-foreground">Release to upload</p>
+              <div className="space-y-2">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Uploading...</p>
               </div>
             ) : (
-              <div>
-                <p className="text-lg font-medium">Drag & drop your trade data file here</p>
+              <div className="space-y-2">
+                <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Supports CSV, XLSX, and XML files up to 100MB
+                  {isDragActive
+                    ? 'Drop the file here...'
+                    : 'Drag & drop a CSV file here, or click to select'}
                 </p>
-                <Button variant="outline" className="mt-4">
-                  Choose File
-                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Supports: CSV files up to 10MB
+                </p>
               </div>
             )}
+          </div>
+
+          <div className="mt-4 text-sm text-muted-foreground">
+            <p className="font-medium">Supported formats:</p>
+            <ul className="list-disc list-inside mt-1 space-y-1">
+              <li>CSV files with headers for contacts (company, name, email, etc.)</li>
+              <li>CSV files with headers for shipments (company, mode, hs_code, etc.)</li>
+              <li>Auto-detection based on column headers</li>
+            </ul>
           </div>
         </CardContent>
       </Card>
 
       {/* Import History */}
       <Card>
-        <CardHeader>
-          <CardTitle>Import History</CardTitle>
-          <CardDescription>
-            Track the progress of your bulk data imports
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Import History
+          </CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadImports}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </CardHeader>
         <CardContent>
-          {imports.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-6 w-6 animate-spin" />
+              <span className="ml-2">Loading...</span>
+            </div>
+          ) : imports.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No imports yet. Upload your first trade data file above.
+              No imports found. Upload a file to get started.
             </div>
           ) : (
             <div className="space-y-4">
-               {imports.map((item) => (
-                 <div key={item.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(item.status)}
-                        <span className="font-medium">{item.filename}</span>
-                        <Badge className={getStatusColor(item.status)}>
-                          {item.status}
-                        </Badge>
-                        {item.processing_metadata?.ai_analysis && (
-                          <Badge variant="outline" className="ml-2">
-                            <Brain className="h-3 w-3 mr-1" />
-                            AI Analyzed
-                          </Badge>
-                        )}
+              {imports.map((imp) => (
+                <div
+                  key={imp.id}
+                  className="border rounded-lg p-4 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-full ${getStatusColor(imp.status)}`}>
+                        {getStatusIcon(imp.status)}
                       </div>
-                      <div className="flex items-center gap-2">
-                        {(item.status === 'running') && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => resetStuckImport(item.id)}
-                            className="h-7 px-2"
-                          >
-                            <RotateCcw className="h-3 w-3 mr-1" />
-                            Reset
-                          </Button>
-                        )}
-                        <span className="text-sm text-muted-foreground">
-                          {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
-                        </span>
+                      <div>
+                        <h4 className="font-medium">{imp.filename}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(imp.createdAt).toLocaleString()}
+                        </p>
                       </div>
                     </div>
+                    <Badge variant={imp.status === 'completed' ? 'default' : 'secondary'}>
+                      {imp.status}
+                    </Badge>
+                  </div>
 
-                   {/* AI Analysis Results */}
-                   {item.processing_metadata?.ai_analysis && (
-                     <div className="mb-3 p-3 bg-muted/30 rounded-lg border">
-                       <h4 className="font-medium text-sm mb-2 flex items-center">
-                         <Sparkles className="h-4 w-4 mr-2 text-blue-500" />
-                         AI Analysis Results
-                       </h4>
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                         <div>
-                           <span className="font-medium">Data Quality Score:</span>
-                           <div className="flex items-center mt-1">
-                             <Progress 
-                               value={item.processing_metadata.ai_analysis.data_quality_score * 10} 
-                               className="w-16 h-2 mr-2" 
-                             />
-                             <span className="text-xs">{item.processing_metadata.ai_analysis.data_quality_score}/10</span>
-                           </div>
-                         </div>
-                         <div>
-                           <span className="font-medium">Est. Processing Time:</span>
-                           <p className="text-muted-foreground text-xs">
-                             {item.processing_metadata.ai_analysis.estimated_processing_time}
-                           </p>
-                         </div>
-                       </div>
-                       {item.processing_metadata.ai_analysis.suggested_cleaning?.length > 0 && (
-                         <div className="mt-2">
-                           <span className="font-medium text-xs">AI Suggestions:</span>
-                           <div className="text-xs text-muted-foreground mt-1 space-y-1">
-                             {item.processing_metadata.ai_analysis.suggested_cleaning.slice(0, 2).map((suggestion, idx) => (
-                               <div key={idx} className="flex items-start">
-                                 <span className="text-blue-500 mr-1 mt-0.5">•</span>
-                                 <span>{suggestion}</span>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       )}
-                     </div>
-                    )}
+                  {imp.status === 'processing' && imp.totalRecords > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Progress</span>
+                        <span>{calculateProgress(imp)}%</span>
+                      </div>
+                      <Progress value={calculateProgress(imp)} className="h-2" />
+                    </div>
+                  )}
 
-                    {/* Batch Processing Status */}
-                    {item.processing_metadata?.current_batch && item.processing_metadata?.total_batches && (
-                      <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <h4 className="font-medium text-sm mb-2 text-blue-700">
-                          Batch Processing Status
-                        </h4>
-                        <div className="text-sm space-y-1">
-                          <div>
-                            <span className="font-medium">Current Batch:</span> {item.processing_metadata.current_batch} / {item.processing_metadata.total_batches}
-                          </div>
-                          <div>
-                            <span className="font-medium">Batch Size:</span> {item.processing_metadata.batch_size} records per batch
-                          </div>
-                          {item.processing_metadata.progress_percentage && (
-                            <div>
-                              <span className="font-medium">Progress:</span> {item.processing_metadata.progress_percentage}%
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {item.total_records > 0 && (
-                      <div className="space-y-2">
-                        <Progress value={calculateProgress(item)} className="h-2" />
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span>
-                            {item.processed_records} / {item.total_records} records processed
-                          </span>
-                          <span>
-                            {item.duplicate_records} duplicates, {item.failed_records} errors
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                 </div>
-               ))}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Total Records</p>
+                      <p className="font-medium">{imp.totalRecords}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Processed</p>
+                      <p className="font-medium text-green-600">{imp.processedRecords}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Errors</p>
+                      <p className="font-medium text-red-600">{imp.errorRecords}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">File Size</p>
+                      <p className="font-medium">
+                        {(imp.fileSize / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                  </div>
+
+                  {imp.processingMetadata?.target_table && (
+                    <div className="pt-2 border-t">
+                      <Badge variant="outline">
+                        Target: {imp.processingMetadata.target_table}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
       </Card>
     </div>
   );
-};
+}

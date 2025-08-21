@@ -1263,6 +1263,13 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "company_alias_resolver_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "search_companies_view"
+            referencedColumns: ["company_id"]
+          },
         ]
       }
       company_profiles: {
@@ -1597,6 +1604,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "search_companies_view"
+            referencedColumns: ["company_id"]
           },
         ]
       }
@@ -3356,6 +3370,13 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "shipments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "search_companies_view"
+            referencedColumns: ["company_id"]
+          },
         ]
       }
       site_content: {
@@ -4166,6 +4187,22 @@ export type Database = {
       }
     }
     Views: {
+      search_companies_view: {
+        Row: {
+          company_id: string | null
+          company_name: string | null
+          contacts_count: number | null
+          country: string | null
+          dest_countries: string[] | null
+          industry: string | null
+          last_shipment_date: string | null
+          modes: string[] | null
+          shipments_count: number | null
+          top_commodities: string[] | null
+          website: string | null
+        }
+        Relationships: []
+      }
       trade_data_view: {
         Row: {
           arrival_date: string | null
@@ -4188,6 +4225,69 @@ export type Database = {
           updated_at: string | null
           value_usd: number | null
           vessel_name: string | null
+        }
+        Relationships: []
+      }
+      unified_shipments_view: {
+        Row: {
+          bol_number: string | null
+          container_count: number | null
+          created_at: string | null
+          description: string | null
+          destination_city: string | null
+          destination_country: string | null
+          gross_weight_kg: number | null
+          hs_code: string | null
+          id: string | null
+          mode: string | null
+          org_id: string | null
+          origin_country: string | null
+          ts_all: unknown | null
+          unified_carrier: string | null
+          unified_company_name: string | null
+          unified_date: string | null
+          value_usd: number | null
+          vessel_name: string | null
+        }
+        Insert: {
+          bol_number?: never
+          container_count?: number | null
+          created_at?: string | null
+          description?: never
+          destination_city?: string | null
+          destination_country?: string | null
+          gross_weight_kg?: number | null
+          hs_code?: string | null
+          id?: string | null
+          mode?: never
+          org_id?: string | null
+          origin_country?: string | null
+          ts_all?: never
+          unified_carrier?: never
+          unified_company_name?: never
+          unified_date?: never
+          value_usd?: number | null
+          vessel_name?: string | null
+        }
+        Update: {
+          bol_number?: never
+          container_count?: number | null
+          created_at?: string | null
+          description?: never
+          destination_city?: string | null
+          destination_country?: string | null
+          gross_weight_kg?: number | null
+          hs_code?: string | null
+          id?: string | null
+          mode?: never
+          org_id?: string | null
+          origin_country?: string | null
+          ts_all?: never
+          unified_carrier?: never
+          unified_company_name?: never
+          unified_date?: never
+          value_usd?: number | null
+          vessel_name?: string | null
         }
         Relationships: []
       }
