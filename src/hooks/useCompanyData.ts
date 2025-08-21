@@ -1,6 +1,18 @@
+
 import { useState, useEffect } from 'react';
-import { Company } from '@/types/database';
 import { supabase } from '@/integrations/supabase/client';
+
+interface Company {
+  id: string;
+  company_name: string;
+  website?: string | null;
+  industry?: string | null;
+  country?: string | null;
+  total_shipments?: number | null;
+  last_activity?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
 
 interface UseCompanyDataResult {
   company: Company | null | undefined;
@@ -27,8 +39,8 @@ export const useCompanyData = (companyName?: string) => {
         const { data, error } = await supabase
           .from('companies')
           .select('*')
-          .eq('name', companyName)
-          .single();
+          .eq('company_name', companyName)
+          .maybeSingle();
 
         if (error) {
           setError(error.message);

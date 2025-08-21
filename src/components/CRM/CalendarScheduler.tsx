@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -55,13 +56,13 @@ export function CalendarScheduler({ dealId, contactId, contactName, contactEmail
       const { data, error } = await supabase
         .from('activities')
         .insert({
-          contact_id: contactId,
+          deal_id: dealId,
           type: 'meeting',
-          status: 'scheduled',
+          subject: meetingData.title,
+          body: meetingData.description || null,
           due_at: meetingDateTime.toISOString(),
-          notes: meetingData.description ?? null,
-          org_id: null, // Add current org ID when available
-          created_by: null, // Add current user ID when available
+          org_id: '00000000-0000-0000-0000-000000000000', // Replace with actual org ID when available
+          created_by: '00000000-0000-0000-0000-000000000000', // Replace with actual user ID when available
         });
 
       if (error) throw error;

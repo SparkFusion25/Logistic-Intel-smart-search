@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabaseClient';
 
 export type ImportMapping = {
@@ -28,7 +29,7 @@ export async function loadImportMapping(orgId: string | null, tableName: string,
     .select('*')
     .eq('table_name', tableName)
     .eq('source_label', sourceLabel)
-    .eq('org_id', orgId)
+    .eq('org_id', orgId || '') // Convert null to empty string to avoid the type error
     .maybeSingle();
   if (error) return { success: false, error: error.message } as const;
   return { success: true, data } as const;
