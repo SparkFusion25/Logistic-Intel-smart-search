@@ -93,6 +93,23 @@ export async function makeRequest<T = any, M = any>(
 ): Promise<APIResponse<T, M>> {
   const { method = 'GET', params, body, headers, cache } = opts;
 
+  // Virtual endpoint mapping for direct Supabase access - check BEFORE fetch
+  if (endpoint.startsWith('/api/search/unified')) {
+    const { searchUnified } = await import('@/repositories/search.repo');
+    const result = await searchUnified(opts?.params || {});
+    return result.success 
+      ? { success: true, data: result.data as any, total: result.total, total_count: result.total, pagination: result.pagination }
+      : { success: false, data: [] as any, error: (result as any).error };
+  }
+  
+  if (endpoint.startsWith('/api/search/companies')) {
+    const { searchCompanies } = await import('@/repositories/search.repo');
+    const result = await searchCompanies(opts?.params || {});
+    return result.success 
+      ? { success: true, data: result.data as any, total: result.total, total_count: result.total }
+      : { success: false, data: [] as any, error: (result as any).error };
+  }
+
   const url = `${endpoint}${toQuery(params)}`;
   const init: RequestInit = {
     method,
@@ -145,23 +162,6 @@ export async function makeRequest<T = any, M = any>(
   }
 
   // success path — normalize
-  // Virtual endpoint mapping for direct Supabase access
-  if (endpoint.startsWith('/api/search/unified')) {
-    const { searchUnified } = await import('@/repositories/search.repo');
-    const result = await searchUnified(opts?.params || {});
-    return result.success 
-      ? { success: true, data: result.data as any, total: result.total, total_count: result.total, pagination: result.pagination }
-      : { success: false, data: [] as any, error: (result as any).error };
-  }
-  
-  if (endpoint.startsWith('/api/search/companies')) {
-    const { searchCompanies } = await import('@/repositories/search.repo');
-    const result = await searchCompanies(opts?.params || {});
-    return result.success 
-      ? { success: true, data: result.data as any, total: result.total, total_count: result.total }
-      : { success: false, data: [] as any, error: (result as any).error };
-  }
-
   return normalizePayload<T>(json);
 }
 
