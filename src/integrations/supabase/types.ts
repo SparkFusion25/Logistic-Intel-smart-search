@@ -3816,6 +3816,7 @@ export type Database = {
           shipper_revenue: string | null
           shipper_state_region: string | null
           shipper_trade_roles: string | null
+          trade_direction: string | null
           trade_direction_explicit: string | null
           transport_method: string | null
           transport_mode: string | null
@@ -3922,6 +3923,7 @@ export type Database = {
           shipper_revenue?: string | null
           shipper_state_region?: string | null
           shipper_trade_roles?: string | null
+          trade_direction?: string | null
           trade_direction_explicit?: string | null
           transport_method?: string | null
           transport_mode?: string | null
@@ -4028,6 +4030,7 @@ export type Database = {
           shipper_revenue?: string | null
           shipper_state_region?: string | null
           shipper_trade_roles?: string | null
+          trade_direction?: string | null
           trade_direction_explicit?: string | null
           transport_method?: string | null
           transport_mode?: string | null

@@ -22,7 +22,7 @@ export const TABLE_ALIASES: TableAliasMap = {
     website: ['url','domain','site']
   },
   unified_shipments: {
-    // Core company identifiers
+    // Core company identifiers - PANJIVA SPECIFIC MAPPINGS ADDED
     unified_company_name: ['company','shipper','consignee','buyer','seller','importer','exporter','company_name','shipper_name','consignee_name','us_consignee_name','consignee company','shipper company','us shipper','us consignee','shipper/consignee','company / shipper','company / consignee'],
     shipper_name: ['shipper','shipper name','us shipper','export shipper','exporter name','shipper_name','us_shipper_name','exp shipper','exporter'],
     consignee_name: ['consignee','consignee name','cnee','bl consignee','us consignee','consignee_name','us_consignee_name','receiver','importer name','importer'],
@@ -36,15 +36,18 @@ export const TABLE_ALIASES: TableAliasMap = {
     shipment_mode: ['shipment mode','mode','shipping mode'],
     transport_method: ['transport method','method','shipping method','freight method'],
     
-    // Commodity codes and descriptions
-    hs_code: ['hs','hscode','hs code','tariff code','harmonized code','hs_codes','hs6','hs2','hs4','hs8','hs10','commodity code','schedule b','harmonized system code','tariff number','commodity classification'],
-    description: ['description','commodity description','product description','goods description','cargo description','item description','shipment description','merchandise description','product name'],
-    hs_description: ['hs description','commodity name','product category','item category','goods category'],
-    commodity_description: ['commodity description','product description','goods description','cargo description','shipment description','merchandise description','commodity','product','goods','cargo','item'],
+    // PANJIVA SPECIFIC MAPPINGS - Critical for correct data import
+    trade_direction: ['trade direction','direction','export','import','trade type','flow direction'],
     
-    // Geographic information
+    // Commodity codes and descriptions - ENHANCED FOR PANJIVA
+    hs_code: ['hs','hscode','hs code','tariff code','harmonized code','hs_codes','hs6','hs2','hs4','hs8','hs10','commodity code','schedule b','harmonized system code','tariff number','commodity classification'],
+    description: ['description','commodity description','product description','goods description','cargo description','item description','shipment description','merchandise description','product name','goods shipped'],
+    hs_description: ['hs description','commodity name','product category','item category','goods category'],
+    commodity_description: ['commodity description','product description','goods description','cargo description','shipment description','merchandise description','commodity','product','goods','cargo','item','goods shipped'],
+    
+    // Geographic information - PANJIVA COUNTRY MAPPINGS
     origin_country: ['origin','country of origin','from country','shipper country','export country','origin_country_name','shipper_country','departure country','source country'],
-    destination_country: ['destination','dest','to country','consignee country','import country','destination_country_name','consignee_country','country of unlading','arrival country','target country'],
+    destination_country: ['destination','dest','to country','consignee country','import country','destination_country_name','consignee_country','country of unlading','arrival country','target country','country of destination'],
     destination_city: ['dest city','city of arrival','arrival city','consignee city','port of unlading','destination_city_name','consignee_city','delivery city','final destination'],
     destination_state: ['dest state','destination state','consignee state','arrival state','delivery state','state of delivery'],
     shipment_origin: ['shipment origin','origin','departure point','source location','pickup location'],
@@ -77,12 +80,12 @@ export const TABLE_ALIASES: TableAliasMap = {
     arrival_date: ['arrival date','delivery date','receipt date','discharge date','unloading date'],
     departure_date: ['departure date','loading date','pickup date','embarkation date','dispatch date'],
     
-    // Values and measurements
+    // Values and measurements - PANJIVA WEIGHT MAPPINGS CRITICAL
     unified_value: ['value','total value','cargo value','shipment value','freight value'],
-    unified_weight: ['weight','total weight','cargo weight','shipment weight','freight weight'],
+    unified_weight: ['weight','total weight','cargo weight','shipment weight','freight weight','weight (kg)'],
     value_usd: ['value','declared value','cargo value','shipment value','customs value','fob value','merchandise value','commercial value','invoice value'],
-    gross_weight_kg: ['weight','gross weight','weight kg','total weight','cargo weight','shipment weight','freight weight','net weight'],
-    weight_kg: ['weight kg','weight','cargo weight','net weight','total weight'],
+    gross_weight_kg: ['weight','gross weight','weight kg','total weight','cargo weight','shipment weight','freight weight','net weight','weight (kg)'],
+    weight_kg: ['weight kg','weight','cargo weight','net weight','total weight','weight (kg)'],
     container_count: ['containers','container qty','teu','number of containers','container quantity','boxes','container units','ctn count'],
     quantity: ['quantity','qty','units','pieces','count','number of items'],
     
