@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, BarChart3, Search, Users, Mail, Calculator, FileText, Shield, Globe, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
+import LandingMobileMenu from '@/components/layout/LandingMobileMenu';
 
 export default function Index() {
   const { user } = useAuth();
@@ -63,28 +64,34 @@ export default function Index() {
               </Badge>
             </div>
             <div className="flex items-center space-x-4">
-              {user ? (
-                <Link to="/dashboard">
-                  <Button>
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <Link to="/auth">
-                    <Button variant="outline">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link to="/auth">
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center space-x-4">
+                {user ? (
+                  <Link to="/dashboard">
                     <Button>
-                      Get Started
+                      Go to Dashboard
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                </div>
-              )}
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Link to="/auth">
+                      <Button variant="outline">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/auth">
+                      <Button>
+                        Get Started
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+              
+              {/* Mobile Navigation */}
+              <LandingMobileMenu />
             </div>
           </div>
         </div>

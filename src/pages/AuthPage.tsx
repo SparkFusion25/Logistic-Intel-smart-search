@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle, Globe, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 
 type AuthMode = 'signin' | 'signup';
@@ -136,8 +136,26 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md card-glass">
+    <div className="min-h-screen bg-background">
+      {/* Mobile-friendly header */}
+      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="flex items-center space-x-2">
+              <Globe className="w-6 h-6 text-primary" />
+              <span className="text-lg font-semibold text-foreground">LogisticIntel</span>
+            </Link>
+            <Link to="/" className="flex items-center space-x-1 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back to Home</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Auth form */}
+      <div className="flex items-center justify-center p-4 pt-20">
+        <Card className="w-full max-w-md card-glass">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center mb-4">
             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -264,6 +282,7 @@ export default function AuthPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
