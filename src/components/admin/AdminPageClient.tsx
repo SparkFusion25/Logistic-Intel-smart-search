@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Archive } from 'lucide-react';
+import { BulkImportManager } from './BulkImportManager';
 
 export default function AdminPageClient() {
   return (
@@ -97,6 +99,19 @@ export default function AdminPageClient() {
               <span>View Logs</span>
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Bulk Import Manager Section */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+            <Archive className="h-5 w-5" />
+            Bulk Import Manager
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BulkImportManager />
         </CardContent>
       </Card>
     </div>
