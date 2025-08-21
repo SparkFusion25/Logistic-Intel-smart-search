@@ -39,6 +39,7 @@ type BulkImport = {
   errorDetails: Record<string, any>;
   fileSize: number;
   fileType: string;
+  filePath: string | null; // Add file_path to detect legacy imports
 };
 
 export function BulkImportManager() {
@@ -84,7 +85,8 @@ export function BulkImportManager() {
       }
 
       if (!importRecord.file_path) {
-        throw new Error('No file path found for this import');
+        toast.error('This is a legacy import without stored file. Please use "Re-upload" to upload the file again.');
+        return;
       }
 
       // Download file from storage
@@ -114,6 +116,26 @@ export function BulkImportManager() {
     }
   };
 
+  // Delete/reset legacy import to allow re-upload
+  const deleteImport = async (importId: string) => {
+    try {
+      const { error } = await supabase
+        .from('bulk_imports')
+        .delete()
+        .eq('id', importId);
+
+      if (error) {
+        throw new Error(`Failed to delete import: ${error.message}`);
+      }
+
+      toast.success('Import deleted. You can now re-upload the file.');
+      loadImports();
+    } catch (error) {
+      console.error('Failed to delete import:', error);
+      toast.error(`Failed to delete import: ${error.message}`);
+    }
+  };
+
   const loadImports = useCallback(async () => {
     setLoading(true);
     try {
@@ -138,7 +160,8 @@ export function BulkImportManager() {
         processingMetadata: (typeof item.processing_metadata === 'object' && item.processing_metadata !== null) ? item.processing_metadata as Record<string, any> : {},
         errorDetails: (typeof item.error_details === 'object' && item.error_details !== null) ? item.error_details as Record<string, any> : {},
         fileSize: item.file_size || 0,
-        fileType: item.file_type || 'unknown'
+        fileType: item.file_type || 'unknown',
+        filePath: item.file_path || null // Add file_path mapping
       }));
 
       setImports(transformedImports);
@@ -503,7 +526,9 @@ export function BulkImportManager() {
                           AI: {imp.aiProcessingStatus.replace('ai_', '')}
                         </Badge>
                       )}
-                      {imp.status === 'uploaded' && (
+                      {/* Show different buttons based on import type and status */}
+                      {imp.status === 'uploaded' && imp.filePath ? (
+                        // Modern imports with stored files - show Process button
                         <Button
                           size="sm"
                           variant="outline"
@@ -515,7 +540,22 @@ export function BulkImportManager() {
                           ) : null}
                           {processing === imp.id ? 'Processing...' : 'Process'}
                         </Button>
-                      )}
+                      ) : imp.status === 'uploaded' && !imp.filePath ? (
+                        // Legacy imports without stored files - show Re-upload button
+                        <>
+                          <Badge variant="destructive" className="text-xs">
+                            Legacy Import - File Missing
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteImport(imp.id)}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Delete & Re-upload
+                          </Button>
+                        </>
+                      ) : null}
                     </div>
                   </div>
 
