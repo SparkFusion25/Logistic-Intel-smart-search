@@ -80,10 +80,10 @@ export default function AdvancedFilters({
   };
 
   return (
-    <div className="card-glass p-4 md:p-6">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Filters</h3>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-foreground">Filters</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Date range */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Date Range</label>
@@ -92,14 +92,14 @@ export default function AdvancedFilters({
               type="date"
               value={field(local.date_from)}
               onChange={(e) => push({ date_from: e.target.value || null })}
-              className="flex-1 rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+              className="flex-1 rounded-lg bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
               placeholder="From"
             />
             <input
               type="date"
               value={field(local.date_to)}
               onChange={(e) => push({ date_to: e.target.value || null })}
-              className="flex-1 rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+              className="flex-1 rounded-lg bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
               placeholder="To"
             />
           </div>
@@ -111,7 +111,7 @@ export default function AdvancedFilters({
           <input
             value={field(local.hs_code)}
             onChange={(e) => push({ hs_code: e.target.value })}
-            className="w-full rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+            className="w-full rounded-lg bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
             placeholder="Enter HS code..."
             inputMode="numeric"
           />
@@ -156,22 +156,22 @@ export default function AdvancedFilters({
           <input
             value={field(local.carrier)}
             onChange={(e) => push({ carrier: e.target.value })}
-            className="w-full rounded-xl bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
+            className="w-full rounded-lg bg-background border-2 border-border px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors"
             placeholder="Enter carrier name..."
           />
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <button
-          className="btn-primary px-6 py-2 text-sm font-medium"
+          className="btn-primary px-6 py-2 text-sm font-medium flex-1 sm:flex-none"
           disabled={applyDisabled}
           onClick={onApply}
         >
           Apply Filters
         </button>
         <button
-          className="btn-secondary px-6 py-2 text-sm font-medium"
+          className="btn-secondary px-6 py-2 text-sm font-medium flex-1 sm:flex-none"
           onClick={clear}
         >
           Clear All

@@ -23,7 +23,23 @@ const queryClient = new QueryClient();
 // Dashboard Page Wrappers
 const DashboardPage = () => <DashboardOverview />;
 
-const SearchPage = () => <SearchPanel />;
+const SearchPage = () => (
+  <div className="flex flex-col">
+    <div className="card-glass p-4 sm:p-6 lg:p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">
+          Search Intelligence<span className="text-lg">™</span>
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Discover global trade patterns and business opportunities
+        </p>
+      </div>
+    </div>
+    <div className="p-4 sm:p-6 lg:p-8 pt-0">
+      <SearchPanel />
+    </div>
+  </div>
+);
 
 const CRMPage = () => (
   <div className="flex flex-col">
