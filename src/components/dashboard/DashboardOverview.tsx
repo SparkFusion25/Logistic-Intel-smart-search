@@ -1,4 +1,4 @@
-import { DashboardStats } from './DashboardStats';
+import { FourCardStats } from './FourCardStats';
 import { QuickSearchCard } from './QuickSearchCard';
 import { MiniCRMList } from './MiniCRMList';
 import { ManualQuoteCard } from './ManualQuoteCard';
@@ -18,8 +18,8 @@ export function DashboardOverview() {
           </p>
         </div>
         
-        {/* KPI Stats inside header */}
-        <DashboardStats />
+        {/* Four Card Stats */}
+        <FourCardStats />
       </div>
 
       <div className="space-y-8 p-4 sm:p-6 lg:p-8">

@@ -111,7 +111,7 @@ export default function SearchPanel(){
   const onClearFilters = () => run();
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col space-y-4">
       {/* Unified Search Card */}
       <div className="card-glass p-8">
         {/* Premium Title */}
@@ -121,34 +121,31 @@ export default function SearchPanel(){
           </h1>
         </div>
 
-        <div className="space-y-6">
-          {/* Search Bar */}
-          <div className="relative">
+        {/* Search Bar with Inline Mode Toggle */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="relative flex-1">
             <input
               value={q}
               onChange={(e)=>setQ(e.target.value)}
               onKeyDown={(e)=>{if(e.key==='Enter') run();}}
               placeholder="Search companies, HS codes, carriers, products..."
-              className="w-full h-14 rounded-2xl bg-background border-2 border-border px-6 pr-32 text-base placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300"
+              className="w-full h-14 rounded-2xl bg-background border-2 border-border px-6 pr-4 text-base placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300"
             />
-            <button 
-              onClick={()=>run()} 
-              className="absolute right-2 top-2 btn-primary px-6 py-2.5 h-10 disabled:opacity-60 text-sm font-medium" 
-              disabled={loading}
-            >
-              {loading ? 'Searching...' : 'Search'}
-            </button>
           </div>
-
-          {/* Mode Toggle */}
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-foreground">Transport Mode:</span>
-            <ModeToggle mode={mode} setMode={setMode}/>
-          </div>
-
-          {/* Filters */}
-          <AdvancedFilters value={filters as Filters} onChange={setFilters as any} onApply={onApplyFilters} onClear={onClearFilters}/>
+          <ModeToggle mode={mode} setMode={setMode}/>
+          <button 
+            onClick={()=>run()} 
+            className="btn-primary px-6 py-2.5 h-14 disabled:opacity-60 text-sm font-medium rounded-2xl" 
+            disabled={loading}
+          >
+            {loading ? 'Searching...' : 'Search'}
+          </button>
         </div>
+      </div>
+
+      {/* Filters Card - Closer spacing */}
+      <div className="card-glass p-6">
+        <AdvancedFilters value={filters as Filters} onChange={setFilters as any} onApply={onApplyFilters} onClear={onClearFilters}/>
       </div>
 
       {/* AI Assist */}
