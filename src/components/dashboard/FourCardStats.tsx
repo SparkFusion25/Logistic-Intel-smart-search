@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Building2, Megaphone, Route } from 'lucide-react';
+import { Users, Building2, Megaphone } from 'lucide-react';
 import StatCard from '@/components/shared/StatCard';
+import { TradeLaneMonitor } from './TradeLaneMonitor';
 
 
 export function FourCardStats() {
   const [stats, setStats] = useState({
     contacts: 0,
     companies: 0,
-    campaigns: 0,
-    topTradelane: 'Loading...'
+    campaigns: 0
   });
 
   useEffect(() => {
@@ -31,28 +31,10 @@ export function FourCardStats() {
         // Mock campaigns for now
         const campaignsCount = 3;
 
-        // Get top tradelane
-        const { data: tradeData } = await supabase
-          .from('unified_shipments')
-          .select('origin_country, destination_country')
-          .not('origin_country', 'is', null)
-          .not('destination_country', 'is', null)
-          .limit(100);
-
-        const routes: Record<string, number> = {};
-        tradeData?.forEach(row => {
-          const route = `${row.origin_country} → ${row.destination_country}`;
-          routes[route] = (routes[route] || 0) + 1;
-        });
-
-        const topRoute = Object.entries(routes)
-          .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'No data';
-
         setStats({
           contacts: contactsCount || 0,
           companies: uniqueCompanies,
-          campaigns: campaignsCount,
-          topTradelane: topRoute
+          campaigns: campaignsCount
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -63,7 +45,7 @@ export function FourCardStats() {
   }, []);
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       <StatCard
         title="Contacts"
         value={stats.contacts.toLocaleString()}
@@ -88,12 +70,11 @@ export function FourCardStats() {
         changeType="increase"
         color="from-purple-400 to-purple-500"
       />
-      <StatCard
-        title="Top Tradelane"
-        value={stats.topTradelane}
-        icon={Route}
-        color="from-orange-400 to-orange-500"
-      />
+      
+      {/* Trade Lane Monitor replaces the simple stat card */}
+      <div className="xl:col-span-1">
+        <TradeLaneMonitor />
+      </div>
     </div>
   );
 }
