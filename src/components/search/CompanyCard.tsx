@@ -70,6 +70,20 @@ export function CompanyCard({ company, onClick, onViewDetails }: CompanyCardProp
           </div>
         </div>
 
+        <div className="flex items-center gap-2 mb-3">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick?.();
+            }}
+            className="flex items-center gap-1"
+          >
+            + Add to CRM
+          </Button>
+        </div>
+
         <div className="grid grid-cols-2 gap-4 mb-3">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-blue-500" />

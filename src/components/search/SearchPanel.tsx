@@ -1,5 +1,5 @@
 // src/components/search/SearchPanel.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedSearch } from '@/hooks/useUnifiedSearch';
 import type { Mode, Filters, UnifiedRow } from '@/types/search';
@@ -9,6 +9,9 @@ import { Highlight } from '@/lib/highlight';
 import { upper } from '@/lib/strings';
 import AIAssistBar from '@/components/search/AIAssistBar';
 import { PaginationControls } from './PaginationControls';
+import { CompanyCard } from './CompanyCard';
+import { CompanyDetailsModal } from './CompanyDetailsModal';
+import { searchCompaniesAggregated } from '@/repositories/search.repo';
 
 function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
   const Btn=(m:Mode,label:string)=>(
@@ -24,6 +27,25 @@ function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
       {Btn('all','All')}
       {Btn('air','Air ✈')}
       {Btn('ocean','Ocean 🚢')}
+    </div>
+  );
+}
+
+type ViewType = 'shipments' | 'companies';
+
+function ViewToggle({ view, setView }:{ view:ViewType; setView:(v:ViewType)=>void }){
+  const Btn=(v:ViewType,label:string)=>(
+    <button
+      onClick={()=>setView(v)}
+      className={`pill-glossy font-medium text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 ${
+        view===v ? 'active' : ''
+      }`}
+    >{label}</button>
+  );
+  return (
+    <div className="flex items-center gap-1 sm:gap-2">
+      {Btn('shipments','Shipments')}
+      {Btn('companies','Companies')}
     </div>
   );
 }
@@ -96,8 +118,14 @@ function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(ro
 
 export default function SearchPanel(){
   const { q,setQ,mode,setMode,filters,setFilters,items,total,loading,error,currentPage,totalPages,run,goToPage }=useUnifiedSearch({ initialMode:'all', initialLimit:50 });
+  const [view, setView] = useState<ViewType>('shipments');
+  const [companyItems, setCompanyItems] = useState<any[]>([]);
+  const [companyTotal, setCompanyTotal] = useState(0);
+  const [companyLoading, setCompanyLoading] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
 
-  // Add-to-CRM using Supabase
+  // Add-to-CRM using Supabase for shipments
   const onAddToCrm=async(row:UnifiedRow)=>{
     try{
       const { error } = await supabase.from('crm_contacts').insert({
@@ -113,8 +141,60 @@ export default function SearchPanel(){
     }
   };
 
-  const onApplyFilters = () => run();
-  const onClearFilters = () => run();
+  // Add-to-CRM for companies
+  const onAddCompanyToCrm = async(company: any) => {
+    try{
+      const { error } = await supabase.from('crm_contacts').insert({
+        org_id: (await supabase.auth.getUser()).data.user?.id,
+        company_name: company.company_name || 'Unknown Company',
+        source: 'search_company',
+        notes: `Added from company search - ${company.shipments_count} shipments`,
+        tags: ['company', 'prospect']
+      });
+      if (error) throw error;
+    }catch(e){
+      console.error('Failed to add company to CRM:', e);
+    }
+  };
+
+  // Search companies function
+  const runCompanySearch = async () => {
+    setCompanyLoading(true);
+    try {
+      // Filter out null values from filters for company search
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(([_, value]) => value != null)
+      );
+      
+      const result = await searchCompaniesAggregated({
+        q,
+        mode,
+        ...cleanFilters,
+        limit: 50,
+        offset: (currentPage - 1) * 50
+      });
+      
+      if (result.success) {
+        setCompanyItems(result.data);
+        setCompanyTotal(result.total);
+      }
+    } catch (e) {
+      console.error('Company search failed:', e);
+    } finally {
+      setCompanyLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    if (view === 'companies') {
+      runCompanySearch();
+    } else {
+      run();
+    }
+  };
+
+  const onApplyFilters = () => handleSearch();
+  const onClearFilters = () => handleSearch();
 
   return (
     <div className="flex flex-col space-y-4 sm:space-y-6">
@@ -132,17 +212,20 @@ export default function SearchPanel(){
             />
           </div>
           
-          {/* Mobile: Stack mode toggle and search button */}
+          {/* Mobile: Stack toggles and search button */}
           <div className="flex gap-3">
+            <div className="flex-shrink-0">
+              <ViewToggle view={view} setView={setView}/>
+            </div>
             <div className="flex-shrink-0">
               <ModeToggle mode={mode} setMode={setMode}/>
             </div>
             <button 
-              onClick={()=>run()} 
+              onClick={handleSearch} 
               className="btn-primary px-4 sm:px-6 py-2.5 h-12 sm:h-14 disabled:opacity-60 text-sm font-medium rounded-xl sm:rounded-2xl flex-shrink-0" 
-              disabled={loading}
+              disabled={loading || companyLoading}
             >
-              {loading ? 'Searching...' : 'Search'}
+              {(loading || companyLoading) ? 'Searching...' : 'Search'}
             </button>
           </div>
         </div>
@@ -165,7 +248,11 @@ export default function SearchPanel(){
       {/* Results Summary and Pagination */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-4 rounded-xl border border-border gap-3 sm:gap-0">
         <div className="text-sm text-muted-foreground font-medium">
-          {loading ? 'Loading…' : error ? `Error: ${error}` : `${total.toLocaleString()} results found`}
+          {view === 'companies' ? (
+            companyLoading ? 'Loading companies…' : `${companyTotal.toLocaleString()} companies found`
+          ) : (
+            loading ? 'Loading shipments…' : error ? `Error: ${error}` : `${total.toLocaleString()} shipments found`
+          )}
           {totalPages > 0 && (
             <span className="ml-2 text-xs">
               (Page {currentPage} of {totalPages})
@@ -176,14 +263,39 @@ export default function SearchPanel(){
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={goToPage}
-          loading={loading}
+          loading={loading || companyLoading}
         />
       </div>
 
-      {/* Premium Results Grid - Mobile Responsive */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-        {items.map((r)=>(<ResultRow key={r.id} r={r} q={q} onAddToCrm={onAddToCrm}/>))}
-      </div>
+      {/* Results Grid - Conditional Rendering */}
+      {view === 'companies' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          {companyItems.map((company) => (
+            <CompanyCard 
+              key={company.company_id || company.company_name} 
+              company={company}
+              onClick={() => onAddCompanyToCrm(company)}
+              onViewDetails={() => {
+                setSelectedCompany(company);
+                setShowCompanyModal(true);
+              }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          {items.map((r)=>(<ResultRow key={r.id} r={r} q={q} onAddToCrm={onAddToCrm}/>))}
+        </div>
+      )}
+
+      {/* Company Details Modal */}
+      {selectedCompany && (
+        <CompanyDetailsModal
+          isOpen={showCompanyModal}
+          onClose={() => setShowCompanyModal(false)}
+          company={selectedCompany}
+        />
+      )}
     </div>
   );
 }

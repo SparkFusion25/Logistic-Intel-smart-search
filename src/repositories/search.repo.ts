@@ -113,6 +113,68 @@ export async function searchCompanies(params: { q?: string; limit?: number; offs
   } as const;
 }
 
+export async function searchCompaniesAggregated(params: SearchParams = {}) {
+  const { 
+    q, 
+    mode = 'all', 
+    origin_country, 
+    destination_country, 
+    hs_code, 
+    carrier, 
+    date_from, 
+    date_to, 
+    limit = 25, 
+    offset = 0 
+  } = params;
+
+  // Use the company_trade_profiles table for aggregated company data
+  let query = supabase
+    .from('company_trade_profiles')
+    .select('*', { count: 'exact' })
+    .order('total_shipments', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  // Apply filters
+  if (q) {
+    query = query.ilike('company_name', `%${q}%`);
+  }
+
+  const { data, error, count } = await query;
+  
+  if (error) {
+    return { 
+      success: false, 
+      error: error.message, 
+      data: [], 
+      total: 0 
+    } as const;
+  }
+  
+  const total = typeof count === 'number' ? count : (Array.isArray(data) ? data.length : 0);
+  
+  // Transform data to match SearchCompanyView format
+  const transformedData = (data ?? []).map(company => ({
+    company_name: company.company_name,
+    company_id: company.id,
+    contacts_count: 0, // This would need to be calculated from CRM contacts
+    shipments_count: company.total_shipments || 0,
+    last_shipment_date: company.last_shipment_date,
+    modes: [], // Would need to be derived from trade data
+    dest_countries: company.top_destination_countries || [],
+    top_commodities: company.top_commodities || [],
+    website: null, // Would need enrichment
+    country: null, // Would need enrichment
+    industry: null, // Would need enrichment
+  }));
+  
+  return { 
+    success: true, 
+    data: transformedData, 
+    total, 
+    pagination: { hasMore: total > offset + limit } 
+  } as const;
+}
+
 export async function insertCrmContacts(contacts: any[]) {
   const payload = contacts.map(contact => ({
     company_name: contact.company_name || 'Unknown Company',
