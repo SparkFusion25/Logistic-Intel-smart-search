@@ -2,6 +2,7 @@ import { FourCardStats } from './FourCardStats';
 import { RecentCompaniesCard } from './RecentCompaniesCard';
 import { QuickSearchCard } from './QuickSearchCard';
 import MarketBenchmark from '@/components/benchmark/MarketBenchmark';
+import { BulkImportTest } from '../test/BulkImportTest';
 
 export function DashboardOverview() {
   return (
@@ -88,6 +89,11 @@ export function DashboardOverview() {
           </button>
         </div>
       </div>
+
+        {/* Temporary Test Component for Bulk Import */}
+        <div className="card-glass p-8">
+          <BulkImportTest />
+        </div>
       </div>
     </div>
   );
