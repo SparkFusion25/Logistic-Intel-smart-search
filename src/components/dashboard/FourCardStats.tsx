@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Building2, Megaphone } from 'lucide-react';
 import StatCard from '@/components/shared/StatCard';
-import { TradeLaneMonitor } from './TradeLaneMonitor';
+import { QuickSearchCard } from './QuickSearchCard';
 
 
 export function FourCardStats() {
@@ -71,9 +71,9 @@ export function FourCardStats() {
         color="from-purple-400 to-purple-500"
       />
       
-      {/* Trade Lane Monitor replaces the simple stat card */}
+      {/* Quick Search Card as the 4th stat */}
       <div className="xl:col-span-1">
-        <TradeLaneMonitor />
+        <QuickSearchCard />
       </div>
     </div>
   );

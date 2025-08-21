@@ -1,7 +1,6 @@
 import { FourCardStats } from './FourCardStats';
-import { QuickSearchCard } from './QuickSearchCard';
-import { MiniCRMList } from './MiniCRMList';
-import { EnhancedCRMCard } from './EnhancedCRMCard';
+import { RecentCompaniesCard } from './RecentCompaniesCard';
+import { BulkImportProcessor } from './BulkImportProcessor';
 
 export function DashboardOverview() {
   return (
@@ -23,17 +22,11 @@ export function DashboardOverview() {
 
       <div className="space-y-8 p-4 sm:p-6 lg:p-8">
 
-        {/* Main Widgets Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {/* Quick Search */}
-        <QuickSearchCard />
+        {/* Recent Companies Added - Full Width */}
+        <RecentCompaniesCard />
         
-        {/* Mini CRM */}
-        <MiniCRMList />
-        
-        {/* Enhanced CRM Contact Card - spans 2 columns on xl screens */}
-        <EnhancedCRMCard />
-      </div>
+        {/* Bulk Import Processor */}
+        <BulkImportProcessor />
 
       {/* Premium Quick Actions */}
       <div className="card-glass p-8">
