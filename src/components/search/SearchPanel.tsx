@@ -8,6 +8,7 @@ import ConfidenceIndicator from './ConfidenceIndicator';
 import { Highlight } from '@/lib/highlight';
 import { upper } from '@/lib/strings';
 import AIAssistBar from '@/components/search/AIAssistBar';
+import { PaginationControls } from './PaginationControls';
 
 function ModeToggle({ mode, setMode }:{ mode:Mode; setMode:(m:Mode)=>void }){
   const Btn=(m:Mode,label:string)=>(
@@ -94,7 +95,7 @@ function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(ro
 }
 
 export default function SearchPanel(){
-  const { q,setQ,mode,setMode,filters,setFilters,items,total,loading,error,hasMore,run,loadMore }=useUnifiedSearch({ initialMode:'all', initialLimit:25 });
+  const { q,setQ,mode,setMode,filters,setFilters,items,total,loading,error,currentPage,totalPages,run,goToPage }=useUnifiedSearch({ initialMode:'all', initialLimit:50 });
 
   // Add-to-CRM using Supabase
   const onAddToCrm=async(row:UnifiedRow)=>{
@@ -161,20 +162,22 @@ export default function SearchPanel(){
         onApplyStructured={(f)=>{ setFilters((x)=>({ ...(x as Filters), ...(f||{}) })); run(); }}
       />
 
-      {/* Summary / load more - Mobile Optimized */}
+      {/* Results Summary and Pagination */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-4 rounded-xl border border-border gap-3 sm:gap-0">
         <div className="text-sm text-muted-foreground font-medium">
-          {loading?'Loading…':(error?`Error: ${error}`:`${total.toLocaleString()} results found`)}
+          {loading ? 'Loading…' : error ? `Error: ${error}` : `${total.toLocaleString()} results found`}
+          {totalPages > 0 && (
+            <span className="ml-2 text-xs">
+              (Page {currentPage} of {totalPages})
+            </span>
+          )}
         </div>
-        {hasMore&&(
-          <button 
-            onClick={loadMore} 
-            disabled={loading} 
-            className="px-4 py-2 rounded-lg bg-muted border border-border hover:bg-accent text-sm font-medium transition-colors w-full sm:w-auto"
-          >
-            Load more
-          </button>
-        )}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          loading={loading}
+        />
       </div>
 
       {/* Premium Results Grid - Mobile Responsive */}

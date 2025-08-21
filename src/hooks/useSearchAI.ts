@@ -25,23 +25,19 @@ export default function useSearchAI() {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      const response = await fetch('/api/search/ai-assist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data, error } = await supabase.functions.invoke('search-ai-assist', {
+        body: {
           query: query.trim(),
           filters,
           lastResults: lastResults.slice(0, 10), // Send only first 10 results for context
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`AI assist failed: ${response.status}`);
+      if (error) {
+        throw new Error(error.message || 'AI assist failed');
       }
-
-      const data = await response.json();
 
       setState(prev => ({
         ...prev,

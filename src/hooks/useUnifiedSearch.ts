@@ -41,10 +41,11 @@ interface SearchParams {
   filters: Partial<Filters>;
   limit: number;
   offset: number;
+  page: number;
 }
 
 export function useUnifiedSearch(options: UseUnifiedSearchOptions = {}) {
-  const { initialMode = 'all', initialLimit = 25 } = options;
+  const { initialMode = 'all', initialLimit = 50 } = options;
   
   const [q, setQ] = useState('');
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -53,17 +54,18 @@ export function useUnifiedSearch(options: UseUnifiedSearchOptions = {}) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(initialLimit);
-  const [offset, setOffset] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const buildSearchParams = useCallback((searchOffset = 0): SearchParams => {
+  const buildSearchParams = useCallback((page = 1): SearchParams => {
     return {
       q: q.trim(),
       mode,
       filters,
       limit,
-      offset: searchOffset,
+      offset: (page - 1) * limit,
+      page,
     };
   }, [q, mode, filters, limit]);
 
@@ -106,44 +108,47 @@ export function useUnifiedSearch(options: UseUnifiedSearchOptions = {}) {
     };
   }, []);
 
-  const run = useCallback(async (resetOffset = true) => {
+  const run = useCallback(async (page = 1) => {
     setLoading(true);
     setError(null);
     
     try {
-      const searchOffset = resetOffset ? 0 : offset;
-      const params = buildSearchParams(searchOffset);
+      const params = buildSearchParams(page);
       const result = await searchAPI(params);
       
-      if (resetOffset) {
-        setItems(result.items);
-        setOffset(limit);
-      } else {
-        setItems(prev => [...prev, ...result.items]);
-        setOffset(prev => prev + limit);
-      }
-      
+      setItems(result.items);
       setTotal(result.total);
-      setHasMore(result.hasMore);
+      setCurrentPage(page);
+      setTotalPages(Math.ceil(result.total / limit));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Search failed';
       setError(errorMessage);
-      
-      if (resetOffset) {
-        setItems([]);
-        setTotal(0);
-        setHasMore(false);
-      }
+      setItems([]);
+      setTotal(0);
+      setCurrentPage(1);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
-  }, [buildSearchParams, searchAPI, offset, limit]);
+  }, [buildSearchParams, searchAPI, limit]);
 
-  const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      run(false);
+  const goToPage = useCallback((page: number) => {
+    if (page >= 1 && page <= totalPages && !loading) {
+      run(page);
     }
-  }, [loading, hasMore, run]);
+  }, [totalPages, loading, run]);
+
+  const nextPage = useCallback(() => {
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  }, [currentPage, totalPages, goToPage]);
+
+  const prevPage = useCallback(() => {
+    if (currentPage > 1) {
+      goToPage(currentPage - 1);
+    }
+  }, [currentPage, goToPage]);
 
   const reset = useCallback(() => {
     setQ('');
@@ -152,8 +157,8 @@ export function useUnifiedSearch(options: UseUnifiedSearchOptions = {}) {
     setItems([]);
     setTotal(0);
     setError(null);
-    setHasMore(false);
-    setOffset(0);
+    setCurrentPage(1);
+    setTotalPages(0);
   }, [initialMode]);
 
   return {
@@ -165,14 +170,17 @@ export function useUnifiedSearch(options: UseUnifiedSearchOptions = {}) {
     total,
     loading,
     error,
-    hasMore,
+    currentPage,
+    totalPages,
     
     // Actions
     setQ,
     setMode,
     setFilters,
     run,
-    loadMore,
+    goToPage,
+    nextPage,
+    prevPage,
     reset,
   };
 }
