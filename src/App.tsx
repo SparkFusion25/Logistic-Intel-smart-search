@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./components/pages/Index";
 import { AppShell } from "@/components/ui/AppShell";
-import { EnhancedSearchPanel } from "@/components/search/EnhancedSearchPanel";
+import SearchPanel from "@/components/search/SearchPanel";
 import CRMPanel from "@/components/crm/CRMPanel";
 import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
@@ -36,7 +36,7 @@ const SearchPage = () => (
       </div>
     </div>
     <div className="flex-1 p-4 sm:p-6 lg:p-8 pt-0">
-      <EnhancedSearchPanel />
+      <SearchPanel />
     </div>
   </div>
 );

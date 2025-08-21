@@ -238,6 +238,12 @@ export function BulkImportManager() {
     setUploading(true);
     
     try {
+      // Get authenticated user
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user?.id) {
+        throw new Error('User not authenticated. Please log in to upload files.');
+      }
+
       // Create import job record
       const { data: importData, error: importError } = await supabase
         .from('bulk_imports')
@@ -247,7 +253,7 @@ export function BulkImportManager() {
           file_size: file.size,
           status: 'uploaded',
           total_records: 0,
-          org_id: (await supabase.auth.getUser()).data.user?.id || '00000000-0000-0000-0000-000000000000',
+          org_id: user.user.id,
           processing_metadata: {
             original_filename: file.name,
             file_size: file.size,
