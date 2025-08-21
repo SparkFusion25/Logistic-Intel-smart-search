@@ -41,10 +41,10 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Campaign Details</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Campaign Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -53,6 +53,7 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter campaign name"
+              className="min-h-[44px]"
             />
           </div>
           <div>
@@ -61,6 +62,7 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your campaign"
+              className="min-h-[100px] resize-none"
             />
           </div>
         </CardContent>
@@ -68,35 +70,38 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Campaign Steps</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Campaign Steps</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {steps.map((step, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Step {index + 1}: {step.type}</h4>
+            <div key={index} className="border border-border rounded-xl p-4 space-y-4 bg-muted/30">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h4 className="font-semibold text-foreground">Step {index + 1}: {step.type.charAt(0).toUpperCase() + step.type.slice(1)}</h4>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => removeStep(index)}
+                  className="self-start sm:self-auto min-h-[44px] px-4"
                 >
                   Remove
                 </Button>
               </div>
               
               {step.type === 'email' && (
-                <>
+                <div className="space-y-3">
                   <Input
                     placeholder="Email subject"
                     value={step.subject}
                     onChange={(e) => updateStep(index, 'subject', e.target.value)}
+                    className="min-h-[44px]"
                   />
                   <Textarea
                     placeholder="Email template"
                     value={step.template}
                     onChange={(e) => updateStep(index, 'template', e.target.value)}
+                    className="min-h-[100px] resize-none"
                   />
-                </>
+                </div>
               )}
               
               {step.type === 'linkedin' && (
@@ -104,6 +109,7 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
                   placeholder="LinkedIn message"
                   value={step.template}
                   onChange={(e) => updateStep(index, 'template', e.target.value)}
+                  className="min-h-[100px] resize-none"
                 />
               )}
               
@@ -113,27 +119,44 @@ export default function CampaignBuilder({ onSave }: CampaignBuilderProps) {
                   placeholder="Wait days"
                   value={step.delay}
                   onChange={(e) => updateStep(index, 'delay', Number(e.target.value))}
+                  className="min-h-[44px]"
                 />
               )}
             </div>
           ))}
           
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => addStep('email')}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => addStep('email')}
+              className="min-h-[44px] touch-manipulation"
+            >
               + Email Step
             </Button>
-            <Button variant="outline" onClick={() => addStep('linkedin')}>
+            <Button 
+              variant="outline" 
+              onClick={() => addStep('linkedin')}
+              className="min-h-[44px] touch-manipulation"
+            >
               + LinkedIn Step
             </Button>
-            <Button variant="outline" onClick={() => addStep('wait')}>
+            <Button 
+              variant="outline" 
+              onClick={() => addStep('wait')}
+              className="min-h-[44px] touch-manipulation"
+            >
               + Wait Step
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={!name.trim()}>
+      <div className="flex justify-center sm:justify-end">
+        <Button 
+          onClick={handleSave} 
+          disabled={!name.trim()}
+          className="w-full sm:w-auto min-h-[44px] px-8 touch-manipulation"
+        >
           Save Campaign
         </Button>
       </div>

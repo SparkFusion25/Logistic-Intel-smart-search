@@ -499,12 +499,26 @@ h6, .h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
   /* Mobile-optimized cards */
   .card-glass {
     border-radius: 16px;
-    margin: 0.5rem 0;
-  }
-  
-  /* Better mobile spacing */
-  .glass {
-    border-radius: 12px;
     padding: 1rem;
   }
+  
+  /* Mobile drawer animation improvements */
+  .mobile-drawer-overlay {
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Hide scrollbars on mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Touch manipulation for better mobile interaction */
+.touch-manipulation {
+  touch-action: manipulation;
 }
