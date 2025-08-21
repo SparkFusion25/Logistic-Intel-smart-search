@@ -10,7 +10,7 @@ export function DashboardOverview() {
       <div className="card-glass p-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">
-            Dashboard Intelligence<span className="text-lg">™</span>
+            Dashboard Intelligence TEST<span className="text-lg">™</span>
           </h1>
           <p className="text-muted-foreground mt-1">
             Welcome back! Here's what's happening with your trade operations.
