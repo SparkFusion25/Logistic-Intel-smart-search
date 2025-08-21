@@ -17,10 +17,12 @@ import {
   Download
 } from 'lucide-react';
 import { buildMapping, applyMappingToRow } from '@/lib/import/matcher';
+import { TABLE_SCHEMAS } from '@/lib/import/schema';
+import { TABLE_ALIASES } from '@/lib/import/aliases';
 import { saveImportMapping, loadImportMapping } from '@/repositories/import.repo';
 import { insertCrmContacts, insertUnifiedShipments } from '@/repositories/search.repo';
 
-// Types
+// Types - matching the actual bulk_imports table schema
 type BulkImport = {
   id: string;
   filename: string;
@@ -48,9 +50,9 @@ export function BulkImportManager() {
     
     // Set up real-time subscription
     const subscription = supabase
-      .channel('import_jobs_changes')
+      .channel('bulk_imports_changes')
       .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'import_jobs' }, 
+          { event: '*', schema: 'public', table: 'bulk_imports' }, 
           () => {
             loadImports();
           }
@@ -66,7 +68,7 @@ export function BulkImportManager() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('import_jobs')
+        .from('bulk_imports')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -74,18 +76,18 @@ export function BulkImportManager() {
 
       const transformedImports = (data || []).map((item): BulkImport => ({
         id: item.id,
-        filename: (item.processing_metadata as any)?.original_filename || item.object_path?.split('/').pop() || 'Unknown',
-        status: (item.status === 'success' ? 'completed' : item.status) as 'uploaded' | 'processing' | 'completed' | 'failed',
-        totalRecords: item.total_rows || 0,
-        processedRecords: item.ok_rows || 0,
-        errorRecords: item.error_rows || 0,
-        duplicateRecords: 0,
+        filename: item.filename,
+        status: item.status as 'uploaded' | 'processing' | 'completed' | 'failed',
+        totalRecords: item.total_records || 0,
+        processedRecords: item.processed_records || 0,
+        errorRecords: item.error_records || 0,
+        duplicateRecords: item.duplicate_records || 0,
         createdAt: item.created_at || '',
-        completedAt: item.finished_at,
-        processingMetadata: (item.processing_metadata as any) || {},
-        errorDetails: {},
-        fileSize: (item.processing_metadata as any)?.file_size || 0,
-        fileType: (item.processing_metadata as any)?.file_type || 'unknown'
+        completedAt: item.completed_at,
+        processingMetadata: (typeof item.processing_metadata === 'object' && item.processing_metadata !== null) ? item.processing_metadata as Record<string, any> : {},
+        errorDetails: (typeof item.error_details === 'object' && item.error_details !== null) ? item.error_details as Record<string, any> : {},
+        fileSize: item.file_size || 0,
+        fileType: item.file_type || 'unknown'
       }));
 
       setImports(transformedImports);
@@ -124,8 +126,8 @@ export function BulkImportManager() {
     try {
       // Update status to processing
       await supabase
-        .from('import_jobs')
-        .update({ status: 'running' })
+        .from('bulk_imports')
+        .update({ status: 'processing' })
         .eq('id', importId);
 
       // Parse file
@@ -145,18 +147,20 @@ export function BulkImportManager() {
       const targetTable = isContactsFile ? 'crm_contacts' : 'unified_shipments';
 
       // Build column mapping
-      const mapping = buildMapping(headers, targetTable);
+      const tableSchema = TABLE_SCHEMAS[targetTable];
+      const aliases = TABLE_ALIASES[targetTable] || {};
+      const mappingResult = buildMapping(headers, tableSchema, aliases);
       
       // Save mapping as preset
       await saveImportMapping({
         org_id: null,
         table_name: targetTable,
         source_label: file.name.split('.')[0],
-        mapping
+        mapping: mappingResult.mapping
       });
 
       // Apply mapping to rows
-      const mappedRows = rows.map(row => applyMappingToRow(row, mapping));
+      const mappedRows = rows.map(row => applyMappingToRow(row, mappingResult.mapping));
 
       // Insert data
       let result;
@@ -172,16 +176,16 @@ export function BulkImportManager() {
 
       // Update import job status
       await supabase
-        .from('import_jobs')
+        .from('bulk_imports')
         .update({
-          status: 'success',
-          total_rows: rows.length,
-          ok_rows: result.data.length,
-          error_rows: rows.length - result.data.length,
-          finished_at: new Date().toISOString(),
+          status: 'completed',
+          total_records: rows.length,
+          processed_records: result.data.length,
+          error_records: rows.length - result.data.length,
+          completed_at: new Date().toISOString(),
           processing_metadata: {
             target_table: targetTable,
-            mapping,
+            mapping: mappingResult.mapping,
             original_filename: file.name,
             file_size: file.size,
             file_type: file.name.split('.').pop()
@@ -196,11 +200,11 @@ export function BulkImportManager() {
       
       // Update status to error
       await supabase
-        .from('import_jobs')
+        .from('bulk_imports')
         .update({
-          status: 'error',
-          finished_at: new Date().toISOString(),
-          processing_metadata: {
+          status: 'failed',
+          completed_at: new Date().toISOString(),
+          error_details: {
             error: error instanceof Error ? error.message : 'Unknown error'
           }
         })
@@ -230,24 +234,16 @@ export function BulkImportManager() {
     setUploading(true);
     
     try {
-      // Upload file to Supabase storage
-      const fileName = `${Date.now()}-${file.name}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('bulk-imports')
-        .upload(fileName, file);
-
-      if (uploadError) {
-        throw new Error(`Upload failed: ${uploadError.message}`);
-      }
-
       // Create import job record
       const { data: importData, error: importError } = await supabase
-        .from('import_jobs')
+        .from('bulk_imports')
         .insert({
-          source_bucket: 'bulk-imports',
-          object_path: uploadData.path,
-          status: 'queued',
+          filename: file.name,
+          file_type: file.name.split('.').pop() || 'csv',
+          file_size: file.size,
+          status: 'uploaded',
+          total_records: 0,
+          org_id: '00000000-0000-0000-0000-000000000000', // Default org for now
           processing_metadata: {
             original_filename: file.name,
             file_size: file.size,

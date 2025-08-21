@@ -5,7 +5,7 @@ export type ImportMapping = {
   org_id: string | null;
   table_name: string;          // e.g., 'crm_contacts'
   source_label: string;        // e.g., filename pattern or user-given name
-  mapping: Record<string,string>; // header -> column
+  mapping: Record<string, string | null>; // header -> column
 };
 
 export async function saveImportMapping(m: ImportMapping) {

@@ -81,3 +81,16 @@ export function buildMapping(headers: string[], columns: ColumnInfo[], aliases: 
 
   return { mapping, confidences, unknown };
 }
+
+export function applyMappingToRow(row: Record<string, any>, mapping: Record<string, string | null>): Record<string, any> {
+  const result: Record<string, any> = {};
+  
+  for (const [header, value] of Object.entries(row)) {
+    const targetColumn = mapping[header];
+    if (targetColumn) {
+      result[targetColumn] = value;
+    }
+  }
+  
+  return result;
+}
