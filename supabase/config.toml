@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.search-unified]
 verify_jwt = false
+
+[functions.ai-company-processor]
+verify_jwt = false

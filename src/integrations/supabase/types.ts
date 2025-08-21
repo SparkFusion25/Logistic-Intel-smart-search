@@ -845,6 +845,7 @@ export type Database = {
       }
       bulk_imports: {
         Row: {
+          ai_processing_status: string | null
           completed_at: string | null
           created_at: string | null
           duplicate_records: number | null
@@ -863,6 +864,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_processing_status?: string | null
           completed_at?: string | null
           created_at?: string | null
           duplicate_records?: number | null
@@ -881,6 +883,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_processing_status?: string | null
           completed_at?: string | null
           created_at?: string | null
           duplicate_records?: number | null
@@ -4391,6 +4394,10 @@ export type Database = {
         Args: { a: string[]; b: string[] }
         Returns: string[]
       }
+      migrate_legacy_shipments: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       norm_name: {
         Args: { s: string }
         Returns: string
@@ -4442,6 +4449,10 @@ export type Database = {
               p_trial_ocean: number
             }
         Returns: number
+      }
+      process_companies_with_ai: {
+        Args: { p_import_id?: string }
+        Returns: undefined
       }
       refresh_company_profile: {
         Args: { p_company_name: string }

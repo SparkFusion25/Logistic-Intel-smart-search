@@ -21,12 +21,14 @@ import { TABLE_SCHEMAS } from '@/lib/import/schema';
 import { TABLE_ALIASES } from '@/lib/import/aliases';
 import { saveImportMapping, loadImportMapping } from '@/repositories/import.repo';
 import { insertCrmContacts, insertUnifiedShipments } from '@/repositories/search.repo';
+import { parseXLSXFile, parseCSVFile } from '@/lib/import/xlsxParser';
 
 // Types - matching the actual bulk_imports table schema
 type BulkImport = {
   id: string;
   filename: string;
   status: 'uploaded' | 'processing' | 'completed' | 'failed';
+  aiProcessingStatus: 'pending' | 'ai_processing' | 'ai_completed' | 'ai_failed';
   totalRecords: number;
   processedRecords: number;
   errorRecords: number;
@@ -78,6 +80,7 @@ export function BulkImportManager() {
         id: item.id,
         filename: item.filename,
         status: item.status as 'uploaded' | 'processing' | 'completed' | 'failed',
+        aiProcessingStatus: item.ai_processing_status as 'pending' | 'ai_processing' | 'ai_completed' | 'ai_failed',
         totalRecords: item.total_records || 0,
         processedRecords: item.processed_records || 0,
         errorRecords: item.error_records || 0,
@@ -102,22 +105,11 @@ export function BulkImportManager() {
   // Parse CSV/Excel files
   const parseFile = async (file: File): Promise<any[]> => {
     if (file.name.endsWith('.csv')) {
-      const text = await file.text();
-      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
-      if (lines.length === 0) return [];
-      
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-      const rows = lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.replace(/"/g, '').trim());
-        const obj: any = {};
-        headers.forEach((header, index) => {
-          obj[header] = values[index] || '';
-        });
-        return obj;
-      });
-      return rows;
+      return parseCSVFile(file);
+    } else if (file.name.match(/\.(xlsx|xls)$/i)) {
+      return parseXLSXFile(file);
     } else {
-      throw new Error('Only CSV files are supported in this version');
+      throw new Error('Only CSV and XLSX files are supported');
     }
   };
 
@@ -195,6 +187,18 @@ export function BulkImportManager() {
 
       toast.success(`Successfully imported ${result.data.length} records to ${targetTable}`);
 
+      // Trigger AI processing for company intelligence
+      if (targetTable === 'unified_shipments') {
+        try {
+          await supabase.functions.invoke('ai-company-processor', {
+            body: { import_id: importId }
+          });
+          toast.info('AI company processing started in background');
+        } catch (aiError) {
+          console.warn('AI processing failed to start:', aiError);
+        }
+      }
+
     } catch (error) {
       console.error('Processing failed:', error);
       
@@ -221,8 +225,8 @@ export function BulkImportManager() {
     const file = acceptedFiles[0];
     
     // Validate file
-    if (!file.name.endsWith('.csv')) {
-      toast.error('Only CSV files are supported');
+    if (!file.name.match(/\.(csv|xlsx|xls)$/i)) {
+      toast.error('Only CSV and XLSX files are supported');
       return;
     }
     
@@ -284,14 +288,19 @@ export function BulkImportManager() {
     onDrop,
     accept: {
       'text/csv': ['.csv'],
-      'application/vnd.ms-excel': ['.csv']
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-excel': ['.xls']
     },
     multiple: false,
     disabled: uploading
   });
 
   // Helper functions
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, aiStatus?: string) => {
+    if (aiStatus === 'ai_processing') return 'bg-purple-500';
+    if (aiStatus === 'ai_completed') return 'bg-emerald-500';
+    if (aiStatus === 'ai_failed') return 'bg-orange-500';
+    
     switch (status) {
       case 'completed': return 'bg-green-500';
       case 'processing': return 'bg-blue-500';
@@ -300,7 +309,11 @@ export function BulkImportManager() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string, aiStatus?: string) => {
+    if (aiStatus === 'ai_processing') return <RefreshCw className="h-4 w-4 animate-spin" />;
+    if (aiStatus === 'ai_completed') return <CheckCircle className="h-4 w-4" />;
+    if (aiStatus === 'ai_failed') return <AlertCircle className="h-4 w-4" />;
+    
     switch (status) {
       case 'completed': return <CheckCircle className="h-4 w-4" />;
       case 'processing': return <RefreshCw className="h-4 w-4 animate-spin" />;
@@ -349,7 +362,7 @@ export function BulkImportManager() {
                     : 'Drag & drop a CSV file here, or click to select'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Supports: CSV files up to 10MB
+                  Supports: CSV and XLSX files up to 10MB
                 </p>
               </div>
             )}
@@ -358,9 +371,10 @@ export function BulkImportManager() {
           <div className="mt-4 text-sm text-muted-foreground">
             <p className="font-medium">Supported formats:</p>
             <ul className="list-disc list-inside mt-1 space-y-1">
-              <li>CSV files with headers for contacts (company, name, email, etc.)</li>
-              <li>CSV files with headers for shipments (company, mode, hs_code, etc.)</li>
+              <li>CSV/XLSX files with headers for contacts (company, name, email, etc.)</li>
+              <li>CSV/XLSX files with headers for shipments (company, mode, hs_code, etc.)</li>
               <li>Auto-detection based on column headers</li>
+              <li>AI-powered company matching and normalization (post-import)</li>
             </ul>
           </div>
         </CardContent>
@@ -401,10 +415,10 @@ export function BulkImportManager() {
                   className="border rounded-lg p-4 space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${getStatusColor(imp.status)}`}>
-                        {getStatusIcon(imp.status)}
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-full ${getStatusColor(imp.status, imp.aiProcessingStatus)}`}>
+                      {getStatusIcon(imp.status, imp.aiProcessingStatus)}
+                    </div>
                       <div>
                         <h4 className="font-medium">{imp.filename}</h4>
                         <p className="text-sm text-muted-foreground">
@@ -412,9 +426,19 @@ export function BulkImportManager() {
                         </p>
                       </div>
                     </div>
-                    <Badge variant={imp.status === 'completed' ? 'default' : 'secondary'}>
-                      {imp.status}
-                    </Badge>
+                    <div className="flex gap-2">
+                      <Badge variant={imp.status === 'completed' ? 'default' : 'secondary'}>
+                        {imp.status}
+                      </Badge>
+                      {imp.aiProcessingStatus !== 'pending' && (
+                        <Badge 
+                          variant={imp.aiProcessingStatus === 'ai_completed' ? 'default' : 
+                                 imp.aiProcessingStatus === 'ai_failed' ? 'destructive' : 'secondary'}
+                        >
+                          AI: {imp.aiProcessingStatus.replace('ai_', '')}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   {imp.status === 'processing' && imp.totalRecords > 0 && (
@@ -448,11 +472,18 @@ export function BulkImportManager() {
                     </div>
                   </div>
 
-                  {imp.processingMetadata?.target_table && (
-                    <div className="pt-2 border-t">
-                      <Badge variant="outline">
-                        Target: {imp.processingMetadata.target_table}
-                      </Badge>
+                  {(imp.processingMetadata?.target_table || imp.processingMetadata?.ai_processed_companies) && (
+                    <div className="pt-2 border-t flex gap-2 flex-wrap">
+                      {imp.processingMetadata?.target_table && (
+                        <Badge variant="outline">
+                          Target: {imp.processingMetadata.target_table}
+                        </Badge>
+                      )}
+                      {imp.processingMetadata?.ai_processed_companies && (
+                        <Badge variant="outline">
+                          AI Processed: {imp.processingMetadata.ai_processed_companies} companies
+                        </Badge>
+                      )}
                     </div>
                   )}
                 </div>
