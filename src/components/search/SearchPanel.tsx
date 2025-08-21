@@ -31,14 +31,14 @@ function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(ro
   const companyInitial = r.unified_company_name?.charAt(0).toUpperCase() || '?';
   
   return (
-    <div className="card-glass p-4 sm:p-6 flex flex-col gap-4 transition-all duration-300 group">
+    <div className="bg-card border-2 border-border hover:border-primary/30 rounded-xl p-4 sm:p-6 flex flex-col gap-4 transition-all duration-200 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
       <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-glow flex-shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-lg flex-shrink-0">
             {companyInitial}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="pill-glossy text-xs font-medium px-3 py-1">
+            <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
               {r.mode?upper(r.mode):'—'}
             </div>
             <div className="font-bold text-sm sm:text-base text-foreground truncate">
@@ -51,40 +51,41 @@ function ResultRow({ r, q, onAddToCrm }:{ r:UnifiedRow; q:string; onAddToCrm:(ro
         </div>
       </div>
       
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">HS Code</span>
-          <span className="font-semibold truncate">{r.hs_code||'—'}</span>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+        <div className="flex flex-col p-3 bg-muted/30 rounded-lg border border-border/50">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">HS Code</span>
+          <span className="font-bold text-foreground truncate">{r.hs_code||'—'}</span>
         </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Origin</span>
-          <span className="font-semibold truncate">{r.origin_country||'—'}</span>
+        <div className="flex flex-col p-3 bg-muted/30 rounded-lg border border-border/50">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Origin</span>
+          <span className="font-bold text-foreground truncate">{r.origin_country||'—'}</span>
         </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Destination</span>
-          <span className="font-semibold truncate">{r.destination_city||r.destination_country||'—'}</span>
+        <div className="flex flex-col p-3 bg-muted/30 rounded-lg border border-border/50">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Destination</span>
+          <span className="font-bold text-foreground truncate">{r.destination_city||r.destination_country||'—'}</span>
         </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Date</span>
-          <span className="font-semibold truncate">{r.unified_date||'—'}</span>
+        <div className="flex flex-col p-3 bg-muted/30 rounded-lg border border-border/50">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Date</span>
+          <span className="font-bold text-foreground truncate">{r.unified_date||'—'}</span>
         </div>
       </div>
       
-      <div className="text-sm text-muted-foreground line-clamp-2 bg-muted/50 p-3 rounded-lg">
-        {r.description||'No description available'}
+      <div className="text-sm text-muted-foreground bg-muted/40 p-4 rounded-lg border border-border/30">
+        <div className="font-medium text-foreground mb-1">Description</div>
+        <div className="line-clamp-2">{r.description||'No description available'}</div>
       </div>
       
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-border/30">
         <button 
-          className="btn-gradient px-4 py-2 text-sm font-medium rounded-lg transition-transform flex-1 sm:flex-none" 
+          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl flex-1 sm:flex-none" 
           onClick={()=>onAddToCrm(r)}
         >
           + Add to CRM
         </button>
-        <button className="pill-glossy px-4 py-2 text-sm font-medium transition-transform flex-1 sm:flex-none">
+        <button className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border border-border/50 flex-1 sm:flex-none">
           View Trade
         </button>
-        <button className="pill-glossy px-4 py-2 text-sm font-medium transition-transform flex-1 sm:flex-none">
+        <button className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors border border-border/50 flex-1 sm:flex-none">
           Quote
         </button>
       </div>
