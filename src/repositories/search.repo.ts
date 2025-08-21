@@ -132,8 +132,17 @@ export async function searchCompaniesAggregated(params: SearchParams = {}) {
     let query = supabase
       .from('company_trade_profiles')
       .select(`
-        *,
-        id as company_id
+        id,
+        company_name,
+        total_shipments,
+        total_ocean_shipments,
+        total_air_shipments,
+        last_shipment_date,
+        total_trade_value_usd,
+        avg_shipment_value_usd,
+        top_origin_countries,
+        top_destination_countries,
+        top_commodities
       `, { count: 'exact' })
       .order('total_shipments', { ascending: false });
 
@@ -160,8 +169,8 @@ export async function searchCompaniesAggregated(params: SearchParams = {}) {
       shipments_count: company.total_shipments || 0,
       last_shipment_date: company.last_shipment_date,
       modes: [
-        ...(company.total_ocean_shipments > 0 ? ['ocean'] : []),
-        ...(company.total_air_shipments > 0 ? ['air'] : [])
+        ...((company.total_ocean_shipments || 0) > 0 ? ['ocean'] : []),
+        ...((company.total_air_shipments || 0) > 0 ? ['air'] : [])
       ],
       dest_countries: company.top_destination_countries || [],
       top_commodities: company.top_commodities || [],

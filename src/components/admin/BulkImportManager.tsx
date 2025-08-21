@@ -187,6 +187,10 @@ export function BulkImportManager() {
   // Process uploaded file
   const processFile = async (file: File, importId: string) => {
     try {
+      // Get current user ID for org_id assignment
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || 'bb997b6b-fa1a-46c8-9957-fabe835eee55';
+
       // Update status to processing
       await supabase
         .from('bulk_imports')
@@ -232,8 +236,35 @@ export function BulkImportManager() {
         mapping: mappingResult.mapping
       });
 
-      // Apply mapping to rows
-      const mappedRows = rows.map(row => applyMappingToRow(row, mappingResult.mapping));
+      // Apply mapping to rows and add systematic enhancements
+      const mappedRows = rows.map(row => {
+        const mappedRow = applyMappingToRow(row, mappingResult.mapping);
+        
+        // PHASE 1 FIX: Set systematic MODE for unified_shipments
+        if (targetTable === 'unified_shipments') {
+          // Default to 'ocean' for current Panjiva files (as per user instructions)
+          mappedRow.mode = mappedRow.mode || 'ocean';
+          
+          // Ensure unified_company_name is populated from shipper or consignee
+          if (!mappedRow.unified_company_name) {
+            mappedRow.unified_company_name = mappedRow.shipper_name || mappedRow.consignee_name || null;
+          }
+          
+          // Clean and validate company name
+          if (mappedRow.unified_company_name) {
+            mappedRow.unified_company_name = mappedRow.unified_company_name.trim();
+            if (mappedRow.unified_company_name === '' || 
+                mappedRow.unified_company_name.toLowerCase().includes('unknown')) {
+              mappedRow.unified_company_name = null;
+            }
+          }
+          
+          // Set org_id for ownership
+          mappedRow.org_id = currentUserId;
+        }
+        
+        return mappedRow;
+      });
 
       // Insert data
       let result;

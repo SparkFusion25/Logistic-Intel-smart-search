@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Building2, Users, Ship, Calendar, Globe, TrendingUp, Eye, Plus, MapPin, Award, Clock } from 'lucide-react';
 import { TrendCard } from './TrendCard';
+import { TradeLaneAnalysisDrawer } from '@/components/TradeLaneAnalysisDrawer';
 import { toast } from 'sonner';
 import { useCompanyData } from '@/hooks/useCompanyData';
 import { usePlan } from '@/components/Providers';
@@ -150,18 +151,20 @@ export function CompanyCard({ company, onAddToCRM, onViewDetails }: CompanyCardP
             Add to CRM
           </Button>
           {onViewDetails && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onViewDetails();
-              }}
-              className="flex items-center gap-1 border-primary/30 hover:bg-primary/5"
-            >
-              <Eye className="h-3 w-3" />
-              Analyze
-            </Button>
+            <TradeLaneAnalysisDrawer 
+              company={company}
+              trigger={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1 border-primary/30 hover:bg-primary/5"
+                >
+                  <Eye className="h-3 w-3" />
+                  Analyze
+                </Button>
+              }
+            />
           )}
         </div>
 

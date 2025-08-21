@@ -4202,6 +4202,27 @@ export type Database = {
       }
     }
     Views: {
+      company_search_view: {
+        Row: {
+          avg_shipment_value_usd: number | null
+          company_id: string | null
+          company_name: string | null
+          contacts_count: number | null
+          country: string | null
+          dest_countries: string[] | null
+          industry: string | null
+          last_shipment_date: string | null
+          modes: string[] | null
+          shipments_count: number | null
+          top_commodities: string[] | null
+          top_origin_countries: string[] | null
+          total_air_shipments: number | null
+          total_ocean_shipments: number | null
+          total_trade_value_usd: number | null
+          website: string | null
+        }
+        Relationships: []
+      }
       search_companies_view: {
         Row: {
           company_id: string | null
