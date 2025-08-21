@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.ai-company-processor]
 verify_jwt = false
+
+[functions.process-bulk-import]
+verify_jwt = false
