@@ -58,7 +58,7 @@ function ResultRow({ r, q, onAddToCrm, onViewCompany }:{ r:UnifiedRow; q:string;
     <div className="bg-card border-2 border-border hover:border-primary/30 rounded-xl p-4 sm:p-6 flex flex-col gap-4 transition-all duration-200 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
       <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-lg flex-shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center text-primary-foreground font-bold text-sm shadow-lg flex-shrink-0 border border-primary/20">
             {companyInitial}
           </div>
           <div className="flex items-center gap-2 flex-wrap">

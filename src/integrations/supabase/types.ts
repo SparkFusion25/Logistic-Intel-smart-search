@@ -4690,6 +4690,10 @@ export type Database = {
         Args: { p_uid: string }
         Returns: boolean
       }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_trial_expired: {
         Args: { p_uid: string }
         Returns: boolean
