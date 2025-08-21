@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./components/pages/Index";
 import { AppShell } from "@/components/ui/AppShell";
-import SearchPanel from "@/components/search/SearchPanel";
+import { EnhancedSearchPanel } from "@/components/search/EnhancedSearchPanel";
 import CRMPanel from "@/components/crm/CRMPanel";
 import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 const DashboardPage = () => <DashboardOverview />;
 
 const SearchPage = () => (
-  <div className="flex flex-col">
+  <div className="flex flex-col min-h-screen">
     <div className="card-glass p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">
@@ -35,8 +35,8 @@ const SearchPage = () => (
         </p>
       </div>
     </div>
-    <div className="p-4 sm:p-6 lg:p-8 pt-0">
-      <SearchPanel />
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 pt-0">
+      <EnhancedSearchPanel />
     </div>
   </div>
 );

@@ -30,10 +30,16 @@ export function EnhancedSearchPanel({ className }: EnhancedSearchPanelProps) {
     items: results, total, loading, currentPage: page, totalPages, nextPage, prevPage, goToPage, run, reset
   } = useUnifiedSearch();
 
-  // Enhanced mobile-first search experience
+  // Enhanced mobile-first search experience with better touch targets and gestures
   const handleSearch = async () => {
-    if (query.trim() || Object.keys(filters).length > 0) {
+    if (query.trim() || Object.keys(filters).some(key => filters[key])) {
       await run();
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
     }
   };
 

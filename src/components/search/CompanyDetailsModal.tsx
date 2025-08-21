@@ -522,7 +522,14 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
                           <p className="font-medium text-sm sm:text-base">Volume Change Alerts</p>
                           <p className="text-xs sm:text-sm text-muted-foreground">Get notified when shipment volume changes by 25%+</p>
                         </div>
-                        <Button variant="outline" size="sm" className="w-full sm:w-auto">Enable</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full sm:w-auto"
+                          onClick={() => toast({ title: "Alert enabled", description: "You'll be notified of volume changes for this company." })}
+                        >
+                          Enable
+                        </Button>
                       </div>
 
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg bg-background/50 gap-3">
@@ -530,7 +537,14 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
                           <p className="font-medium text-sm sm:text-base">New Destinations</p>
                           <p className="text-xs sm:text-sm text-muted-foreground">Alert when shipping to new countries</p>
                         </div>
-                        <Button variant="outline" size="sm" className="w-full sm:w-auto">Enable</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full sm:w-auto"
+                          onClick={() => toast({ title: "Alert enabled", description: "You'll be notified when this company ships to new destinations." })}
+                        >
+                          Enable
+                        </Button>
                       </div>
 
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg bg-background/50 gap-3">
@@ -538,7 +552,14 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
                           <p className="font-medium text-sm sm:text-base">Pattern Anomalies</p>
                           <p className="text-xs sm:text-sm text-muted-foreground">Detect unusual seasonal changes</p>
                         </div>
-                        <Button variant="outline" size="sm" className="w-full sm:w-auto">Enable</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full sm:w-auto"
+                          onClick={() => toast({ title: "Alert enabled", description: "You'll be notified of seasonal pattern changes." })}
+                        >
+                          Enable
+                        </Button>
                       </div>
 
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg bg-background/50 gap-3">
@@ -546,7 +567,14 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
                           <p className="font-medium text-sm sm:text-base">New Product Categories</p>
                           <p className="text-xs sm:text-sm text-muted-foreground">Monitor new commodity types</p>
                         </div>
-                        <Button variant="outline" size="sm" className="w-full sm:w-auto">Enable</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full sm:w-auto"
+                          onClick={() => toast({ title: "Alert enabled", description: "You'll be notified of new product categories." })}
+                        >
+                          Enable
+                        </Button>
                       </div>
                     </div>
 
