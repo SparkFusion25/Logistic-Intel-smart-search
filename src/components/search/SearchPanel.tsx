@@ -9,7 +9,7 @@ import { Highlight } from '@/lib/highlight';
 import { upper } from '@/lib/strings';
 import AIAssistBar from '@/components/search/AIAssistBar';
 import { PaginationControls } from './PaginationControls';
-import { CompanyCard } from './CompanyCard';
+import { CompanyCardEnhanced } from './CompanyCardEnhanced';
 import { CompanyDetailsModal } from './CompanyDetailsModal';
 import { searchCompaniesAggregated } from '@/repositories/search.repo';
 import { toast } from 'sonner';
@@ -125,7 +125,7 @@ function ResultRow({ r, q, onAddToCrm, onViewCompany }:{ r:UnifiedRow; q:string;
 
 export default function SearchPanel(){
   const { q,setQ,mode,setMode,filters,setFilters,items,total,loading,error,currentPage,totalPages,run,goToPage }=useUnifiedSearch({ initialMode:'all', initialLimit:50 });
-  const [view, setView] = useState<ViewType>('shipments');
+  const [view, setView] = useState<ViewType>('companies'); // Default to companies mode
   const [companyItems, setCompanyItems] = useState<any[]>([]);
   const [companyTotal, setCompanyTotal] = useState(0);
   const [companyLoading, setCompanyLoading] = useState(false);
@@ -238,31 +238,75 @@ export default function SearchPanel(){
 
   return (
     <div className="flex flex-col space-y-4 sm:space-y-6">
-      {/* Unified Search Card */}
-      <div className="card-glass p-4 sm:p-6 lg:p-8">
-        {/* Search Bar with Mobile-Optimized Layout */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
+      {/* Search Intelligence Header */}
+      <div className="card-glass p-6 lg:p-8">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
+            Search Intelligence™
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Discover import/export activity into the U.S.
+          </p>
+        </div>
+
+        {/* Search Bar with Enhanced Design */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
           <div className="relative flex-1">
             <input
               value={q}
               onChange={(e)=>setQ(e.target.value)}
-              onKeyDown={(e)=>{if(e.key==='Enter') run();}}
-              placeholder="Search companies, HS codes, carriers, products..."
-              className="w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-background border-2 border-border px-4 sm:px-6 pr-4 text-sm sm:text-base placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-300"
+              onKeyDown={(e)=>{if(e.key==='Enter') handleSearch();}}
+              placeholder="Search companies, HS codes, carriers, products…"
+              className="input-primary h-14 text-base rounded-2xl shadow-sm border-2 focus:shadow-lg transition-all duration-300"
             />
           </div>
           
-          {/* Mobile: Stack toggles and search button */}
-          <div className="flex gap-3">
-            <div className="flex-shrink-0">
-              <ViewToggle view={view} setView={setView}/>
+          {/* Mode Pills */}
+          <div className="flex items-center gap-2">
+            <div className="toggle-container">
+              <button 
+                onClick={() => setView('companies')}
+                className={`toggle-item ${view === 'companies' ? 'active' : ''}`}
+                data-active={view === 'companies'}
+              >
+                Companies
+              </button>
+              <button 
+                onClick={() => setView('shipments')}
+                className={`toggle-item ${view === 'shipments' ? 'active' : ''}`}
+                data-active={view === 'shipments'}
+              >
+                Shipments
+              </button>
             </div>
-            <div className="flex-shrink-0">
-              <ModeToggle mode={mode} setMode={setMode}/>
+            
+            <div className="toggle-container">
+              <button 
+                onClick={() => setMode('all')}
+                className={`toggle-item ${mode === 'all' ? 'active' : ''}`}
+                data-active={mode === 'all'}
+              >
+                All
+              </button>
+              <button 
+                onClick={() => setMode('air')}
+                className={`toggle-item ${mode === 'air' ? 'active' : ''}`}
+                data-active={mode === 'air'}
+              >
+                Air ✈
+              </button>
+              <button 
+                onClick={() => setMode('ocean')}
+                className={`toggle-item ${mode === 'ocean' ? 'active' : ''}`}
+                data-active={mode === 'ocean'}
+              >
+                Ocean 🚢
+              </button>
             </div>
+            
             <button 
               onClick={handleSearch} 
-              className="btn-primary px-4 sm:px-6 py-2.5 h-12 sm:h-14 disabled:opacity-60 text-sm font-medium rounded-xl sm:rounded-2xl flex-shrink-0" 
+              className="btn-primary h-14 px-6 text-base font-semibold rounded-2xl shadow-lg" 
               disabled={loading || companyLoading}
             >
               {(loading || companyLoading) ? 'Searching...' : 'Search'}
@@ -311,9 +355,9 @@ export default function SearchPanel(){
 
       {/* Results Grid - Conditional Rendering */}
       {view === 'companies' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {companyItems.map((company) => (
-            <CompanyCard 
+            <CompanyCardEnhanced 
               key={company.company_id || company.company_name} 
               company={company}
               onAddToCRM={onAddCompanyToCrm}

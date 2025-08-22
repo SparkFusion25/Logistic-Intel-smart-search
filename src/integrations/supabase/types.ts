@@ -769,6 +769,54 @@ export type Database = {
         }
         Relationships: []
       }
+      alerts: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          emailed_at: string | null
+          id: string
+          payload: Json | null
+          read_at: string | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          emailed_at?: string | null
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          emailed_at?: string | null
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "search_companies_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -1241,6 +1289,45 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      company_activity: {
+        Row: {
+          company_id: string
+          last_shipment_at: string | null
+          total_shipments_12m: number | null
+          trade_value_12m: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          last_shipment_at?: string | null
+          total_shipments_12m?: number | null
+          trade_value_12m?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          last_shipment_at?: string | null
+          total_shipments_12m?: number | null
+          trade_value_12m?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_activity_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_activity_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "search_companies_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       company_alias_resolver: {
         Row: {
@@ -2636,6 +2723,60 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      new_shipper_alerts: {
+        Row: {
+          company_id: string | null
+          company_name: string
+          created_at: string | null
+          detected_at: string | null
+          emailed: boolean | null
+          id: string
+          payload: Json | null
+          user_id: string | null
+          viewed: boolean | null
+          window_months: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          company_name: string
+          created_at?: string | null
+          detected_at?: string | null
+          emailed?: boolean | null
+          id?: string
+          payload?: Json | null
+          user_id?: string | null
+          viewed?: boolean | null
+          window_months?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          company_name?: string
+          created_at?: string | null
+          detected_at?: string | null
+          emailed?: boolean | null
+          id?: string
+          payload?: Json | null
+          user_id?: string | null
+          viewed?: boolean | null
+          window_months?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_shipper_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_shipper_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "search_companies_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       oauth_tokens: {
         Row: {
@@ -4134,6 +4275,36 @@ export type Database = {
           role?: string | null
           subscription_status?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          daily_digest: boolean | null
+          email_alerts: boolean | null
+          inapp_alerts: boolean | null
+          new_shipper_threshold_days: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          daily_digest?: boolean | null
+          email_alerts?: boolean | null
+          inapp_alerts?: boolean | null
+          new_shipper_threshold_days?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          daily_digest?: boolean | null
+          email_alerts?: boolean | null
+          inapp_alerts?: boolean | null
+          new_shipper_threshold_days?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
