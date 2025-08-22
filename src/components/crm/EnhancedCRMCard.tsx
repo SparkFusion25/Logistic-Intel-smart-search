@@ -118,14 +118,7 @@ export function EnhancedCRMCard({
             </div>
             
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAnalysisDrawer(true)}
-              >
-                <TrendingUp className="h-4 w-4 mr-1" />
-                Analyze
-              </Button>
+              {/* Analysis button will be rendered below */}
             </div>
           </div>
         </CardHeader>
@@ -321,19 +314,25 @@ export function EnhancedCRMCard({
       </Card>
 
       {/* Analysis Drawer */}
-      {showAnalysisDrawer && (
-        <TradeLaneAnalysisDrawerEnhanced
-          isOpen={showAnalysisDrawer}
-          onClose={() => setShowAnalysisDrawer(false)}
-          company={{
-            company_name: company.company_name,
-            company_id: company.id,
-            shipments_count: company.total_shipments || 0,
-            last_shipment_date: company.last_shipment_date || null,
-            modes: (company.modes || []).map(m => m.mode)
-          } as any}
-        />
-      )}
+      <TradeLaneAnalysisDrawerEnhanced
+        company={{
+          company_name: company.company_name,
+          company_id: company.id,
+          shipments_count: company.total_shipments || 0,
+          last_shipment_date: company.last_shipment_date || null,
+          modes: (company.modes || []).map(m => m.mode)
+        }}
+        trigger={
+          <Button
+            variant="outline"
+            size="sm"
+            className={showAnalysisDrawer ? "hidden" : ""}
+          >
+            <TrendingUp className="h-4 w-4 mr-1" />
+            Analyze
+          </Button>
+        }
+      />
     </>
   );
 }
