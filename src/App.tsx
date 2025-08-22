@@ -1,197 +1,126 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { AuthProvider } from "@/components/AuthProvider";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Index from "./components/pages/Index";
-import AuthPage from "@/pages/AuthPage";
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 import Home from "@/routes/Home";
 import About from "@/routes/About";
 import Pricing from "@/routes/Pricing";
 import BlogIndex from "@/routes/BlogIndex";
-import { AppShell } from "@/components/ui/AppShell";
-import SearchPanel from "@/components/search/SearchPanel";
-import CRMPanel from "@/components/crm/CRMPanel";
-import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
-import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
-import EmailComposer from "@/components/email/EmailComposer";
-import CampaignBuilder from "@/components/campaigns/CampaignBuilder";
-import TariffCalculator from "@/components/widgets/TariffCalculator";
-import QuoteGenerator from "@/components/widgets/QuoteGenerator";
-import AdminPageClient from "@/components/admin/AdminPageClient";
-import MarketBenchmark from "@/components/benchmark/MarketBenchmark";
+import Login from "@/routes/auth/Login";
+import Signup from "@/routes/auth/Signup";
+import OAuthCallback from "@/routes/auth/OAuthCallback";
+import Logout from "@/routes/auth/Logout";
+import Dashboard from "@/routes/Dashboard";
+import RequestDemo from "@/routes/RequestDemo";
+import { supabase } from '@/lib/supabase-client';
 
-const queryClient = new QueryClient();
+// Auth guard component
+function RequireAuth({ children }: { children: JSX.Element }) {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const nav = useNavigate();
 
-// Dashboard Page Wrappers
-const DashboardPage = () => <DashboardOverview />;
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
+      
+      if (!data.session) {
+        nav('/auth/login');
+      }
+    });
 
-const SearchPage = () => (
-  <div className="flex flex-col min-h-screen">
-    <div className="card-glass p-4 sm:p-6 lg:p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Search Intelligence<span className="text-lg">™</span>
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Discover global trade patterns and business opportunities
-        </p>
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      if (!session && event === 'SIGNED_OUT') {
+        nav('/auth/login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [nav]);
+
+  if (loading) {
+    return (
+      <div className='min-h-screen grid place-items-center bg-slate-50'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-[#0F4C81] mx-auto mb-4'></div>
+          <div className='text-slate-600'>Loading…</div>
+        </div>
       </div>
-    </div>
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 pt-0">
-      <SearchPanel />
-    </div>
-  </div>
-);
+    );
+  }
 
-const CRMPage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          CRM Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <CRMPanel />
-    </div>
-  </div>
-);
+  if (!session) {
+    return <Navigate to="/auth/login" replace />;
+  }
 
-const EmailPage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Email Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <EmailComposer />
-    </div>
-  </div>
-);
+  return children;
+}
 
-const CampaignsPage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Campaign Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <CampaignBuilder onSave={(campaign) => console.log('Campaign saved:', campaign)} />
-    </div>
-  </div>
-);
-
-const CampaignAnalyticsPage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Analytics Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <div className="bg-card rounded-lg p-6 shadow-card">
-        <p className="text-muted-foreground">Campaign analytics and performance metrics coming soon.</p>
-      </div>
-    </div>
-  </div>
-);
-
-const TariffPage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Tariff Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <TariffCalculator />
-    </div>
-  </div>
-);
-
-const QuotePage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Quote Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <QuoteGenerator />
-    </div>
-  </div>
-);
-
-const AdminPage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Admin Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <AdminPageClient />
-    </div>
-  </div>
-);
-
-const BenchmarkPage = () => (
-  <div className="flex flex-col">
-    <div className="card-glass p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Market Intelligence<span className="text-lg">™</span>
-        </h1>
-      </div>
-      <MarketBenchmark />
-    </div>
-  </div>
-);
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Marketing Site Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/blog" element={<BlogIndex />} />
-              
-              {/* Legacy route for existing users */}
-              <Route path="/app" element={<Index />} />
-              
-              {/* Authentication */}
-              <Route path="/auth" element={<AuthPage />} />
-              
-              {/* Protected Dashboard Routes */}
-              <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/search" element={<ProtectedRoute><AppShell><SearchPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/crm" element={<ProtectedRoute><AppShell><CRMPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/email" element={<ProtectedRoute><AppShell><EmailPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/campaigns" element={<ProtectedRoute><AppShell><CampaignsPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/campaigns/analytics" element={<ProtectedRoute><AppShell><CampaignAnalyticsPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/widgets/tariff" element={<ProtectedRoute><AppShell><TariffPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/widgets/quote" element={<ProtectedRoute><AppShell><QuotePage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/admin" element={<ProtectedRoute><AppShell><AdminPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/benchmark" element={<ProtectedRoute><AppShell><BenchmarkPage /></AppShell></ProtectedRoute>} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
-
-export default App;
+export default function App() {
+  return (
+    <HelmetProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public marketing routes with NavBar and Footer */}
+          <Route path="/" element={
+            <>
+              <NavBar />
+              <Home />
+              <Footer />
+            </>
+          } />
+          <Route path="/about" element={
+            <>
+              <NavBar />
+              <About />
+              <Footer />
+            </>
+          } />
+          <Route path="/pricing" element={
+            <>
+              <NavBar />
+              <Pricing />
+              <Footer />
+            </>
+          } />
+          <Route path="/blog" element={
+            <>
+              <NavBar />
+              <BlogIndex />
+              <Footer />
+            </>
+          } />
+          <Route path="/demo/request" element={
+            <>
+              <NavBar />
+              <RequestDemo />
+              <Footer />
+            </>
+          } />
+          
+          {/* Auth routes without NavBar/Footer */}
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/signup" element={<Signup />} />
+          <Route path="/auth/callback" element={<OAuthCallback />} />
+          <Route path="/logout" element={<Logout />} />
+          
+          {/* Protected dashboard route */}
+          <Route path="/dashboard" element={
+            <RequireAuth>
+              <Dashboard />
+            </RequireAuth>
+          } />
+          
+          {/* Catch all - redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </HelmetProvider>
+  );
+}
