@@ -14,6 +14,7 @@ import Signup from "@/routes/auth/Signup";
 import OAuthCallback from "@/routes/auth/OAuthCallback";
 import Logout from "@/routes/auth/Logout";
 import RequestDemo from "@/routes/RequestDemo";
+import Help from "@/routes/Help";
 import { supabase } from '@/lib/supabase-client';
 import { AppShell } from '@/components/ui/AppShell';
 import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
@@ -121,6 +122,13 @@ export default function App() {
             <>
               <NavBar />
               <RequestDemo />
+              <Footer />
+            </>
+          } />
+          <Route path="/help" element={
+            <>
+              <NavBar />
+              <Help />
               <Footer />
             </>
           } />

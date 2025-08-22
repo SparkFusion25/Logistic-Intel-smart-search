@@ -1,4 +1,4 @@
-import { AdminPageClientEnhanced } from '@/components/admin/AdminPageClientEnhanced';
+import AdminPageClientEnhanced from '@/components/admin/AdminPageClientEnhanced';
 
 export default function Admin() {
   return (
