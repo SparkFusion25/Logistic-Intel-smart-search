@@ -28,7 +28,7 @@ export async function searchUnified(params: SearchParams = {}) {
   } = params;
 
   let query = supabase
-    .from('unified_shipments_view')
+    .from('unified_shipments')
     .select('*', { count: 'exact' })
     .order('unified_date', { ascending: false })
     .range(offset, offset + limit - 1);
@@ -84,7 +84,7 @@ export async function searchCompanies(params: { q?: string; limit?: number; offs
   const { q, limit = 25, offset = 0 } = params;
 
   let query = supabase
-    .from('search_companies_view')
+    .from('company_search_view')
     .select('*', { count: 'exact' })
     .order('shipments_count', { ascending: false })
     .range(offset, offset + limit - 1);
