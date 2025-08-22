@@ -1,14 +1,35 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# Robots.txt for Logistic Intel
+# https://logisticintel.com/robots.txt
 
 User-agent: *
 Allow: /
+
+# Marketing site
+Allow: /about
+Allow: /pricing
+Allow: /blog/
+Allow: /blog/category/
+Allow: /blog/tag/
+
+# Block admin and auth areas
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /api/
+
+# Block temporary/draft content
+Disallow: /draft/
+Disallow: /preview/
+
+# Allow search engines to access assets
+Allow: /assets/
+Allow: /images/
+Allow: /og/
+Allow: /_next/static/
+
+# Sitemaps
+Sitemap: https://logisticintel.com/sitemap.xml
+Sitemap: https://logisticintel.com/blog-sitemap.xml
+
+# Crawl delay (be nice to smaller crawlers)
+Crawl-delay: 1
