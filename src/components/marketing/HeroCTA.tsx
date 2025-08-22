@@ -1,49 +1,30 @@
 export default function HeroCTA() {
   return (
-    <div className="p-6 sm:p-8">
-      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6" 
-          style={{ color: 'var(--text)' }}>
-        Search global trade. Close more freight deals.
-      </h1>
-      <p className="text-lg sm:text-xl mb-6 max-w-xl leading-relaxed" 
-         style={{ color: 'var(--text-muted)' }}>
-        Company-first search across US import/export data with integrated CRM and outreach.
-      </p>
-      
-      {/* Feature badges */}
-      <div className="flex flex-wrap gap-2 mb-8">
-        {[
-          "Company-first search",
-          "Add to CRM in one click", 
-          "Apollo enrichment ready"
-        ].map((badge, i) => (
-          <span key={i} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-                style={{ 
-                  background: 'var(--brand-50)',
-                  color: 'var(--brand-700)'
-                }}>
-            {badge}
-          </span>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-4">
-        <a
-          href="/signup"
-          className="gradient-cta inline-flex items-center rounded-2xl px-6 py-3 font-semibold shadow-lg transition hover:brightness-110"
-        >
-          Start Free
-        </a>
-        <a
-          href="/login?demo=true"
-          className="inline-flex items-center rounded-2xl px-6 py-3 font-semibold transition"
-          style={{ 
-            color: 'var(--brand-700)',
-            background: 'transparent'
-          }}
-        >
-          See Live Demo
-        </a>
+    <div className="p-6 sm:p-10">
+      {/* soft scrim directly behind text to guarantee contrast */}
+      <div className="inline-block rounded-2xl bg-white/70 backdrop-blur-md px-6 py-5 shadow">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0B1E39]">
+          Global freight intelligence, CRM, and outreach in one platform
+        </h1>
+        <p className="mt-3 text-slate-700 max-w-xl">
+          Search shipments, analyze lanes, calculate tariffs, and launch real campaigns—without leaving Logistic Intel.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <a
+            href="/request-demo"
+            className="inline-flex items-center rounded-xl px-5 py-3 text-white font-semibold shadow transition
+                       bg-gradient-to-r from-[#0B1E39] to-[#0F4C81] hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#0F4C81]"
+          >
+            Request a demo
+          </a>
+          <a
+            href="/signup"
+            className="inline-flex items-center rounded-xl px-5 py-3 font-semibold text-[#0F4C81] bg-white shadow hover:bg-slate-50
+                       focus:outline-none focus:ring-2 focus:ring-[#0F4C81]"
+          >
+            Start free trial
+          </a>
+        </div>
       </div>
     </div>
   );

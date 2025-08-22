@@ -23,10 +23,9 @@ export const ContainerIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export const FactoryIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" {...props}>
-    <circle cx="12" cy="12" r="12" fill="#0F4C81" />
-    <path d="M6 15h12v3H6zM6 15l3-2v2l3-2v2" fill="white" />
-    <rect x="8" y="12" width="1.6" height="1.6" fill="#0F4C81"/>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" {...props}>
+    <circle cx="12" cy="12" r="12" fill="var(--brand-500)" />
+    <path d="M6 16h12v2H6zM8 10h2v6H8zM12 8h2v8h-2zM16 12h2v4h-2z" fill="white" />
   </svg>
 );
 
