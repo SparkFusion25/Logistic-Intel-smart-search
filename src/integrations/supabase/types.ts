@@ -4676,6 +4676,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_user_profile_safe: {
+        Args: { user_email: string; user_id: string }
+        Returns: string
+      }
       current_org_id: {
         Args: Record<PropertyKey, never>
         Returns: string
