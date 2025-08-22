@@ -14,6 +14,7 @@ interface BulkImportRecord {
   org_id: string;
 }
 
+// @ts-ignore
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -27,7 +28,9 @@ Deno.serve(async (req) => {
       throw new Error('Import ID is required');
     }
 
+    // @ts-ignore
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    // @ts-ignore
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     if (!supabaseUrl || !supabaseKey) {
@@ -169,7 +172,9 @@ Deno.serve(async (req) => {
     try {
       const { importId } = await req.clone().json();
       if (importId) {
+        // @ts-ignore
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        // @ts-ignore
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         
         await fetch(`${supabaseUrl}/rest/v1/bulk_imports?id=eq.${importId}`, {
