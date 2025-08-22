@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function CTASection() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 bg-[#F7F8FA]">
@@ -9,18 +11,18 @@ export default function CTASection() {
           Join thousands of logistics professionals using Logistic Intel to find new opportunities and grow their business.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a 
-            href="/demo/request" 
+          <Link 
+            to="/demo/request" 
             className="inline-flex items-center rounded-xl px-8 py-4 text-lg font-semibold text-[#0F4C81] bg-white hover:bg-slate-50 transition shadow-lg"
           >
             Request a Demo
-          </a>
-          <a 
-            href="/auth/signup" 
+          </Link>
+          <Link 
+            to="/auth/signup" 
             className="inline-flex items-center rounded-xl px-8 py-4 text-lg font-semibold text-white border-2 border-white hover:bg-white hover:text-[#0F4C81] transition"
           >
             Start Free Trial
-          </a>
+          </Link>
         </div>
       </div>
     </section>

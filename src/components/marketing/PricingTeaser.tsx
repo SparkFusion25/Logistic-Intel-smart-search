@@ -62,8 +62,8 @@ export default function PricingTeaser() {
                   </li>
                 ))}
               </ul>
-              <a 
-                href={plan.href}
+              <Link 
+                to={plan.href}
                 className={`block w-full py-3 px-6 rounded-xl font-semibold transition ${
                   plan.popular 
                     ? 'bg-gradient-to-r from-[#0B1E39] to-[#0F4C81] text-white hover:brightness-110' 
@@ -71,7 +71,7 @@ export default function PricingTeaser() {
                 }`}
               >
                 {plan.cta}
-              </a>
+              </Link>
             </div>
           </div>
         ))}

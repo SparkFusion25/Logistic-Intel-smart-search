@@ -63,12 +63,12 @@ export default function CompanyCard({
       </div>
 
       <div className="mt-5 flex gap-2">
-        <a href="/crm/add" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-white text-sm
+        <a href="/auth/signup" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-white text-sm
            bg-gradient-to-r from-[#0B1E39] to-[#0F4C81] shadow hover:brightness-110">Add to CRM</a>
-        <a href="/company" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-[#0F4C81] text-sm bg-white border
+        <a href="/auth/signup" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-[#0F4C81] text-sm bg-white border
            border-slate-200 hover:bg-slate-50">View</a>
-        <a href="/email" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-[#0F4C81] text-sm bg-white border
-           border-slate-200 hover:bg-slate-50">Email</a>
+        <a href="/demo/request" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-[#0F4C81] text-sm bg-white border
+           border-slate-200 hover:bg-slate-50">Demo</a>
       </div>
     </div>
   );
