@@ -18,6 +18,18 @@ import { supabase } from '@/lib/supabase-client';
 import { AppShell } from '@/components/ui/AppShell';
 import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
 
+// Dashboard pages
+import Search from '@/routes/dashboard/Search';
+import CRM from '@/routes/dashboard/CRM';
+import Email from '@/routes/dashboard/Email';
+import Campaigns from '@/routes/dashboard/Campaigns';
+import CampaignAnalytics from '@/routes/dashboard/CampaignAnalytics';
+import Quote from '@/routes/dashboard/Quote';
+import Tariff from '@/routes/dashboard/Tariff';
+import Benchmark from '@/routes/dashboard/Benchmark';
+import Admin from '@/routes/dashboard/Admin';
+import Settings from '@/routes/dashboard/Settings';
+
 // Auth guard component
 function RequireAuth({ children }: { children: JSX.Element }) {
   const [session, setSession] = useState<any>(null);
@@ -119,11 +131,81 @@ export default function App() {
           <Route path="/auth/callback" element={<OAuthCallback />} />
           <Route path="/logout" element={<Logout />} />
           
-          {/* Protected dashboard route with full app shell */}
+          {/* Protected dashboard routes with full app shell */}
           <Route path="/dashboard" element={
             <RequireAuth>
               <AppShell>
                 <DashboardOverview />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/search" element={
+            <RequireAuth>
+              <AppShell>
+                <Search />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/crm" element={
+            <RequireAuth>
+              <AppShell>
+                <CRM />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/email" element={
+            <RequireAuth>
+              <AppShell>
+                <Email />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/campaigns" element={
+            <RequireAuth>
+              <AppShell>
+                <Campaigns />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/campaigns/analytics" element={
+            <RequireAuth>
+              <AppShell>
+                <CampaignAnalytics />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/widgets/quote" element={
+            <RequireAuth>
+              <AppShell>
+                <Quote />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/widgets/tariff" element={
+            <RequireAuth>
+              <AppShell>
+                <Tariff />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/benchmark" element={
+            <RequireAuth>
+              <AppShell>
+                <Benchmark />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/admin" element={
+            <RequireAuth>
+              <AppShell>
+                <Admin />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/dashboard/settings" element={
+            <RequireAuth>
+              <AppShell>
+                <Settings />
               </AppShell>
             </RequireAuth>
           } />
