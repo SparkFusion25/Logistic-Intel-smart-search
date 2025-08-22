@@ -1,24 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
+interface BulkImport {
+  id: string;
+  filename: string;
+  status: string;
+  ai_processing_status: string | null;
+  processed_records: number | null;
+  total_records: number | null;
+}
+
 export function BulkImportTest() {
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [latestImport, setLatestImport] = useState<BulkImport | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  useEffect(() => {
+    loadLatestImport();
+  }, []);
+
+  const loadLatestImport = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bulk_imports')
+        .select('id, filename, status, ai_processing_status, processed_records, total_records')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      setLatestImport(data);
+    } catch (error) {
+      console.error('Failed to load latest import:', error);
+      toast({
+        title: "Failed to Load Import",
+        description: "Could not find any bulk imports to test with",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const testEdgeFunction = async () => {
+    if (!latestImport) {
+      toast({
+        title: "No Import Available",
+        description: "Please upload a file first to test the edge function",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setTesting(true);
     setResults(null);
     
     try {
-      console.log('Testing process-bulk-import edge function...');
+      console.log('Testing process-bulk-import edge function with import:', latestImport.id);
       
       const { data, error } = await supabase.functions.invoke('process-bulk-import', {
         body: { 
-          importId: '929af10a-748d-4258-a41c-e227c619131f' // The stuck import ID
+          importId: latestImport.id
         }
       });
 
@@ -59,13 +106,22 @@ export function BulkImportTest() {
   };
 
   const testDatabaseQuery = async () => {
+    if (!latestImport) {
+      toast({
+        title: "No Import Available",
+        description: "Please upload a file first to test database queries",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      console.log('Testing database access...');
+      console.log('Testing database access for import:', latestImport.id);
       
       const { data, error } = await supabase
         .from('bulk_imports')
         .select('id, filename, status, processed_records')
-        .eq('id', '929af10a-748d-4258-a41c-e227c619131f')
+        .eq('id', latestImport.id)
         .single();
 
       console.log('Database query result:', { data, error });
@@ -87,16 +143,48 @@ export function BulkImportTest() {
     }
   };
 
+  if (loading) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>🧪 Bulk Import Function Tests</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center p-8">
+            <div className="text-muted-foreground">Loading latest import...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>🧪 Bulk Import Function Tests</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {latestImport ? (
+          <div className="p-3 bg-muted rounded-lg mb-4">
+            <div className="text-sm">
+              <div><strong>Testing with:</strong> {latestImport.filename}</div>
+              <div><strong>Status:</strong> {latestImport.status}</div>
+              <div><strong>AI Status:</strong> {latestImport.ai_processing_status || 'pending'}</div>
+              <div><strong>Progress:</strong> {latestImport.processed_records || 0}/{latestImport.total_records || 0} records</div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
+            <div className="text-sm text-yellow-800">
+              No imports found. Please upload a file to test with.
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2">
           <Button 
             onClick={testEdgeFunction}
-            disabled={testing}
+            disabled={testing || !latestImport}
             variant="outline"
           >
             {testing ? '🔄 Testing...' : '🚀 Test Edge Function'}
@@ -104,9 +192,18 @@ export function BulkImportTest() {
           
           <Button 
             onClick={testDatabaseQuery}
+            disabled={!latestImport}
             variant="outline"
           >
             📊 Test Database Query
+          </Button>
+
+          <Button 
+            onClick={loadLatestImport}
+            variant="outline"
+            size="sm"
+          >
+            🔄 Refresh
           </Button>
         </div>
 
@@ -122,9 +219,9 @@ export function BulkImportTest() {
         )}
 
         <div className="text-sm text-muted-foreground">
-          <p><strong>Target Import:</strong> Panjiva - US EXPORTS 2025.xlsx</p>
-          <p><strong>Status:</strong> uploaded (0 records processed)</p>
-          <p><strong>Expected:</strong> Edge function should process and return success</p>
+          <p><strong>How it works:</strong> This test uses the most recent bulk import in your system</p>
+          <p><strong>Expected:</strong> Edge function should process the import and return success</p>
+          <p><strong>Note:</strong> Click refresh if you've just uploaded a new file</p>
         </div>
       </CardContent>
     </Card>
