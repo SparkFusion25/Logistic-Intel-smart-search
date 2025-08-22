@@ -10,6 +10,7 @@ import { upper } from '@/lib/strings';
 import AIAssistBar from '@/components/search/AIAssistBar';
 import { PaginationControls } from './PaginationControls';
 import { CompanyCardEnhanced } from './CompanyCardEnhanced';
+import { ShipmentCardEnhanced } from './ShipmentCardEnhanced';
 import { CompanyDetailsModal } from './CompanyDetailsModal';
 import { searchCompaniesAggregated } from '@/repositories/search.repo';
 import { toast } from 'sonner';
@@ -238,10 +239,11 @@ export default function SearchPanel(){
 
   return (
     <div className="flex flex-col space-y-4 sm:space-y-6">
-      {/* Search Intelligence Header */}
-      <div className="card-glass p-6 lg:p-8">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
+      {/* Main Search Card - No Header Card */}
+      <div className="card-glass p-4 sm:p-6 lg:p-8 sticky top-0 z-20 backdrop-blur-sm bg-card/95">
+        {/* Title and Search Input */}
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold gradient-text mb-2">
             Search Intelligence™
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -249,55 +251,54 @@ export default function SearchPanel(){
           </p>
         </div>
 
-        {/* Search Bar with Enhanced Design */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-4">
           <div className="relative flex-1">
             <input
               value={q}
               onChange={(e)=>setQ(e.target.value)}
               onKeyDown={(e)=>{if(e.key==='Enter') handleSearch();}}
               placeholder="Search companies, HS codes, carriers, products…"
-              className="input-primary h-14 text-base rounded-2xl shadow-sm border-2 focus:shadow-lg transition-all duration-300"
+              className="input-primary h-12 sm:h-14 text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-sm border-2 focus:shadow-lg transition-all duration-300 w-full"
             />
           </div>
           
-          {/* Mode Pills */}
-          <div className="flex items-center gap-2">
-            <div className="toggle-container">
+          {/* Mode Pills - Responsive */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <div className="toggle-container flex-1 sm:flex-none">
               <button 
                 onClick={() => setView('companies')}
-                className={`toggle-item ${view === 'companies' ? 'active' : ''}`}
+                className={`toggle-item flex-1 sm:flex-none ${view === 'companies' ? 'active' : ''}`}
                 data-active={view === 'companies'}
               >
                 Companies
               </button>
               <button 
                 onClick={() => setView('shipments')}
-                className={`toggle-item ${view === 'shipments' ? 'active' : ''}`}
+                className={`toggle-item flex-1 sm:flex-none ${view === 'shipments' ? 'active' : ''}`}
                 data-active={view === 'shipments'}
               >
                 Shipments
               </button>
             </div>
             
-            <div className="toggle-container">
+            <div className="toggle-container flex-1 sm:flex-none">
               <button 
                 onClick={() => setMode('all')}
-                className={`toggle-item ${mode === 'all' ? 'active' : ''}`}
+                className={`toggle-item flex-1 sm:flex-none ${mode === 'all' ? 'active' : ''}`}
                 data-active={mode === 'all'}
               >
                 All
               </button>
               <button 
                 onClick={() => setMode('air')}
-                className={`toggle-item ${mode === 'air' ? 'active' : ''}`}
+                className={`toggle-item flex-1 sm:flex-none ${mode === 'air' ? 'active' : ''}`}
                 data-active={mode === 'air'}
               >
                 Air ✈
               </button>
               <button 
                 onClick={() => setMode('ocean')}
-                className={`toggle-item ${mode === 'ocean' ? 'active' : ''}`}
+                className={`toggle-item flex-1 sm:flex-none ${mode === 'ocean' ? 'active' : ''}`}
                 data-active={mode === 'ocean'}
               >
                 Ocean 🚢
@@ -306,7 +307,7 @@ export default function SearchPanel(){
             
             <button 
               onClick={handleSearch} 
-              className="btn-primary h-14 px-6 text-base font-semibold rounded-2xl shadow-lg" 
+              className="btn-primary h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-semibold rounded-xl sm:rounded-2xl shadow-lg w-full sm:w-auto" 
               disabled={loading || companyLoading}
             >
               {(loading || companyLoading) ? 'Searching...' : 'Search'}
@@ -371,11 +372,9 @@ export default function SearchPanel(){
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
           {items.map((r)=>(
-            <ResultRow 
+            <ShipmentCardEnhanced
               key={r.id} 
-              r={r} 
-              q={q} 
-              onAddToCrm={onAddToCrm}
+              shipment={r}
               onViewCompany={(row) => {
                 setSelectedCompany(createCompanyFromRow(row));
                 setShowCompanyModal(true);
