@@ -895,6 +895,7 @@ export type Database = {
           duplicate_records: number | null
           error_details: Json | null
           error_records: number | null
+          failed_at: string | null
           file_path: string | null
           file_size: number | null
           file_type: string
@@ -903,8 +904,10 @@ export type Database = {
           org_id: string
           processed_records: number | null
           processing_metadata: Json | null
+          started_at: string | null
           status: string
           total_records: number | null
+          total_rows: number | null
           updated_at: string | null
         }
         Insert: {
@@ -914,6 +917,7 @@ export type Database = {
           duplicate_records?: number | null
           error_details?: Json | null
           error_records?: number | null
+          failed_at?: string | null
           file_path?: string | null
           file_size?: number | null
           file_type: string
@@ -922,8 +926,10 @@ export type Database = {
           org_id: string
           processed_records?: number | null
           processing_metadata?: Json | null
+          started_at?: string | null
           status?: string
           total_records?: number | null
+          total_rows?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -933,6 +939,7 @@ export type Database = {
           duplicate_records?: number | null
           error_details?: Json | null
           error_records?: number | null
+          failed_at?: string | null
           file_path?: string | null
           file_size?: number | null
           file_type?: string
@@ -941,8 +948,10 @@ export type Database = {
           org_id?: string
           processed_records?: number | null
           processing_metadata?: Json | null
+          started_at?: string | null
           status?: string
           total_records?: number | null
+          total_rows?: number | null
           updated_at?: string | null
         }
         Relationships: []
