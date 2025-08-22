@@ -14,18 +14,12 @@ export function JsonLd({ data }: JsonLdProps) {
   );
 }
 
-// Common structured data generators
 export const createWebSiteSchema = () => ({
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Logistic Intel",
   "url": "https://logisticintel.com",
-  "description": "Global freight intelligence, CRM, and outreach platform",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://logisticintel.com/search?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
+  "description": "Global freight intelligence, CRM, and outreach platform"
 });
 
 export const createOrganizationSchema = () => ({
@@ -33,20 +27,9 @@ export const createOrganizationSchema = () => ({
   "@type": "Organization",
   "name": "Logistic Intel",
   "url": "https://logisticintel.com",
-  "logo": "https://logisticintel.com/logo.png",
-  "description": "Global freight intelligence, CRM, and outreach platform for logistics professionals",
+  "description": "Global freight intelligence platform for logistics professionals",
   "foundingDate": "2019",
-  "industry": "Logistics Technology",
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "telephone": "+1-555-LOGISTIC",
-    "contactType": "customer service",
-    "availableLanguage": ["English"]
-  },
-  "sameAs": [
-    "https://linkedin.com/company/logistic-intel",
-    "https://twitter.com/logisticintel"
-  ]
+  "industry": "Logistics Technology"
 });
 
 export const createBreadcrumbSchema = (items: Array<{ name: string; url: string }>) => ({

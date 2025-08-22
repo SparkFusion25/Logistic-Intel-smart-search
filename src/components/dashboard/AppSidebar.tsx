@@ -21,21 +21,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { SidebarBrand } from "./SidebarBrand"
 
 const navigationItems = [
-  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Search", url: "/dashboard/search", icon: Search },
-  { title: "CRM", url: "/dashboard/crm", icon: Contact },
-  { title: "Email", url: "/dashboard/email", icon: Mail },
-  { title: "Campaigns", url: "/dashboard/campaigns", icon: Flag },
-  { title: "Campaign Analytics", url: "/dashboard/campaigns/analytics", icon: LineChart },
-  { title: "Quote Generator", url: "/dashboard/widgets/quote", icon: FileText },
-  { title: "Tariff Calculator", url: "/dashboard/widgets/tariff", icon: Calculator },
-  { title: "Benchmark", url: "/dashboard/benchmark", icon: Activity },
-  { title: "Admin", url: "/dashboard/admin", icon: ShieldCheck },
+  { title: "Overview", url: "/app", icon: LayoutDashboard },
+  { title: "Search", url: "/app/search", icon: Search },
+  { title: "CRM", url: "/app/crm", icon: Contact },
+  { title: "Email", url: "/app/email", icon: Mail },
+  { title: "Campaigns", url: "/app/campaigns", icon: Flag },
+  { title: "Analytics", url: "/app/campaigns/analytics", icon: LineChart },
+  { title: "Widgets", url: "/app/widgets", icon: Target },
+  { title: "Admin", url: "/app/admin", icon: ShieldCheck },
 ]
 
 const bottomItems = [
   { title: "Blog", url: "/blog", icon: BookOpen },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+  { title: "Settings", url: "/app/settings", icon: Settings },
   { title: "Help", url: "/help", icon: HelpCircle },
 ]
 
