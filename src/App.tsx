@@ -8,13 +8,15 @@ import Home from "@/routes/Home";
 import About from "@/routes/About";
 import Pricing from "@/routes/Pricing";
 import BlogIndex from "@/routes/BlogIndex";
+import BlogArticle from "@/routes/BlogArticle";
 import Login from "@/routes/auth/Login";
 import Signup from "@/routes/auth/Signup";
 import OAuthCallback from "@/routes/auth/OAuthCallback";
 import Logout from "@/routes/auth/Logout";
-import Dashboard from "@/routes/Dashboard";
 import RequestDemo from "@/routes/RequestDemo";
 import { supabase } from '@/lib/supabase-client';
+import { AppShell } from '@/components/ui/AppShell';
+import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
 
 // Auth guard component
 function RequireAuth({ children }: { children: JSX.Element }) {
@@ -96,6 +98,13 @@ export default function App() {
               <Footer />
             </>
           } />
+          <Route path="/blog/:slug" element={
+            <>
+              <NavBar />
+              <BlogArticle />
+              <Footer />
+            </>
+          } />
           <Route path="/demo/request" element={
             <>
               <NavBar />
@@ -110,10 +119,12 @@ export default function App() {
           <Route path="/auth/callback" element={<OAuthCallback />} />
           <Route path="/logout" element={<Logout />} />
           
-          {/* Protected dashboard route */}
+          {/* Protected dashboard route with full app shell */}
           <Route path="/dashboard" element={
             <RequireAuth>
-              <Dashboard />
+              <AppShell>
+                <DashboardOverview />
+              </AppShell>
             </RequireAuth>
           } />
           
