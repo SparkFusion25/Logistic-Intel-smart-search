@@ -9,6 +9,10 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./components/pages/Index";
 import AuthPage from "@/pages/AuthPage";
+import Home from "@/routes/Home";
+import About from "@/routes/About";
+import Pricing from "@/routes/Pricing";
+import BlogIndex from "@/routes/BlogIndex";
 import { AppShell } from "@/components/ui/AppShell";
 import SearchPanel from "@/components/search/SearchPanel";
 import CRMPanel from "@/components/crm/CRMPanel";
@@ -159,8 +163,19 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              {/* Marketing Site Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/blog" element={<BlogIndex />} />
+              
+              {/* Legacy route for existing users */}
+              <Route path="/app" element={<Index />} />
+              
+              {/* Authentication */}
               <Route path="/auth" element={<AuthPage />} />
+              
+              {/* Protected Dashboard Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
               <Route path="/dashboard/search" element={<ProtectedRoute><AppShell><SearchPage /></AppShell></ProtectedRoute>} />
               <Route path="/dashboard/crm" element={<ProtectedRoute><AppShell><CRMPage /></AppShell></ProtectedRoute>} />
