@@ -1,16 +1,10 @@
 // String utility functions
 
-// Convert string to uppercase
-export function upper(str: string | null | undefined): string {
-  if (!str) return '';
-  return str.toUpperCase();
-}
-
-// Convert string to lowercase
-export function lower(str: string | null | undefined): string {
-  if (!str) return '';
-  return str.toLowerCase();
-}
+export const s = (v: unknown): string => (typeof v === 'string' ? v : v == null ? '' : String(v));
+export const upper = (v: unknown) => s(v).toUpperCase();
+export const lower = (v: unknown) => s(v).toLowerCase();
+export const trim = (v: unknown) => s(v).trim();
+export const has = (v: unknown) => s(v).length > 0;
 
 // Capitalize first letter of each word
 export function title(str: string | null | undefined): string {
