@@ -49,8 +49,8 @@ export function SeoHelmet({
       <meta name="twitter:image" content={fullOgImage} />
 
       {/* Additional Meta */}
-      <meta name="theme-color" content="#0F4C81" />
-      <meta name="msapplication-TileColor" content="#0F4C81" />
+      <meta name="theme-color" content="#3b82f6" />
+      <meta name="msapplication-TileColor" content="#3b82f6" />
     </Helmet>
   );
 }

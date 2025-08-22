@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -163,29 +163,33 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Marketing Site Routes */}
+              {/* Public Marketing Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/blog" element={<BlogIndex />} />
               
-              {/* Legacy route for existing users */}
-              <Route path="/app" element={<Index />} />
-              
-              {/* Authentication */}
+              {/* Authentication Routes */}
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/signup" element={<AuthPage />} />
               <Route path="/auth" element={<AuthPage />} />
               
-              {/* Protected Dashboard Routes */}
-              <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/search" element={<ProtectedRoute><AppShell><SearchPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/crm" element={<ProtectedRoute><AppShell><CRMPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/email" element={<ProtectedRoute><AppShell><EmailPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/campaigns" element={<ProtectedRoute><AppShell><CampaignsPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/campaigns/analytics" element={<ProtectedRoute><AppShell><CampaignAnalyticsPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/widgets/tariff" element={<ProtectedRoute><AppShell><TariffPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/widgets/quote" element={<ProtectedRoute><AppShell><QuotePage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/admin" element={<ProtectedRoute><AppShell><AdminPage /></AppShell></ProtectedRoute>} />
-              <Route path="/dashboard/benchmark" element={<ProtectedRoute><AppShell><BenchmarkPage /></AppShell></ProtectedRoute>} />
+              {/* Protected App Routes - /app/* pattern */}
+              <Route path="/app" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/search" element={<ProtectedRoute><AppShell><SearchPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/company/:id" element={<ProtectedRoute><AppShell><Index /></AppShell></ProtectedRoute>} />
+              <Route path="/app/crm" element={<ProtectedRoute><AppShell><CRMPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/email" element={<ProtectedRoute><AppShell><EmailPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/campaigns" element={<ProtectedRoute><AppShell><CampaignsPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/campaigns/analytics" element={<ProtectedRoute><AppShell><CampaignAnalyticsPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/widgets/tariff" element={<ProtectedRoute><AppShell><TariffPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/widgets/quote" element={<ProtectedRoute><AppShell><QuotePage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/admin" element={<ProtectedRoute><AppShell><AdminPage /></AppShell></ProtectedRoute>} />
+              <Route path="/app/settings" element={<ProtectedRoute><AppShell><BenchmarkPage /></AppShell></ProtectedRoute>} />
+              
+              {/* Legacy redirects */}
+              <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+              <Route path="/dashboard/*" element={<Navigate to="/app" replace />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
