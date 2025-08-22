@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.process-bulk-import]
 verify_jwt = true
+regions = ["iad"]
+
+[functions.global.cors]
+allowed_origins = ["*"]
+allowed_headers = ["authorization", "x-client-info", "apikey", "content-type"]
+allowed_methods = ["POST", "OPTIONS"]
