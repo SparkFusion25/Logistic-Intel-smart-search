@@ -45,39 +45,36 @@ export function FourCardStats() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-      <StatCard
-        title="Contacts"
-        value={stats.contacts.toLocaleString()}
-        icon={Users}
-        change="+12%"
-        changeType="increase"
-        color="from-blue-400 to-blue-500"
-        href="/dashboard/search"
-      />
-      <StatCard
-        title="Companies"
-        value={stats.companies.toLocaleString()}
-        icon={Building2}
-        change="+8%"
-        changeType="increase"
-        color="from-green-400 to-green-500"
-        href="/dashboard/search"
-      />
-      <StatCard
-        title="Campaigns"
-        value={stats.campaigns.toString()}
-        icon={Megaphone}
-        change="+25%"
-        changeType="increase"
-        color="from-purple-400 to-purple-500"
-        href="/dashboard/crm"
-      />
-      
-      {/* Email Mini Card as the 4th stat */}
-      <div className="xl:col-span-1">
+    <>
+      {/* KPI Cards using glossy design */}
+      <div className="kpi">
+        <div className="flex items-center justify-between mb-2">
+          <div className="label">Total Contacts</div>
+          <Users className="h-4 w-4 text-accent" />
+        </div>
+        <div className="value">{stats.contacts.toLocaleString()}</div>
+      </div>
+
+      <div className="kpi">
+        <div className="flex items-center justify-between mb-2">
+          <div className="label">Companies Tracked</div>
+          <Building2 className="h-4 w-4 text-accent2" />
+        </div>
+        <div className="value">{stats.companies.toLocaleString()}</div>
+      </div>
+
+      <div className="kpi">
+        <div className="flex items-center justify-between mb-2">
+          <div className="label">Active Campaigns</div>
+          <Megaphone className="h-4 w-4 text-success" />
+        </div>
+        <div className="value">{stats.campaigns}</div>
+      </div>
+
+      {/* Email Mini Card - using existing component but will be wrapped in kpi styling */}
+      <div className="kpi">
         <EmailMiniCard />
       </div>
-    </div>
+    </>
   );
 }

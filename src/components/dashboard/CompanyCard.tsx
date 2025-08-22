@@ -114,8 +114,8 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
   return (
     <Card 
       className={cn(
-        "card-glass cursor-pointer p-2 sm:p-2.5 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10",
-        "hover:border-blue-300/50 hover:-translate-y-0.5 group touch-manipulation",
+        "card card-gloss cursor-pointer p-2 sm:p-2.5 transition-all duration-200 hover:shadow-glossy",
+        "hover:-translate-y-0.5 group touch-manipulation",
         "min-h-20 sm:min-h-24 w-72 xl:w-80"
       )}
       onClick={() => setShowDetailsDrawer(true)}
@@ -219,13 +219,12 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
             <div className="flex gap-2 pt-2">
               <Button 
                 size="sm" 
-                variant="default" 
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent card click
                   handleAddToCRM();
                 }}
                 disabled={isAdding}
-                className="bg-brand-primary hover:bg-brand-primary/90"
+                className="btn btn-primary text-xs"
               >
                 {isAdding ? (
                   <>
@@ -242,7 +241,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
               {company.contact?.email && (
                 <Button 
                   size="sm" 
-                  variant="outline"
+                  className="btn btn-ghost text-xs"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Mail className="w-4 h-4 mr-1" />
@@ -251,7 +250,7 @@ export function CompanyCard({ company, source = "manual", onAddedToCRM }: Compan
               )}
               <Button 
                 size="sm" 
-                variant="outline"
+                className="btn btn-ghost text-xs"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink className="w-4 h-4 mr-1" />

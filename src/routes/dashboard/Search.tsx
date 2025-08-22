@@ -1,13 +1,22 @@
 import { SearchIntelligence } from '@/components/dashboard/SearchIntelligence';
+import GlossyCard from '@/ui/GlossyCard';
+import PageHeader from '@/ui/PageHeader';
+import { CTAPrimary } from '@/ui/CTA';
 
 export default function Search() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Search Intelligence</h1>
-        <p className="text-muted-foreground">Find companies, analyze trade data, and discover opportunities</p>
-      </div>
-      <SearchIntelligence />
+    <div className="stack-gap">
+      <PageHeader 
+        title="Search Intelligence" 
+        actions={
+          <CTAPrimary>Export Results</CTAPrimary>
+        } 
+      />
+      
+      {/* Search Interface */}
+      <GlossyCard className="toolbar">
+        <SearchIntelligence />
+      </GlossyCard>
     </div>
   );
 }

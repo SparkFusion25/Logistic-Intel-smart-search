@@ -1,13 +1,25 @@
 import { CRMDashboard } from '@/components/dashboard/CRMDashboard';
+import GlossyCard from '@/ui/GlossyCard';
+import PageHeader from '@/ui/PageHeader';
+import { CTAPrimary, CTAGhost } from '@/ui/CTA';
 
 export default function CRM() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">CRM Dashboard</h1>
-        <p className="text-muted-foreground">Manage contacts, deals, and relationships</p>
-      </div>
-      <CRMDashboard />
+    <div className="stack-gap">
+      <PageHeader 
+        title="CRM Dashboard" 
+        actions={
+          <div className="flex gap-2">
+            <CTAGhost>Import Contacts</CTAGhost>
+            <CTAPrimary>New Contact</CTAPrimary>
+          </div>
+        } 
+      />
+      
+      {/* CRM Interface */}
+      <GlossyCard className="p-0 min-h-[600px]">
+        <CRMDashboard />
+      </GlossyCard>
     </div>
   );
 }
