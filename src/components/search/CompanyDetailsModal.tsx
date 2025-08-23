@@ -220,7 +220,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-7xl h-[95vh] sm:max-h-[90vh] p-0 sm:p-6 overflow-hidden">
+      <DialogContent className="w-full max-w-4xl h-[95vh] sm:max-h-[90vh] p-0 sm:p-6 overflow-hidden">
         {/* Mobile Header */}
         <div className="sm:hidden flex items-center justify-between p-4 border-b bg-background sticky top-0 z-10">
           <div className="flex items-center gap-3">

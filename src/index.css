@@ -392,15 +392,13 @@ html, body, #root { min-height: 100%; background: #f7f7f8; }
 @media (prefers-color-scheme: dark) { html, body, #root { background: #0b0d0f; } }
 /* Enhanced card surface utilities */
 .card-surface { 
-  background: rgba(255,255,255,0.9); 
-  backdrop-filter: blur(10px); 
+  background: rgb(255,255,255); 
   border: 1px solid rgb(226,232,240); 
   box-shadow: 0 2px 10px rgba(2,6,23,0.04); 
   border-radius: 16px;
 }
-.supports-backdrop .card-surface { background: rgba(255,255,255,0.7); }
-:root.dark .card-surface { 
-  background: rgba(15,17,21,0.9); 
+.dark .card-surface { 
+  background: rgb(15,17,21); 
   border-color: rgba(255,255,255,0.08); 
   box-shadow: 0 8px 24px rgba(0,0,0,0.35); 
 }
