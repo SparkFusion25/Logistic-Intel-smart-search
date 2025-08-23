@@ -2,61 +2,45 @@ import { supabase } from '@/lib/supabase';
 
 export interface WatchlistEntry {
   id: string;
-  company_name: string;
-  company_id?: string;
+  company_id: string;
   status: 'saved' | 'watch';
   user_id: string;
   org_id: string;
   created_at: string;
 }
 
-export async function addToWatchlist(companyName: string, status: 'saved' | 'watch' = 'saved'): Promise<WatchlistEntry> {
-  const { data, error } = await supabase
-    .from('company_watchlist')
-    .insert({ 
-      company_name: companyName,
-      status: status
-    })
-    .select()
-    .single();
-    
+// RPC function for watching a company - handles all business logic server-side
+export async function watchCompany(companyId: string): Promise<{ id: string; status: string } | null> {
+  const { data, error } = await supabase.rpc('watch_company', { p_company_id: companyId });
   if (error) throw error;
-  return data;
+  return data as { id: string; status: string } | null;
 }
 
-export async function removeFromWatchlist(companyName: string, status?: 'saved' | 'watch'): Promise<void> {
-  // RLS: deletes only your own row (user_id = auth.uid())
-  let query = supabase
-    .from('company_watchlist')
-    .delete()
-    .eq('company_name', companyName);
-    
-  if (status) {
-    query = query.eq('status', status);
-  }
-  
-  const { error } = await query;
+// RPC function for saving a company to watchlist
+export async function saveCompany(companyId: string): Promise<{ id: string; status: string } | null> {
+  const { data, error } = await supabase.rpc('save_company', { p_company_id: companyId });
+  if (error) throw error;
+  return data as { id: string; status: string } | null;
+}
+
+// RPC function for unwatching a company
+export async function unwatchCompany(companyId: string): Promise<void> {
+  const { error } = await supabase.rpc('unwatch_company', { p_company_id: companyId });
   if (error) throw error;
 }
 
-export async function isWatched(companyName: string, status: 'saved' | 'watch' = 'saved'): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('company_watchlist')
-    .select('id')
-    .eq('company_name', companyName)
-    .eq('status', status)
-    .limit(1)
-    .maybeSingle();
-    
+// RPC function for unsaving a company
+export async function unsaveCompany(companyId: string): Promise<void> {
+  const { error } = await supabase.rpc('unsave_company', { p_company_id: companyId });
   if (error) throw error;
-  return !!data;
 }
 
-export async function getWatchlistStatus(companyName: string): Promise<{ saved: boolean; watched: boolean }> {
+// Get watchlist status for a company
+export async function getWatchlistStatus(companyId: string): Promise<{ saved: boolean; watched: boolean }> {
   const { data, error } = await supabase
     .from('company_watchlist')
     .select('status')
-    .eq('company_name', companyName);
+    .eq('company_id', companyId);
     
   if (error) throw error;
   
@@ -66,14 +50,43 @@ export async function getWatchlistStatus(companyName: string): Promise<{ saved: 
   return { saved, watched };
 }
 
-export async function toggleWatchlist(companyName: string, status: 'saved' | 'watch'): Promise<boolean> {
-  const isCurrentlyWatched = await isWatched(companyName, status);
+// Toggle watchlist status using RPC functions
+export async function toggleWatchlist(companyId: string, status: 'saved' | 'watch'): Promise<boolean> {
+  const currentStatus = await getWatchlistStatus(companyId);
+  const isCurrentlyActive = status === 'saved' ? currentStatus.saved : currentStatus.watched;
   
-  if (isCurrentlyWatched) {
-    await removeFromWatchlist(companyName, status);
+  if (isCurrentlyActive) {
+    // Remove from watchlist
+    if (status === 'saved') {
+      await unsaveCompany(companyId);
+    } else {
+      await unwatchCompany(companyId);
+    }
     return false;
   } else {
-    await addToWatchlist(companyName, status);
+    // Add to watchlist
+    if (status === 'saved') {
+      await saveCompany(companyId);
+    } else {
+      await watchCompany(companyId);
+    }
     return true;
   }
+}
+
+// Backward compatibility - these functions work with company name by looking up the ID first
+export async function getWatchlistStatusByName(companyName: string): Promise<{ saved: boolean; watched: boolean }> {
+  // First, get the company_id from the companies table or v_company_hs6 view
+  const { data: company, error } = await supabase
+    .from('companies')
+    .select('id')
+    .ilike('name', companyName)
+    .limit(1)
+    .maybeSingle();
+    
+  if (error || !company) {
+    return { saved: false, watched: false };
+  }
+  
+  return getWatchlistStatus(company.id);
 }

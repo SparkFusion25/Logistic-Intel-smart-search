@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bookmark, Eye, EyeOff, BookmarkCheck, TrendingUp, MapPin } from 'lucide-react';
-import { addToWatchlist, removeFromWatchlist, getWatchlistStatus } from '@/features/watchlist/api';
+import { watchCompany, saveCompany, unwatchCompany, unsaveCompany, getWatchlistStatus } from '@/features/watchlist/api';
 import { addCompanyPlaceholder, isCompanyInCRM } from '@/features/crm/api';
 import { useToast } from '@/hooks/use-toast';
 import { CTAPrimary, CTAGhost } from '@/ui/CTA';
@@ -40,7 +40,7 @@ export function SimilarCompanyRow({ company, className = '' }: SimilarCompanyRow
     const loadStatus = async () => {
       try {
         const [watchlistStatus, crmStatus] = await Promise.all([
-          getWatchlistStatus(company.company_name),
+          getWatchlistStatus(company.company_id),
           isCompanyInCRM(company.company_name)
         ]);
         
@@ -72,14 +72,14 @@ export function SimilarCompanyRow({ company, className = '' }: SimilarCompanyRow
     
     try {
       if (saved) {
-        await removeFromWatchlist(company.company_name, 'saved');
+        await unsaveCompany(company.company_id);
         setSaved(false);
         toast({
           title: "Removed",
           description: `${company.company_name} removed from saved companies`
         });
       } else {
-        await addToWatchlist(company.company_name, 'saved');
+        await saveCompany(company.company_id);
         setSaved(true);
         toast({
           title: "Saved",
@@ -104,14 +104,14 @@ export function SimilarCompanyRow({ company, className = '' }: SimilarCompanyRow
     
     try {
       if (watched) {
-        await removeFromWatchlist(company.company_name, 'watch');
+        await unwatchCompany(company.company_id);
         setWatched(false);
         toast({
           title: "Unwatched",
           description: `No longer watching ${company.company_name}`
         });
       } else {
-        await addToWatchlist(company.company_name, 'watch');
+        await watchCompany(company.company_id);
         setWatched(true);
         toast({
           title: "Watching",
