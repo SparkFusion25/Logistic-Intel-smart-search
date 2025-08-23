@@ -18,6 +18,7 @@ import Help from "@/routes/Help";
 import { supabase } from '@/lib/supabase-client';
 import { AppShell } from '@/components/ui/AppShell';
 import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
+import { Toaster } from '@/components/ui/toaster';
 
 // Dashboard pages
 import Search from '@/routes/dashboard/Search';
@@ -230,6 +231,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </HelmetProvider>
   );
 }
