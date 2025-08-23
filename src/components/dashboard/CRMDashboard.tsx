@@ -12,7 +12,7 @@ export function CRMDashboard() {
   return (
     <div className="h-full">
       <Tabs value={activeView} onValueChange={setActiveView} className="h-full">
-        <div className="border-b bg-white/70 backdrop-blur-sm">
+        <div className="border-b bg-white">
           <div className="p-4">
             <TabsList className="grid w-fit grid-cols-2">
               <TabsTrigger value="pipeline" className="flex items-center gap-2">

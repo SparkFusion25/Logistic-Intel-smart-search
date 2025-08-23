@@ -202,7 +202,7 @@ export function RecentCompaniesCard() {
 
   if (loading) {
     return (
-      <div className="card-glass p-6 animate-fade-in-up">
+      <div className="card-surface p-6 animate-fade-in-up">
         <div className="flex items-center justify-center h-48">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
         </div>
@@ -212,7 +212,7 @@ export function RecentCompaniesCard() {
 
   return (
     <>
-      <div className="card-glass p-6 animate-fade-in-up border-0">
+      <div className="card-surface p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
