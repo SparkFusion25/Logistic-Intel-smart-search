@@ -7,6 +7,7 @@ import GlossyCard from '@/ui/GlossyCard';
 import PageHeader from '@/ui/PageHeader';
 import { CTAPrimary, CTAGhost } from '@/ui/CTA';
 import { ChartContainer } from '@/ui/ChartTheme';
+import SimilarCompaniesList from '@/components/SimilarCompaniesList';
 
 export function DashboardOverview() {
   return (
@@ -77,6 +78,15 @@ export function DashboardOverview() {
             <CTAGhost className="w-full">Export</CTAGhost>
           </div>
         </div>
+      </GlossyCard>
+
+      {/* Similar Companies */}
+      <GlossyCard className="p-6">
+        <div className="section-header">
+          <h3 className="text-lg font-bold text-foreground">Similar Companies</h3>
+          <CTAPrimary>View All</CTAPrimary>
+        </div>
+        <SimilarCompaniesList limit={5} />
       </GlossyCard>
 
       {/* Bulk Import Test (Dev Tool) */}

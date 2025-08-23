@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,6 +20,7 @@ interface SearchPanelProps {
 
 export default function SearchPanel({ className = '' }: SearchPanelProps) {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [mode, setMode] = useState<'all' | 'air' | 'ocean'>('all');
   const [filters, setFilters] = useState<SearchFilters>({});
@@ -28,6 +30,18 @@ export default function SearchPanel({ className = '' }: SearchPanelProps) {
   const [addingToCRM, setAddingToCRM] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 25;
+
+  // Initialize search query from URL params and auto-search
+  useEffect(() => {
+    const companyParam = searchParams.get('company');
+    if (companyParam) {
+      setSearchQuery(companyParam);
+      // Auto-search when company parameter is provided
+      setTimeout(() => {
+        handleSearch();
+      }, 100);
+    }
+  }, [searchParams]);
 
   // Load countries on mount
   useEffect(() => {
