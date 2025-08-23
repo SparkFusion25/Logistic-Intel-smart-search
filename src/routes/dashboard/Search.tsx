@@ -1,5 +1,4 @@
-import { SearchIntelligence } from '@/components/dashboard/SearchIntelligence';
-import GlossyCard from '@/ui/GlossyCard';
+import SearchPanel from '@/components/SearchPanel';
 import PageHeader from '@/ui/PageHeader';
 import { CTAPrimary } from '@/ui/CTA';
 
@@ -14,9 +13,7 @@ export default function Search() {
       />
       
       {/* Search Interface */}
-      <GlossyCard className="toolbar">
-        <SearchIntelligence />
-      </GlossyCard>
+      <SearchPanel />
     </div>
   );
 }

@@ -1,51 +1,18 @@
 import React from 'react';
 
-interface HighlightProps {
-  text: string | null | undefined;
-  query: string;
-  className?: string;
-}
-
-export function Highlight({ text, query, className = '' }: HighlightProps): React.ReactElement {
-  if (!text || !query.trim()) {
-    return React.createElement('span', { className }, text || '');
-  }
-
-  const searchTerms = query
-    .trim()
-    .split(/\s+/)
-    .filter(term => term.length > 0)
-    .map(term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')); // Escape regex chars
-
-  if (searchTerms.length === 0) {
-    return React.createElement('span', { className }, text);
-  }
-
-  // Create regex pattern that matches any of the search terms (case insensitive)
-  const regex = new RegExp(`(${searchTerms.join('|')})`, 'gi');
+export default function Highlight({text, query}: {text: string; query: string}) {
+  if (!query) return <>{text}</>;
   
-  const parts = text.split(regex);
+  const i = text.toLowerCase().indexOf(query.toLowerCase());
+  if (i < 0) return <>{text}</>;
   
-  const elements = parts.map((part, index) => {
-    const isMatch = searchTerms.some(term => 
-      new RegExp(`^${term}$`, 'i').test(part)
-    );
-    
-    if (isMatch) {
-      return React.createElement(
-        'mark',
-        { 
-          key: index,
-          className: 'bg-yellow-200 text-yellow-900 px-0.5 rounded'
-        },
-        part
-      );
-    }
-    
-    return part;
-  });
-
-  return React.createElement('span', { className }, ...elements);
+  return (
+    <>
+      {text.slice(0, i)}
+      <mark className="bg-yellow-200 px-1 rounded">{text.slice(i, i + query.length)}</mark>
+      {text.slice(i + query.length)}
+    </>
+  );
 }
 
 // Utility function to highlight text in a string (returns HTML string)

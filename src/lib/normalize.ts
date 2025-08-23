@@ -1,6 +1,11 @@
-export const n = {
-  str: (v: string | null | undefined) => v ?? '',
-  num: (v: number | null | undefined) => v ?? 0,
-  json: (v: unknown) => (v ?? null) as any,
-  dt:  (v: string | null | undefined) => (v ? new Date(v) : null),
-};
+export type Unified = Record<string, any>;
+
+export const norm = (row: any): Unified => ({
+  ...row,
+  mode: row?.mode ?? null,
+  shipment_mode: row?.shipment_mode ?? null,
+  shipment_type: row?.shipment_type ?? null,
+  transport_mode: row?.transport_mode ?? null,
+  unified_company_name: row?.unified_company_name ?? row?.company_name ?? null,
+  hs_code: row?.hs_code ?? null
+});
