@@ -1,4 +1,5 @@
-import { CRMDashboardSimple } from '@/components/dashboard/CRMDashboardSimple';
+import { CRMDashboard } from '@/components/dashboard/CRMDashboard';
+import GlossyCard from '@/ui/GlossyCard';
 import PageHeader from '@/ui/PageHeader';
 import { CTAPrimary, CTAGhost } from '@/ui/CTA';
 
@@ -16,9 +17,9 @@ export default function CRM() {
       />
       
       {/* CRM Interface */}
-      <div className="min-h-[600px]">
-        <CRMDashboardSimple />
-      </div>
+      <GlossyCard className="p-0 min-h-[600px]">
+        <CRMDashboard />
+      </GlossyCard>
     </div>
   );
 }
