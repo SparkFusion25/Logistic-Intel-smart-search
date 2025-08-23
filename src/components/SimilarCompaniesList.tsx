@@ -3,6 +3,7 @@ import { Building2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { SimilarCompanyRow } from '@/features/search/SimilarCompanyRow';
+import { SimilarCompaniesEnhanced } from './SimilarCompaniesEnhanced';
 
 interface Company {
   id: string;
@@ -23,13 +24,15 @@ interface SimilarCompaniesListProps {
   companyName?: string;
   limit?: number;
   className?: string;
+  useSimplified?: boolean; // Option to use the simplified component
 }
 
 export default function SimilarCompaniesList({ 
   hsCode, 
   companyName, 
   limit = 10, 
-  className = '' 
+  className = '',
+  useSimplified = false
 }: SimilarCompaniesListProps) {
   const { toast } = useToast();
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -107,6 +110,24 @@ export default function SimilarCompaniesList({
           <p className="text-gray-500">Try adjusting your search criteria</p>
         </div>
       </div>
+    );
+  }
+
+  // Transform data for simplified component
+  const simplifiedCompanies = companies.map(company => ({
+    company_id: company.company_id,
+    company_name: company.company_name,
+    score: company.confidence_score / 100, // Convert percentage to decimal
+    country: company.country,
+    hs6_code: company.hs6_code
+  }));
+
+  if (useSimplified) {
+    return (
+      <SimilarCompaniesEnhanced 
+        items={simplifiedCompanies}
+        className={className}
+      />
     );
   }
 

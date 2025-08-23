@@ -1,0 +1,52 @@
+import { useState } from 'react';
+import { watchCompany } from '../lib/watchlist';
+
+type SimilarCompany = {
+  company_id: string;    // ensure you're passing this in your list data
+  company_name: string;
+  score: number;
+};
+
+export function SimilarCompanies({ items }: { items: SimilarCompany[] }) {
+  const [pending, setPending] = useState<string | null>(null);
+
+  async function onWatch(id: string) {
+    try {
+      setPending(id);
+      await watchCompany(id);
+      // simple optimistic toast—swap to your toast lib if you have one
+      alert('Added to Watchlist');
+    } catch (e: any) {
+      alert(`Failed: ${e.message ?? e}`);
+    } finally {
+      setPending(null);
+    }
+  }
+
+  return (
+    <div className="grid gap-3">
+      {items.map((c) => (
+        <div key={c.company_id} className="flex items-center justify-between rounded-xl border p-3">
+          <div className="min-w-0">
+            <div className="font-medium truncate">{c.company_name}</div>
+            <div className="text-xs opacity-70">Similarity: {Math.round(c.score * 100)}%</div>
+          </div>
+
+          <div className="flex gap-2">
+            <a className="text-sm underline" href={`/search?company=${encodeURIComponent(c.company_name)}`}>
+              Open
+            </a>
+            <button
+              onClick={() => onWatch(c.company_id)}
+              disabled={pending === c.company_id}
+              className="text-sm rounded-md border px-3 py-1"
+              title="Add to Watchlist"
+            >
+              {pending === c.company_id ? 'Adding…' : 'Watch'}
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

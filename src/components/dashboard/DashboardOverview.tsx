@@ -80,13 +80,13 @@ export function DashboardOverview() {
         </div>
       </GlossyCard>
 
-      {/* Similar Companies */}
+      {/* Similar Companies - Simplified Version */}
       <GlossyCard className="p-6">
         <div className="section-header">
           <h3 className="text-lg font-bold text-foreground">Similar Companies</h3>
           <CTAPrimary>View All</CTAPrimary>
         </div>
-        <SimilarCompaniesList limit={5} />
+        <SimilarCompaniesList limit={5} useSimplified={true} />
       </GlossyCard>
 
       {/* Bulk Import Test (Dev Tool) */}
