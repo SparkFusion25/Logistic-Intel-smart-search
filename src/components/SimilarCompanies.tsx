@@ -40,7 +40,8 @@ export function SimilarCompanies({ items }: { items: SimilarCompany[] }) {
             <button
               onClick={() => onWatch(c.company_id)}
               disabled={pending === c.company_id}
-              className="text-sm rounded-md border px-3 py-1"
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white/90 px-2 py-1 text-sm font-medium transition
+                         hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm active:scale-[0.99] disabled:opacity-50"
               title="Add to Watchlist"
             >
               {pending === c.company_id ? 'Adding…' : 'Watch'}

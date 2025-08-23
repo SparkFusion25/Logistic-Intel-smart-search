@@ -2,7 +2,7 @@ import { FourCardStats } from './FourCardStats';
 import { RecentCompaniesCard } from './RecentCompaniesCard';
 import { QuickSearchCard } from './QuickSearchCard';
 import MarketBenchmark from '@/components/benchmark/MarketBenchmark';
-import { BulkImportTest } from '../test/BulkImportTest';
+import { BulkImporter } from './BulkImporter';
 import GlossyCard from '@/ui/GlossyCard';
 import PageHeader from '@/ui/PageHeader';
 import { CTAPrimary, CTAGhost } from '@/ui/CTA';
@@ -90,13 +90,8 @@ export function DashboardOverview() {
         <SimilarCompaniesList limit={5} useSimplified={true} />
       </GlossyCard>
 
-        {/* Bulk Import Test (Dev Tool) */}
-        <GlossyCard className="p-6">
-          <div className="section-header">
-            <h3 className="text-lg font-bold text-foreground">Development Tools</h3>
-          </div>
-          <BulkImportTest />
-        </GlossyCard>
+        {/* Bulk Import */}
+        <BulkImporter />
       </div>
     </div>
   );

@@ -136,6 +136,38 @@ export default function SearchPanel(){
   const [showCompanyModal, setShowCompanyModal] = useState(false);
 
   useEffect(() => setMounted(true), []);
+  
+  // Read URL parameters and auto-search
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const urlQuery = params.get('q');
+    const urlMode = params.get('mode');
+    const urlOrigin = params.get('origin');
+    const urlDestination = params.get('destination');
+    
+    if (urlQuery) {
+      setQ(urlQuery);
+      if (urlMode && (urlMode === 'air' || urlMode === 'ocean' || urlMode === 'all')) {
+        setMode(urlMode as any);
+      }
+      
+      const newFilters: any = {};
+      if (urlOrigin) newFilters.origin_country = urlOrigin;
+      if (urlDestination) newFilters.destination_country = urlDestination;
+      
+      if (Object.keys(newFilters).length > 0) {
+        setFilters(newFilters);
+      }
+      
+      // Trigger search
+      setTimeout(() => {
+        handleSearch();
+      }, 100);
+    }
+  }, [mounted]);
+
   if (!mounted) return null;
 
   // Convert UnifiedRow to company format for modal

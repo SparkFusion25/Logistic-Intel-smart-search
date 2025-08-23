@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Building2, Megaphone } from 'lucide-react';
-import StatCard from '@/components/shared/StatCard';
-import { EmailMiniCard } from './EmailMiniCard';
+import { Users, Building2, Megaphone, Star } from 'lucide-react';
+import { KpiCard } from './KpiCard';
 
 
 export function FourCardStats() {
   const [stats, setStats] = useState({
     contacts: 0,
     companies: 0,
-    campaigns: 0
+    campaigns: 0,
+    watchlist: 0
   });
 
   useEffect(() => {
@@ -31,10 +31,16 @@ export function FourCardStats() {
         // Mock campaigns for now
         const campaignsCount = 3;
 
+        // Fetch watchlist count
+        const { count: watchlistCount } = await supabase
+          .from('company_watchlist')
+          .select('*', { count: 'exact', head: true });
+
         setStats({
           contacts: contactsCount || 0,
           companies: uniqueCompanies,
-          campaigns: campaignsCount
+          campaigns: campaignsCount,
+          watchlist: watchlistCount || 0
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -46,35 +52,10 @@ export function FourCardStats() {
 
   return (
     <>
-      {/* KPI Cards using glossy design */}
-      <div className="kpi">
-        <div className="flex items-center justify-between mb-2">
-          <div className="label">Total Contacts</div>
-          <Users className="h-4 w-4 text-accent" />
-        </div>
-        <div className="value">{stats.contacts.toLocaleString()}</div>
-      </div>
-
-      <div className="kpi">
-        <div className="flex items-center justify-between mb-2">
-          <div className="label">Companies Tracked</div>
-          <Building2 className="h-4 w-4 text-accent2" />
-        </div>
-        <div className="value">{stats.companies.toLocaleString()}</div>
-      </div>
-
-      <div className="kpi">
-        <div className="flex items-center justify-between mb-2">
-          <div className="label">Active Campaigns</div>
-          <Megaphone className="h-4 w-4 text-success" />
-        </div>
-        <div className="value">{stats.campaigns}</div>
-      </div>
-
-      {/* Email Mini Card - using existing component but will be wrapped in kpi styling */}
-      <div className="kpi">
-        <EmailMiniCard />
-      </div>
+      <KpiCard label="Total Contacts" value={stats.contacts} icon={Users} iconColor="text-blue-600" />
+      <KpiCard label="Companies Tracked" value={stats.companies} icon={Building2} iconColor="text-green-600" />
+      <KpiCard label="Active Campaigns" value={stats.campaigns} icon={Megaphone} iconColor="text-purple-600" />
+      <KpiCard label="Watchlist" value={stats.watchlist} icon={Star} iconColor="text-yellow-600" />
     </>
   );
 }

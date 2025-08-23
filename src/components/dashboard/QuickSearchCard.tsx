@@ -1,59 +1,28 @@
 import { useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from 'react-router-dom';
 import { Search, Plane, Ship } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 export function QuickSearchCard() {
   const [company, setCompany] = useState('');
   const [origin, setOrigin] = useState('');
   const [region, setRegion] = useState('');
   const [mode, setMode] = useState<'air' | 'ocean'>('air');
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (!company.trim()) {
-      toast({
-        title: "Company name required",
-        description: "Please enter a company name to search",
-        variant: "destructive"
-      });
       return;
     }
 
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('search-unified', {
-        body: {
-          q: company.trim(),
-          mode: mode === 'air' ? 'air' : 'ocean',
-          filters: {
-            origin_country: origin.trim() || undefined,
-            destination_country: region.trim() || undefined
-          },
-          limit: 10,
-          offset: 0
-        }
-      });
+    // Build search params
+    const params = new URLSearchParams();
+    params.set('q', company.trim());
+    params.set('mode', mode);
+    if (origin.trim()) params.set('origin', origin.trim());
+    if (region.trim()) params.set('destination', region.trim());
 
-      if (error) throw error;
-
-      const results = data?.results || [];
-      toast({
-        title: "Search completed",
-        description: `Found ${results.length} results for "${company}"`,
-      });
-      // Navigate to search results or show in modal
-      // You could use router.push('/search') with state
-    } catch (error) {
-      toast({
-        title: "Search failed",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to search page with params
+    navigate(`/dashboard/search?${params.toString()}`);
   };
 
   return (
@@ -135,20 +104,11 @@ export function QuickSearchCard() {
 
         <button
           onClick={handleSearch}
-          disabled={loading}
-          className="btn-primary w-full"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-4 py-3 font-medium transition
+                     hover:bg-blue-700 hover:shadow-sm active:scale-[0.99]"
         >
-          {loading ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-              Searching...
-            </div>
-          ) : (
-            <>
-              <Search className="h-4 w-4 mr-2" />
-              Search Now
-            </>
-          )}
+          <Search className="h-4 w-4" />
+          Search Now
         </button>
       </div>
     </div>
