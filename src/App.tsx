@@ -30,6 +30,7 @@ import Tariff from '@/routes/dashboard/Tariff';
 import Benchmark from '@/routes/dashboard/Benchmark';
 import Admin from '@/routes/dashboard/Admin';
 import Settings from '@/routes/dashboard/Settings';
+import CompanyPage from '@/pages/company/[id]';
 
 // Auth guard component
 function RequireAuth({ children }: { children: JSX.Element }) {
@@ -214,6 +215,13 @@ export default function App() {
             <RequireAuth>
               <AppShell>
                 <Settings />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/company/:id" element={
+            <RequireAuth>
+              <AppShell>
+                <CompanyPage />
               </AppShell>
             </RequireAuth>
           } />

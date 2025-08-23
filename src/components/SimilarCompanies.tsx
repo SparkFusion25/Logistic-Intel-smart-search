@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { watchCompany } from '../lib/watchlist';
 
 type SimilarCompany = {
@@ -33,9 +34,9 @@ export function SimilarCompanies({ items }: { items: SimilarCompany[] }) {
           </div>
 
           <div className="flex gap-2">
-            <a className="text-sm underline" href={`/search?company=${encodeURIComponent(c.company_name)}`}>
+            <Link to={`/company/${c.company_id}`} className="text-sm underline">
               Open
-            </a>
+            </Link>
             <button
               onClick={() => onWatch(c.company_id)}
               disabled={pending === c.company_id}

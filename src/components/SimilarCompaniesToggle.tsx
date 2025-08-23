@@ -124,7 +124,7 @@ export function SimilarCompaniesToggle({ items, className = '' }: SimilarCompani
 
             <div className="flex gap-2 ml-4">
               <Link 
-                to={`/dashboard/search?company=${encodeURIComponent(company.company_name)}`}
+                to={`/company/${company.company_id}`}
                 className="text-sm text-blue-600 hover:text-blue-800 underline"
               >
                 Open

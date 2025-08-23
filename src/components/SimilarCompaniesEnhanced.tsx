@@ -64,7 +64,7 @@ export function SimilarCompaniesEnhanced({ items, className = '' }: SimilarCompa
 
           <div className="flex gap-2 ml-4">
             <Link 
-              to={`/dashboard/search?company=${encodeURIComponent(c.company_name)}`}
+              to={`/company/${c.company_id}`}
               className="text-sm text-blue-600 hover:text-blue-800 underline"
             >
               Open

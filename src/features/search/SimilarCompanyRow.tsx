@@ -63,7 +63,7 @@ export function SimilarCompanyRow({ company, className = '' }: SimilarCompanyRow
   }, [company.company_name]);
 
   const handleCompanyClick = () => {
-    navigate(`/dashboard/search?company=${encodeURIComponent(company.company_name)}`);
+    navigate(`/company/${company.company_id}`);
   };
 
   const toggleSave = async (e: React.MouseEvent) => {
