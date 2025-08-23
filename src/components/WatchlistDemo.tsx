@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { SimilarCompanies } from './SimilarCompanies';
 import { SimilarCompaniesEnhanced } from './SimilarCompaniesEnhanced';
+import { SimilarCompaniesToggle } from './SimilarCompaniesToggle';
 import SimilarCompaniesList from './SimilarCompaniesList';
+import WatchlistPage from './WatchlistPage';
 
 // Mock data for demonstration
 const mockCompanies = [
@@ -44,7 +46,7 @@ const mockCompanies = [
 ];
 
 export default function WatchlistDemo() {
-  const [currentTab, setCurrentTab] = useState<'basic' | 'enhanced' | 'original'>('basic');
+  const [currentTab, setCurrentTab] = useState<'basic' | 'enhanced' | 'toggle' | 'page' | 'original'>('basic');
 
   // Transform for basic component
   const basicItems = mockCompanies.map(c => ({
@@ -93,6 +95,26 @@ export default function WatchlistDemo() {
             Enhanced Version
           </button>
           <button
+            onClick={() => setCurrentTab('toggle')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              currentTab === 'toggle'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Toggle Version
+          </button>
+          <button
+            onClick={() => setCurrentTab('page')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              currentTab === 'page'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Watchlist Page
+          </button>
+          <button
             onClick={() => setCurrentTab('original')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               currentTab === 'original'
@@ -100,7 +122,7 @@ export default function WatchlistDemo() {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Original Complex Version
+            Original Complex
           </button>
         </nav>
       </div>
@@ -149,6 +171,51 @@ export async function watchCompany(companyId: string) {
               </div>
             </div>
             <SimilarCompaniesEnhanced items={enhancedItems} />
+          </div>
+        )}
+
+        {currentTab === 'toggle' && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Toggle Watchlist Component</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Advanced version with toggle functionality - shows current watchlist state and allows add/remove.
+              </p>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <pre className="text-sm text-gray-700">
+{`// Full toggle functionality
+- getMyWatchlist() to load current state
+- addToWatchlist() and removeFromWatchlist()
+- Visual state indicators (green = watched)
+- Optimistic UI updates with error rollback`}
+                </pre>
+              </div>
+            </div>
+            <SimilarCompaniesToggle items={enhancedItems} />
+          </div>
+        )}
+
+        {currentTab === 'page' && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Full Watchlist Management Page</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Complete watchlist management interface with all watched companies.
+              </p>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <pre className="text-sm text-gray-700">
+{`// Complete watchlist management
+- getMyWatchlist() with full company details
+- Remove companies from watchlist
+- Rich metadata display
+- Empty state handling
+- Loading states and error handling`}
+                </pre>
+              </div>
+            </div>
+            <div className="border rounded-lg overflow-hidden">
+              <WatchlistPage />
+            </div>
           </div>
         )}
 
