@@ -124,7 +124,7 @@ export function EnhancedCRMCard() {
             {contacts.map((contact) => (
               <div
                 key={contact.id}
-                className="flex items-center gap-4 p-4 rounded-xl border border-border hover:border-primary/20 transition-all duration-200 bg-card/50"
+                className="flex items-center gap-4 p-4 rounded-xl card-surface hover:border-primary/20 transition-all duration-200"
               >
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
                   <span className="text-sm font-semibold text-primary">

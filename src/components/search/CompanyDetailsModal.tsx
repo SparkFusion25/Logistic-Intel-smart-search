@@ -263,7 +263,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
           <div className="flex-1 overflow-y-auto px-4 sm:px-0">
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <Card className="bg-card/50 backdrop-blur border border-border/50">
+            <Card className="card-surface">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Ship className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
@@ -277,7 +277,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur border border-border/50">
+            <Card className="card-surface">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Package className="h-4 w-4 sm:h-5 sm:w-5 text-accent shrink-0" />
@@ -291,7 +291,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur border border-border/50">
+            <Card className="card-surface">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 shrink-0" />
@@ -305,7 +305,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur border border-border/50">
+            <Card className="card-surface">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   {currentTrend === 'up' ? 
@@ -334,7 +334,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
               </TabsList>
 
               <TabsContent value="trends" className="flex-1 space-y-4">
-                <Card className="bg-card/50 backdrop-blur border border-border/50">
+                <Card className="card-surface">
                   <CardHeader className="pb-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <CardTitle className="text-lg">Trade Volume Trends</CardTitle>
@@ -456,7 +456,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
               </TabsContent>
 
               <TabsContent value="commodities" className="flex-1 space-y-4">
-                <Card className="bg-card/50 backdrop-blur border border-border/50">
+                <Card className="card-surface">
                   <CardHeader>
                     <CardTitle className="text-lg">Top Traded Products</CardTitle>
                   </CardHeader>
@@ -510,7 +510,7 @@ export function CompanyDetailsModal({ isOpen, onClose, company }: CompanyDetails
               </TabsContent>
 
               <TabsContent value="alerts" className="flex-1 space-y-4">
-                <Card className="bg-card/50 backdrop-blur border border-border/50">
+                <Card className="card-surface">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">Smart Alerts & Monitoring</CardTitle>
                     <p className="text-sm text-muted-foreground">Set up intelligent notifications for trade activity changes</p>

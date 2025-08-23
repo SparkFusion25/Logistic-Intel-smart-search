@@ -5,7 +5,7 @@ import { useUnifiedSearch } from '@/hooks/useUnifiedSearch';
 import type { Mode, Filters, UnifiedRow } from '@/types/search';
 import AdvancedFilters from './AdvancedFilters';
 import ConfidenceIndicator from './ConfidenceIndicator';
-import { Highlight } from '@/lib/highlight';
+import Highlight from '@/lib/highlight';
 import { upper } from '@/lib/strings';
 import AIAssistBar from '@/components/search/AIAssistBar';
 import { PaginationControls } from './PaginationControls';
@@ -240,7 +240,7 @@ export default function SearchPanel(){
   return (
     <div className="flex flex-col space-y-4 sm:space-y-6">
       {/* Main Search Card */}
-      <div className="card-glass p-4 sm:p-6 lg:p-8 sticky top-0 z-20 backdrop-blur-sm bg-card/95">
+      <div className="card-surface p-4 sm:p-6 lg:p-8 sticky top-0 z-20">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-4">
           <div className="relative flex-1">
             <input

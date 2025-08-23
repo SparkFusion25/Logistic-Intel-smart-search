@@ -3,7 +3,7 @@ import useSearchAI from '@/hooks/useSearchAI';
 export default function AIAssistBar({ q, filters, lastResults, onPickSuggestion, onApplyStructured }:{ q:string; filters:any; lastResults:any[]; onPickSuggestion:(s:string)=>void; onApplyStructured:(f:any)=>void; }){
   const { suggestions, structured, summary, loading, error, assist } = useSearchAI();
   return (
-    <div className="rounded-xl sm:rounded-2xl border border-border bg-card/50 p-3 sm:p-4">
+    <div className="card-surface p-3 sm:p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
         <div className="text-sm text-muted-foreground font-medium">🤖 Smart AI Assistant</div>
         <button 

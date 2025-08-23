@@ -15,7 +15,7 @@ export function ResultRow({ row, query, onAddToCrm, onViewCompany, loading = fal
   const companyInitial = row.unified_company_name?.charAt(0).toUpperCase() || '?';
   
   return (
-    <Card className="bg-card/50 backdrop-blur border border-border/50 hover:border-primary/20 transition-all duration-200 hover:shadow-md">
+    <Card className="card-surface hover:border-primary/20 transition-all duration-200 hover:shadow-md">
       <CardContent className="p-4 space-y-3">
         {/* Company header */}
         <div className="flex items-start gap-3">

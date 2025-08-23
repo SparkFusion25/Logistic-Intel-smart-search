@@ -155,7 +155,7 @@ export function BulkImportProcessor() {
           <p className="text-muted-foreground text-sm">No recent imports found</p>
         ) : (
           imports.map((imp) => (
-            <div key={imp.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
+            <div key={imp.id} className="flex items-center justify-between p-3 rounded-lg card-surface">
               <div className="flex items-center space-x-2">
                 {getStatusIcon(imp.status, imp.ai_processing_status)}
                 <div className="flex-1">

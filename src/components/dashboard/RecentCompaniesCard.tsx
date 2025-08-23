@@ -274,7 +274,7 @@ export function RecentCompaniesCard() {
               {displayedCompanies.map((company) => (
                 <div
                   key={company.id}
-                  className="p-4 rounded-xl border border-border hover:border-primary/20 transition-all duration-200 bg-card/50 cursor-pointer"
+                  className="p-4 rounded-xl card-surface hover:border-primary/20 transition-all duration-200 cursor-pointer"
                   onClick={() => handleViewCompany(company)}
                 >
                   <div className="flex items-start justify-between mb-3">

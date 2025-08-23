@@ -1,4 +1,4 @@
-import SearchPanelWorking from '@/components/SearchPanelWorking';
+import SearchPanel from '@/components/search/SearchPanel';
 import PageHeader from '@/ui/PageHeader';
 import { CTAPrimary } from '@/ui/CTA';
 
@@ -13,7 +13,7 @@ export default function Search() {
       />
       
       {/* Search Interface */}
-      <SearchPanelWorking />
+      <SearchPanel />
     </div>
   );
 }

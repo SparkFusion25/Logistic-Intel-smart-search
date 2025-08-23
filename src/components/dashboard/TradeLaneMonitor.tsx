@@ -162,7 +162,7 @@ export function TradeLaneMonitor() {
               className={`flex items-center gap-4 p-3 rounded-lg border transition-all duration-200 ${
                 isMonitored 
                   ? 'border-primary/30 bg-primary/5' 
-                  : 'border-border hover:border-primary/20 bg-card/50'
+                  : 'card-surface hover:border-primary/20'
               }`}
             >
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
