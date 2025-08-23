@@ -9,7 +9,7 @@ import { Search, Filter, Download, Plus, ChevronLeft, ChevronRight } from 'lucid
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase-client';
 import { searchUnified, searchCountries, type SearchFilters, type SearchResponse } from '@/api/search';
-import { upsertContact, type ContactData } from '@/api/crm';
+import { addCompanyPlaceholder } from '@/features/crm/api';
 import GlossyCard from '@/ui/GlossyCard';
 import { CTAPrimary, CTAGhost } from '@/ui/CTA';
 import Highlight from '@/lib/highlight';
@@ -119,31 +119,17 @@ export default function SearchPanel({ className = '' }: SearchPanelProps) {
     }
 
     const shipmentId = shipment.id;
+    const companyName = shipment.unified_company_name || shipment.shipper_name || 'Unknown Company';
+    
     setAddingToCRM(prev => new Set(prev).add(shipmentId));
 
     try {
-      const contactData: ContactData = {
-        org_id: currentUser.id,
-        company_name: shipment.unified_company_name || shipment.shipper_name,
-        source: 'trade-search',
-        tags: ['trade-data'],
-        notes: `Found via search: ${shipment.description || shipment.commodity_description || 'Trade record'}`
-      };
-
-      const result = await upsertContact(contactData);
-
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: result.message,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to add to CRM",
-          variant: "destructive"
-        });
-      }
+      const contactId = await addCompanyPlaceholder(companyName);
+      
+      toast({
+        title: "Success",
+        description: `${companyName} added to CRM`,
+      });
     } catch (error) {
       console.error('Add to CRM error:', error);
       toast({
