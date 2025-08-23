@@ -11,26 +11,27 @@ import SimilarCompaniesList from '@/components/SimilarCompaniesList';
 
 export function DashboardOverview() {
   return (
-    <div className="stack-gap">
-      {/* Page Header */}
-      <PageHeader 
-        title="Dashboard Intelligence™" 
-        actions={
-          <CTAPrimary>Export Report</CTAPrimary>
-        }
-      />
-      
-      {/* Welcome Message */}
-      <GlossyCard className="p-6">
-        <p className="text-muted-foreground">
-          Welcome back! Here's what's happening with your trade operations.
-        </p>
-      </GlossyCard>
+    <div className="px-6 py-6">
+      <div className="mx-auto max-w-7xl space-y-6">
+        {/* Page Header */}
+        <PageHeader 
+          title="Dashboard Intelligence™" 
+          actions={
+            <CTAPrimary>Export Report</CTAPrimary>
+          }
+        />
+        
+        {/* Welcome Message */}
+        <header className="card-surface rounded-2xl p-5">
+          <p className="text-slate-600">
+            Welcome back! Here's what's happening with your trade operations.
+          </p>
+        </header>
 
-      {/* KPI Stats */}
-      <div className="stack-3">
-        <FourCardStats />
-      </div>
+        {/* Unified KPI Stats */}
+        <section className="grid md:grid-cols-4 gap-4">
+          <FourCardStats />
+        </section>
 
       {/* Recent Companies - Full Width */}
       <RecentCompaniesCard />
@@ -89,13 +90,14 @@ export function DashboardOverview() {
         <SimilarCompaniesList limit={5} useSimplified={true} />
       </GlossyCard>
 
-      {/* Bulk Import Test (Dev Tool) */}
-      <GlossyCard className="p-6">
-        <div className="section-header">
-          <h3 className="text-lg font-bold text-foreground">Development Tools</h3>
-        </div>
-        <BulkImportTest />
-      </GlossyCard>
+        {/* Bulk Import Test (Dev Tool) */}
+        <GlossyCard className="p-6">
+          <div className="section-header">
+            <h3 className="text-lg font-bold text-foreground">Development Tools</h3>
+          </div>
+          <BulkImportTest />
+        </GlossyCard>
+      </div>
     </div>
   );
 }

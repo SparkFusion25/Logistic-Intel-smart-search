@@ -137,7 +137,7 @@ export function CompanyCardEnhanced({ company, onAddToCRM, onViewDetails }: Comp
   const topModes = getTopModes();
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/30 bg-gradient-to-br from-card via-card to-card/95">
+    <Card className="card-surface card-hover border-2 hover:border-primary/30">
       <CardContent className="p-6">
         {/* Header Row */}
         <div className="flex items-start justify-between mb-6">
@@ -199,31 +199,29 @@ export function CompanyCardEnhanced({ company, onAddToCRM, onViewDetails }: Comp
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3 mb-6">
-          <Button
-            variant="default"
-            size="sm"
+          <button
             onClick={(e) => {
               e.stopPropagation();
               onAddToCRM?.(company);
             }}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-3 py-2 transition
+                       hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm active:scale-[0.99]"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="w-4 h-4" />
             Add to CRM
-          </Button>
+          </button>
           
           <TradeLaneAnalysisDrawer 
             company={company}
             trigger={
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 border-primary/30 hover:bg-primary/5"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-3 py-2 transition
+                           hover:bg-slate-50 hover:shadow-sm active:scale-[0.99]"
               >
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className="w-4 h-4" />
                 Analyze
-              </Button>
+              </button>
             }
           />
         </div>

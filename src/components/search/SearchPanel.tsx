@@ -126,6 +126,7 @@ function ResultRow({ r, q, onAddToCrm, onViewCompany }:{ r:UnifiedRow; q:string;
 }
 
 export default function SearchPanel(){
+  const [mounted, setMounted] = useState(false);
   const { q,setQ,mode,setMode,filters,setFilters,items,total,loading,error,currentPage,totalPages,run,goToPage }=useUnifiedSearch({ initialMode:'all', initialLimit:50 });
   const [view, setView] = useState<ViewType>('companies'); // Default to companies mode
   const [companyItems, setCompanyItems] = useState<any[]>([]);
@@ -133,6 +134,9 @@ export default function SearchPanel(){
   const [companyLoading, setCompanyLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [showCompanyModal, setShowCompanyModal] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
 
   // Convert UnifiedRow to company format for modal
   const createCompanyFromRow = (row: UnifiedRow) => ({
@@ -239,9 +243,10 @@ export default function SearchPanel(){
   const onClearFilters = () => handleSearch();
 
   return (
-    <div className="flex flex-col space-y-4 sm:space-y-6">
-      {/* Main Search Card */}
-      <div className="card-surface p-4 sm:p-6 lg:p-8 sticky top-0 z-20">
+    <div className="grid lg:grid-cols-3 gap-6">
+      <section className="lg:col-span-2 space-y-6">
+        {/* Main Search Card */}
+        <div className="card-surface p-6 rounded-2xl shadow-sm">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-4">
           <div className="relative flex-1">
             <input
@@ -374,6 +379,19 @@ export default function SearchPanel(){
           ))}
         </div>
       )}
+      </section>
+
+      <aside className="lg:col-span-1">
+        {/* Market Benchmark / Insights */}
+        <div className="card-surface p-6 rounded-2xl shadow-sm mt-6 lg:mt-0">
+          <h3 className="text-lg font-semibold mb-4">Market Insights</h3>
+          <div className="space-y-4">
+            <div className="text-sm text-gray-600">
+              Market benchmark and insights will be displayed here.
+            </div>
+          </div>
+        </div>
+      </aside>
 
       {/* Company Details Modal */}
       {selectedCompany && (
