@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,25 +79,25 @@ export function TradeLaneAnalysisDrawer({ company, trigger }: TradeLaneAnalysisP
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
             <BarChart3 className="h-4 w-4 mr-2" />
             Analyze Trade Lanes
           </Button>
         )}
-      </SheetTrigger>
-      <SheetContent className="w-full max-w-4xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
+      </DialogTrigger>
+      <DialogContent className="w-full max-w-2xl max-h-[80vh] bg-white p-6 overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
             <Globe2 className="h-5 w-5 text-primary" />
             Trade Lane Analysis: {company.company_name}
-          </SheetTitle>
-          <SheetDescription>
+                      </DialogTitle>
+          <DialogDescription>
             Comprehensive trade data and shipping patterns analysis
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="mt-6 space-y-6">
           {/* Key Metrics */}
@@ -323,7 +323,7 @@ export function TradeLaneAnalysisDrawer({ company, trigger }: TradeLaneAnalysisP
             </Button>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
