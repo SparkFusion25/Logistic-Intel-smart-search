@@ -388,8 +388,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Solid card surfaces fix */
-html, body, #root { min-height: 100%; background: #0b0d0f; }
-@media (prefers-color-scheme: light) { html, body, #root { background: #f7f7f8; } }
+html, body, #root { min-height: 100%; background: #f7f7f8; }
+@media (prefers-color-scheme: dark) { html, body, #root { background: #0b0d0f; } }
 /* Shared card surface */
 .card-surface { background: #ffffff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 :root.dark .card-surface { background: #0f1115; border-color: rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
