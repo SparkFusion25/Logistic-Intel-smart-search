@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { createClient } from '@supabase/supabase-js'
-import { addToWatchlist, removeFromWatchlist } from '@/features/watchlist/api'
-import { addCompanyPlaceholder } from '@/features/crm/api'
+import { watchCompany, addCompanyToCRM } from '@/lib/companyActions'
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
@@ -26,9 +25,8 @@ export default function CompanyPage() {
   const [company, setCompany] = useState<CompanyProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isWatched, setIsWatched] = useState(false)
-  const [watchLoading, setWatchLoading] = useState(false)
-  const [crmLoading, setCrmLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let ignore = false
@@ -52,36 +50,29 @@ export default function CompanyPage() {
     return () => { ignore = true }
   }, [id])
 
-  const handleWatch = async () => {
-    if (!id) return
-    setWatchLoading(true)
+  async function onWatch() {
+    if (!company) return;
+    setSaving(true);
     try {
-      if (isWatched) {
-        await removeFromWatchlist(id)
-        setIsWatched(false)
-      } else {
-        await addToWatchlist(id)
-        setIsWatched(true)
-      }
-    } catch (error) {
-      console.error('Error toggling watch status:', error)
-      alert('Failed to update watch status')
+      await watchCompany(company.id);
+      setMessage('Added to watchlist');
+    } catch (e: any) {
+      setMessage(`Error: ${e.message}`);
     } finally {
-      setWatchLoading(false)
+      setSaving(false);
     }
   }
 
-  const handleAddToCRM = async () => {
-    if (!company?.company_name) return
-    setCrmLoading(true)
+  async function onAddCRM() {
+    if (!company) return;
+    setSaving(true);
     try {
-      await addCompanyPlaceholder(company.company_name)
-      alert('Company added to CRM successfully!')
-    } catch (error) {
-      console.error('Error adding to CRM:', error)
-      alert('Failed to add company to CRM')
+      await addCompanyToCRM(company.company_name ?? '');
+      setMessage('Added to CRM');
+    } catch (e: any) {
+      setMessage(`Error: ${e.message}`);
     } finally {
-      setCrmLoading(false)
+      setSaving(false);
     }
   }
 
@@ -99,22 +90,15 @@ export default function CompanyPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button 
-            onClick={handleWatch}
-            disabled={watchLoading}
-            className="rounded-md border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
-          >
-            {watchLoading ? 'Loading...' : isWatched ? 'Unwatch' : 'Watch'}
+          <button onClick={onWatch} disabled={saving} className="rounded-md border px-3 py-1.5">
+            Watch
           </button>
-          <button 
-            onClick={handleAddToCRM}
-            disabled={crmLoading}
-            className="rounded-md bg-black text-white px-3 py-1.5 hover:bg-gray-800 disabled:opacity-50"
-          >
-            {crmLoading ? 'Adding...' : 'Add to CRM'}
+          <button onClick={onAddCRM} disabled={saving} className="rounded-md bg-black text-white px-3 py-1.5">
+            Add to CRM
           </button>
         </div>
       </div>
+      {message && <div className="text-sm text-gray-600 mt-2">{message}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-lg border p-4">
