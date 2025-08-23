@@ -1,5 +1,6 @@
 // src/components/search/SearchPanel.tsx
-import React, { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedSearch } from '@/hooks/useUnifiedSearch';
 import type { Mode, Filters, UnifiedRow } from '@/types/search';
