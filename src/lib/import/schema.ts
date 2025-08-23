@@ -138,3 +138,67 @@ export const TABLE_SCHEMAS: Record<string, ColumnInfo[]> = {
     { column_name: 'air_confidence_score', data_type: 'integer', is_nullable: 'YES' }
   ]
 };
+
+export interface CanonicalRow {
+  unified_company_name: string
+  shipper_name?: string
+  consignee_name?: string
+  origin_country?: string
+  destination_country?: string
+  hs_code?: string
+  description?: string
+  gross_weight_kg?: number
+  value_usd?: number
+  unified_date?: string
+  mode?: 'air' | 'ocean' | 'truck' | 'rail' | 'courier' | string
+  quantity?: number
+  container_count?: number
+  vessel_name?: string
+  bill_of_lading_number?: string
+}
+
+export type CanonicalKeys = keyof CanonicalRow
+
+export const REQUIRED_FIELDS: (keyof CanonicalRow)[] = [
+  'unified_company_name'
+]
+
+export const OPTIONAL_FIELDS: (keyof CanonicalRow)[] = [
+  'shipper_name',
+  'consignee_name',
+  'origin_country',
+  'destination_country',
+  'hs_code',
+  'description',
+  'gross_weight_kg',
+  'value_usd',
+  'unified_date',
+  'mode',
+  'quantity',
+  'container_count',
+  'vessel_name',
+  'bill_of_lading_number'
+]
+
+export const ALL_FIELDS: (keyof CanonicalRow)[] = [
+  ...REQUIRED_FIELDS,
+  ...OPTIONAL_FIELDS
+]
+
+// Helper to validate that a row has required fields
+export function validateCanonicalRow(row: Partial<CanonicalRow>): row is CanonicalRow {
+  return REQUIRED_FIELDS.every(field =>
+    row[field] !== undefined && row[field] !== null && row[field] !== ''
+  )
+}
+
+// Helper to get field type for parsing
+export function getFieldType(field: keyof CanonicalRow): 'string' | 'number' {
+  const numericFields: (keyof CanonicalRow)[] = [
+    'gross_weight_kg',
+    'value_usd',
+    'quantity',
+    'container_count'
+  ]
+  return numericFields.includes(field) ? 'number' : 'string'
+}

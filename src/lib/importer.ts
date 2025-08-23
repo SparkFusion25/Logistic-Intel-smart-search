@@ -1,126 +1,245 @@
 // src/lib/importer.ts
-import { supabase } from './supabaseClient';
-
-export type ImportStatus = 'queued' | 'running' | 'success' | 'error';
+import { supabase } from '@/lib/supabaseClient'
 
 export interface ImportJob {
-  id: string;
-  org_id: string | null;
-  user_id: string | null;
-  source_bucket: string;
-  object_path: string;
-  status: ImportStatus;
-  total_rows: number | null;
-  success_rows: number | null;
-  error_rows: number | null;
-  created_at: string;
-  started_at: string | null;
-  finished_at: string | null;
+  id: string
+  org_id: string
+  user_id: string
+  source_bucket: string
+  object_path: string
+  status: 'queued' | 'running' | 'success' | 'error'
+  total_rows: number
+  success_rows: number
+  error_rows: number
+  started_at: string | null
+  finished_at: string | null
+  created_at: string
+  updated_at: string
 }
 
-function orgPrefix(orgId: string) {
-  const now = new Date();
-  const yyyy = String(now.getUTCFullYear());
-  const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(now.getUTCDate()).padStart(2, '0');
-  return `org/${orgId}/${yyyy}/${mm}/${dd}`;
+export interface ImportJobError {
+  id: string
+  job_id: string
+  row_number: number | null
+  raw_data: any
+  error_code: string | null
+  error_detail: string
+  created_at: string
 }
 
-async function getSessionOrgId(): Promise<string> {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) throw new Error('Not authenticated');
-  // if you store org_id on user metadata, prefer that; else fallback to RPC
-  const metaOrg = (user.user_metadata as any)?.org_id as string | undefined;
-  if (metaOrg) return metaOrg;
+/**
+ * Upload a file and create an import job
+ */
+export async function importFile(file: File): Promise<{ jobId: string }> {
+  // Get current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    throw new Error('User not authenticated')
+  }
 
-  const { data, error: rpcErr } = await supabase.rpc('get_current_org_id');
-  if (rpcErr || !data) throw new Error('Cannot resolve org_id');
-  return data as string;
-}
+  // Generate object path
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const timestamp = now.getTime()
 
-export const importer = {
-  /**
-   * Uploads a file to Storage, creates an import job, triggers the edge function.
-   * Returns the created job.
-   */
-  async importFile(
-    file: File,
-    onProgress?: (stage: 'uploading' | 'queued' | 'triggered', job?: ImportJob) => void
-  ): Promise<ImportJob> {
-    const orgId = await getSessionOrgId();
-    const bucket = 'imports';
-    const path = `${orgPrefix(orgId)}/${Date.now()}-${file.name}`;
+  const objectPath = `org/${user.id}/${year}/${month}/${day}/${timestamp}-${file.name}`
 
-    onProgress?.('uploading');
+  try {
+    // 1. Upload file to storage
+    const { error: uploadError } = await supabase.storage
+      .from('imports')
+      .upload(objectPath, file, { upsert: true })
 
-    const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-      upsert: false,
-      contentType: file.type || 'application/octet-stream',
-    });
-    if (upErr) throw upErr;
+    if (uploadError) {
+      throw new Error(`Upload failed: ${uploadError.message}`)
+    }
 
-    // Create job row
-    const insertPayload = {
-      org_id: orgId,
-      user_id: null, // filled by RLS default via auth.uid() if your policy sets it; otherwise populate here
-      source_bucket: bucket,
-      object_path: path,
-      status: 'queued' as ImportStatus,
-    };
-
-    const { data: jobRows, error: insErr } = await supabase
+    // 2. Create import job record
+    const { data: job, error: jobError } = await supabase
       .from('import_jobs')
-      .insert(insertPayload)
+      .insert({
+        org_id: user.id, // Using user ID as org ID for now
+        user_id: user.id,
+        source_bucket: 'imports',
+        object_path: objectPath,
+        status: 'queued',
+        total_rows: 0,
+        success_rows: 0,
+        error_rows: 0
+      })
       .select()
-      .limit(1);
+      .single()
 
-    if (insErr) throw insErr;
-    const job = jobRows![0] as ImportJob;
+    if (jobError || !job) {
+      throw new Error(`Failed to create job: ${jobError?.message || 'Unknown error'}`)
+    }
 
-    onProgress?.('queued', job);
+    // 3. Trigger edge function
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      throw new Error('No access token available')
+    }
 
-    // Trigger edge function
-    const { data: triggerRes, error: fnErr } = await supabase.functions.invoke('import-shipments', {
-      body: { job_id: job.id, bucket, object_path: path },
-    });
-    if (fnErr) throw fnErr;
+    const edgeResponse = await fetch(`${supabase.supabaseUrl}/functions/v1/import-shipments`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        job_id: job.id,
+        bucket: 'imports',
+        object_path: objectPath
+      })
+    })
 
-    onProgress?.('triggered', job);
-    return job;
-  },
+    if (!edgeResponse.ok) {
+      const errorText = await edgeResponse.text()
+      console.error('Edge function error:', errorText)
+      
+      // Update job status to error
+      await supabase
+        .from('import_jobs')
+        .update({ status: 'error' })
+        .eq('id', job.id)
+      
+      throw new Error(`Processing failed: ${errorText}`)
+    }
 
-  /** Poll a job by id */
-  async getJobStatus(jobId: string): Promise<ImportJob | null> {
-    const { data, error } = await supabase
-      .from('import_jobs')
-      .select('*')
-      .eq('id', jobId)
-      .maybeSingle();
+    return { jobId: job.id }
+  } catch (error) {
+    // Clean up uploaded file if job creation failed
+    try {
+      await supabase.storage.from('imports').remove([objectPath])
+    } catch (cleanupError) {
+      console.warn('Failed to clean up uploaded file:', cleanupError)
+    }
 
-    if (error) throw error;
-    return data as ImportJob | null;
-  },
+    throw error
+  }
+}
 
-  /** List recent jobs for current org (most recent first) */
-  async listJobs(limit = 25): Promise<ImportJob[]> {
-    const { data, error } = await supabase
-      .from('import_jobs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return (data || []) as ImportJob[];
-  },
+/**
+ * Get the status of an import job
+ */
+export async function getJobStatus(jobId: string): Promise<ImportJob> {
+  const { data: job, error } = await supabase
+    .from('import_jobs')
+    .select('*')
+    .eq('id', jobId)
+    .single()
 
-  /** Fetch recent errors for a job */
-  async getJobErrors(jobId: string, limit = 100) {
-    const { data, error } = await supabase
-      .from('import_job_errors')
-      .select('id, row_number, error_code, error_detail, raw_data, created_at')
-      .eq('job_id', jobId)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
-  },
-};
+  if (error) {
+    throw new Error(`Failed to get job status: ${error.message}`)
+  }
+
+  if (!job) {
+    throw new Error('Job not found')
+  }
+
+  return job as ImportJob
+}
+
+/**
+ * Get errors for a specific job
+ */
+export async function getJobErrors(
+  jobId: string,
+  limit = 50,
+  offset = 0
+): Promise<ImportJobError[]> {
+  const { data: errors, error } = await supabase
+    .from('import_job_errors')
+    .select('*')
+    .eq('job_id', jobId)
+    .order('row_number', { ascending: true, nullsFirst: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    throw new Error(`Failed to get job errors: ${error.message}`)
+  }
+
+  return (errors || []) as ImportJobError[]
+}
+
+/**
+ * List recent import jobs for current user
+ */
+export async function listJobs(limit = 20): Promise<ImportJob[]> {
+  const { data: jobs, error } = await supabase
+    .from('import_jobs')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    throw new Error(`Failed to list jobs: ${error.message}`)
+  }
+
+  return (jobs || []) as ImportJob[]
+}
+
+/**
+ * Subscribe to job status changes
+ */
+export function subscribeToJob(
+  jobId: string,
+  callback: (job: ImportJob) => void
+): { unsubscribe: () => void } {
+  const subscription = supabase
+    .channel(`job-${jobId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'import_jobs',
+        filter: `id=eq.${jobId}`
+      },
+      (payload) => {
+        callback(payload.new as ImportJob)
+      }
+    )
+    .subscribe()
+
+  return {
+    unsubscribe: () => {
+      subscription.unsubscribe()
+    }
+  }
+}
+
+/**
+ * Delete an import job and its associated data
+ */
+export async function deleteJob(jobId: string): Promise<void> {
+  // First get the job to find the file path
+  const job = await getJobStatus(jobId)
+
+  // Delete errors first (foreign key constraint)
+  await supabase
+    .from('import_job_errors')
+    .delete()
+    .eq('job_id', jobId)
+
+  // Delete the job record
+  const { error: jobError } = await supabase
+    .from('import_jobs')
+    .delete()
+    .eq('id', jobId)
+
+  if (jobError) {
+    throw new Error(`Failed to delete job: ${jobError.message}`)
+  }
+
+  // Clean up the file
+  try {
+    await supabase.storage
+      .from('imports')
+      .remove([job.object_path])
+  } catch (storageError) {
+    console.warn('Failed to delete file from storage:', storageError)
+  }
+}

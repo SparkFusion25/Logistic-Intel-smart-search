@@ -1,96 +1,103 @@
-import type { ColumnInfo } from './schema';
-import type { AliasMap } from './aliases';
+import { resolveAlias } from './aliases'
+import { CanonicalRow, CanonicalKeys, getFieldType } from './schema'
 
-function normalize(s: string) {
-  return s.trim().toLowerCase().replace(/[_\-\s]+/g, ' ');
+/**
+ * Maps incoming file headers to canonical keys using the alias resolver
+ */
+export function mapHeadersToCanonical(headers: string[]): (CanonicalKeys | null)[] {
+  return headers.map(header => {
+    if (!header || typeof header !== 'string') {
+      return null
+    }
+    
+    return resolveAlias(header.trim())
+  })
 }
 
-// Lightweight Levenshtein distance for fuzzy matching
-function lev(a: string, b: string) {
-  a = a.toLowerCase(); b = b.toLowerCase();
-  const m = a.length, n = b.length;
-  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      );
-    }
-  }
-  return dp[m][n];
-}
+/**
+ * Converts a raw row object to canonical format using header mapping
+ */
+export function toCanonicalRow(
+  raw: Record<string, string | number | null | undefined>,
+  headerMapping?: (CanonicalKeys | null)[]
+): Partial<CanonicalRow> {
+  const canonical: Partial<CanonicalRow> = {}
 
-export type MappingResult = {
-  mapping: Record<string, string | null>; // header -> column or null
-  confidences: Record<string, number>;    // 0..1 confidence per header
-  unknown: string[];                      // headers we couldn't confidently map
-};
-
-export function buildMapping(headers: string[], columns: ColumnInfo[], aliases: AliasMap = {}): MappingResult {
-  const cols = columns.map(c => c.column_name.toLowerCase());
-  const aliasIndex = new Map<string, string>();
-  Object.entries(aliases).forEach(([col, list]) => {
-    list.forEach(a => aliasIndex.set(normalize(a), col));
-  });
-
-  const mapping: Record<string, string | null> = {};
-  const confidences: Record<string, number> = {};
-  const unknown: string[] = [];
-
-  for (const hRaw of headers) {
-    const h = normalize(hRaw);
-
-    // 1) Exact column match
-    if (cols.includes(h)) {
-      mapping[hRaw] = h;
-      confidences[hRaw] = 1.0;
-      continue;
+  for (const [key, value] of Object.entries(raw)) {
+    if (value === undefined || value === null || value === '') {
+      continue
     }
 
-    // 2) Alias match
-    if (aliasIndex.has(h)) {
-      const col = aliasIndex.get(h)!;
-      mapping[hRaw] = col;
-      confidences[hRaw] = 0.95;
-      continue;
+    // Try to resolve the key directly first
+    let canonicalKey = resolveAlias(key)
+
+    // If we have a header mapping and this is a numeric index, use the mapping
+    if (!canonicalKey && headerMapping) {
+      const numericIndex = parseInt(key, 10)
+      if (!isNaN(numericIndex) && numericIndex < headerMapping.length) {
+        canonicalKey = headerMapping[numericIndex]
+      }
     }
 
-    // 3) Fuzzy match (closest column)
-    let bestCol = '';
-    let bestScore = Infinity;
-    for (const c of cols) {
-      const d = lev(h, c);
-      if (d < bestScore) { bestScore = d; bestCol = c; }
-    }
-    // Heuristic: accept if edit distance small relative to header length
-    const threshold = Math.max(1, Math.floor(h.length * 0.25));
-    if (bestScore <= threshold) {
-      mapping[hRaw] = bestCol;
-      confidences[hRaw] = Math.max(0.6, 1 - bestScore / Math.max(h.length, bestCol.length));
-    } else {
-      mapping[hRaw] = null;
-      confidences[hRaw] = 0;
-      unknown.push(hRaw);
+    if (canonicalKey) {
+      const fieldType = getFieldType(canonicalKey)
+      
+      if (fieldType === 'number') {
+        // Parse numeric fields
+        const numericValue = parseNumericValue(value)
+        if (numericValue !== null) {
+          ;(canonical as any)[canonicalKey] = numericValue
+        }
+      } else {
+        // String fields - ensure we have a string
+        const stringValue = String(value).trim()
+        if (stringValue) {
+          ;(canonical as any)[canonicalKey] = stringValue
+        }
+      }
     }
   }
 
-  return { mapping, confidences, unknown };
+  return canonical
 }
 
-export function applyMappingToRow(row: Record<string, any>, mapping: Record<string, string | null>): Record<string, any> {
-  const result: Record<string, any> = {};
-  
-  for (const [header, value] of Object.entries(row)) {
-    const targetColumn = mapping[header];
-    if (targetColumn) {
-      result[targetColumn] = value;
-    }
+/**
+ * Parse a value into a number, handling various formats
+ */
+function parseNumericValue(value: string | number | null | undefined): number | null {
+  if (typeof value === 'number') {
+    return isNaN(value) ? null : value
   }
-  
-  return result;
+
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  // Remove common formatting characters
+  const cleaned = value
+    .trim()
+    .replace(/[$,\s]/g, '') // Remove dollar signs, commas, spaces
+    .replace(/[()]/g, '') // Remove parentheses
+
+  if (cleaned === '' || cleaned === '-') {
+    return null
+  }
+
+  const parsed = parseFloat(cleaned)
+  return isNaN(parsed) ? null : parsed
+}
+
+/**
+ * Create a preview of how headers would map
+ */
+export function previewHeaderMapping(headers: string[]): Array<{
+  original: string
+  canonical: CanonicalKeys | null
+  recognized: boolean
+}> {
+  return headers.map(header => ({
+    original: header,
+    canonical: resolveAlias(header),
+    recognized: resolveAlias(header) !== null
+  }))
 }

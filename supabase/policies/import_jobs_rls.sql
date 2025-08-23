@@ -1,94 +1,52 @@
--- RLS Policies for import_jobs and import_job_errors tables
--- Ensures org-based security isolation
+-- Row Level Security policies for import_jobs and import_job_errors
 
 -- Enable RLS on both tables
 ALTER TABLE public.import_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.import_job_errors ENABLE ROW LEVEL SECURITY;
 
--- Import Jobs Policies
--- Users can only see jobs from their org
-CREATE POLICY "Users can view their org's import jobs" 
-ON public.import_jobs FOR SELECT 
-USING (
-  -- For development: allow authenticated users to see all jobs
-  -- In production: add proper org_id check
-  auth.uid() IS NOT NULL
-);
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS import_jobs_rw ON public.import_jobs;
+DROP POLICY IF EXISTS import_job_errors_r ON public.import_job_errors;
 
-CREATE POLICY "Users can create import jobs" 
-ON public.import_jobs FOR INSERT 
-WITH CHECK (
-  auth.uid() IS NOT NULL AND
-  org_id = auth.uid() -- Use user ID as org_id for now
-);
+-- Policy for import_jobs: users can manage their own jobs
+-- For now, using user_id = auth.uid() until org system is fully implemented
+CREATE POLICY import_jobs_rw ON public.import_jobs
+FOR ALL
+TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
-CREATE POLICY "Users can update their org's import jobs" 
-ON public.import_jobs FOR UPDATE 
-USING (
-  auth.uid() IS NOT NULL AND
-  (org_id = auth.uid() OR user_id = auth.uid())
-);
-
--- Service role can bypass RLS for bulk operations
-CREATE POLICY "Service role can manage all import jobs" 
-ON public.import_jobs FOR ALL 
-USING (auth.role() = 'service_role');
-
--- Import Job Errors Policies
--- Users can only see errors for jobs they have access to
-CREATE POLICY "Users can view their import job errors" 
-ON public.import_job_errors FOR SELECT 
+-- Policy for import_job_errors: users can read errors for their jobs
+CREATE POLICY import_job_errors_r ON public.import_job_errors
+FOR SELECT
+TO authenticated
 USING (
   EXISTS (
-    SELECT 1 FROM public.import_jobs 
-    WHERE import_jobs.id = import_job_errors.job_id 
-    AND (
-      auth.uid() IS NOT NULL AND
-      (import_jobs.org_id = auth.uid() OR import_jobs.user_id = auth.uid())
-    )
+    SELECT 1 FROM public.import_jobs
+    WHERE import_jobs.id = import_job_errors.job_id
+    AND import_jobs.user_id = auth.uid()
   )
 );
 
--- Service role can manage all errors (needed for Edge Function)
-CREATE POLICY "Service role can manage all import job errors" 
-ON public.import_job_errors FOR ALL 
-USING (auth.role() = 'service_role');
-
--- Storage Policies for 'imports' bucket
--- Users can upload to their org folder
-CREATE POLICY "Users can upload to their org folder in imports bucket" 
-ON storage.objects FOR INSERT 
+-- Allow authenticated users to insert errors (needed by edge functions)
+CREATE POLICY import_job_errors_w ON public.import_job_errors
+FOR INSERT
+TO authenticated
 WITH CHECK (
-  bucket_id = 'imports' AND 
-  auth.uid() IS NOT NULL AND
-  (storage.foldername(name))[1] = 'org' AND
-  (storage.foldername(name))[2] = auth.uid()::text
+  EXISTS (
+    SELECT 1 FROM public.import_jobs
+    WHERE import_jobs.id = import_job_errors.job_id
+    AND import_jobs.user_id = auth.uid()
+  )
 );
 
--- Users can read from their org folder
-CREATE POLICY "Users can read from their org folder in imports bucket" 
-ON storage.objects FOR SELECT 
-USING (
-  bucket_id = 'imports' AND 
-  auth.uid() IS NOT NULL AND
-  (storage.foldername(name))[1] = 'org' AND
-  (storage.foldername(name))[2] = auth.uid()::text
-);
+-- Grant necessary permissions to authenticated users
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.import_jobs TO authenticated;
+GRANT SELECT, INSERT ON public.import_job_errors TO authenticated;
 
--- Service role can manage all objects in imports bucket
-CREATE POLICY "Service role can manage all imports bucket objects" 
-ON storage.objects FOR ALL 
-USING (bucket_id = 'imports' AND auth.role() = 'service_role');
-
--- Comments for documentation
-COMMENT ON POLICY "Users can view their org's import jobs" ON public.import_jobs IS 
-'Users can only access import jobs from their organization';
-
-COMMENT ON POLICY "Service role can manage all import jobs" ON public.import_jobs IS 
-'Edge Functions running as service role can bypass RLS for bulk operations';
-
-COMMENT ON TABLE public.import_jobs IS 
-'Import job tracking table - stores metadata for bulk data imports';
-
-COMMENT ON TABLE public.import_job_errors IS 
-'Import error logging table - stores detailed error information for failed rows';
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_import_jobs_user_id ON public.import_jobs(user_id);
+CREATE INDEX IF NOT EXISTS idx_import_jobs_status ON public.import_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_import_jobs_created_at ON public.import_jobs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_import_job_errors_job_id ON public.import_job_errors(job_id);
+CREATE INDEX IF NOT EXISTS idx_import_job_errors_row_number ON public.import_job_errors(job_id, row_number);

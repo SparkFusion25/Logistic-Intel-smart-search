@@ -32,6 +32,7 @@ import Benchmark from '@/routes/dashboard/Benchmark';
 import Admin from '@/routes/dashboard/Admin';
 import Settings from '@/routes/dashboard/Settings';
 import CompanyPage from '@/pages/company/[id]';
+import ImporterPage from '@/pages/Importer';
 
 // Auth guard component
 function RequireAuth({ children }: { children: JSX.Element }) {
@@ -223,6 +224,13 @@ export default function App() {
             <RequireAuth>
               <AppShell>
                 <CompanyPage />
+              </AppShell>
+            </RequireAuth>
+          } />
+          <Route path="/importer" element={
+            <RequireAuth>
+              <AppShell>
+                <ImporterPage />
               </AppShell>
             </RequireAuth>
           } />
