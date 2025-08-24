@@ -16,12 +16,12 @@ import {
   RefreshCw,
   Download
 } from 'lucide-react';
-import { buildMapping, applyMappingToRow } from '@/lib/import/matcher';
+import { mapHeadersToCanonical, toCanonicalRow, previewHeaderMapping } from '@/lib/import/matcher';
 import { TABLE_SCHEMAS } from '@/lib/import/schema';
-import { TABLE_ALIASES } from '@/lib/import/aliases';
+import { ALIAS_MAP } from '@/lib/import/aliases';
 import { saveImportMapping, loadImportMapping } from '@/repositories/import.repo';
 import { insertCrmContacts, insertUnifiedShipments } from '@/repositories/search.repo';
-import { parseXLSXFile, parseCSVFile } from '@/lib/import/xlsxParser';
+import { readRows, parseCSV, isExcelFile } from '@/lib/import/xlsxParser';
 
 // Types - matching the actual bulk_imports table schema
 type BulkImport = {
@@ -223,22 +223,24 @@ export function BulkImportManager() {
       // Default to unified_shipments for trade files, only use crm_contacts for genuine CRM files
       const targetTable = (hasCrmIndicators && !hasShipmentIndicators) ? 'crm_contacts' : 'unified_shipments';
 
-      // Build column mapping
-      const tableSchema = TABLE_SCHEMAS[targetTable];
-      const aliases = TABLE_ALIASES[targetTable] || {};
-      const mappingResult = buildMapping(headers, tableSchema, aliases);
+      // Build column mapping using new system
+      const headerMapping = mapHeadersToCanonical(headers);
+      const mappingObj: Record<string, string | null> = {};
+      headers.forEach((header, index) => {
+        mappingObj[header] = headerMapping[index];
+      });
       
       // Save mapping as preset
       await saveImportMapping({
         org_id: null,
         table_name: targetTable,
         source_label: file.name.split('.')[0],
-        mapping: mappingResult.mapping
+        mapping: mappingObj
       });
 
       // Apply mapping to rows and add systematic enhancements
       const mappedRows = rows.map(row => {
-        const mappedRow = applyMappingToRow(row, mappingResult.mapping);
+        const mappedRow = toCanonicalRow(row, headerMapping) as any;
         
         // PHASE 1 FIX: Set systematic MODE for unified_shipments
         if (targetTable === 'unified_shipments') {
