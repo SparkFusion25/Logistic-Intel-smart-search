@@ -1,245 +1,263 @@
-
-import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import Home from "@/routes/Home";
-import About from "@/routes/About";
-import Pricing from "@/routes/Pricing";
-import BlogIndex from "@/routes/BlogIndex";
-import BlogArticle from "@/routes/BlogArticle";
-import Login from "@/routes/auth/Login";
-import Signup from "@/routes/auth/Signup";
-import OAuthCallback from "@/routes/auth/OAuthCallback";
-import Logout from "@/routes/auth/Logout";
-import RequestDemo from "@/routes/RequestDemo";
-import Help from "@/routes/Help";
-import { supabase } from '@/lib/supabase-client';
-import { AppShell } from '@/components/ui/AppShell';
-import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
-import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/components/AuthProvider";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+// Import updated Index component
+import Index from "@/components/pages/Index";
+
+// Auth pages
+import AuthPage from "@/pages/AuthPage";
+
+// App Shell for dashboard
+import { AppShell } from "@/components/ui/AppShell";
 
 // Dashboard pages
-import Search from '@/routes/dashboard/Search';
-import CRM from '@/routes/dashboard/CRM';
-import Email from '@/routes/dashboard/Email';
-import Campaigns from '@/routes/dashboard/Campaigns';
-import CampaignAnalytics from '@/routes/dashboard/CampaignAnalytics';
-import Quote from '@/routes/dashboard/Quote';
-import Tariff from '@/routes/dashboard/Tariff';
-import Benchmark from '@/routes/dashboard/Benchmark';
-import Admin from '@/routes/dashboard/Admin';
-import Settings from '@/routes/dashboard/Settings';
-import CompanyPage from '@/pages/company/[id]';
-import ImporterPage from '@/pages/Importer';
+import SearchPanel from "@/components/search/SearchPanel";
+import CRMPanel from "@/components/crm/CRMPanel";
+import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import EmailComposer from "@/components/email/EmailComposer";
+import CampaignBuilder from "@/components/campaigns/CampaignBuilder";
+import TariffCalculator from "@/components/widgets/TariffCalculator";
+import QuoteGenerator from "@/components/widgets/QuoteGenerator";
+import AdminPageClient from "@/components/admin/AdminPageClient";
+import MarketBenchmark from "@/components/benchmark/MarketBenchmark";
 
-// Auth guard component
-function RequireAuth({ children }: { children: JSX.Element }) {
-  const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const nav = useNavigate();
+// Marketing pages
+import About from "@/pages/About";
+import Pricing from "@/pages/Pricing";
+import BlogIndex from "@/pages/BlogIndex";
+import BlogArticle from "@/pages/BlogArticle";
+import RequestDemo from "@/pages/RequestDemo";
+import Help from "@/pages/Help";
 
-  useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-      
-      if (!data.session) {
-        nav('/auth/login');
-      }
-    });
+// Company page (updated from CRM)
+import CompanyPage from "@/pages/CompanyPage";
+import CompanyDetails from "@/pages/CompanyDetails";
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      if (!session && event === 'SIGNED_OUT') {
-        nav('/auth/login');
-      }
-    });
+const queryClient = new QueryClient();
 
-    return () => subscription.unsubscribe();
-  }, [nav]);
+// Dashboard Page Wrappers with proper styling
+const DashboardPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <DashboardOverview />
+  </div>
+);
 
-  if (loading) {
-    return (
-      <div className='min-h-screen grid place-items-center bg-slate-50'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-[#0F4C81] mx-auto mb-4'></div>
-          <div className='text-slate-600'>Loading…</div>
-        </div>
+const SearchPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Search Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Discover global trade patterns and business opportunities
+        </p>
       </div>
-    );
-  }
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <SearchPanel />
+    </div>
+  </div>
+);
 
-  if (!session) {
-    return <Navigate to="/auth/login" replace />;
-  }
+// Updated Company page (formerly CRM)
+const CompanyPageWrapper = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Company Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Manage and track your saved companies
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <CompanyPage />
+    </div>
+  </div>
+);
 
-  return children;
-}
+const EmailPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Email Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Create and manage email campaigns
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <EmailComposer />
+    </div>
+  </div>
+);
 
-export default function App() {
-  return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public marketing routes with NavBar and Footer */}
-          <Route path="/" element={
-            <>
-              <NavBar />
-              <Home />
-              <Footer />
-            </>
-          } />
-          <Route path="/about" element={
-            <>
-              <NavBar />
-              <About />
-              <Footer />
-            </>
-          } />
-          <Route path="/pricing" element={
-            <>
-              <NavBar />
-              <Pricing />
-              <Footer />
-            </>
-          } />
-          <Route path="/blog" element={
-            <>
-              <NavBar />
-              <BlogIndex />
-              <Footer />
-            </>
-          } />
-          <Route path="/blog/:slug" element={
-            <>
-              <NavBar />
-              <BlogArticle />
-              <Footer />
-            </>
-          } />
-          <Route path="/demo/request" element={
-            <>
-              <NavBar />
-              <RequestDemo />
-              <Footer />
-            </>
-          } />
-          <Route path="/help" element={
-            <>
-              <NavBar />
-              <Help />
-              <Footer />
-            </>
-          } />
-          
-          {/* Auth routes without NavBar/Footer */}
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/signup" element={<Signup />} />
-          <Route path="/auth/callback" element={<OAuthCallback />} />
-          <Route path="/logout" element={<Logout />} />
-          
-          {/* Protected dashboard routes with full app shell */}
-          <Route path="/dashboard" element={
-            <RequireAuth>
-              <AppShell>
-                <DashboardOverview />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/search" element={
-            <RequireAuth>
-              <AppShell>
-                <Search />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/crm" element={
-            <RequireAuth>
-              <AppShell>
-                <CRM />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/email" element={
-            <RequireAuth>
-              <AppShell>
-                <Email />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/campaigns" element={
-            <RequireAuth>
-              <AppShell>
-                <Campaigns />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/campaigns/analytics" element={
-            <RequireAuth>
-              <AppShell>
-                <CampaignAnalytics />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/widgets/quote" element={
-            <RequireAuth>
-              <AppShell>
-                <Quote />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/widgets/tariff" element={
-            <RequireAuth>
-              <AppShell>
-                <Tariff />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/benchmark" element={
-            <RequireAuth>
-              <AppShell>
-                <Benchmark />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/admin" element={
-            <RequireAuth>
-              <AppShell>
-                <Admin />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/dashboard/settings" element={
-            <RequireAuth>
-              <AppShell>
-                <Settings />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/company/:id" element={
-            <RequireAuth>
-              <AppShell>
-                <CompanyPage />
-              </AppShell>
-            </RequireAuth>
-          } />
-          <Route path="/importer" element={
-            <RequireAuth>
-              <AppShell>
-                <ImporterPage />
-              </AppShell>
-            </RequireAuth>
-          } />
-          
-          {/* Catch all - redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-      <Toaster />
-    </HelmetProvider>
-  );
-}
+const CampaignsPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Campaign Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Build and track outreach campaigns
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <CampaignBuilder onSave={(campaign) => console.log('Campaign saved:', campaign)} />
+    </div>
+  </div>
+);
+
+const CampaignAnalyticsPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Analytics Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Track campaign performance and metrics
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <p className="text-gray-600">Campaign analytics and performance metrics coming soon.</p>
+      </div>
+    </div>
+  </div>
+);
+
+const TariffPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Tariff Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Calculate duties and tariffs for international trade
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <TariffCalculator />
+    </div>
+  </div>
+);
+
+const QuotePage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Quote Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Generate professional quotes and proposals
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <QuoteGenerator />
+    </div>
+  </div>
+);
+
+const AdminPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Admin Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Manage system settings and content
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <AdminPageClient />
+    </div>
+  </div>
+);
+
+const BenchmarkPage = () => (
+  <div className="flex flex-col min-h-screen bg-white">
+    <div className="bg-white border-b border-gray-100 p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Market Intelligence<span className="text-lg text-blue-600">™</span>
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Benchmark performance and analyze market trends
+        </p>
+      </div>
+    </div>
+    <div className="flex-1 p-6 bg-gray-50">
+      <MarketBenchmark />
+    </div>
+  </div>
+);
+
+const App = () => (
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public marketing routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/blog" element={<BlogIndex />} />
+                <Route path="/blog/:slug" element={<BlogArticle />} />
+                <Route path="/demo/request" element={<RequestDemo />} />
+                <Route path="/help" element={<Help />} />
+                
+                {/* Auth routes */}
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/auth/login" element={<AuthPage />} />
+                <Route path="/auth/signup" element={<AuthPage />} />
+                
+                {/* Protected dashboard routes */}
+                <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/search" element={<ProtectedRoute><AppShell><SearchPage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/companies" element={<ProtectedRoute><AppShell><CompanyPageWrapper /></AppShell></ProtectedRoute>} />
+                <Route path="/company/:id" element={<ProtectedRoute><AppShell><CompanyDetails /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/email" element={<ProtectedRoute><AppShell><EmailPage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/campaigns" element={<ProtectedRoute><AppShell><CampaignsPage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/campaigns/analytics" element={<ProtectedRoute><AppShell><CampaignAnalyticsPage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/widgets/tariff" element={<ProtectedRoute><AppShell><TariffPage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/widgets/quote" element={<ProtectedRoute><AppShell><QuotePage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/admin" element={<ProtectedRoute><AppShell><AdminPage /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/benchmark" element={<ProtectedRoute><AppShell><BenchmarkPage /></AppShell></ProtectedRoute>} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
+);
+
+export default App;
