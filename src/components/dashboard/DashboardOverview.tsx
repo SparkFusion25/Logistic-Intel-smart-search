@@ -36,6 +36,8 @@ const mockRecentCompanies = [
     color: "blue",
     country: "USA"
   },
+  {
+    id: 2,
     name: "Ocean Freight Solutions", 
     totalShipments: 890, 
     lastSeen: "5 days ago", 
