@@ -29,17 +29,15 @@ import QuoteGenerator from "@/components/widgets/QuoteGenerator";
 import AdminPageClient from "@/components/admin/AdminPageClient";
 import MarketBenchmark from "@/components/benchmark/MarketBenchmark";
 
-// Marketing pages
-import About from "@/pages/About";
-import Pricing from "@/pages/Pricing";
-import BlogIndex from "@/pages/BlogIndex";
-import BlogArticle from "@/pages/BlogArticle";
-import RequestDemo from "@/pages/RequestDemo";
-import Help from "@/pages/Help";
-
-// Company page (updated from CRM)
-import CompanyPage from "@/pages/CompanyPage";
-import CompanyDetails from "@/pages/CompanyDetails";
+// Simple placeholder components for missing pages
+const ComingSoonPage = ({ title }: { title: string }) => (
+  <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-3xl font-bold text-gray-900 mb-4">{title}</h1>
+      <p className="text-gray-600">This page is coming soon.</p>
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -82,7 +80,7 @@ const CompanyPageWrapper = () => (
       </div>
     </div>
     <div className="flex-1 p-6 bg-gray-50">
-      <CompanyPage />
+      <CRMPanel />
     </div>
   </div>
 );
@@ -227,12 +225,12 @@ const App = () => (
               <Routes>
                 {/* Public marketing routes */}
                 <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/blog" element={<BlogIndex />} />
-                <Route path="/blog/:slug" element={<BlogArticle />} />
-                <Route path="/demo/request" element={<RequestDemo />} />
-                <Route path="/help" element={<Help />} />
+                <Route path="/about" element={<ComingSoonPage title="About Us" />} />
+                <Route path="/pricing" element={<ComingSoonPage title="Pricing" />} />
+                <Route path="/blog" element={<ComingSoonPage title="Blog" />} />
+                <Route path="/blog/:slug" element={<ComingSoonPage title="Blog Article" />} />
+                <Route path="/demo/request" element={<ComingSoonPage title="Request Demo" />} />
+                <Route path="/help" element={<ComingSoonPage title="Help Center" />} />
                 
                 {/* Auth routes */}
                 <Route path="/auth" element={<AuthPage />} />
@@ -243,7 +241,7 @@ const App = () => (
                 <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
                 <Route path="/dashboard/search" element={<ProtectedRoute><AppShell><SearchPage /></AppShell></ProtectedRoute>} />
                 <Route path="/dashboard/companies" element={<ProtectedRoute><AppShell><CompanyPageWrapper /></AppShell></ProtectedRoute>} />
-                <Route path="/company/:id" element={<ProtectedRoute><AppShell><CompanyDetails /></AppShell></ProtectedRoute>} />
+                <Route path="/dashboard/crm" element={<ProtectedRoute><AppShell><CompanyPageWrapper /></AppShell></ProtectedRoute>} />
                 <Route path="/dashboard/email" element={<ProtectedRoute><AppShell><EmailPage /></AppShell></ProtectedRoute>} />
                 <Route path="/dashboard/campaigns" element={<ProtectedRoute><AppShell><CampaignsPage /></AppShell></ProtectedRoute>} />
                 <Route path="/dashboard/campaigns/analytics" element={<ProtectedRoute><AppShell><CampaignAnalyticsPage /></AppShell></ProtectedRoute>} />
