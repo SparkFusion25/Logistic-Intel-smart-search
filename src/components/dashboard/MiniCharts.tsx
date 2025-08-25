@@ -1,0 +1,2 @@
+export function MiniBar(){return <div className='surface h-40 flex items-end gap-1 p-3'>{Array.from({length:12}).map((_,i)=>(<div key={i} className='bg-primary/30' style={{height:Math.max(10, (i*7)%100), width:8}}/>))}</div>}
+export function MiniLine(){return <div className='surface h-40 p-3 text-muted text-sm flex items-center justify-center'>Line chart placeholder</div>}

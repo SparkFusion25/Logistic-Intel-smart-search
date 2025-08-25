@@ -1,41 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Custom global styles */
-:root {
-  color-scheme: dark;
-}
-
-html,
-body,
-#__next {
-  height: 100%;
-}
-
-body {
-  background: #0f172a;
-  color: #f1f5f9;
-}
-
-/* Component styles */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  border-width: 1px;
-  font-size: 0.75rem;
-}
-
-/* Ensure proper dark theme */
-* {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Button hover effects */
-button:hover {
-  transform: translateY(-1px);
-  transition: all 0.2s ease;
-}
+.surface { @apply bg-white rounded-2xl shadow-soft; }
+.cta-primary { @apply bg-primary hover:bg-primaryDark text-white; }
+.cta-secondary { @apply bg-purple hover:bg-purpleDark text-white; }
+.cta-tertiary { @apply bg-teal hover:bg-tealDark text-white; }
+.section-title { @apply text-xl md:text-2xl font-semibold text-ink; }
+.kpi { @apply surface p-4 md:p-6; }
